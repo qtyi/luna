@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LunaResources.resx">
+    <body>
+      <trans-unit id="ArgIsNotStructuredTrivia">
+        <source>'{0}' is not structured trivia.</source>
+        <target state="new">'{0}' is not structured trivia.</target>
+        <note>{0} is the name of an argument.</note>
+      </trans-unit>
+      <trans-unit id="ArgMustBeEmpty">
+        <source>'{0}' must be empty.</source>
+        <target state="new">'{0}' must be empty.</target>
+        <note>{0} is the name of an argument.</note>
+      </trans-unit>
+      <trans-unit id="ArgMustBeNullWhenArgIsNull">
+        <source>When '{0}' is null, '{1}' must also be null.</source>
+        <target state="new">When '{0}' is null, '{1}' must also be null.</target>
+        <note>{1} must also be null when {0} is null.</note>
+      </trans-unit>
+      <trans-unit id="ArgMustHaveOneFewerElementThanArg">
+        <source>'{0}' must have 1 fewer element than '{1}'.</source>
+        <target state="new">'{0}' must have 1 fewer element than '{1}'.</target>
+        <note>{0} must have 1 fewer element than {1}.</note>
+      </trans-unit>
+      <trans-unit id="ArgMustNotBeEmpty">
+        <source>'{0}' must not be empty.</source>
+        <target state="new">'{0}' must not be empty.</target>
+        <note>{0} is the name of an argument.</note>
+      </trans-unit>
+      <trans-unit id="ChainingSpeculativeModelIsNotSupported">
+        <source>Chaining speculative semantic model is not supported. You should create a speculative model from the non-speculative ParentModel.</source>
+        <target state="new">Chaining speculative semantic model is not supported. You should create a speculative model from the non-speculative ParentModel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocationIsNotInSyntaxTree">
+        <source>Location is not in a syntax tree.</source>
+        <target state="new">Location is not in a syntax tree.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingListItem">
+        <source>The item specified is not the element of a list.</source>
+        <target state="new">The item specified is not the element of a list.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PositionIsNotWithinSyntax">
+        <source>Position is not within syntax tree with full span {0}.</source>
+        <target state="new">Position is not within syntax tree with full span {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpeculatedSyntaxNodeCannotBelongToCurrentCompilation">
+        <source>Syntax node to be speculated cannot belong to a syntax tree from the current compilation.</source>
+        <target state="new">Syntax node to be speculated cannot belong to a syntax tree from the current compilation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SyntaxNodeIsNotWithinSyntaxTree">
+        <source>Syntax node is not within syntax tree.</source>
+        <target state="new">Syntax node is not within syntax tree.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SyntaxNodeTypeMustBeDerivedFromCertainType">
+        <source>Syntax node type '{0}' must be derived from '{1}'.</source>
+        <target state="new">Syntax node type '{0}' must be derived from '{1}'.</target>
+        <note>{0} is a description of the syntax node type that derived from {2} which also a description of a certain syntax node type.</note>
+      </trans-unit>
+      <trans-unit id="SyntaxTokenIsNotInSyntaxTree">
+        <source>Syntax token is not in a syntax tree.</source>
+        <target state="new">Syntax token is not in a syntax tree.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ThisMethodCanOnlyBeUsedToCreateTokens">
+        <source>This method can only be used to create tokens - {0} is not a token kind.</source>
+        <target state="new">This method can only be used to create tokens - {0} is not a token kind.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

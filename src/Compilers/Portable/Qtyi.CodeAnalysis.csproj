@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <Configurations>$(Configurations);Testing</Configurations>
+    <DefineConstants Condition="'$(Configuration)' == 'Testing'">DEBUG;$(DefineConstants)</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
+    <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
+
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Qtyi.CodeAnalysis.Common</PackageId>
+    <PackageDescription>
+      .NET编译器平台("Luna")的共享程序集。
+      请不要尝试单独安装此包，你应该通过安装其他基于它的包来安装它。
+    </PackageDescription>
+
+    <!-- Enable output of generated files back into our Generated directory -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    <Authors>Sam Lu</Authors>
+    <Company>Qtyi</Company>
+    <Copyright>© Sam Lu, All rights reserved.</Copyright>
+    <PackageTags>Luna CodeAnalysis Compiler Lua MoonScript Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
+    <NeutralLanguage>zh-CN</NeutralLanguage>
+    <AssemblyVersion></AssemblyVersion>
+    <FileVersion></FileVersion>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!-- InternalsVisibleTo -->
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.UnitTests" />
+
+    <!-- InternalsVisibleFrom -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.4.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Update="LunaResources.resx" GenerateSource="true" />
+  </ItemGroup>
+
+</Project>

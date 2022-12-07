@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{1EFCD563-A706-4F35-BCDB-3DED21D02AF9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.CodeAnalysis", "src\Compilers\Portable\Qtyi.CodeAnalysis.csproj", "{243A5798-74AB-40AB-9265-2D1BBD17FCCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Testing|Any CPU = Testing|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{243A5798-74AB-40AB-9265-2D1BBD17FCCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243A5798-74AB-40AB-9265-2D1BBD17FCCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243A5798-74AB-40AB-9265-2D1BBD17FCCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243A5798-74AB-40AB-9265-2D1BBD17FCCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{243A5798-74AB-40AB-9265-2D1BBD17FCCA}.Testing|Any CPU.ActiveCfg = Testing|Any CPU
+		{243A5798-74AB-40AB-9265-2D1BBD17FCCA}.Testing|Any CPU.Build.0 = Testing|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{243A5798-74AB-40AB-9265-2D1BBD17FCCA} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FBFA7D01-8DCA-472B-B849-F9824DCB855F}
+	EndGlobalSection
+EndGlobal

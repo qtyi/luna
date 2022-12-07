@@ -1,0 +1,20 @@
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+
+namespace Qtyi.CodeAnalysis;
+
+/// <summary>
+/// 表示最基础的不做任何事的语法引用的实现。
+/// </summary>
+internal sealed class SimpleSyntaxReference : SyntaxReference
+{
+    private readonly SyntaxNode _node;
+
+    public override SyntaxTree SyntaxTree => this._node.SyntaxTree;
+
+    public override TextSpan Span => this._node.Span;
+
+    internal SimpleSyntaxReference(SyntaxNode node) => this._node = node;
+
+    public override SyntaxNode GetSyntax(CancellationToken cancellationToken = default) => this._node;
+}
