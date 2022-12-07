@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Luna.Compilers.Tools</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>LANG_LUA;$(DefineConstants)TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="LuaCodeAnalysisSourceGenerators.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" Condition="'$(TargetFramework)' != 'net6.0'" />
+  </ItemGroup>
+
+  <Import Project="..\Shared\ErrorFactsGenerators.Shared.projitems" Label="Shared" />
+
+</Project>

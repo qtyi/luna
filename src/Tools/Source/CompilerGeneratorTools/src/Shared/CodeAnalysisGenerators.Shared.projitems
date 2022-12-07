@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b2d21490-8284-48c7-8e96-85ebfb70c11f</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Luna.Compilers.Generators</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\IndentWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\StringBuilderReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ITree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ITreeType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ITreeTypeChild.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\AbstractSymbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\SymbolTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\SymbolTreeType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\PredefinedSymbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\Symbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\SymbolsFileWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\SymbolsGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\SymbolsSourceWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxFileWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CachingSourceGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Errors\ErrorFactsGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\GreenNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InternalErrorCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\AbstractNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\Comment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\TreeTypeChild.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\Kind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\Node.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\PredefinedNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\Tree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\TreeType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SourceTextReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxSourceWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\TreeFlattening.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TreeFileWriter`2.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Make sure to reference the same version of Microsoft.CodeAnalysis.Analyzers as the rest of the build -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="$(MicrosoftCodeAnalysisAnalyzersVersion)" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(SourceGeneratorMicrosoftCodeAnalysisVersion)" PrivateAssets="all" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+    <PackageReference Include="Nullable" Version="1.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Errors\" />
+  </ItemGroup>
+</Project>

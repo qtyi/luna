@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <RootNamespace>Luna.Compilers.Tools</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\config-schema.json" Link="config-schema.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\config.json" Link="config.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="default.css" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Compilers\Core\Portable\Microsoft.CodeAnalysis.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ReferenceSimulatorsProjects Condition="'$(Configuration)' == 'Debug'">true</ReferenceSimulatorsProjects>
+  </PropertyGroup>
+
+  <Import Project="$(RepositoryEngineeringDir)targets\Simulators.targets" />
+
+</Project>

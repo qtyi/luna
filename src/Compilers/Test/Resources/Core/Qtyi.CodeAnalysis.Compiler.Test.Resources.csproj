@@ -1,0 +1,33 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <RootNamespace></RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <IsShipping>false</IsShipping>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\README.md" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingAnalyzer.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingGenerator.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingSuppressor.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\ResourceLoader.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestKeys.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestResources.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\nativeCOFFResources.obj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
+
+</Project>

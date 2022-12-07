@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../LuaResources.resx">
+    <body>
+      <trans-unit id="ERR_AssgLvalueExpected">
+        <source>The left-hand side of an assignment must be a variable or member.</source>
+        <target state="new">The left-hand side of an assignment must be a variable or member.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_AttributeExpected">
+        <source>Attribute expected.</source>
+        <target state="new">Attribute expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_BadDocumentationMode">
+        <source>Provided documentation mode is unsupported or invalid: '{0}'.</source>
+        <target state="new">Provided documentation mode is unsupported or invalid: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_BadLanguageVersion">
+        <source>Provided language version is unsupported or invalid: '{0}'.</source>
+        <target state="new">Provided language version is unsupported or invalid: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_BadSourceCodeKind">
+        <source>Provided source code kind is unsupported or invalid: '{0}'.</source>
+        <target state="new">Provided source code kind is unsupported or invalid: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_CommaExpected">
+        <source>',' expected.</source>
+        <target state="new">',' expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_ElseIfCannotStartStatement">
+        <source>'elseif' cannot start a statement.</source>
+        <target state="new">'elseif' cannot start a statement.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_ExpressionExpected">
+        <source>Expression expected.</source>
+        <target state="new">Expression expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_FieldSeparatorExpected">
+        <source>',' or ';' expected.</source>
+        <target state="new">',' or ';' expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_IdentifierExpected">
+        <source>Identifier expected.</source>
+        <target state="new">Identifier expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_IdentifierExpectedKW">
+        <source>Identifier expected; '{0}' is a keyword.</source>
+        <target state="new">Identifier expected; '{0}' is a keyword.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_IllegalEscape">
+        <source>Unrecognized escape sequence.</source>
+        <target state="new">Unrecognized escape sequence.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_IllegalStatement">
+        <source>Only assignment and invocation expressions can be used as a statement</source>
+        <target state="new">Only assignment and invocation expressions can be used as a statement</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_IllegalUtf8ByteSequence">
+        <source>Illegal UTF-8 byte escape sequence.</source>
+        <target state="new">Illegal UTF-8 byte escape sequence.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InsufficientStack">
+        <source>An expression is too long or complex to compile.</source>
+        <target state="new">An expression is too long or complex to compile.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InternalError">
+        <source>Internal error in the Lua compiler.</source>
+        <target state="new">Internal error in the Lua compiler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InvalidAttrTerm">
+        <source>Invalid attribute term '{0}'.</source>
+        <target state="new">Invalid attribute term '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InvalidExprTerm">
+        <source>Invalid expression term '{0}'.</source>
+        <target state="new">Invalid expression term '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InvalidFieldValueTerm">
+        <source>Invalid filed value expression term.</source>
+        <target state="new">Invalid filed value expression term.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InvalidInstrumentationKind">
+        <source>Invalid instrumentation kind: '{0}'.</source>
+        <target state="new">Invalid instrumentation kind: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InvalidNumber">
+        <source>Invalid number.</source>
+        <target state="new">Invalid number.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_InvocationArgumentsExpected">
+        <source>Invocation arguments expected.</source>
+        <target state="new">Invocation arguments expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_MisplacedReturnStat">
+        <source>Return statement can only be the last statement of a block.</source>
+        <target state="new">Return statement can only be the last statement of a block.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_NewlineInConst">
+        <source>Newline in string literal constant.</source>
+        <target state="new">Newline in string literal constant.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_NumberOverflow">
+        <source>Number constant is too large.</source>
+        <target state="new">Number constant is too large.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_OpenEndedComment">
+        <source>End-of-file found, close long brackect expected.</source>
+        <target state="new">End-of-file found, close long brackect expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_SemicolonExpected">
+        <source>';' expected.</source>
+        <target state="new">';' expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_SyntaxError">
+        <source>Syntax error, '{0}' expected.</source>
+        <target state="new">Syntax error, '{0}' expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_TooManyIdentifiers">
+        <source>Too many control variables.</source>
+        <target state="new">Too many control variables.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_UnexpectedCharacter">
+        <source>Unexpected character '{0}'.</source>
+        <target state="new">Unexpected character '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_UnterminatedStringLiteral">
+        <source>Unterminated string literal.</source>
+        <target state="new">Unterminated string literal.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ThisMethodCanOnlyBeUsedToCreateTokens">
+        <source>This method can only be used to create tokens - {0} is not a token kind.</source>
+        <target state="new">This method can only be used to create tokens - {0} is not a token kind.</target>
+        <note>此方法仅用于创建标志。</note>
+      </trans-unit>
+      <trans-unit id="UseIdentifierForTokens">
+        <source>Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier to create tokens.</source>
+        <target state="new">Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier to create tokens.</target>
+        <note>应使用Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier创建标志。</note>
+      </trans-unit>
+      <trans-unit id="UseLiteralForNumeric">
+        <source>Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal to create numeric literal tokens.</source>
+        <target state="new">Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal to create numeric literal tokens.</target>
+        <note>应使用Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal创建数字字面量标志。</note>
+      </trans-unit>
+      <trans-unit id="WRN_ErrorOverride">
+        <source>{0}. See also error LUA{1}.</source>
+        <target state="new">{0}. See also error LUA{1}.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

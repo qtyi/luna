@@ -1,0 +1,12 @@
+{
+  "$schema": "config-schema.json",
+
+  "paths": "Simulators\\",
+
+  "extensions": {
+    ".cs": "CSharp",
+    ".vb": "VisualBasic",
+    ".lua": "Lua",
+    ".moon": "MoonScript"
+  }
+}

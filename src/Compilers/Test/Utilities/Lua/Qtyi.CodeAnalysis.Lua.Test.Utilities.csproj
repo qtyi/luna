@@ -1,0 +1,35 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <NoStdLib>true</NoStdLib>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsShipping>false</IsShipping>
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <!-- InternalsVisibleFrom -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj" />
+    <ProjectReference Include="..\..\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
+    <ProjectReference Include="..\..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
+    <ProjectReference Include="..\..\..\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
+    <ProjectReference Include="..\..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
+  </ItemGroup>
+  
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties project_1json__JSONSchema="http://json.schemastore.org/launchsettings" />
+    </VisualStudio>
+  </ProjectExtensions>
+
+</Project>

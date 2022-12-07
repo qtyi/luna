@@ -1,0 +1,38 @@
+﻿div.code-box{
+    color: black;
+    font-family: 'Fira Code', "Microsoft YaHei";
+}
+
+.none {
+    color: black;
+}
+.kwd {
+    color: blue;
+}
+.ind {
+    color: cornflowerblue
+}
+.op {
+    color: darkblue;
+}
+.punct {
+    color: darkslateblue;
+}
+.num {
+    color: darkgoldenrod;
+}
+.str {
+    color: darkred;
+}
+.space {
+    color: transparent;
+}
+.comment {
+    color: olivedrab;
+}
+.doc {
+    color: olive;
+}
+.skipped {
+    color: darkgray;
+}

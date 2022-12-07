@@ -1,0 +1,46 @@
+﻿<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Shared\GlobalAssemblyCacheHelpers\FusionAssemblyIdentity.cs" Link="FusionAssemblyIdentity" />
+  </ItemGroup>
+
+  <ItemGroup>
+
+
+    <!-- InternalsVisibleFrom -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <PackageReference Include="coverlet.collector" Version="3.1.2" />
+    <PackageReference Update="XunitXml.TestLogger" Version="3.0.62" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Portable\Qtyi.CodeAnalysis.csproj" />
+    
+    <ProjectReference Include="..\..\..\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj" Aliases="PDB" />
+    <ProjectReference Include="..\..\Test\Resources\Core\Qtyi.CodeAnalysis.Compiler.Test.Resources.csproj" />
+
+    <!-- Lua -->
+    <ProjectReference Include="..\..\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
+    <ProjectReference Include="..\..\Test\Utilities\Lua\Qtyi.CodeAnalysis.Lua.Test.Utilities.csproj" />
+    
+    <!-- MoonScript -->
+    <ProjectReference Include="..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
+    <ProjectReference Include="..\..\Test\Utilities\MoonScript\Qtyi.CodeAnalysis.MoonScript.Test.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>

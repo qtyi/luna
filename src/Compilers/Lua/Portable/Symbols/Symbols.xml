@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tree Root="Symbol">
+  
+  <AbstractSymbol Name="AssemblySymbol" Base="Symbol"/>
+
+  <Symbol Name="NetModuleSymbol" Base="Symbol" Implement="ModuleSymbol"/>
+
+  <AbstractSymbol Name="ModuleSymbol" Base="Symbol"/>
+
+  <Symbol Name="NamespaceSymbol" Base="ModuleSymbol"/>
+  
+  <AbstractSymbol Name="TypeSymbol" Base="ModuleSymbol"/>
+  <AbstractSymbol Name="NamedTypeSymbol" Base="TypeSymbol"/>
+
+  <AbstractSymbol Name="MemberSymbol" Base="Symbol"/>
+  
+  <Symbol Name="LabelSymbol" Base="Symbol"/>
+
+  <Symbol Name="LocalSymbol" Base="Symbol"/>
+
+  <Symbol Name="ParameterSymbol" Base="Symbol"/>
+  
+</Tree>

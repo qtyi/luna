@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(RepositoryEngineeringDir)targets\GenerateCompilerExecutableBindingRedirects.targets" />
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>4cec9807-0cf3-4aab-91b7-7e5c68159520</SharedGUID>
+    <RootNamespace>Qtyi.CodeAnalysis.MoonScript.CommandLine</RootNamespace>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LargeAddressAware>true</LargeAddressAware>
+    <StartupObject>Qtyi.CodeAnalysis.MoonScript.CommandLine.Program</StartupObject>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CommandLine</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\BuildProtocol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\ConsoleUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\NativeMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\CompilerServerLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\RuntimeHostInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\NamedPipeUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\BuildClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\BuildServerConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\ExitingTraceListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\Moonc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.cs" />
+    <None Include="$(MSBuildThisFileDirectory)App.config" Condition="'$(TargetFramework)' == 'net472'" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript.CommandLine.UnitTests" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\Core\Portable\Microsoft.CodeAnalysis.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
+    <PackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControlVersion)" Condition="'$(TargetFramework)' == 'net6.0'" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(DefaultLanguageSourceExtension)' != '' AND '$(BuildingInsideVisualStudio)' != 'true'">
+    <ExpectedCompile Include="$(MSBuildThisFileDirectory)**\*$(DefaultLanguageSourceExtension)" />
+  </ItemGroup>
+  <Import Project="$(RepositoryEngineeringDir)targets\DiaSymReaderNative.targets" />
+</Project>

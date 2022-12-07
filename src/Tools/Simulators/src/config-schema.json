@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "为Luna的模拟器的配置文件“config.json”规范格式的JSON架构",
+
+  "type": "object",
+  "properties": {
+    "paths": {
+      "type": [ "string", "array" ],
+      "minItems": 1
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^\\.[^\\.]+$"
+      },
+      "patternProperties": {
+        "^\\.[^\\.]+$": {
+          "type": [ "string", "array" ],
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  },
+  "required": [
+    "paths", "extensions"
+  ]
+}

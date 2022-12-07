@@ -1,0 +1,72 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
+    <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
+
+    <!-- 将生成的文件在“Generated”文件夹中生成副本。 -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageDescription>
+      .NET编译器平台（“Luna”）的组件“Qtyi.CodeAnalysis.MoonScript.dll”，提供MoonScript语言支持。
+    </PackageDescription>
+    <PackageTags>Luna MoonScript CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>LANG_MOONSCRIPT;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.EndOfLine.cs" Link="Parser\Lexer.EndOfLine.cs" />
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.Identifier.cs" Link="Parser\Lexer.Identifier.cs" />
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.NumericLiteral.cs" Link="Parser\Lexer.NumericLiteral.cs" />
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.TokenInfo.cs" Link="Parser\Lexer.TokenInfo.Basic.cs" />
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.WhiteSpace.cs" Link="Parser\Lexer.WhiteSpace.cs" />
+    <Compile Include="..\..\Lua\Portable\SymbolDisplay\ObjectDisplay.cs" Link="SymbolDisplay\ObjectDisplay.cs" />
+    <Compile Include="..\..\Lua\Portable\SymbolDisplay\SymbolDisplay.cs" Link="SymbolDisplay\SymbolDisplay.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\Shared\Syntax.xsd" Link="Syntax\Syntax.xsd" />
+    <AdditionalFiles Include="Syntax\Syntax.xml" />
+
+    <!-- 不将上一个源代码生成器产生的输出结果包含进入后续的运行流程。 -->
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/*/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="MoonScriptResources.resx" GenerateSource="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- InternalsVisibleTo -->
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript.Parser.UnitTests" />
+
+    <!-- InternalsVisibleFrom -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
+    <ProjectReference Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\MoonScriptCodeAnalysisSourceGenerators\MoonScriptCodeAnalysisSourceGenerators.csproj">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
+
+  <Import Project="..\..\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems" Label="Shared" />
+
+</Project>
