@@ -5,7 +5,7 @@
     <Copyright Condition="'$(Copyright)' == ''">$(CopyrightMicrosoft)</Copyright>
     <PackageLicenseExpression Condition="'$(PackageLicenseExpression)' == ''">MIT</PackageLicenseExpression>
 
-    <PackageTags Condition="'$(PackageTags)' == ''">Luna CodeAnalysis Compiler Lua MoonScript Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
+    <PackageTags Condition="'$(PackageTags)' == ''">Luna CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
     <ThirdPartyNoticesFilePath Condition="'$(ThirdPartyNoticesFilePath)' == ''">$(MSBuildThisFileDirectory)..\..\src\NuGet\ThirdPartyNotices.rtf</ThirdPartyNoticesFilePath>
 
     <VSSDKTargetPlatformRegRootSuffix>LunaDev</VSSDKTargetPlatformRegRootSuffix>

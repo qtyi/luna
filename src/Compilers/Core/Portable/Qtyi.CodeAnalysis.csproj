@@ -1,0 +1,44 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
+    <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
+
+    <!-- 将生成的文件在“Generated”文件夹中生成副本。 -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Qtyi.CodeAnalysis.Common</PackageId>
+    <PackageDescription>
+      .NET编译器平台（“Luna”）的共享程序集。
+      请不要尝试单独安装此包，你应该通过安装其他基于它的包来安装它。
+    </PackageDescription>
+    <PackageTags>Luna CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Update="LunaResources.resx" GenerateSource="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- InternalsVisibleTo -->
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.UnitTests" />
+
+    <!-- InternalsVisibleFrom -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
+  
+</Project>

@@ -1,0 +1,45 @@
+﻿Luna.Compilers.Simulators.ILanguageParserSimulator
+Luna.Compilers.Simulators.ILanguageParserSimulator.GetKindText(int rawKind) -> string
+Luna.Compilers.Simulators.ILanguageParserSimulator.ParseSyntaxTree(Microsoft.CodeAnalysis.Text.SourceText sourceText) -> Microsoft.CodeAnalysis.SyntaxTree
+Luna.Compilers.Simulators.ILexerSimulator
+Luna.Compilers.Simulators.ILexerSimulator.GetTokenKind(int rawKind) -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.ILexerSimulator.Initialize(Luna.Compilers.Simulators.LexerSimulatorContext context) -> void
+Luna.Compilers.Simulators.ILexerSimulator.LexToEnd(Microsoft.CodeAnalysis.Text.SourceText sourceText) -> System.Collections.Generic.IEnumerable<Microsoft.CodeAnalysis.SyntaxToken>
+Luna.Compilers.Simulators.ISimulator
+Luna.Compilers.Simulators.ISimulator.Initialize(Luna.Compilers.Simulators.SimulatorContext context) -> void
+Luna.Compilers.Simulators.LanguageParserSimulatorAttribute
+Luna.Compilers.Simulators.LanguageParserSimulatorAttribute.LanguageParserSimulatorAttribute(string firstLanguage, params string[] additionalLanguages) -> void
+Luna.Compilers.Simulators.LexerSimulatorAttribute
+Luna.Compilers.Simulators.LexerSimulatorAttribute.LexerSimulatorAttribute(string firstLanguage, params string[] additionalLanguages) -> void
+Luna.Compilers.Simulators.Simulator
+Luna.Compilers.Simulators.SimulatorAttribute
+Luna.Compilers.Simulators.SimulatorAttribute.Languages.get -> string[]
+Luna.Compilers.Simulators.SimulatorAttribute.SimulatorAttribute(string firstLanguage, params string[] additionalLanguages) -> void
+Luna.Compilers.Simulators.SimulatorContext
+Luna.Compilers.Simulators.SimulatorContext.LanguageName.get -> string
+Luna.Compilers.Simulators.SimulatorContext.SimulatorContext() -> void
+Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.None = 0 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.Keyword = 1 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.Identifier = 2 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.Operator = 3 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.Punctuation = 4 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.NumericLiteral = 5 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.StringLiteral = 6 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.WhiteSpace = 7 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.NewLine = 8 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.Comment = 9 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.Documentation = 10 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Simulators.TokenKind.Skipped = 11 -> Luna.Compilers.Simulators.TokenKind
+Luna.Compilers.Tools.SimulatorConfiguration
+Luna.Compilers.Tools.SimulatorConfiguration.Extensions.get -> System.Collections.Generic.IDictionary<string, string[]>
+Luna.Compilers.Tools.SimulatorConfiguration.Paths.get -> string[]
+static Luna.Compilers.Simulators.Simulator.RegisterSimulator(string fileExtension, string languageName, System.Type simulatorType) -> void
+static Luna.Compilers.Simulators.Simulator.RegisterSimulatorFrom(System.Reflection.Assembly assembly, System.Func<string, System.Collections.Generic.IEnumerable<string>> languageNameToFileExtensionsProvider = null) -> void
+static Luna.Compilers.Simulators.Simulator.RegisterSimulatorFromConfiguration(Luna.Compilers.Tools.SimulatorConfiguration config) -> void
+static Luna.Compilers.Simulators.Simulator.RegisterSimulatorFromConfiguration(string configFilePath) -> void
+static Luna.Compilers.Simulators.Simulator.TryGetLanguageParserSimulatorByFileExtension(string fileExtension, out Luna.Compilers.Simulators.ILanguageParserSimulator[] languageParserSimulators) -> bool
+static Luna.Compilers.Simulators.Simulator.TryGetLanguageParserSimulatorByLanguageName(string languageName, out Luna.Compilers.Simulators.ILanguageParserSimulator[] languageParserSimulators) -> bool
+static Luna.Compilers.Simulators.Simulator.TryGetLexerSimulatorByFileExtension(string fileExtension, out Luna.Compilers.Simulators.ILexerSimulator[] lexerSimulators) -> bool
+static Luna.Compilers.Simulators.Simulator.TryGetLexerSimulatorByLanguageName(string languageName, out Luna.Compilers.Simulators.ILexerSimulator[] lexerSimulators) -> bool
+static Luna.Compilers.Tools.SimulatorConfiguration.Deserialize(System.IO.Stream stream) -> Luna.Compilers.Tools.SimulatorConfiguration

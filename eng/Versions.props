@@ -6,7 +6,7 @@
   -->
   <PropertyGroup>
     <MajorVersion>4</MajorVersion>
-    <MinorVersion>5</MinorVersion>
+    <MinorVersion>4</MinorVersion>
     <PatchVersion>0</PatchVersion>
     <PreReleaseVersionLabel>2</PreReleaseVersionLabel>
     <VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
@@ -79,6 +79,11 @@
     <RefOnlyMicrosoftBuildUtilitiesCoreVersion>$(RefOnlyMicrosoftBuildPackagesVersion)</RefOnlyMicrosoftBuildUtilitiesCoreVersion>
     <NuGetVisualStudioContractsVersion>6.0.0-preview.0.15</NuGetVisualStudioContractsVersion>
     <MicrosoftVisualStudioRpcContractsVersion>17.2.31</MicrosoftVisualStudioRpcContractsVersion>
+    <!--
+      Since the Microsoft.CodeAnalysis.Common package is a public dependency of our NuGet
+      packages we will keep its version the same as our release version.
+    -->
+    <MicrosoftCodeAnalysisVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</MicrosoftCodeAnalysisVersion>
     <!--
       Since the Microsoft.CodeAnalysis.Analyzers package is a public dependency of our NuGet
       packages we will keep it untied to the RoslynDiagnosticsNugetPackageVersion we use for

@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tree Root="SyntaxNode">
+
+  <PredefinedNode Name="LuaSyntaxNode" Base="SyntaxNode"/>
+  <PredefinedNode Name="SyntaxToken" Base="LuaSyntaxNode"/>
+  <PredefinedNode Name="StructuredTriviaSyntax" Base="LuaSyntaxNode"/>
+
+
+
+  <!-- 名称 -->
+  <AbstractNode Name="NameSyntax" Base="ExpressionSyntax"/>
+  <Node Name="IdentifierNameSyntax" Base="NameSyntax">
+    <Kind Name="IdentifierName"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+      <Kind Name="GlobalEnvironmentKeyword"/>
+      <Kind Name="EnvironmentKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="QualifiedNameSyntax" Base="NameSyntax">
+    <Kind Name="QualifiedName" />
+    <Field Name="Left" Type="NameSyntax"/>
+    <Field Name="DotToken" Type="SyntaxToken">
+      <Kind Name="DotToken"/>
+    </Field>
+    <Field Name="Right" Type="IdentifierNameSyntax"/>
+  </Node>
+  <Node Name="ImplicitSelfParameterNameSyntax" Base="NameSyntax">
+    <Kind Name="ImplicitSelfParameterName" />
+    <Field Name="Left" Type="NameSyntax"/>
+    <Field Name="ColonToken" Type="SyntaxToken">
+      <Kind Name="ColonToken"/>
+    </Field>
+    <Field Name="Right" Type="IdentifierNameSyntax"/>
+  </Node>
+
+
+
+  <!-- 表达式 -->
+  <AbstractNode Name="ExpressionSyntax" Base="LuaSyntaxNode"/>
+  <Node Name="LiteralExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="NilLiteralExpression"/>
+    <Kind Name="FalseLiteralExpression"/>
+    <Kind Name="TrueLiteralExpression"/>
+    <Kind Name="NumericLiteralExpression"/>
+    <Kind Name="StringLiteralExpression"/>
+    <Kind Name="VariousArgumentsExpression"/>
+    <Field Name="Token" Type="SyntaxToken">
+      <Kind Name="NilKeyword"/>
+      <Kind Name="FalseKeyword"/>
+      <Kind Name="TrueKeyword"/>
+      <Kind Name="NumericLiteralToken"/>
+      <Kind Name="StringLiteralToken"/>
+      <Kind Name="MultiLineRawStringLiteralToken"/>
+      <Kind Name="DotDotDotToken"/>
+    </Field>
+  </Node>
+  <Node Name="ParenthesizedExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="ParenthesizedExpression"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+      <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+      <Kind Name="CloseParenToken"/>
+    </Field>
+  </Node>
+  <Node Name="FunctionDefinitionExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="FunctionDefinitionExpression"/>
+    <Field Name="FunctionKeyword" Type="SyntaxToken">
+      <Kind Name="FunctionKeyword"/>
+    </Field>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="TableConstructorExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="TableConstructorExpression"/>
+    <Field Name="OpenBrace" Type="SyntaxToken">
+      <Kind Name="OpenBraceToken"/>
+    </Field>
+    <Field Name="Fields" Type="SeparatedSyntaxList&lt;FieldSyntax&gt;" AllowTrailingSeparator="true"/>
+    <Field Name="CloseBrace" Type="SyntaxToken">
+      <Kind Name="CloseBraceToken"/>
+    </Field>
+  </Node>
+  <Node Name="BinaryExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="AdditionExpression"/>
+    <Kind Name="SubtractionExpression"/>
+    <Kind Name="MultiplicationExpression"/>
+    <Kind Name="DivisionExpression"/>
+    <Kind Name="FloorDivisionExpression"/>
+    <Kind Name="ExponentiationExpression"/>
+    <Kind Name="ModuloExpression"/>
+    <Kind Name="BitwiseAndExpression"/>
+    <Kind Name="BitwiseExclusiveOrExpression"/>
+    <Kind Name="BitwiseOrExpression"/>
+    <Kind Name="BitwiseLeftShiftExpression"/>
+    <Kind Name="BitwiseRightShiftExpression"/>
+    <Kind Name="ConcatenationExpression"/>
+    <Kind Name="LessThanExpression"/>
+    <Kind Name="LessThanOrEqualExpression"/>
+    <Kind Name="GreaterThanExpression"/>
+    <Kind Name="GreaterThanOrEqualExpression"/>
+    <Kind Name="EqualExpression"/>
+    <Kind Name="NotEqualExpression"/>
+    <Kind Name="AndExpression"/>
+    <Kind Name="OrExpression"/>
+    <Field Name="Left" Type="ExpressionSyntax"/>
+    <Field Name="OperatorToken" Type="SyntaxToken">
+      <Kind Name="PlusToken"/>
+      <Kind Name="MinusToken"/>
+      <Kind Name="AsteriskToken"/>
+      <Kind Name="SlashToken"/>
+      <Kind Name="SlashSlashToken"/>
+      <Kind Name="CaretToken"/>
+      <Kind Name="PersentToken"/>
+      <Kind Name="AmpersandToken"/>
+      <Kind Name="TildeToken"/>
+      <Kind Name="BarToken"/>
+      <Kind Name="LessThanLessThanToken"/>
+      <Kind Name="GreaterThanGreaterThanToken"/>
+      <Kind Name="DotDotToken"/>
+      <Kind Name="LessThanToken"/>
+      <Kind Name="LessThanEqualsToken"/>
+      <Kind Name="GreaterThanToken"/>
+      <Kind Name="GreaterThanEqualsToken"/>
+      <Kind Name="EqualsEqualsToken"/>
+      <Kind Name="TildeEqualsToken"/>
+      <Kind Name="AndKeyword"/>
+      <Kind Name="OrKeyword"/>
+    </Field>
+    <Field Name="Right" Type="ExpressionSyntax"/>
+  </Node>
+  <Node Name="UnaryExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="UnaryMinusExpression"/>
+    <Kind Name="LogicalNotExpression"/>
+    <Kind Name="LengthExpression"/>
+    <Kind Name="BitwiseNotExpression"/>
+    <Field Name="OperatorToken" Type="SyntaxToken">
+      <Kind Name="MinusToken"/>
+      <Kind Name="NotKeyword"/>
+      <Kind Name="HashToken"/>
+      <Kind Name="TildeToken"/>
+    </Field>
+    <Field Name="Operand" Type="ExpressionSyntax"/>
+  </Node>
+  <AbstractNode Name="MemberAccessExpressionSyntax" Base="ExpressionSyntax">
+    <Field Name="Self" Type="ExpressionSyntax"/>
+    <Field Name="Member" Type="ExpressionSyntax"/>
+  </AbstractNode>
+  <Node Name="SimpleMemberAccessExpressionSyntax" Base="MemberAccessExpressionSyntax">
+    <Kind Name="SimpleMemberAccessExpression"/>
+    <Field Name="Self" Type="ExpressionSyntax" Override="true"/>
+    <Field Name="OperatorToken" Type="SyntaxToken">
+      <Kind Name="DotToken"/>
+    </Field>
+    <Field Name="MemberName" Type="IdentifierNameSyntax"/>
+  </Node>
+  <Node Name="IndexMemberAccessExpressionSyntax" Base="MemberAccessExpressionSyntax">
+    <Kind Name="IndexMemberAccessExpression"/>
+    <Field Name="Self" Type="ExpressionSyntax" Override="true"/>
+    <Field Name="OpenBracketToken" Type="SyntaxToken">
+      <Kind Name="OpenBracketToken"/>
+    </Field>
+    <Field Name="Member" Type="ExpressionSyntax" Override="true"/>
+    <Field Name="CloseBracketToken" Type="SyntaxToken">
+      <Kind Name="CloseBracketToken"/>
+    </Field>
+  </Node>
+  <Node Name="InvocationExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="InvocationExpression"/>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="Arguments" Type="InvocationArgumentsSyntax"/>
+  </Node>
+  <Node Name="ImplicitSelfParameterExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="ImplicitSelfParameterExpression"/>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="ColonToken" Type="SyntaxToken">
+      <Kind Name="ColonToken"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+  </Node>
+
+
+
+  <!-- 语句 -->
+  <AbstractNode Name="StatementSyntax" Base="LuaSyntaxNode"/>
+  <Node Name="EmptyStatementSyntax" Base="StatementSyntax">
+    <Kind Name="EmptyStatement"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken">
+      <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+  <Node Name="AssignmentStatementSyntax" Base="StatementSyntax">
+    <Kind Name="AssignmentStatement"/>
+    <Field Name="Left" Type="SeparatedSyntaxList&lt;ExpressionSyntax&gt;" MinCount="1"/>
+    <Field Name="EqualsToken" Type="SyntaxToken">
+      <Kind Name="EqualsToken"/>
+    </Field>
+    <Field Name="Right" Type="SeparatedSyntaxList&lt;ExpressionSyntax&gt;" MinCount="1"/>
+  </Node>
+  <Node Name="InvocationStatementSyntax" Base="StatementSyntax">
+    <Kind Name="InvocationStatement"/>
+    <Field Name="Expression" Type="InvocationExpressionSyntax"/>
+  </Node>
+  <Node Name="LabelStatementSyntax" Base="StatementSyntax">
+    <Kind Name="LabelStatement"/>
+    <Field Name="LeftColonColonToken" Type="SyntaxToken">
+      <Kind Name="ColonColonToken"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="RightColonColonToken" Type="SyntaxToken">
+      <Kind Name="ColonColonToken"/>
+    </Field>
+  </Node>
+  <Node Name="BreakStatementSyntax" Base="StatementSyntax">
+    <Kind Name="BreakStatement"/>
+    <Field Name="BreakKeyword" Type="SyntaxToken">
+      <Kind Name="BreakKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="GotoStatementSyntax" Base="StatementSyntax">
+    <Kind Name="GotoStatement"/>
+    <Field Name="GotoKeyword" Type="SyntaxToken">
+      <Kind Name="GotoKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+  </Node>
+  <Node Name="ReturnStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ReturnStatement"/>
+    <Field Name="ReturnKeyword" Type="SyntaxToken">
+      <Kind Name="ReturnKeyword"/>
+    </Field>
+    <Field Name="Expressions" Type="SeparatedSyntaxList&lt;ExpressionSyntax&gt;"/>
+  </Node>
+  <Node Name="DoStatementSyntax" Base="StatementSyntax">
+    <Kind Name="DoStatement"/>
+    <Field Name="DoKeyword" Type="SyntaxToken">
+      <Kind Name="DoKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="WhileStatementSyntax" Base="StatementSyntax">
+    <Kind Name="WhileStatement"/>
+    <Field Name="WhileKeyword" Type="SyntaxToken">
+      <Kind Name="WhileKeyword"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="DoKeyword" Type="SyntaxToken">
+      <Kind Name="DoKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="RepeatStatementSyntax" Base="StatementSyntax">
+    <Kind Name="RepeatStatement"/>
+    <Field Name="RepeatKeyword" Type="SyntaxToken">
+      <Kind Name="RepeatKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="UntilKeyword" Type="SyntaxToken">
+      <Kind Name="UntilKeyword"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+  </Node>
+  <Node Name="IfStatementSyntax" Base="StatementSyntax">
+    <Kind Name="IfStatement"/>
+    <Field Name="IfKeyword" Type="SyntaxToken">
+      <Kind Name="IfKeyword"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="ThenKeyword" Type="SyntaxToken">
+      <Kind Name="ThenKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="ElseIfs" Type="SyntaxList&lt;ElseIfClauseSyntax&gt;"/>
+    <Field Name="Else" Type="ElseClauseSyntax" Optional="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="ElseIfClauseSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ElseIfClause"/>
+    <Field Name="ElseIfKeyword" Type="SyntaxToken">
+      <Kind Name="ElseIfKeyword"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="ThenKeyword" Type="SyntaxToken">
+      <Kind Name="ThenKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+  </Node>
+  <Node Name="ElseClauseSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ElseClause"/>
+    <Field Name="ElseKeyword" Type="SyntaxToken">
+      <Kind Name="ElseKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+  </Node>
+  <Node Name="ForStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ForStatement"/>
+    <Field Name="ForKeyword" Type="SyntaxToken">
+      <Kind Name="ForKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="EqualsToken" Type="SyntaxToken">
+      <Kind Name="EqualsToken"/>
+    </Field>
+    <Field Name="Initial" Type="ExpressionSyntax"/>
+    <Field Name="FirstCommaToken" Type="SyntaxToken">
+      <Kind Name="CommaToken"/>
+    </Field>
+    <Field Name="Limit" Type="ExpressionSyntax"/>
+    <Field Name="SecondCommaToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="CommaToken"/>
+    </Field>
+    <Field Name="Step" Type="ExpressionSyntax" Optional="true"/>
+    <Field Name="DoKeyword" Type="SyntaxToken">
+      <Kind Name="DoKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="ForInStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ForInStatement"/>
+    <Field Name="ForKeyword" Type="SyntaxToken">
+      <Kind Name="ForKeyword"/>
+    </Field>
+    <Field Name="Names" Type="SeparatedSyntaxList&lt;IdentifierNameSyntax&gt;" MinCount="1"/>
+    <Field Name="InKeyword" Type="SyntaxToken">
+      <Kind Name="InKeyword"/>
+    </Field>
+    <Field Name="Expressions" Type="SeparatedSyntaxList&lt;ExpressionSyntax&gt;" MinCount="1"/>
+    <Field Name="DoKeyword" Type="SyntaxToken">
+      <Kind Name="DoKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="FunctionDefinitionStatementSyntax" Base="StatementSyntax">
+    <Kind Name="FunctionDefinitionStatement"/>
+    <Field Name="FunctionKeyword" Type="SyntaxToken">
+      <Kind Name="FunctionKeyword"/>
+    </Field>
+    <Field Name="Name" Type="NameSyntax"/>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="LocalFunctionDefinitionStatementSyntax" Base="StatementSyntax">
+    <Kind Name="LocalFunctionDefinitionStatement"/>
+    <Field Name="LocalKeyword" Type="SyntaxToken">
+      <Kind Name="LocalKeyword"/>
+    </Field>
+    <Field Name="FunctionKeyword" Type="SyntaxToken">
+      <Kind Name="FunctionKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="LocalDeclarationStatementSyntax" Base="StatementSyntax">
+    <Kind Name="LocalDeclarationStatement"/>
+    <Field Name="LocalKeyword" Type="SyntaxToken">
+      <Kind Name="LocalKeyword"/>
+    </Field>
+    <Field Name="NameAttributeLists" Type="SeparatedSyntaxList&lt;NameAttributeListSyntax&gt;" MinCount="1"/>
+    <Field Name="Initializer" Type="EqualsValuesClauseSyntax" Optional="true"/>
+  </Node>
+  <Node Name="EqualsValuesClauseSyntax" Base="LuaSyntaxNode">
+    <Kind Name="EqualsValuesClause"/>
+    <Field Name="EqualsToken" Type="SyntaxToken">
+      <Kind Name="EqualsToken"/>
+    </Field>
+    <Field Name="Expressions" Type="SeparatedSyntaxList&lt;ExpressionSyntax&gt;" MinCount="1"/>
+  </Node>
+
+
+
+  <!-- 声明 -->
+  <Node Name="ChunkSyntax" Base="LuaSyntaxNode">
+    <Kind Name="Chunk"/>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndOfFileToken" Type="SyntaxToken">
+      <Kind Name="EndOfFileToken"/>
+    </Field>
+  </Node>
+  <Node Name="BlockSyntax" Base="LuaSyntaxNode">
+    <Kind Name="Block"/>
+    <Field Name="Statements" Type="SyntaxList&lt;StatementSyntax&gt;"/>
+    <Field Name="Return" Type="ReturnStatementSyntax" Optional="true"/>
+  </Node>
+  <Node Name="SkippedTokensTriviaSyntax" Base="StructuredTriviaSyntax">
+    <Kind Name="SkippedTokensTrivia"/>
+    <Field Name="Tokens" Type="SyntaxList&lt;SyntaxToken&gt;"/>
+  </Node>
+  <Node Name="ParameterListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ParameterList"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+      <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Parameters" Type="SeparatedSyntaxList&lt;ParameterSyntax&gt;"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+      <Kind Name="CloseParenToken"/>
+    </Field>
+  </Node>
+  <Node Name="ParameterSyntax" Base="LuaSyntaxNode">
+    <Kind Name="Parameter"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+      <Kind Name="DotDotDotToken"/>
+    </Field>
+  </Node>
+  <AbstractNode Name="FieldSyntax" Base="LuaSyntaxNode">
+    <Field Name="FieldKey" Type="ExpressionSyntax" Optional="true"/>
+    <Field Name="FieldValue" Type="ExpressionSyntax"/>
+  </AbstractNode>
+  <Node Name="ItemFieldSyntax" Base="FieldSyntax">
+    <Kind Name="ItemField"/>
+    <Field Name="FieldValue" Type="ExpressionSyntax" Override="true"/>
+  </Node>
+  <Node Name="NameValueFieldSyntax" Base="FieldSyntax">
+    <Kind Name="NameValueField"/>
+    <Field Name="FieldName" Type="IdentifierNameSyntax"/>
+    <Field Name="EqualsToken" Type="SyntaxToken">
+      <Kind Name="EqualsToken"/>
+    </Field>
+    <Field Name="FieldValue" Type="ExpressionSyntax" Override="true"/>
+  </Node>
+  <Node Name="KeyValueFieldSyntax" Base="FieldSyntax">
+    <Kind Name="KeyValueField"/>
+    <Field Name="OpenBracketToken" Type="SyntaxToken">
+      <Kind Name="OpenBracketToken"/>
+    </Field>
+    <Field Name="FieldKey" Type="ExpressionSyntax" Override="true"/>
+    <Field Name="CloseBracketToken" Type="SyntaxToken">
+      <Kind Name="CloseBracketToken"/>
+    </Field>
+    <Field Name="EqualsToken" Type="SyntaxToken">
+      <Kind Name="EqualsToken"/>
+    </Field>
+    <Field Name="FieldValue" Type="ExpressionSyntax" Override="true"/>
+  </Node>
+  <AbstractNode Name="InvocationArgumentsSyntax" Base="LuaSyntaxNode"/>
+  <Node Name="ArgumentTableSyntax" Base="InvocationArgumentsSyntax">
+    <Kind Name="ArgumentTable"/>
+    <Field Name="Table" Type="TableConstructorExpressionSyntax"/>
+  </Node>
+  <Node Name="ArgumentListSyntax" Base="InvocationArgumentsSyntax">
+    <Kind Name="ArgumentList"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+      <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="List" Type="SeparatedSyntaxList&lt;ArgumentSyntax&gt;"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+      <Kind Name="CloseParenToken"/>
+    </Field>
+  </Node>
+  <Node Name="ArgumentStringSyntax" Base="InvocationArgumentsSyntax">
+    <Kind Name="ArgumentString"/>
+    <Field Name="String" Type="SyntaxToken">
+      <Kind Name="StringLiteralToken"/>
+      <Kind Name="MultiLineRawStringLiteralToken"/>
+    </Field>
+  </Node>
+  <Node Name="ArgumentSyntax" Base="LuaSyntaxNode">
+    <Kind Name="Argument"/>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+  </Node>
+  <Node Name="NameAttributeListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="NameAttributeList"/>
+    <Field Name="Identifier" Type="IdentifierNameSyntax"/>
+    <Field Name="AttributeList" Type="AttributeListSyntax" Optional="true"/>
+  </Node>
+  <Node Name="AttributeListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="AttributeList"/>
+    <Field Name="LessThanToken" Type="SyntaxToken">
+      <Kind Name="LessThanToken"/>
+    </Field>
+    <Field Name="Attributes" Type="SeparatedSyntaxList&lt;AttributeSyntax&gt;" MinCount="1"/>
+    <Field Name="GreaterThanToken" Type="SyntaxToken">
+      <Kind Name="GreaterThanToken"/>
+    </Field>
+  </Node>
+  <Node Name="AttributeSyntax" Base="LuaSyntaxNode">
+    <Kind Name="Attribute"/>
+    <Field Name="Token" Type="SyntaxToken">
+      <Kind Name="CloseKeyword"/>
+      <Kind Name="ConstKeyword"/>
+    </Field>
+  </Node>
+
+</Tree>

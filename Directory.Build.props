@@ -2,5 +2,6 @@
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
   <Import Project="eng\targets\Settings.props" />
+  <Import Project="eng\targets\ExternalDirectories.props" />
 </Project>
 
