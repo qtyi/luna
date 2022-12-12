@@ -36,11 +36,9 @@
 
     <!-- Lua -->
     <ProjectReference Include="..\..\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
-    <ProjectReference Include="..\..\Test\Utilities\Lua\Qtyi.CodeAnalysis.Lua.Test.Utilities.csproj" />
     
     <!-- MoonScript -->
     <ProjectReference Include="..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
-    <ProjectReference Include="..\..\Test\Utilities\MoonScript\Qtyi.CodeAnalysis.MoonScript.Test.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

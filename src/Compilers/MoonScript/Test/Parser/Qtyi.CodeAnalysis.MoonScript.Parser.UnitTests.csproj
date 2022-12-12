@@ -8,10 +8,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DefineConstants>LANG_MOONSCRIPT;$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>

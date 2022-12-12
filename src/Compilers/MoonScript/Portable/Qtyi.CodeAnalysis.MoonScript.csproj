@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -19,10 +19,6 @@
       .NET编译器平台（“Luna”）的组件“Qtyi.CodeAnalysis.MoonScript.dll”，提供MoonScript语言支持。
     </PackageDescription>
     <PackageTags>Luna MoonScript CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <DefineConstants>LANG_MOONSCRIPT;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,6 +46,7 @@
   <ItemGroup>
     <!-- InternalsVisibleTo -->
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript.Parser.UnitTests" />
+    <InternalsVisibleTo Include="moonc" />
 
     <!-- InternalsVisibleFrom -->
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />

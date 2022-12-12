@@ -1,15 +1,15 @@
-﻿# Licensed to the .NET Foundation under one or more agreements.
-# The .NET Foundation licenses this file to you under the MIT license.
+﻿# Licensed to the Qtyi under one or more agreements.
+# The Qtyi licenses this file to you under the MIT license.
 # See the LICENSE file in the project root for more information.
 
-# This file contains command-line options that the C#
-# command line compiler (CSC) will process as part
+# This file contains command-line options that the MoonScript
+# command line compiler (MOONC) will process as part
 # of every compilation, unless the "/noconfig" option
 # is specified. 
 
 # Reference the common Framework libraries
 /r:Accessibility.dll
-/r:Microsoft.CSharp.dll
+/r:Qtyi.MoonScript.dll
 /r:System.Configuration.dll
 /r:System.Configuration.Install.dll
 /r:System.Core.dll

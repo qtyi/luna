@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(RepositoryEngineeringDir)targets\GenerateCompilerExecutableBindingRedirects.targets" />
   <PropertyGroup>
@@ -17,21 +18,26 @@
     <Import_RootNamespace>CommandLine</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\BuildProtocol.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\ConsoleUtil.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\NativeMethods.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\CompilerServerLogger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\RuntimeHostInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\NamedPipeUtil.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\BuildClient.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\BuildServerConnection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\ExitingTraceListener.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\Luac.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Program.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\BuildProtocol.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\CompilerServerLogger.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\ConsoleUtil.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\NativeMethods.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Shared\BuildClient.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Shared\BuildServerConnection.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Shared\ExitingTraceListener.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Shared\NamedPipeUtil.cs" />
+    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Shared\RuntimeHostInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\LunaBuildProtocol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\LunaCompilerServerLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\LunaBuildClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\LunaBuildServerConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\CommandLine\Compiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\CommandLine\Program.cs" />
     <None Include="$(MSBuildThisFileDirectory)App.config" Condition="'$(TargetFramework)' == 'net472'" />
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.CommandLine.UnitTests" />
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\Core\Portable\Microsoft.CodeAnalysis.csproj" />
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControlVersion)" Condition="'$(TargetFramework)' == 'net6.0'" />
   </ItemGroup>
   <ItemGroup Condition="'$(DefaultLanguageSourceExtension)' != '' AND '$(BuildingInsideVisualStudio)' != 'true'">

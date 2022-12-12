@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -21,10 +21,6 @@
     <PackageTags>Luna Lua CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
   </PropertyGroup>
   
-  <PropertyGroup>
-    <DefineConstants>LANG_LUA;$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\Shared\Syntax.xsd" Link="Syntax\Syntax.xsd" />
     <AdditionalFiles Include="Syntax\Syntax.xml" />
@@ -42,6 +38,7 @@
   <ItemGroup>
     <!-- InternalsVisibleTo -->
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.Parser.UnitTests" />
+    <InternalsVisibleTo Include="luac" />
     <InternalsVisibleTo Include="Luna.Compilers.Simulators.Lua" />
 
     <!-- InternalsVisibleFrom -->

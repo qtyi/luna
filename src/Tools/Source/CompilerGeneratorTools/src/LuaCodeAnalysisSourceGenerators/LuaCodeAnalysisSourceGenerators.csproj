@@ -12,10 +12,6 @@
     <ExcludeFromSourceBuild>false</ExcludeFromSourceBuild>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DefineConstants>LANG_LUA;$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\..\..\..\..\Compilers\Core\Portable\Symbols\LanguageNames.cs" Link="LanguageNames.cs" />
     <Compile Include="..\..\..\..\..\Compilers\Lua\Portable\Errors\ErrorCode.cs" Link="ErrorCode.cs" />

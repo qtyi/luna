@@ -8,10 +8,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DefineConstants>LANG_MOONSCRIPT;$(DefineConstants)TRACE</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="*" />
   </ItemGroup>

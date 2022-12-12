@@ -1,19 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-
-    <!-- This project file effectively retargets our exe for .NET Framework ARM64.  -->
     <AssemblyName>luac</AssemblyName>
     <PlatformTarget>ARM64</PlatformTarget>
     <TargetFramework>net472</TargetFramework>
-    <DisableNullableWarnings>true</DisableNullableWarnings>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsSymbolPublishingPackage>true</IsSymbolPublishingPackage>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\luac.rsp" Condition="'$(TargetFramework)' == 'net472'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\moonc.rsp" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Import Project="..\LuacCommandLine.projitems" Label="Shared" />
+
 </Project>
