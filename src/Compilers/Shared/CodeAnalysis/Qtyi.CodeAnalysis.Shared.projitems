@@ -11,6 +11,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Binder\BindingDiagnosticBag.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLine\CommandLineArguments.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLine\CommandLineDiagnosticFormatter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommandLine\CommandLineParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommandLine\Compiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\Compilation.cs" />

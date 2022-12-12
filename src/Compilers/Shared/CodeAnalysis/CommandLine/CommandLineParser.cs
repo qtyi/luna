@@ -8,11 +8,13 @@ using Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.Lua;
 
-using ThisMessageProvider = Lua.MessageProvider;
+using ThisCommandLineArguments = LuaCommandLineArguments;
+using ThisMessageProvider = MessageProvider;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
 
-using ThisMessageProvider = MoonScript.MessageProvider;
+using ThisCommandLineArguments = MoonScriptCommandLineArguments;
+using ThisMessageProvider = MessageProvider;
 #endif
 
 public partial class
@@ -32,4 +34,18 @@ public partial class
         (bool isScriptCommandLineParser = false)
         : base(ThisMessageProvider.Instance, isScriptCommandLineParser) { }
 
+    public new partial ThisCommandLineArguments Parse(
+        IEnumerable<string> args,
+        string? baseDirectory,
+        string? sdkDirectory,
+        string? additionalReferenceDirectories = null);
+
+    #region CommandLineParser
+    internal override CommandLineArguments CommonParse(
+        IEnumerable<string> args,
+        string baseDirectory,
+        string? sdkDirectory,
+        string? additionalReferenceDirectories) =>
+        this.Parse(args, baseDirectory, sdkDirectory, additionalReferenceDirectories);
+    #endregion
 }
