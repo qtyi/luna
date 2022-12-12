@@ -31,6 +31,15 @@ partial class NetModuleSymbol : IModuleSymbolInternal
     /// <inheritdoc/>
     public sealed override SymbolKind Kind => SymbolKind.NetModule;
 
+    /// <summary>
+    /// 获取此模块符号的表示全局（根）命名空间的符号。
+    /// </summary>
+    /// <value>
+    /// 此模块符号的表示全局（根）命名空间的符号。
+    /// 其仅限此模块范围，用于浏览定义在此模块中的所有符号。
+    /// </value>
+    public abstract NamespaceSymbol GlobalNamespace { get; }
+
     /// <remarks>.NET模块符号必定不被另一个名称类型符号包含。</remarks>
     /// <value>返回<see langword="null"/>。</value>
     /// <inheritdoc/>

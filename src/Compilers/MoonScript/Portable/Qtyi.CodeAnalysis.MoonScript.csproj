@@ -35,6 +35,8 @@
     <None Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\Shared\Syntax.xsd" Link="Syntax\Syntax.xsd" />
     <AdditionalFiles Include="Syntax\Syntax.xml" />
 
+    <AdditionalFiles Include="Symbols\Symbols.xml" />
+
     <!-- 不将上一个源代码生成器产生的输出结果包含进入后续的运行流程。 -->
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/*/**/*.cs" />
   </ItemGroup>
