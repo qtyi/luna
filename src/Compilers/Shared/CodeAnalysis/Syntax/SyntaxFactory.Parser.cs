@@ -21,6 +21,8 @@ using ThisParseOptions = MoonScriptParseOptions;
 
 using Syntax.InternalSyntax;
 using SyntaxToken = Microsoft.CodeAnalysis.SyntaxToken;
+using System.Text;
+using System.Threading;
 
 static partial class SyntaxFactory
 {
@@ -31,17 +33,37 @@ static partial class SyntaxFactory
     private static LanguageParser MakeParser(Lexer lexer) => new(lexer, oldTree: null, changes: null);
 
     public static SyntaxTree ParseSyntaxTree(
-        SourceText text,
+        string text,
         ParseOptions? options,
-        string path,
-        CancellationToken cancellationToken) =>
-        SyntaxFactory.ParseSyntaxTree(text, (ThisParseOptions?)options, path, cancellationToken);
+        string path = "",
+        Encoding? encoding = null,
+        CancellationToken cancellationToken = default) =>
+        SyntaxFactory.ParseSyntaxTree(text, (ThisParseOptions?)options, path, encoding, cancellationToken);
+
+    public static ThisSyntaxTree ParseSyntaxTree(
+        string text,
+        ThisParseOptions? options,
+        string path = "",
+        Encoding? encoding = null,
+        CancellationToken cancellationToken = default) =>
+        SyntaxFactory.ParseSyntaxTree(
+            SourceText.From(text, encoding, SourceHashAlgorithm.Sha1),
+            options,
+            path,
+            cancellationToken);
 
     public static SyntaxTree ParseSyntaxTree(
         SourceText text,
+        ParseOptions? options,
+        string path,
+        CancellationToken cancellationToken = default) =>
+        SyntaxFactory.ParseSyntaxTree(text, (ThisParseOptions?)options, path, cancellationToken);
+
+    public static ThisSyntaxTree ParseSyntaxTree(
+        SourceText text,
         ThisParseOptions? options,
         string path,
-        CancellationToken cancellationToken) =>
+        CancellationToken cancellationToken = default) =>
         ThisSyntaxTree.ParseText(text, options, path, cancellationToken);
 
     public static SyntaxTriviaList ParseLeadingTrivia(string text, ThisParseOptions? options = null, int offset = 0)

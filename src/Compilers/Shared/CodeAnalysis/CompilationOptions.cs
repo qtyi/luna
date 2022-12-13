@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
+using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -28,9 +29,181 @@ public sealed partial class
 #pragma warning restore CS0659
     : CompilationOptions, IEquatable<ThisCompilationOptions>
 {
-    public LuaCompilationOptions(OutputKind outputKind, bool reportSuppressedDiagnostics, string? moduleName, string? mainTypeName, string? scriptClassName, string? cryptoKeyContainer, string? cryptoKeyFile, ImmutableArray<byte> cryptoPublicKey, bool? delaySign, bool publicSign, OptimizationLevel optimizationLevel, bool checkOverflow, Platform platform, ReportDiagnostic generalDiagnosticOption, int warningLevel, ImmutableDictionary<string, ReportDiagnostic> specificDiagnosticOptions, bool concurrentBuild, bool deterministic, DateTime currentLocalTime, bool debugPlusMode, XmlReferenceResolver? xmlReferenceResolver, SourceReferenceResolver? sourceReferenceResolver, SyntaxTreeOptionsProvider? syntaxTreeOptionsProvider, MetadataReferenceResolver? metadataReferenceResolver, AssemblyIdentityComparer? assemblyIdentityComparer, StrongNameProvider? strongNameProvider, MetadataImportOptions metadataImportOptions, bool referencesSupersedeLowerVersions) : base(outputKind, reportSuppressedDiagnostics, moduleName, mainTypeName, scriptClassName, cryptoKeyContainer, cryptoKeyFile, cryptoPublicKey, delaySign, publicSign, optimizationLevel, checkOverflow, platform, generalDiagnosticOption, warningLevel, specificDiagnosticOptions, concurrentBuild, deterministic, currentLocalTime, debugPlusMode, xmlReferenceResolver, sourceReferenceResolver, syntaxTreeOptionsProvider, metadataReferenceResolver, assemblyIdentityComparer, strongNameProvider, metadataImportOptions, referencesSupersedeLowerVersions)
+    public
+#if LANG_LUA
+        LuaCompilationOptions
+#elif LANG_MOONSCRIPT
+        MoonScriptCompilationOptions
+#endif
+    (
+        OutputKind outputKind,
+        bool reportSuppressedDiagnostics = false,
+        string? moduleName = null,
+        string? mainTypeName = null,
+        string? scriptClassName = null,
+        OptimizationLevel optimizationLevel = OptimizationLevel.Debug,
+        bool checkOverflow = false,
+        string? cryptoKeyContainer = null,
+        string? cryptoKeyFile = null,
+        ImmutableArray<byte> cryptoPublicKey = default,
+        bool? delaySign = null,
+        Platform platform = Platform.AnyCpu,
+        ReportDiagnostic generalDiagnosticOption = ReportDiagnostic.Default,
+        int warningLevel = Diagnostic.DefaultWarningLevel,
+        ImmutableDictionary<string, ReportDiagnostic>? specificDiagnosticOptions = null,
+        bool concurrentBuild = true,
+        bool deterministic = false,
+        XmlReferenceResolver? xmlReferenceResolver = null,
+        SourceReferenceResolver? sourceReferenceResolver = null,
+        MetadataReferenceResolver? metadataReferenceResolver = null,
+        AssemblyIdentityComparer? assemblyIdentityComparer = null,
+        StrongNameProvider? strongNameProvider = null,
+        bool publicSign = false,
+        MetadataImportOptions metadataImportOptions = MetadataImportOptions.Public) :
+        this(
+            outputKind,
+            reportSuppressedDiagnostics,
+            moduleName,
+            mainTypeName,
+            scriptClassName,
+            optimizationLevel,
+            checkOverflow,
+            cryptoKeyContainer,
+            cryptoKeyFile,
+            cryptoPublicKey,
+            delaySign,
+            platform,
+            generalDiagnosticOption,
+            warningLevel,
+            specificDiagnosticOptions,
+            concurrentBuild,
+            deterministic,
+            currentLocalTime: default,
+            debugPlusMode: false,
+            xmlReferenceResolver,
+            sourceReferenceResolver,
+            syntaxTreeOptionsProvider: null,
+            metadataReferenceResolver,
+            assemblyIdentityComparer,
+            strongNameProvider,
+            metadataImportOptions,
+            referencesSupersedeLowerVersions: false,
+            publicSign)
+    { }
+
+    /// <remarks>正确参数的构造器。</remarks>
+    internal
+#if LANG_LUA
+        LuaCompilationOptions
+#elif LANG_MOONSCRIPT
+        MoonScriptCompilationOptions
+#endif
+    (
+        OutputKind outputKind,
+        bool reportSuppressedDiagnostics,
+        string? moduleName,
+        string? mainTypeName,
+        string? scriptClassName,
+        OptimizationLevel optimizationLevel,
+        bool checkOverflow,
+        string? cryptoKeyContainer,
+        string? cryptoKeyFile,
+        ImmutableArray<byte> cryptoPublicKey,
+        bool? delaySign,
+        Platform platform,
+        ReportDiagnostic generalDiagnosticOption,
+        int warningLevel,
+        ImmutableDictionary<string, ReportDiagnostic>? specificDiagnosticOptions,
+        bool concurrentBuild,
+        bool deterministic,
+        DateTime currentLocalTime,
+        bool debugPlusMode,
+        XmlReferenceResolver? xmlReferenceResolver,
+        SourceReferenceResolver? sourceReferenceResolver,
+        SyntaxTreeOptionsProvider? syntaxTreeOptionsProvider,
+        MetadataReferenceResolver? metadataReferenceResolver,
+        AssemblyIdentityComparer? assemblyIdentityComparer,
+        StrongNameProvider? strongNameProvider,
+        MetadataImportOptions metadataImportOptions,
+        bool referencesSupersedeLowerVersions,
+        bool publicSign) :
+        base(
+            outputKind,
+            reportSuppressedDiagnostics,
+            moduleName,
+            mainTypeName,
+            scriptClassName,
+            cryptoKeyContainer,
+            cryptoKeyFile,
+            cryptoPublicKey,
+            delaySign,
+            publicSign,
+            optimizationLevel,
+            checkOverflow,
+            platform,
+            generalDiagnosticOption,
+            warningLevel,
+            specificDiagnosticOptions.ToImmutableDictionaryOrEmpty(),
+            concurrentBuild,
+            deterministic,
+            currentLocalTime,
+            debugPlusMode,
+            xmlReferenceResolver,
+            sourceReferenceResolver,
+            syntaxTreeOptionsProvider,
+            metadataReferenceResolver,
+            assemblyIdentityComparer,
+            strongNameProvider,
+            metadataImportOptions,
+            referencesSupersedeLowerVersions)
     {
     }
+
+    private
+#if LANG_LUA
+        LuaCompilationOptions
+#elif LANG_MOONSCRIPT
+        MoonScriptCompilationOptions
+#endif
+    (ThisCompilationOptions other) : this(
+        other.OutputKind,
+        other.ReportSuppressedDiagnostics,
+        other.ModuleName,
+        other.MainTypeName,
+        other.ScriptClassName,
+        other.OptimizationLevel,
+        other.CheckOverflow,
+        other.CryptoKeyContainer,
+        other.CryptoKeyFile,
+        other.CryptoPublicKey,
+        other.DelaySign,
+        other.Platform,
+        other.GeneralDiagnosticOption,
+        other.WarningLevel,
+        other.SpecificDiagnosticOptions,
+        other.ConcurrentBuild,
+        other.Deterministic,
+        other.CurrentLocalTime,
+        other.DebugPlusMode,
+        other.XmlReferenceResolver,
+        other.SourceReferenceResolver,
+        other.SyntaxTreeOptionsProvider,
+        other.MetadataReferenceResolver,
+        other.AssemblyIdentityComparer,
+        other.StrongNameProvider,
+        other.MetadataImportOptions,
+        other.ReferencesSupersedeLowerVersions,
+        other.PublicSign)
+    { }
+
+    #region With修改
+    internal ThisCompilationOptions WithReferencesSupersedeLowerVersions(bool value)
+    {
+        if (value == this.ReferencesSupersedeLowerVersions) return this;
+
+        return new(this) { ReferencesSupersedeLowerVersions = value };
+    }
+    #endregion
 
     public override NullableContextOptions NullableContextOptions { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
 

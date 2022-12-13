@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{1EFCD563-A706-4F35-BCDB-3DED21D02AF9}"
-	ProjectSection(SolutionItems) = preProject
-		src\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj = src\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.CodeAnalysis", "src\Compilers\Core\Portable\Qtyi.CodeAnalysis.csproj", "{0B997E79-F70B-4191-9F34-CB7EF4028029}"
 EndProject
@@ -85,6 +82,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.CodeAnalysis.Lua.Parse
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.CodeAnalysis.MoonScript.Parser.UnitTests", "src\Compilers\MoonScript\Test\Parser\Qtyi.CodeAnalysis.MoonScript.Parser.UnitTests.csproj", "{D829CC3D-D8F2-40B7-902C-733B259DA0CC}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luna.Test.PdbUtilities", "src\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj", "{84799CBA-6653-444C-8246-B3C1E5034F4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +146,10 @@ Global
 		{D829CC3D-D8F2-40B7-902C-733B259DA0CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D829CC3D-D8F2-40B7-902C-733B259DA0CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D829CC3D-D8F2-40B7-902C-733B259DA0CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -179,6 +182,7 @@ Global
 		{48CCBB50-B9E9-4A5A-AD46-91D80519B95E} = {F0AC91C6-F4A1-437B-A3A5-039F84FD50DB}
 		{D8A79D84-6B22-417B-87C0-AAB4B1BF0D7E} = {C18EFA03-23EF-4681-A503-290B17577587}
 		{D829CC3D-D8F2-40B7-902C-733B259DA0CC} = {43AD8ACC-F5F5-4937-9397-CD7EC0B01202}
+		{84799CBA-6653-444C-8246-B3C1E5034F4D} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FBFA7D01-8DCA-472B-B849-F9824DCB855F}

@@ -2,10 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if LANG_LUA
 using System;
 using Microsoft.CodeAnalysis;
 
+#if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
 
 using ThisCommandLineArguments = LuaCommandLineArguments;

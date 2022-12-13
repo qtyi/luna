@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>net7.0;net472</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Luna.Compilers.Tools</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" Condition="'$(TargetFramework)' != 'net6.0'" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" Condition="'$(TargetFramework)' != 'net7.0'" />
   </ItemGroup>
 
   <Import Project="..\Shared\SyntaxGenerator.Shared.projitems" Label="Shared" />

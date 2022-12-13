@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CompilationOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\SemanticModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\SemanticModel.SymbolInfoOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)compilation\SyntaxAndDeclarationManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\Diagnostic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\DiagnosticBagExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\DiagnosticFormatter.cs" />

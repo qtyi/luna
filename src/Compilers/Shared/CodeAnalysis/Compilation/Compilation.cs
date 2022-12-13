@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Reflection.Metadata;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeGen;
@@ -14,14 +15,23 @@ using Microsoft.CodeAnalysis.Symbols;
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
 
+using ThisCompilation = LuaCompilation;
 using ThisCompilationOptions = LuaCompilationOptions;
+using ThisSyntaxTree = LuaSyntaxTree;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
 
+using ThisCompilation = MoonScriptCompilation;
 using ThisCompilationOptions = MoonScriptCompilationOptions;
+using ThisSyntaxTree = MoonScriptSyntaxTree;
 #endif
 
 #warning 未实现。
+/// <summary>
+/// 此类表示编译器单次发起的一个不可变的内容。尽管不可变，但同时也按需分配，并且在需要时会提交和缓存数据。
+/// 可以在一个现有的编译内容的基础上应用一些微小的修改来产生一个新的编译内容。
+/// 很多场合下这样创建新编译内容更加高效，因为新的编译内容能重用旧的编译内容的信息。
+/// </summary>
 public sealed partial class
 #if LANG_LUA
     LuaCompilation
@@ -34,6 +44,95 @@ public sealed partial class
 
     public new ThisCompilationOptions Options => this._options;
 
+    private
+#if LANG_LUA
+        LuaCompilation
+#elif LANG_MOONSCRIPT
+        MoonScriptCompilation
+#endif
+    (
+        string? assemblyName,
+        ThisCompilationOptions options,
+        ImmutableArray<MetadataReference> references,
+        ThisCompilation? previousSubmission,
+        Type? submissionReturnType,
+        Type? hostObjectType,
+        bool isSubmission,
+        ReferenceManager? referenceManager,
+        bool reuseReferenceManager,
+        SyntaxAndDeclarationManager syntaxAndDeclarations,
+        SemanticModelProvider? semanticModelProvider,
+        AsyncQueue<CompilationEvent>? eventQueue = null) :
+        this(
+            assemblyName,
+            options,
+            references,
+            previousSubmission,
+            submissionReturnType,
+            hostObjectType,
+            isSubmission,
+            referenceManager,
+            reuseReferenceManager,
+            syntaxAndDeclarations,
+            ThisCompilation.SyntaxTreeCommonFeatures(syntaxAndDeclarations.ExternalSyntaxTrees),
+            semanticModelProvider,
+            eventQueue)
+    { }
+
+    private
+#if LANG_LUA
+        LuaCompilation
+#elif LANG_MOONSCRIPT
+        MoonScriptCompilation
+#endif
+    (
+        string? assemblyName,
+        ThisCompilationOptions options,
+        ImmutableArray<MetadataReference> references,
+        ThisCompilation? previousSubmission,
+        Type? submissionReturnType,
+        Type? hostObjectType,
+        bool isSubmission,
+        ReferenceManager? referenceManager,
+        bool reuseReferenceManager,
+        SyntaxAndDeclarationManager syntaxAndDeclarations,
+        IReadOnlyDictionary<string, string> features,
+        SemanticModelProvider? semanticModelProvider,
+        AsyncQueue<CompilationEvent>? eventQueue = null) :
+        base(assemblyName, references, features, isSubmission, semanticModelProvider, eventQueue);
+
+    private static readonly ThisCompilationOptions s_defaultOptions = new(OutputKind.ConsoleApplication);
+    private static readonly ThisCompilationOptions s_defaultSubmissionOptions = new ThisCompilationOptions(OutputKind.NetModule).WithReferencesSupersedeLowerVersions(true);
+
+    public static ThisCompilation Create(
+        string? assemblyName,
+        IEnumerable<ThisSyntaxTree>? syntaxTrees = null,
+        IEnumerable<MetadataReference>? references = null,
+        ThisCompilationOptions? options = null) =>
+        ThisCompilation.Create(
+            assemblyName,
+            options ?? ThisCompilation.s_defaultOptions,
+            syntaxTrees,
+            references,
+            previousSubmission: null,
+            returnType: null,
+            hostObjectType: null,
+            isSubmission: false);
+
+    private static ThisCompilation Create(
+        string? assemblyName,
+        ThisCompilationOptions options,
+        IEnumerable<ThisSyntaxTree>? syntaxTrees,
+        IEnumerable<MetadataReference>? references,
+        ThisCompilation? previousSubmission,
+        Type? returnType,
+        Type? hostObjectType,
+        bool isSubmission)
+    {
+        Debug.Assert(!isSubmission || options.ReferencesSupersedeLowerVersions);
+    }
+
+    #region Compilation
     protected override CompilationOptions CommonOptions => this._options;
 
     public new ImmutableArray<SyntaxTree> SyntaxTrees => throw new NotImplementedException();
@@ -41,14 +140,6 @@ public sealed partial class
     public SemanticModel GetSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility) => throw new NotImplementedException();
 
     public LanguageVersion LanguageVersion { get; }
-
-    public
-#if LANG_LUA
-        LuaCompilation
-#elif LANG_MOONSCRIPT
-        MoonScriptCompilation
-#endif
-        () : base(null, default, null, false, null, null) { }
 
     public override ImmutableArray<MetadataReference> DirectiveReferences => throw new NotImplementedException();
 
@@ -437,4 +528,5 @@ public sealed partial class
     {
         throw new NotImplementedException();
     }
+    #endregion
 }

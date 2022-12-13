@@ -232,7 +232,7 @@ public abstract partial class
     /// <param name="path">代码文本的路径。</param>
     /// <param name="cancellationToken">解析操作的取消标志。</param>
     /// <returns>表示<paramref name="text"/>的所有信息的语法树。</returns>
-    public static SyntaxTree ParseText(
+    public static ThisSyntaxTree ParseText(
         SourceText text,
         ThisParseOptions? options = null,
         string path = "",
