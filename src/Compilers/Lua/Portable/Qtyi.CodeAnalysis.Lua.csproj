@@ -53,11 +53,7 @@
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)">
-      <Aliases></Aliases>
-    </PackageReference>
-  </ItemGroup>
+  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
 
   <Import Project="..\..\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems" Label="Shared" />
 

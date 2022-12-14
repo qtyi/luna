@@ -37,9 +37,9 @@
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript.CommandLine.UnitTests" />
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControlVersion)" Condition="'$(TargetFramework)' == 'net7.0'" />
   </ItemGroup>
+  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
   <ItemGroup Condition="'$(DefaultLanguageSourceExtension)' != '' AND '$(BuildingInsideVisualStudio)' != 'true'">
     <ExpectedCompile Include="$(MSBuildThisFileDirectory)**\*$(DefaultLanguageSourceExtension)" />
   </ItemGroup>

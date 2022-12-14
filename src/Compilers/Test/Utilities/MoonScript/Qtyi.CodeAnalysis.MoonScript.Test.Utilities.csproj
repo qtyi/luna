@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\..\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj" />
     <ProjectReference Include="..\..\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
@@ -26,6 +22,8 @@
     <ProjectReference Include="..\..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
   </ItemGroup>
   
+  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
+
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties project_1json__JSONSchema="http://json.schemastore.org/launchsettings" />

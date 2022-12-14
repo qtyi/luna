@@ -28,7 +28,6 @@
   
   <ItemGroup>
     <PackageReference Include="DiffPlex" Version="$(DiffPlexVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Test.Resources.Proprietary" Version="$(MicrosoftCodeAnalysisTestResourcesProprietaryVersion)" />
     <PackageReference Include="Microsoft.DiaSymReader.Converter.Xml" Version="$(MicrosoftDiaSymReaderConverterXmlVersion)" />
     <PackageReference Include="Microsoft.Metadata.Visualizer" Version="$(MicrosoftMetadataVisualizerVersion)" />
@@ -65,6 +64,8 @@
     <ProjectReference Include="..\..\..\Compilers\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
   </ItemGroup>
   
+  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
+
   <Import Project="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Core\Generated.targets" />
   
 </Project>

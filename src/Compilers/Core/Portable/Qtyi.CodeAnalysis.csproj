@@ -37,8 +37,6 @@
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
   
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-  </ItemGroup>
-  
+  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
+
 </Project>
