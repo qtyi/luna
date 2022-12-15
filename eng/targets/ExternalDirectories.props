@@ -2,6 +2,6 @@
 <Project>
   <PropertyGroup>
     <LunaRepositoryDirectory>$(MSBuildThisFileDirectory)..\..\</LunaRepositoryDirectory>
-    <DotNetRoslynRepositoryDirectory>$(MSBuildThisFileDirectory)..\..\..\..\dotnet\roslyn\</DotNetRoslynRepositoryDirectory>
+    <RoslynRepositoryDirectory>$(MSBuildThisFileDirectory)..\..\..\..\sanmuru\luna\</RoslynRepositoryDirectory>
   </PropertyGroup>
 </Project>

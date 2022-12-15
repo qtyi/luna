@@ -11,9 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\**\*.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\**\*.cs" />
 
-    <None Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\Operations\OperationInterfaces.xml" />
+    <None Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\Operations\OperationInterfaces.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,7 +35,7 @@
 
   <ItemGroup>
     <!-- Need to include the PerformanceSensitiveAttribute definition in source build, since we can't get it from the analyzer package. -->
-    <Compile Remove="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\PerformanceSensitiveAttribute.cs" Condition="'$(DotNetBuildFromSource)' != 'true'" />
+    <Compile Remove="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\PerformanceSensitiveAttribute.cs" Condition="'$(DotNetBuildFromSource)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>
@@ -93,21 +93,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\CodeAnalysisResources.resx" GenerateSource="true" />
-    <EmbeddedResource Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\Resources\default.win32manifest" />
+    <EmbeddedResource Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\CodeAnalysisResources.resx" GenerateSource="true" />
+    <EmbeddedResource Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\Resources\default.win32manifest" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\RuleSet\RuleSetSchema.xsd">
+    <None Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\RuleSet\RuleSetSchema.xsd">
       <SubType>Designer</SubType>
     </None>
-    <PublicAPI Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\PublicAPI.Shipped.txt" />
-    <PublicAPI Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\Portable\PublicAPI.Unshipped.txt" />
+    <PublicAPI Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\PublicAPI.Shipped.txt" />
+    <PublicAPI Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\PublicAPI.Unshipped.txt" />
   </ItemGroup>
 
-  <Import Project="$(DotNetRoslynRepositoryDirectory)src\Compilers\Core\AnalyzerDriver\AnalyzerDriver.projitems" Label="Shared" />
-  <Import Project="$(DotNetRoslynRepositoryDirectory)src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems" Label="Shared" />
-  <Import Project="$(DotNetRoslynRepositoryDirectory)src\Dependencies\PooledObjects\Microsoft.CodeAnalysis.PooledObjects.projitems" Label="Shared" />
-  <Import Project="$(DotNetRoslynRepositoryDirectory)src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.projitems" Label="Shared" />
+  <Import Project="$(RoslynRepositoryDirectory)src\Compilers\Core\AnalyzerDriver\AnalyzerDriver.projitems" Label="Shared" />
+  <Import Project="$(RoslynRepositoryDirectory)src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems" Label="Shared" />
+  <Import Project="$(RoslynRepositoryDirectory)src\Dependencies\PooledObjects\Microsoft.CodeAnalysis.PooledObjects.projitems" Label="Shared" />
+  <Import Project="$(RoslynRepositoryDirectory)src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.projitems" Label="Shared" />
 
 </Project>

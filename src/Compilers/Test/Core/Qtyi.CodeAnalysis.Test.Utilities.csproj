@@ -8,14 +8,14 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Core\**\*.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\Extensions\ControlFlowRegionExtensions.cs" Link="Compilation\FlowAnalysis\ControlFlowRegionExtensions.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\FlowAnalysis\CustomDataFlowAnalysis.cs" Link="Compilation\FlowAnalysis\CustomDataFlowAnalysis.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\FlowAnalysis\DataFlowAnalyzer.cs" Link="Compilation\FlowAnalysis\DataFlowAnalyzer.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Core\**\*.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\Extensions\ControlFlowRegionExtensions.cs" Link="Compilation\FlowAnalysis\ControlFlowRegionExtensions.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\FlowAnalysis\CustomDataFlowAnalysis.cs" Link="Compilation\FlowAnalysis\CustomDataFlowAnalysis.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\FlowAnalysis\DataFlowAnalyzer.cs" Link="Compilation\FlowAnalysis\DataFlowAnalyzer.cs" />
   </ItemGroup>
   
   <ItemGroup>
-    <EmbeddedResource Update="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Core\TestResource.resx" GenerateSource="true" />
+    <EmbeddedResource Update="$(RoslynRepositoryDirectory)src\Compilers\Test\Core\TestResource.resx" GenerateSource="true" />
   </ItemGroup>
   
   <ItemGroup>
@@ -66,6 +66,6 @@
   
   <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
 
-  <Import Project="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Core\Generated.targets" />
+  <Import Project="$(RoslynRepositoryDirectory)src\Compilers\Test\Core\Generated.targets" />
   
 </Project>

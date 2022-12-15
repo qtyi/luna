@@ -9,17 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\README.md" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingAnalyzer.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingGenerator.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingSuppressor.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\ResourceLoader.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestKeys.cs" />
-    <Compile Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestResources.cs" />
+    <Content Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\README.md" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingAnalyzer.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingGenerator.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingSuppressor.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\ResourceLoader.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestKeys.cs" />
+    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestResources.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="$(DotNetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\nativeCOFFResources.obj" />
+    <EmbeddedResource Include="$(RoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\nativeCOFFResources.obj" />
   </ItemGroup>
   
   <ItemGroup>
