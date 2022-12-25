@@ -11,7 +11,14 @@ namespace Qtyi.CodeAnalysis.MoonScript
         Void = InternalErrorCode.Void,
         Unknown = InternalErrorCode.Unknown,
 
-        ERR_InternalError = 1,
+        #region 控制行
+        /// <summary>重复包含源文件。</summary>
+        WRN_FileAlreadyIncluded,
+        /// <summary>无法读取<c>app.config</c>文件。</summary>
+        ERR_CantReadConfigFile,
+        #endregion
+
+        ERR_InternalError,
 
         ERR_InvalidInstrumentationKind,
         ERR_BadSourceCodeKind,

@@ -2,6 +2,31 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../MoonScriptResources.resx">
     <body>
+      <trans-unit id="ERR_CantReadConfigFile">
+        <source>Cannot read config file '{0}' -- '{1}'</source>
+        <target state="new">Cannot read config file '{0}' -- '{1}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_LangVersions">
+        <source>Supported language versions:</source>
+        <target state="new">Supported language versions:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_LogoLine1">
+        <source>{0} version {1}</source>
+        <target state="new">{0} version {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_LogoLine2">
+        <source>Copyright (C) Qtyi. All rights reserved.</source>
+        <target state="new">Copyright (C) Qtyi. All rights reserved.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_ToolName">
+        <source>MoonScript Compiler</source>
+        <target state="new">MoonScript Compiler</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ThisMethodCanOnlyBeUsedToCreateTokens">
         <source>This method can only be used to create tokens - {0} is not a token kind.</source>
         <target state="new">This method can only be used to create tokens - {0} is not a token kind.</target>
@@ -16,6 +41,11 @@
         <source>Use Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Literal to create numeric literal tokens.</source>
         <target state="new">Use Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Literal to create numeric literal tokens.</target>
         <note>应使用Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Literal创建数字字面量标志。</note>
+      </trans-unit>
+      <trans-unit id="WRN_FileAlreadyIncluded">
+        <source>Source file '{0}' specified multiple times.</source>
+        <target state="new">Source file '{0}' specified multiple times.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -117,6 +117,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ERR_CantReadConfigFile" xml:space="preserve">
+    <value>Cannot read config file '{0}' -- '{1}'</value>
+  </data>
+  <data name="IDS_LangVersions" xml:space="preserve">
+    <value>Supported language versions:</value>
+  </data>
+  <data name="IDS_LogoLine1" xml:space="preserve">
+    <value>{0} version {1}</value>
+  </data>
+  <data name="IDS_LogoLine2" xml:space="preserve">
+    <value>Copyright (C) Qtyi. All rights reserved.</value>
+  </data>
+  <data name="IDS_ToolName" xml:space="preserve">
+    <value>MoonScript Compiler</value>
+  </data>
   <data name="ThisMethodCanOnlyBeUsedToCreateTokens" xml:space="preserve">
     <value>This method can only be used to create tokens - {0} is not a token kind.</value>
     <comment>此方法仅用于创建标志。</comment>
@@ -128,5 +143,8 @@
   <data name="UseLiteralForNumeric" xml:space="preserve">
     <value>Use Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Literal to create numeric literal tokens.</value>
     <comment>应使用Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Literal创建数字字面量标志。</comment>
+  </data>
+  <data name="WRN_FileAlreadyIncluded" xml:space="preserve">
+    <value>Source file '{0}' specified multiple times.</value>
   </data>
 </root>

@@ -11,9 +11,16 @@ namespace Qtyi.CodeAnalysis.Lua
         Void = InternalErrorCode.Void,
         Unknown = InternalErrorCode.Unknown,
 
+        #region 控制行
+        /// <summary>重复包含源文件。</summary>
+        WRN_FileAlreadyIncluded,
+        /// <summary>无法读取<c>app.config</c>文件。</summary>
+        ERR_CantReadConfigFile,
+        #endregion
+
         ERR_InternalError,
 
-        ERR_InvalidInstrumentationKind = 1,
+        ERR_InvalidInstrumentationKind,
         ERR_BadSourceCodeKind,
         ERR_BadDocumentationMode,
         ERR_BadLanguageVersion,

@@ -27,6 +27,11 @@
         <target state="new">Provided source code kind is unsupported or invalid: '{0}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_CantReadConfigFile">
+        <source>Cannot read config file '{0}' -- '{1}'.</source>
+        <target state="new">Cannot read config file '{0}' -- '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_CommaExpected">
         <source>',' expected.</source>
         <target state="new">',' expected.</target>
@@ -157,6 +162,26 @@
         <target state="new">Unterminated string literal.</target>
         <note />
       </trans-unit>
+      <trans-unit id="IDS_LangVersions">
+        <source>Supported language versions:</source>
+        <target state="new">Supported language versions:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_LogoLine1">
+        <source>{0} version {1}</source>
+        <target state="new">{0} version {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_LogoLine2">
+        <source>Copyright (C) Qtyi. All rights reserved.</source>
+        <target state="new">Copyright (C) Qtyi. All rights reserved.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_ToolName">
+        <source>Lua Compiler</source>
+        <target state="new">Lua Compiler</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ThisMethodCanOnlyBeUsedToCreateTokens">
         <source>This method can only be used to create tokens - {0} is not a token kind.</source>
         <target state="new">This method can only be used to create tokens - {0} is not a token kind.</target>
@@ -175,6 +200,11 @@
       <trans-unit id="WRN_ErrorOverride">
         <source>{0}. See also error LUA{1}.</source>
         <target state="new">{0}. See also error LUA{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WRN_FileAlreadyIncluded">
+        <source>Source file '{0}' specified multiple times.</source>
+        <target state="new">Source file '{0}' specified multiple times.</target>
         <note />
       </trans-unit>
     </body>

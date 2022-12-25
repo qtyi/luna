@@ -15,9 +15,9 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 #warning 未实现。
 partial class MessageProvider : CommonMessageProvider
 {
-    public override string CodePrefix => throw new NotImplementedException();
+    public override string CodePrefix => MessageProvider.ErrorCodePrefix;
 
-    public override Type ErrorCodeType => throw new NotImplementedException();
+    public override Type ErrorCodeType => typeof(ErrorCode);
 
     public override int WRN_DuplicateAnalyzerReference => throw new NotImplementedException();
 

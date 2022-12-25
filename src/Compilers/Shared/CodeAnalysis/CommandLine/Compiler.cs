@@ -15,6 +15,7 @@ using ThisCommandLineArguments = LuaCommandLineArguments;
 using ThisCommandLineParser = LuaCommandLineParser;
 using ThisCompiler = LuaCompiler;
 using ThisCompilation = LuaCompilation;
+using ThisMessageProvider = MessageProvider;
 using ThisParseOptions = LuaParseOptions;
 using ThisSyntaxTree = LuaSyntaxTree;
 #elif LANG_MOONSCRIPT
@@ -24,6 +25,7 @@ using ThisCommandLineArguments = MoonScriptCommandLineArguments;
 using ThisCommandLineParser = MoonScriptCommandLineParser;
 using ThisCompiler = MoonScriptCompiler;
 using ThisCompilation = MoonScriptCompilation;
+using ThisMessageProvider = MessageProvider;
 using ThisParseOptions = MoonScriptParseOptions;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
 #endif
@@ -69,6 +71,17 @@ internal abstract partial class
     /// </value>
     protected internal new ThisCommandLineArguments Arguments => (ThisCommandLineArguments)base.Arguments;
 
+    /// <summary>
+    /// 获取用于在<c>/help</c>和<c>/version</c>选项中提供版本信息的编译器类的类型。
+    /// </summary>
+    /// <value>
+    /// 编译器类的类型。
+    /// </value>
+    /// <remarks>
+    /// 我们并不使用<see cref="object.GetType"/>的返回值，因为这样会使模拟的子类的功能失效。
+    /// </remarks>
+    internal override Type Type => typeof(ThisCompiler);
+
     /// <param name="parser">命令行解析器，用于解析命令行参数。</param>
     /// <param name="responseFile">响应文件路径，若不指定则传入<see langword="null"/>。</param>
     /// <param name="args">尚未解析的命令行参数，可能仍保留一些供<paramref name="parser"/>识别的语法信息。</param>
@@ -101,7 +114,7 @@ internal abstract partial class
     /// <summary>
     /// 创建编译内容。
     /// </summary>
-    /// <param name="consoleOutput">控制台输出。</param>
+    /// <param name="consoleOutput">控制台输出目标。</param>
     /// <param name="touchedFilesLogger">记录编译期间所有使用过的文件的记录器。</param>
     /// <param name="errorLogger">记录编译期间所有报告的错误的记录器。</param>
     /// <param name="analyzerConfigOptions">所有的分析器配置选项。</param>
@@ -259,26 +272,120 @@ internal abstract partial class
         else
         {
             Debug.Assert(fileDiagnostics.Count == 0);
-            return ThisCompiler.ParseFile(parseOptions, scriptParseOptions, content, file);
+            return ParseSyntaxTree();
+        }
+
+        ThisSyntaxTree ParseSyntaxTree()
+        {
+            var tree = SyntaxFactory.ParseSyntaxTree(
+                content,
+                file.IsScript ? scriptParseOptions : parseOptions,
+                file.Path);
+
+            // prepopulate line tables.
+            // we will need line tables anyways and it is better to not wait until we are in emit
+            // where things run sequentially.
+            tree.GetMappedLineSpanAndVisibility(default, out _);
+
+            return tree;
         }
     }
 
-    private static ThisSyntaxTree ParseFile(
-        ThisParseOptions parseOptions,
-        ThisParseOptions scriptParseOptions,
-        SourceText content,
-        CommandLineSourceFile file)
+    protected override string GetOutputFileName(Compilation compilation, CancellationToken cancellationToken)
     {
-        var tree = SyntaxFactory.ParseSyntaxTree(
-            content,
-            file.IsScript ? scriptParseOptions : parseOptions,
-            file.Path);
+        // 若已明确指定输出文件名。
+        if (this.Arguments.OutputFileName is not null) return this.Arguments.OutputFileName;
 
-        // prepopulate line tables.
-        // we will need line tables anyways and it is better to not wait until we are in emit
-        // where things run sequentially.
-        tree.GetMappedLineSpanAndVisibility(default, out _);
+        Debug.Assert(this.Arguments.CompilationOptions.OutputKind.IsApplication());
 
-        return tree;
+        var comp = (ThisCompilation)compilation;
+        // 先查看表示脚本的类是否存在。
+        Symbol? entryPoint = comp.ScriptClass;
+        if (entryPoint is null)
+        {
+            var method = comp.GetEntryPoint(cancellationToken);
+            if (method is null)
+                // 未找到入口点，报告一个错误，同时此编译内容不会被发射。
+                return "error";
+
+            entryPoint = method;
+        }
+
+        // 获取入口点符号所在的源文件路径。
+        var entryPointFileName = PathUtilities.GetFileName(entryPoint.Locations.First().SourceTree!.FilePath);
+        return Path.ChangeExtension(entryPointFileName, ".exe");
     }
+
+    /// <summary>
+    /// 命令行中是否有抑制默认的回响文件的选项。
+    /// </summary>
+    /// <param name="args">命令行选项。</param>
+    /// <returns>若<paramref name="args"/>中有抑制默认的回响文件的选项则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
+    internal override bool SuppressDefaultResponseFile(IEnumerable<string> args)
+    {
+        return args.Any(arg => new[] { "/noconfig", "-noconfig" }.Contains(arg.ToLowerInvariant()));
+    }
+
+    /// <summary>
+    /// 打印编译器徽标。
+    /// </summary>
+    /// <param name="consoleOutput">控制台输出目标。</param>
+    public override void PrintLogo(TextWriter consoleOutput)
+    {
+        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_LogoLine1, this.Culture), this.GetToolName(), this.GetCompilerVersion());
+        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_LogoLine2, this.Culture));
+        consoleOutput.WriteLine();
+    }
+
+    /// <summary>
+    /// 打印支持的语言版本。
+    /// </summary>
+    /// <param name="consoleOutput">控制台输出目标。</param>
+    public override void PrintLangVersions(TextWriter consoleOutput)
+    {
+        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_LangVersions, this.Culture));
+
+        var defaultVersion = LanguageVersion.Default.MapSpecifiedToEffectiveVersion();
+        var latestVersion = LanguageVersion.Latest.MapSpecifiedToEffectiveVersion();
+        foreach (var v in (LanguageVersion[])Enum.GetValues(typeof(LanguageVersion)))
+        {
+            if (v == defaultVersion)
+                consoleOutput.WriteLine($"{v.ToDisplayString()} (default)");
+            else if (v == latestVersion)
+                consoleOutput.WriteLine($"{v.ToDisplayString()} (latest)");
+            else
+                consoleOutput.WriteLine(v.ToDisplayString());
+        }
+        consoleOutput.WriteLine();
+    }
+
+    /// <summary>
+    /// 获取工具名称。
+    /// </summary>
+    /// <returns>此编译器工具的名称。</returns>
+    internal override string GetToolName()
+    {
+        return ErrorFacts.GetMessage(MessageID.IDS_ToolName, this.Culture);
+    }
+
+    /// <summary>
+    /// 打印命令行帮助信息（一行80个西文字符）。
+    /// </summary>
+    /// <param name="consoleOutput">控制台输出目标。</param>
+    public override void PrintHelp(TextWriter consoleOutput)
+    {
+        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_CSCHelp, this.Culture));
+    }
+
+    /// <summary>
+    /// 尝试获取指定文本表示的编译器诊断码。
+    /// </summary>
+    /// <param name="diagnosticId">编译器诊断码的文本表示。</param>
+    /// <param name="code">与<paramref name="diagnosticId"/>对应的值。</param>
+    /// <returns>若获取成功则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
+    protected override bool TryGetCompilerDiagnosticCode(string diagnosticId, out uint code)
+    {
+        return CommonCompiler.TryGetCompilerDiagnosticCode(diagnosticId, ThisMessageProvider.ErrorCodePrefix, out code);
+    }
+
 }
