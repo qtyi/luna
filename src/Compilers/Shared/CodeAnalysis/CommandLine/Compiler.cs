@@ -5,6 +5,8 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Collections;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using Roslyn.Utilities;
 
@@ -15,6 +17,7 @@ using ThisCommandLineArguments = LuaCommandLineArguments;
 using ThisCommandLineParser = LuaCommandLineParser;
 using ThisCompiler = LuaCompiler;
 using ThisCompilation = LuaCompilation;
+using ThisGeneratorDriver = LuaGeneratorDriver;
 using ThisMessageProvider = MessageProvider;
 using ThisParseOptions = LuaParseOptions;
 using ThisSyntaxTree = LuaSyntaxTree;
@@ -25,6 +28,7 @@ using ThisCommandLineArguments = MoonScriptCommandLineArguments;
 using ThisCommandLineParser = MoonScriptCommandLineParser;
 using ThisCompiler = MoonScriptCompiler;
 using ThisCompilation = MoonScriptCompilation;
+using ThisGeneratorDriver = MoonScriptGeneratorDriver;
 using ThisMessageProvider = MessageProvider;
 using ThisParseOptions = MoonScriptParseOptions;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
@@ -48,7 +52,7 @@ internal abstract partial class
     : CommonCompiler
 {
     /// <summary>响应文件名称。</summary>
-    internal const string ResponseFileName = ExecutableName + ".rsp";
+    internal const string ResponseFileName = ThisCompiler.ExecutableName + ".rsp";
 
     /// <summary>命令行诊断格式化器。</summary>
     private readonly CommandLineDiagnosticFormatter _diagnosticFormatter;
@@ -291,6 +295,17 @@ internal abstract partial class
         }
     }
 
+    /// <summary>
+    /// 获取输出文件名称。
+    /// </summary>
+    /// <param name="compilation">若命令行参数中未指定输出文件名称，则根据编译内容的相关符号信息决定。</param>
+    /// <param name="cancellationToken">取消操作的标志。</param>
+    /// <returns>编译输出的文件名称，文件后缀名为<c>.exe</c>；若失败，则报告一个错误。</returns>
+    /// <remarks>
+    /// <para>若<see cref="CommandLineArguments.OutputFileName"/>已明确指定，则返回此文件名；</para>
+    /// <para>若编译内容为脚本，则返回脚本所在的文件名；</para>
+    /// <para>若编译内容包含程序入口点，则返回入口点所在的文件名。</para>
+    /// </remarks>
     protected override string GetOutputFileName(Compilation compilation, CancellationToken cancellationToken)
     {
         // 若已明确指定输出文件名。
@@ -388,4 +403,37 @@ internal abstract partial class
         return CommonCompiler.TryGetCompilerDiagnosticCode(diagnosticId, ThisMessageProvider.ErrorCodePrefix, out code);
     }
 
+    /// <summary>
+    /// 从命令行参数中决定分析器。
+    /// </summary>
+    /// <param name="diagnostics">诊断消息列表。</param>
+    /// <param name="messageProvider">信息提供器。</param>
+    /// <param name="skipAnalyzers">是否跳过分析器。</param>
+    /// <param name="analyzers">决定的分析器。</param>
+    /// <param name="generators">决定的生成器。</param>
+    protected override partial void ResolveAnalyzersFromArguments(List<DiagnosticInfo> diagnostics, CommonMessageProvider messageProvider, bool skipAnalyzers, out ImmutableArray<Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer> analyzers, out ImmutableArray<ISourceGenerator> generators);
+
+    /// <summary>
+    /// 从外部源指令中决定内置的文件。
+    /// </summary>
+    /// <remarks>
+    /// 由于基于Lua的语言均不支持指令，因此此方法不做任何事。
+    /// </remarks>
+    protected sealed override void ResolveEmbeddedFilesFromExternalSourceDirectives(SyntaxTree tree, SourceReferenceResolver resolver, OrderedSet<string> embeddedFiles, DiagnosticBag diagnostics)
+    {
+        return;
+    }
+
+    /// <summary>
+    /// 创建生成器启动器的新实例。
+    /// </summary>
+    /// <param name="parseOptions">解析器选项。</param>
+    /// <param name="generators">所有的源生成器。</param>
+    /// <param name="analyzerConfigOptionsProvider">分析器配置选项提供器。</param>
+    /// <param name="additionalTexts">创建实例操作所需的附加文本（非源文件）。</param>
+    /// <returns></returns>
+    private protected override GeneratorDriver CreateGeneratorDriver(ParseOptions parseOptions, ImmutableArray<ISourceGenerator> generators, AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider, ImmutableArray<AdditionalText> additionalTexts)
+    {
+        return ThisGeneratorDriver.Create(generators, additionalTexts, (ThisParseOptions)parseOptions, analyzerConfigOptionsProvider);
+    }
 }

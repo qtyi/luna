@@ -48,6 +48,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Parser\SyntaxFactoryContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parser\SyntaxParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parser\SyntaxParser.ResetPoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SourceGeneration\GeneratorDriver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SourceGeneration\SyntaxHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SymbolDisplay\SymbolDisplay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\AssemblySymbol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\Attributes\AttributeData.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\Synthesized\GeneratedNames.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\TypeSymbol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\UnsupportedMetadataTypeSymbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\IdentifierNameSyntax.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\ContextAwareSyntax.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\IdentifierNameSyntax.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\StructuredTriviaSyntax.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\SyntaxRewriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\SyntaxTokenAccumulator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\SyntaxTraverser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\NameSyntax.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\SkippedTokensTriviaSyntax.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxEquivalence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxFactory.Parser.cs" />

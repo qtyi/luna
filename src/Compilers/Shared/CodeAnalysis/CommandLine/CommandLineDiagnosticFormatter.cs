@@ -15,6 +15,9 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 using ThisDiagnosticFormatter = MoonScriptDiagnosticFormatter;
 #endif
 
+/// <summary>
+/// 此类型表示命令行诊断消息的格式化器。
+/// </summary>
 internal sealed partial class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
 {
     /// <summary>基地址。</summary>

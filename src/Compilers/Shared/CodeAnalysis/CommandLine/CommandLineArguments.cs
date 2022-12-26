@@ -62,8 +62,7 @@ public sealed partial class
         MoonScriptCommandLineArguments
 #endif
     ()
-    {
-    }
+    { }
 #pragma warning restore CS8618
 
     #region CommandLineArguments
