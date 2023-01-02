@@ -2,9 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
+extern alias MSCA;
+
 using System.Globalization;
-using Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -261,16 +262,4 @@ partial class MessageProvider : CommonMessageProvider
     {
         throw new NotImplementedException();
     }
-
-#if DEBUG
-    internal override bool ShouldAssertExpectedMessageArgumentsLength(int errorCode) =>
-        (ErrorCode)errorCode switch
-    {
-        0 => false,
-        ErrorCode.Unknown => false,
-        ErrorCode.Void => false,
-        ErrorCode.ERR_IdentifierExpectedKW => false, // 格式化时使用 {1} 而非 {0} 。
-        _ => true
-    };
-#endif
 }

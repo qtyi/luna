@@ -2,16 +2,17 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Xml.Serialization;
 using System.Xml;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Text;
+using MSCA::System.Diagnostics.CodeAnalysis;
 using Luna.Compilers.Generators.Symbols.Model;
 using Luna.Compilers.Generators.Symbols;
-using System.Diagnostics;
 
 namespace Luna.Compilers.Generators;
 

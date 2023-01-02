@@ -2,23 +2,28 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Roslyn.Utilities;
+#if !NETCOREAPP
+using NotNullWhenAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
+#endif
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
 using ThisInternalSyntaxNode = LuaSyntaxNode;
-using SyntaxTriviaList = Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<LuaSyntaxNode>;
+using SyntaxTriviaList = MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<LuaSyntaxNode>;
 #elif LANG_MOONSCRIPT
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
-using SyntaxTriviaList = Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<MoonScriptSyntaxNode>;
+using SyntaxTriviaList = MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<MoonScriptSyntaxNode>;
 #endif
 
 internal partial class SyntaxToken : ThisInternalSyntaxNode
@@ -90,7 +95,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     private void SetFullWidth() => this.FullWidth = this.Text.Length;
 
     /// <summary>
-    /// 在此基类上添加<see cref="Microsoft.CodeAnalysis.GreenNode.NodeFlags.IsNotMissing"/>标志。若子类要表示缺失的语法标志，则在子类中移除这个标志。
+    /// 在此基类上添加<see cref="GreenNode.NodeFlags.IsNotMissing"/>标志。若子类要表示缺失的语法标志，则在子类中移除这个标志。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void SetIsNotMissingFlag() => this.SetFlags(NodeFlags.IsNotMissing);

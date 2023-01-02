@@ -2,10 +2,15 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Text;
+#if !NETCOREAPP
+using NotNullIfNotNullAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute;
+#endif
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
@@ -100,7 +105,7 @@ static partial class SyntaxReplacer
 
         private bool ShouldVisit(TextSpan span) => span.IntersectsWith(this._elementSpan);
 
-        [return: NotNullIfNotNull("node")]
+        [return: NotNullIfNotNull(nameof(node))]
         public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
         {
             if (node is null) return null;
@@ -158,7 +163,7 @@ static partial class SyntaxReplacer
             this._newNodes = newNodes;
         }
 
-        [return: NotNullIfNotNull("node")]
+        [return: NotNullIfNotNull(nameof(node))]
         public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
         {
             if (node == this._originalNode)

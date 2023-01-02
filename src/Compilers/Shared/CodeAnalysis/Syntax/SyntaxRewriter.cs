@@ -2,13 +2,16 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
+extern alias MSCA;
+
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Syntax;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Syntax;
+#if !NETCOREAPP
+using NotNullIfNotNullAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute;
+#endif
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -29,7 +32,9 @@ public abstract partial class
     MoonScriptSyntaxRewriter
 #endif
 {
-    public virtual bool VisitIntoStructuredTrivia { get; init; }
+    private readonly bool _visitIntoStructuredTrivia;
+
+    public virtual bool VisitIntoStructuredTrivia => this._visitIntoStructuredTrivia;
 
     public
 #if LANG_LUA
@@ -37,14 +42,14 @@ public abstract partial class
 #elif LANG_MOONSCRIPT
         MoonScriptSyntaxRewriter
 #endif
-        (bool visitIntoStructuredTrivia = false) => this.VisitIntoStructuredTrivia = visitIntoStructuredTrivia;
+        (bool visitIntoStructuredTrivia = false) => this._visitIntoStructuredTrivia = visitIntoStructuredTrivia;
 
     /// <summary>
     /// 当前的递归深度。
     /// </summary>
     private int _recursionDepth;
 
-    [return: NotNullIfNotNull("node")]
+    [return: NotNullIfNotNull(nameof(node))]
     public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
     {
         if (node is null) return null;
@@ -159,7 +164,7 @@ public abstract partial class
         else return alternate.ToList();
     }
 
-    [return: NotNullIfNotNull("node")]
+    [return: NotNullIfNotNull(nameof(node))]
     public virtual TNode? VisitListElement<TNode>(TNode? node) where TNode : ThisSyntaxNode
         => (TNode?)this.Visit(node);
 

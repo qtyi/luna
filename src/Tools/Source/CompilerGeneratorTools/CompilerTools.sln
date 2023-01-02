@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32611.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompilersBoundTreeGenerator", "src\BoundTreeGenerator\CompilersBoundTreeGenerator.csproj", "{02459936-CD2C-4F61-B671-5C518F2A3DDC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompilersIOperationGenerator", "src\IOperationGenerator\CompilersIOperationGenerator.csproj", "{78B6E516-9909-4B10-B831-577F28C469DD}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SyntaxGenerator.Shared", "src\Shared\SyntaxGenerator.Shared.shproj", "{663ACC36-C493-4FA5-B8D7-A5124CB30514}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ErrorFactsGenerators.Shared", "src\Shared\ErrorFactsGenerators.Shared.shproj", "{16D73FFE-6BEC-4064-A313-898B5E231B6A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{8D97F96D-BC12-459B-A46C-38BD2C817183}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{8D97F96D-BC12-459B-A46C-38BD2C817183}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lua", "Lua", "{081DE8C4-8C41-4253-A297-0054911EBF8F}"
 EndProject
@@ -37,14 +33,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{02459936-CD2C-4F61-B671-5C518F2A3DDC}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{02459936-CD2C-4F61-B671-5C518F2A3DDC}.Debug|Any CPU.Build.0 = Debug|x64
-		{02459936-CD2C-4F61-B671-5C518F2A3DDC}.Release|Any CPU.ActiveCfg = Release|x64
-		{02459936-CD2C-4F61-B671-5C518F2A3DDC}.Release|Any CPU.Build.0 = Release|x64
-		{78B6E516-9909-4B10-B831-577F28C469DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{78B6E516-9909-4B10-B831-577F28C469DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{78B6E516-9909-4B10-B831-577F28C469DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{78B6E516-9909-4B10-B831-577F28C469DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{37FD3ADD-848F-492B-89D8-F874FD4EFF21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{37FD3ADD-848F-492B-89D8-F874FD4EFF21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37FD3ADD-848F-492B-89D8-F874FD4EFF21}.Release|Any CPU.ActiveCfg = Release|Any CPU

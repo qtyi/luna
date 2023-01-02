@@ -2,9 +2,27 @@
 <Project>
 
   <!-- 对于 https://github.com/dotnet/roslyn/issues/65905 的临时方法。 -->
-  <ItemGroup Label="Microsoft.CodeAnalysis.Common">
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))" />
-    <ProjectReference Include="$(LunaRepositoryDirectory)src\Compilers\Core\RoslynCodeAnalysis\Microsoft.CodeAnalysis.csproj" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))" />
-  </ItemGroup>
+  <Target Name="ReferenceMicrosoftCodeAnalysisCommon"
+          BeforeTargets="CollectPackageReferences">
+    <PropertyGroup>
+      <IsSourceGenerator Condition="'$(IsSourceGenerator)' != 'true'">false</IsSourceGenerator>
+      <UseMicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' != 'false'">true</UseMicrosoftCodeAnalysisAlias>
+
+      <_MicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' == 'false'"></_MicrosoftCodeAnalysisAlias>
+      <_MicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' != 'false' and '$(MicrosoftCodeAnalysisAlias)' != ''">$(MicrosoftCodeAnalysisAlias)</_MicrosoftCodeAnalysisAlias>
+      <_MicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' != 'false' and '$(MicrosoftCodeAnalysisAlias)' == ''">MSCA</_MicrosoftCodeAnalysisAlias>
+
+      <DefineConstants Condition="'$(_MicrosoftCodeAnalysisAlias)' != ''">$(_MicrosoftCodeAnalysisAlias);$(DefineConstants)</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AssemblyAttributeExternAliases Include="$(_MicrosoftCodeAnalysisAlias)"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(SourceGeneratorMicrosoftCodeAnalysisVersion)" Condition="'$(IsSourceGenerator)' == 'true'" PrivateAssets="all" Aliases="$(_MicrosoftCodeAnalysisAlias)"/>
+      <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" Condition="'$(IsSourceGenerator)' != 'true'" Aliases="$(_MicrosoftCodeAnalysisAlias)"/>
+    </ItemGroup>
+  </Target>
 
 </Project>

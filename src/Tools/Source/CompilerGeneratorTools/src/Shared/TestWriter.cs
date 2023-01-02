@@ -1,8 +1,13 @@
-﻿using Luna.Compilers.Generators.Model;
+﻿// Licensed to the Qtyi under one or more agreements.
+// The Qtyi licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Luna.Compilers.Generators.Syntax;
+using Luna.Compilers.Generators.Syntax.Model;
 
 namespace Luna.Compilers.Generators;
 
-internal class TestWriter : AbstractFileWriter
+internal class TestWriter : SyntaxFileWriter
 {
     private TestWriter(TextWriter writer, Tree tree, CancellationToken cancellationToken = default) : base(writer, tree, cancellationToken)
     {
@@ -233,7 +238,7 @@ internal class TestWriter : AbstractFileWriter
 
         //check properties
         {
-            string withStat = null;
+            string? withStat = null;
             foreach (var field in nodeFields)
             {
                 if (IsOptional(field))

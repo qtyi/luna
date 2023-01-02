@@ -2,8 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System;
-using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 

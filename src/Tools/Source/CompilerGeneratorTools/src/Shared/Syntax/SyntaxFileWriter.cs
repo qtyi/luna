@@ -4,6 +4,7 @@
 
 namespace Luna.Compilers.Generators.Syntax;
 
+using System.Runtime.CompilerServices;
 using Model;
 
 internal abstract class SyntaxFileWriter : TreeFileWriter<Tree, TreeType, TreeTypeChild>
@@ -15,7 +16,7 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<Tree, TreeType, TreeTy
         _nodeMap = tree.Types.OfType<Node>().ToDictionary(n => n.Name);
     }
 
-    #region Node helpers
+    #region 帮助方法
     protected static string OverrideOrNewModifier(Field field)
     {
         return IsOverride(field) ? "override " : IsNew(field) ? "new " : "";
@@ -108,14 +109,17 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<Tree, TreeType, TreeTy
     protected Node? GetNode(string? typeName)
         => typeName is not null && _nodeMap.TryGetValue(typeName, out var node) ? node : null;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static bool IsOptional(Field f)
-        => IsTrue(f.Optional);
+        => f.IsOptional();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static bool IsOverride(Field f)
-        => f.Override is not null;
+        => f.IsOverride();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static bool IsNew(Field f)
-        => IsTrue(f.New);
+        => f.IsNew();
 
     protected static bool HasErrors(Node n)
     {

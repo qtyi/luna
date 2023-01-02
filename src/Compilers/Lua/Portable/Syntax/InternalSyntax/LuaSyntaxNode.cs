@@ -2,7 +2,9 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CodeAnalysis;
+extern alias MSCA;
+
+using MSCA::Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
@@ -18,7 +20,7 @@ internal partial class LuaSyntaxNode
 
     internal static partial NodeFlags SetFactoryContext(NodeFlags flags, SyntaxFactoryContext context) => flags;
 
-    public override partial Microsoft.CodeAnalysis.SyntaxToken CreateSeparator<TNode>(SyntaxNode element) => Lua.SyntaxFactory.Token(SyntaxKind.CommaToken);
+    public override partial MSCA::Microsoft.CodeAnalysis.SyntaxToken CreateSeparator<TNode>(SyntaxNode element) => Lua.SyntaxFactory.Token(SyntaxKind.CommaToken);
 
     public override partial bool IsTriviaWithEndOfLine() =>
         this.Kind switch

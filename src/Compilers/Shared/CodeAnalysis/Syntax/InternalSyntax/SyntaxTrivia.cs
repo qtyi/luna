@@ -2,10 +2,15 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Roslyn.Utilities;
+#if !NETCOREAPP
+using NotNullWhenAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
+#endif
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -116,6 +121,6 @@ internal partial class SyntaxTrivia :
 
     protected override void WriteTriviaTo(TextWriter writer) => writer.Write(this.Text);
 
-    public static implicit operator Microsoft.CodeAnalysis.SyntaxTrivia(SyntaxTrivia trivia) =>
+    public static implicit operator MSCA::Microsoft.CodeAnalysis.SyntaxTrivia(SyntaxTrivia trivia) =>
         new(token: default, trivia, position: 0, index: 0);
 }

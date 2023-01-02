@@ -2,9 +2,14 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Text;
+#if !NETCOREAPP
+using NotNullIfNotNullAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute;
+#endif
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
@@ -81,8 +86,10 @@ internal static partial class SyntaxReplacer
         private static readonly HashSet<SyntaxTrivia> s_noTrivia = new();
 
         private readonly TextSpan _totalSpan;
+        private readonly bool _visitIntoStructuredTrivia;
         private readonly bool _shouldVisitTrivia;
 
+        public override bool VisitIntoStructuredTrivia => this._visitIntoStructuredTrivia;
         public bool HasWork => this._nodeSet.Count + this._tokenSet.Count + this._triviaSet.Count > 0;
 
         public Replacer(
@@ -113,12 +120,12 @@ internal static partial class SyntaxReplacer
             // 快速计算总文本范围，缩小搜索范围。
             this._totalSpan = Replacer<TNode>.ComputeTotalSpan(this._spanSet);
 
-            this.VisitIntoStructuredTrivia =
+            this._visitIntoStructuredTrivia =
                 this._nodeSet.Any(n => n.IsPartOfStructuredTrivia()) ||
                 this._tokenSet.Any(t => t.IsPartOfStructuredTrivia()) ||
                 this._triviaSet.Any(t => t.IsPartOfStructuredTrivia());
 
-            this._shouldVisitTrivia = this._triviaSet.Count > 0 || this.VisitIntoStructuredTrivia;
+            this._shouldVisitTrivia = this._triviaSet.Count > 0 || this._visitIntoStructuredTrivia;
         }
 
         /// <summary>
@@ -176,7 +183,7 @@ internal static partial class SyntaxReplacer
         /// 若<paramref name="node"/>不在需要替换的语法节点集中，或未指定用于计算替换后的语法节点的委托，则方法将返回<paramref name="node"/>本身。
         /// </remarks>
         /// <inheritdoc/>
-        [return: NotNullIfNotNull("node")]
+        [return: NotNullIfNotNull(nameof(node))]
         public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
         {
             if (node is null) return null;

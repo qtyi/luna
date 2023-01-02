@@ -2,10 +2,11 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+extern alias MSCA;
+
 using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;

@@ -2,12 +2,16 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
+using MSCA::Microsoft.CodeAnalysis;
+
 namespace Qtyi.CodeAnalysis.MoonScript;
 
 public enum SyntaxKind : ushort
 {
     None = 0,
-    List = Microsoft.CodeAnalysis.GreenNode.ListKind,
+    List = GreenNode.ListKind,
 
     #region 标点
     /// <summary>表示<c>+</c>标记。</summary>

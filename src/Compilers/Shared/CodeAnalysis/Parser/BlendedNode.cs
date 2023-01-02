@@ -5,11 +5,11 @@
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
-using ThisSyntaxNode = Qtyi.CodeAnalysis.Lua.LuaSyntaxNode;
+using ThisSyntaxNode = Lua.LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
-using ThisSyntaxNode = Qtyi.CodeAnalysis.MoonScript.MoonScriptSyntaxNode;
+using ThisSyntaxNode = MoonScript.MoonScriptSyntaxNode;
 #endif
 
 /// <summary>

@@ -2,12 +2,13 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using MSCA::Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -149,7 +150,7 @@ internal abstract partial class
     /// <returns>修改后的<paramref name="flags"/>。</returns>
     internal static partial NodeFlags SetFactoryContext(NodeFlags flags, SyntaxFactoryContext context);
 
-    public override partial Microsoft.CodeAnalysis.SyntaxToken CreateSeparator<TNode>(SyntaxNode element);
+    public override partial MSCA::Microsoft.CodeAnalysis.SyntaxToken CreateSeparator<TNode>(SyntaxNode element);
 
     public virtual bool IsTokenAtEndOfLine() =>
         this is SyntaxToken token &&
@@ -161,9 +162,9 @@ internal abstract partial class
     /// <summary>
     /// 使用条件弱表来保存与语法节点相对应的结构语法琐碎内容的唯一实例。
     /// </summary>
-    private static readonly ConditionalWeakTable<SyntaxNode, Dictionary<Microsoft.CodeAnalysis.SyntaxTrivia, WeakReference<SyntaxNode>>> s_structuresTable = new();
+    private static readonly ConditionalWeakTable<SyntaxNode, Dictionary<MSCA::Microsoft.CodeAnalysis.SyntaxTrivia, WeakReference<SyntaxNode>>> s_structuresTable = new();
 
-    public override SyntaxNode GetStructure(Microsoft.CodeAnalysis.SyntaxTrivia trivia)
+    public override SyntaxNode GetStructure(MSCA::Microsoft.CodeAnalysis.SyntaxTrivia trivia)
     {
         if (!trivia.HasStructure) throw new ArgumentException(string.Format(LunaResources.ArgIsNotStructuredTrivia), nameof(trivia));
 
@@ -198,6 +199,6 @@ internal abstract partial class
     /// <param name="trivia">现有的语法琐碎内容。</param>
     /// <returns>根据现有的语法琐碎内容创建的新的表示结构语法琐碎内容的语法节点。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected virtual SyntaxNode GetNewStructure(Microsoft.CodeAnalysis.SyntaxTrivia trivia) =>
+    protected virtual SyntaxNode GetNewStructure(MSCA::Microsoft.CodeAnalysis.SyntaxTrivia trivia) =>
         Syntax.StructuredTriviaSyntax.Create(trivia);
 }

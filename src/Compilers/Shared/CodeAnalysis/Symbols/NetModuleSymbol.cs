@@ -2,13 +2,13 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Reflection.PortableExecutable;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Symbols;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 using Qtyi.CodeAnalysis.Lua;
@@ -167,7 +167,7 @@ partial class NetModuleSymbol : IModuleSymbolInternal
         throw new ArgumentOutOfRangeException(nameof(index));
     }
 
-    internal abstract void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol originatingSourceAssemblyDebugOnly = null);
+    internal abstract void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol? originatingSourceAssemblyDebugOnly = null);
 
     internal abstract bool HasUnifiedReferences { get; }
 

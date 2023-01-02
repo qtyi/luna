@@ -2,16 +2,18 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Collections.Immutable;
 using System.Diagnostics;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.PooledObjects;
-using Microsoft.CodeAnalysis.Syntax;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.PooledObjects;
+using MSCA::Microsoft.CodeAnalysis.Syntax;
+using MSCA::Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
-using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 partial class Lexer
 {
@@ -112,7 +114,6 @@ partial class Lexer
                             minIndent = Math.Min(minIndent, builderToken.GetWhiteSpaceIndent());
                         }
                         isLastTokenAtEndOfLine = builderToken.IsTokenAtEndOfLine();
-
 
                         // 添加插值内容的语法标志。
                         var contents = this.ScanInterpolatedStringContent(

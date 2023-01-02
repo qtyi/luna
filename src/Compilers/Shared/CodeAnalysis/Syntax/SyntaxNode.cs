@@ -2,14 +2,12 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*
- * Latest code review on 2022.7.3.
- */
+extern alias MSCA;
 
 using System.Diagnostics;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.PooledObjects;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.PooledObjects;
+using MSCA::Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -109,7 +107,7 @@ public abstract partial class
     /// <param name="node">要复制的语法节点。</param>
     /// <param name="syntaxTree">语法节点所在的语法树。</param>
     /// <returns><paramref name="node"/>的副本。</returns>
-    internal static new T CloneNodeAsRoot<T>(T node, ThisSyntaxTree syntaxTree) where T : ThisSyntaxNode => SyntaxNode.CloneNodeAsRoot(node, syntaxTree);
+    internal static T CloneNodeAsRoot<T>(T node, ThisSyntaxTree syntaxTree) where T : ThisSyntaxNode => SyntaxNode.CloneNodeAsRoot(node, syntaxTree);
 
     /// <summary>
     /// 计算得到一个语法树对象，这个语法树对象以指定的语法节点为根节点。
@@ -132,7 +130,7 @@ public abstract partial class
             {
                 // 原子操作设置语法树到根节点。
                 Interlocked.Exchange(ref node._syntaxTree, ThisSyntaxTree.CreateWithoutClone(node));
-                tree = node._syntaxTree as ThisSyntaxTree;
+                tree = (ThisSyntaxTree)node._syntaxTree;
                 break;
             }
 
@@ -267,7 +265,7 @@ public abstract partial class
 
         return SyntaxReplacer.Replace(
             this,
-            nodes.Cast<ThisSyntaxNode>(), computeReplacementNode is null ? null : (node, rewritten) => (ThisSyntaxNode)computeReplacementNode((node as TNode)!, (rewritten as TNode)!),
+            nodes?.Cast<ThisSyntaxNode>(), computeReplacementNode is null ? null : (node, rewritten) => (ThisSyntaxNode)computeReplacementNode((node as TNode)!, (rewritten as TNode)!),
             tokens, computeReplacementToken,
             trivia, computeReplacementTrivia)
             .AsRootOfNewTreeWithOptionsFrom(this.SyntaxTree);

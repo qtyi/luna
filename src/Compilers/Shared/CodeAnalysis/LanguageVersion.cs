@@ -2,17 +2,16 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
+extern alias MSCA;
 
-namespace Qtyi.CodeAnalysis.
+using System.Runtime.CompilerServices;
+using MSCA::Microsoft.CodeAnalysis;
+
 #if LANG_LUA
-    Lua
+namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
-    MoonScript
+namespace Qtyi.CodeAnalysis.MoonScript;
 #endif
-    ;
 
 internal static partial class LanguageVersionExtensionsInternal
 {

@@ -2,10 +2,13 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CodeAnalysis;
+extern alias MSCA;
+
 using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
+using MSCA::System.Runtime.CompilerServices;
+using MSCA::Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
@@ -13,7 +16,7 @@ namespace Qtyi.CodeAnalysis.Lua.Symbols;
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
 #endif
 
-internal struct FileIdentifier
+internal readonly struct FileIdentifier
 {
     private static readonly Encoding s_encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 

@@ -2,8 +2,9 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics;
-using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols.Metadata.PE;
@@ -14,7 +15,7 @@ namespace Qtyi.CodeAnalysis.MoonScript.Symbols.Metadata.PE;
 /// <summary>
 /// 提供决定元数据标志和签名的方法的帮助类。
 /// </summary>
-internal partial class MetadataDecoder : Microsoft.CodeAnalysis.MetadataDecoder<PEModuleSymbol, TypeSymbol, PEMethodSymbol, PEFieldSymbol, Symbol>
+internal partial class MetadataDecoder : MSCA::Microsoft.CodeAnalysis.MetadataDecoder<PEModuleSymbol, TypeSymbol, PEMethodSymbol, PEFieldSymbol, Symbol>
 {
     /// <summary>用于决定泛型类型参数的类型上下文。</summary>
     private readonly PENamedTypeSymbol? _typeContext;

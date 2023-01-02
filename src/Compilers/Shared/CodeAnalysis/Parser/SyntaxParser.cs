@@ -2,27 +2,33 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.PooledObjects;
-using Microsoft.CodeAnalysis.Text;
+extern alias MSCA;
+
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.PooledObjects;
+using MSCA::Microsoft.CodeAnalysis.Text;
+#if !NETCOREAPP || NETCOREAPP3_1
+using MemberNotNullAttribute = MSCA::System.Diagnostics.CodeAnalysis.MemberNotNullAttribute;
+using MemberNotNullWhenAttribute = MSCA::System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute;
+#endif
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
-using ThisParseOptions = Qtyi.CodeAnalysis.Lua.LuaParseOptions;
-using ThisSyntaxNode = Qtyi.CodeAnalysis.Lua.LuaSyntaxNode;
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax.LuaSyntaxNode;
+using ThisParseOptions = LuaParseOptions;
+using ThisSyntaxNode = Lua.LuaSyntaxNode;
+using ThisInternalSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
-using ThisParseOptions = Qtyi.CodeAnalysis.MoonScript.MoonScriptParseOptions;
-using ThisSyntaxNode = Qtyi.CodeAnalysis.MoonScript.MoonScriptSyntaxNode;
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax.MoonScriptSyntaxNode;
+using ThisParseOptions = MoonScriptParseOptions;
+using ThisSyntaxNode = MoonScript.MoonScriptSyntaxNode;
+using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
-using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 /// <summary>
 /// 表示语法解析器，提供语法解析器的必要约束和部分实现，此类必须被继承。
@@ -1003,7 +1009,7 @@ internal abstract partial class SyntaxParser : IDisposable
                 }
                 else
                 {
-                    var existing = (SyntaxDiagnosticInfo)token.GetDiagnostics().FirstOrDefault();
+                    var existing = (SyntaxDiagnosticInfo?)token.GetDiagnostics().FirstOrDefault();
                     if (existing is not null)
                     {
                         diagnostic = existing;
@@ -1016,7 +1022,7 @@ internal abstract partial class SyntaxParser : IDisposable
             }
             else if (node.ContainsDiagnostics && diagnostic == null)
             {
-                var existing = (SyntaxDiagnosticInfo)node.GetDiagnostics().FirstOrDefault();
+                var existing = (SyntaxDiagnosticInfo?)node.GetDiagnostics().FirstOrDefault();
                 if (existing is not null)
                 {
                     diagnostic = existing;
