@@ -2,9 +2,11 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.PooledObjects;
-using Roslyn.Utilities;
+extern alias MSCA;
+
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.PooledObjects;
+using MSCA::Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -56,21 +58,21 @@ internal sealed partial class
 
     public override bool IsAttribute(SyntaxNode node) => false;
 
-    public override SyntaxNode GetNameOfAttribute(SyntaxNode node) => throw ExceptionUtilities.Unreachable();
+    public override SyntaxNode GetNameOfAttribute(SyntaxNode node) => throw ExceptionUtilities.Unreachable;
 
     public override bool IsAttributeList(SyntaxNode node) => false;
 
-    public override void AddAttributeTargets(SyntaxNode node, ArrayBuilder<SyntaxNode> targets) => throw ExceptionUtilities.Unreachable();
+    public override void AddAttributeTargets(SyntaxNode node, ArrayBuilder<SyntaxNode> targets) => throw ExceptionUtilities.Unreachable;
 
-    public override SeparatedSyntaxList<SyntaxNode> GetAttributesOfAttributeList(SyntaxNode node) => throw ExceptionUtilities.Unreachable();
+    public override SeparatedSyntaxList<SyntaxNode> GetAttributesOfAttributeList(SyntaxNode node) => throw ExceptionUtilities.Unreachable;
 
     public override partial bool IsLambdaExpression(SyntaxNode node);
 
     public override string GetUnqualifiedIdentifierOfName(SyntaxNode node) => ((NameSyntax)node).GetUnqualifiedName().Identifier.ValueText;
 
-    public override void AddAliases(GreenNode node, ArrayBuilder<(string aliasName, string symbolName)> aliases, bool global) => throw ExceptionUtilities.Unreachable();
+    public override void AddAliases(GreenNode node, ArrayBuilder<(string aliasName, string symbolName)> aliases, bool global) => throw ExceptionUtilities.Unreachable;
 
-    public override void AddAliases(CompilationOptions options, ArrayBuilder<(string aliasName, string symbolName)> aliases) => throw ExceptionUtilities.Unreachable();
+    public override void AddAliases(CompilationOptions options, ArrayBuilder<(string aliasName, string symbolName)> aliases) => throw ExceptionUtilities.Unreachable;
 
-    public override bool ContainsGlobalAliases(SyntaxNode root) => throw ExceptionUtilities.Unreachable();
+    public override bool ContainsGlobalAliases(SyntaxNode root) => throw ExceptionUtilities.Unreachable;
 }

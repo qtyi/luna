@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;

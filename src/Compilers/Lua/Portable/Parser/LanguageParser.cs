@@ -2,16 +2,18 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.PooledObjects;
-using Microsoft.CodeAnalysis.Text;
-using Roslyn.Utilities;
+using System.Xml.Linq;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.PooledObjects;
+using MSCA::Microsoft.CodeAnalysis.Text;
+using MSCA::Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
-using System.Xml.Linq;
-using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 partial class LanguageParser
 {

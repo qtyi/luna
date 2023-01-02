@@ -2,13 +2,15 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Collections.Immutable;
 using System.Diagnostics;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Collections;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Collections;
+using MSCA::Microsoft.CodeAnalysis.Diagnostics;
+using MSCA::Microsoft.CodeAnalysis.Text;
+using MSCA::Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -411,7 +413,7 @@ internal abstract partial class
     /// <param name="skipAnalyzers">是否跳过分析器。</param>
     /// <param name="analyzers">决定的分析器。</param>
     /// <param name="generators">决定的生成器。</param>
-    protected override partial void ResolveAnalyzersFromArguments(List<DiagnosticInfo> diagnostics, CommonMessageProvider messageProvider, bool skipAnalyzers, out ImmutableArray<Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer> analyzers, out ImmutableArray<ISourceGenerator> generators);
+    protected override partial void ResolveAnalyzersFromArguments(List<DiagnosticInfo> diagnostics, CommonMessageProvider messageProvider, bool skipAnalyzers, out ImmutableArray<DiagnosticAnalyzer> analyzers, out ImmutableArray<ISourceGenerator> generators);
 
     /// <summary>
     /// 从外部源指令中决定内置的文件。

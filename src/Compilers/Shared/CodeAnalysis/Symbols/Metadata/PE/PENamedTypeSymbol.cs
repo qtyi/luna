@@ -2,11 +2,12 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
-using Microsoft.CodeAnalysis;
-using Qtyi.CodeAnalysis.Lua.Symbols.PublicModel;
+using MSCA::Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols.Metadata.PE;

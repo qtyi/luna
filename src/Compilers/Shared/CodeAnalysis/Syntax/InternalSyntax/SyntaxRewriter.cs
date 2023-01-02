@@ -2,18 +2,20 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics;
-using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using MSCA::Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax.LuaSyntaxNode;
+using ThisInternalSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax.MoonScriptSyntaxNode;
+using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
 internal partial class

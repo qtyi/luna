@@ -2,7 +2,13 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Diagnostics.CodeAnalysis;
+#if !NETCOREAPP
+using NotNullWhenAttribute = MSCA.System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
+#endif
+
 #if LANG_LUA
 using SyntaxKind = Qtyi.CodeAnalysis.Lua.SyntaxKind;
 #elif LANG_MOONSCRIPT
@@ -11,6 +17,7 @@ using SyntaxKind = Qtyi.CodeAnalysis.MoonScript.SyntaxKind;
 
 namespace Microsoft.CodeAnalysis
 {
+    using MSCA::Microsoft.CodeAnalysis;
 
     public static partial class
 #if LANG_LUA
@@ -59,14 +66,14 @@ namespace Microsoft.CodeAnalysis
         }
     }
 }
-namespace Qtyi.CodeAnalysis.
+
 #if LANG_LUA
-    Lua
+namespace Qtyi.CodeAnalysis.Lua
 #elif LANG_MOONSCRIPT
-    MoonScript
+namespace Qtyi.CodeAnalysis.MoonScript
 #endif
 {
-    using Microsoft.CodeAnalysis;
+    using MSCA::Microsoft.CodeAnalysis;
 
     public static class
 #if LANG_LUA
@@ -86,7 +93,7 @@ namespace Qtyi.CodeAnalysis.
         public static bool IsKeyword(this SyntaxToken token) => SyntaxFacts.IsKeywordKind(token.Kind());
 
         public static bool IsContextualKeyword(this SyntaxToken token) => SyntaxFacts.IsContextualKeyword(token.Kind());
-        
+
         public static bool IsReservedKeyword(this SyntaxToken token) => SyntaxFacts.IsReservedKeyword(token.Kind());
 
 #warning 未完成

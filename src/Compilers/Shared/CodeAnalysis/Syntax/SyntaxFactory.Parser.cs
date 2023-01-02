@@ -2,8 +2,12 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
+extern alias MSCA;
+
+using System.Text;
+using System.Threading;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -20,9 +24,7 @@ using ThisParseOptions = MoonScriptParseOptions;
 #endif
 
 using Syntax.InternalSyntax;
-using SyntaxToken = Microsoft.CodeAnalysis.SyntaxToken;
-using System.Text;
-using System.Threading;
+using SyntaxToken = MSCA::Microsoft.CodeAnalysis.SyntaxToken;
 
 static partial class SyntaxFactory
 {

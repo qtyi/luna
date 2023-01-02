@@ -3,7 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 #if DEBUG
-using Microsoft.CodeAnalysis;
+
+extern alias MSCA;
+
+using MSCA::Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -42,4 +45,5 @@ partial class
         internal override SyntaxNode? GetNodeSlot(int slot) => null;
     }
 }
+
 #endif

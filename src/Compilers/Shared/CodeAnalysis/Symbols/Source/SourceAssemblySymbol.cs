@@ -2,15 +2,14 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Concurrent;
+extern alias MSCA;
+
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Collections.Internal;
-using Microsoft.CodeAnalysis.PooledObjects;
-using Roslyn.Utilities;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.PooledObjects;
+using MSCA::Roslyn.Utilities;
 
 using Machine = System.Reflection.PortableExecutable.Machine;
 

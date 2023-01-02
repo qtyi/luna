@@ -86,8 +86,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luna.Test.PdbUtilities", "s
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AnalyzerDriver", "..\..\sanmuru\luna\src\Compilers\Core\AnalyzerDriver\AnalyzerDriver.shproj", "{D0BC9BE7-24F6-40CA-8DC6-FCB93BD44B34}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.CodeAnalysis", "src\Compilers\Core\RoslynCodeAnalysis\Microsoft.CodeAnalysis.csproj", "{EC816366-F4D3-45AF-84B0-60606123C4E3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -154,10 +152,6 @@ Global
 		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EC816366-F4D3-45AF-84B0-60606123C4E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC816366-F4D3-45AF-84B0-60606123C4E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC816366-F4D3-45AF-84B0-60606123C4E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC816366-F4D3-45AF-84B0-60606123C4E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,7 +186,6 @@ Global
 		{D829CC3D-D8F2-40B7-902C-733B259DA0CC} = {43AD8ACC-F5F5-4937-9397-CD7EC0B01202}
 		{84799CBA-6653-444C-8246-B3C1E5034F4D} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
 		{D0BC9BE7-24F6-40CA-8DC6-FCB93BD44B34} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
-		{EC816366-F4D3-45AF-84B0-60606123C4E3} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FBFA7D01-8DCA-472B-B849-F9824DCB855F}
@@ -213,10 +206,6 @@ Global
 		..\..\sanmuru\luna\src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems*{d73adf7d-2c1c-42ae-b2ab-edc9497e4b71}*SharedItemsImports = 13
 		src\Tools\Source\CompilerGeneratorTools\src\Shared\CodeAnalysisGenerators.Shared.projitems*{d9e8b235-24cf-4072-8e72-cd104b6b5e9c}*SharedItemsImports = 5
 		..\..\sanmuru\luna\src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.projitems*{e919dd77-34f8-4f57-8058-4d3ff4c2b241}*SharedItemsImports = 13
-		..\..\sanmuru\luna\src\Compilers\Core\AnalyzerDriver\AnalyzerDriver.projitems*{ec816366-f4d3-45af-84b0-60606123c4e3}*SharedItemsImports = 5
-		..\..\sanmuru\luna\src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems*{ec816366-f4d3-45af-84b0-60606123c4e3}*SharedItemsImports = 5
-		..\..\sanmuru\luna\src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.projitems*{ec816366-f4d3-45af-84b0-60606123c4e3}*SharedItemsImports = 5
-		..\..\sanmuru\luna\src\Dependencies\PooledObjects\Microsoft.CodeAnalysis.PooledObjects.projitems*{ec816366-f4d3-45af-84b0-60606123c4e3}*SharedItemsImports = 5
 		src\Compilers\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems*{f79b66d5-56db-4f7c-b589-0338ee3f9f15}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

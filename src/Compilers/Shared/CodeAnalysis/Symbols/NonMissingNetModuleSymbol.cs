@@ -2,10 +2,11 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias MSCA;
+
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
@@ -114,7 +115,7 @@ internal abstract partial class NonMissingNetModuleSymbol : NetModuleSymbol
         return false;
     }
 
-    internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol originatingSourceAssemblyDebugOnly = null)
+    internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol? originatingSourceAssemblyDebugOnly = null)
     {
         Debug.Assert(this._moduleReferences is null);
         Interlocked.CompareExchange(ref this._moduleReferences, moduleReferences, null);

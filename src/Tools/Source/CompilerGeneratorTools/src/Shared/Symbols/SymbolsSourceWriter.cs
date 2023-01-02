@@ -22,13 +22,15 @@ internal class SymbolsSourceWriter : SymbolsFileWriter
         WriteLine();
         WriteLine("#nullable enable");
         WriteLine();
+        WriteLine("extern alias MSCA;");
+        WriteLine();
         WriteLine("using System;");
         WriteLine("using System.Collections.Generic;");
-        WriteLine("using Microsoft.CodeAnalysis;");
-        WriteLine("using Microsoft.CodeAnalysis.Symbols;");
+        WriteLine("using MSCA::Microsoft.CodeAnalysis;");
+        WriteLine("using MSCA::Microsoft.CodeAnalysis.Symbols;");
+        WriteLine("using MSCA::Roslyn.Utilities;");
         WriteLine($"using Qtyi.CodeAnalysis.{LanguageNames.This};");
         WriteLine($"using Qtyi.CodeAnalysis.{LanguageNames.This}.Symbols;");
-        WriteLine("using Roslyn.Utilities;");
         WriteLine();
     }
 

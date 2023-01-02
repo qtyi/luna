@@ -2,9 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols.Metadata.PE;
 

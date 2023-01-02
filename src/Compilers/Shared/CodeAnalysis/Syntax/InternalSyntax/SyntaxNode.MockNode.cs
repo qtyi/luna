@@ -3,7 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 #if DEBUG
-using Microsoft.CodeAnalysis;
+
+extern alias MSCA;
+
+using MSCA::Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -48,4 +51,5 @@ partial class
         internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations) => new MockNode(this.GetDiagnostics(), annotations);
     }
 }
+
 #endif

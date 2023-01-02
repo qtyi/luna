@@ -13,6 +13,7 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <UseMicrosoftCodeAnalysisAlias>false</UseMicrosoftCodeAnalysisAlias>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <Import_RootNamespace>CommandLine</Import_RootNamespace>

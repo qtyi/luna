@@ -2,16 +2,17 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*
- * Latest code review on 2022.7.3.
- */
+extern alias MSCA;
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using Roslyn.Utilities;
-using System.Diagnostics;
+using MSCA::Microsoft.CodeAnalysis;
+using MSCA::Microsoft.CodeAnalysis.Text;
+using MSCA::Roslyn.Utilities;
+#if !NETCOREAPP
+using NotNullWhenAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
+#endif
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -86,8 +87,8 @@ public abstract partial class
     /// </value>
     public abstract override int Length { get; }
 
-    /// <inheritdoc cref="ThisSyntaxNode.CloneNodeAsRoot{T}(T, SyntaxTree)"/>
-    /// <seealso cref="ThisSyntaxNode.CloneNodeAsRoot{T}(T, SyntaxTree)"/>
+    /// <inheritdoc cref="ThisSyntaxNode.CloneNodeAsRoot{T}(T, ThisSyntaxTree)"/>
+    /// <seealso cref="ThisSyntaxNode.CloneNodeAsRoot{T}(T, ThisSyntaxTree)"/>
     protected T CloneNodeAsRoot<T>(T node)
         where T : ThisSyntaxNode =>
         ThisSyntaxNode.CloneNodeAsRoot(node, this);
@@ -268,7 +269,7 @@ public abstract partial class
     #region 更改
     public override SyntaxTree WithChangedText(SourceText newText)
     {
-        if (this.TryGetText(out SourceText? oldText))
+        if (this.TryGetText(out var oldText))
         {
             var changes = newText.GetChangeRanges(oldText);
 
@@ -401,7 +402,7 @@ public abstract partial class
     /// <inheritdoc/>
     protected sealed override bool TryGetRootCore([NotNullWhen(true)] out SyntaxNode? root)
     {
-        if (this.TryGetRoot(out ThisSyntaxNode? node))
+        if (this.TryGetRoot(out var node))
         {
             root = node;
             return true;
