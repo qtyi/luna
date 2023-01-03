@@ -5,9 +5,14 @@
   <Target Name="ReferenceMicrosoftCodeAnalysisCommon"
           BeforeTargets="CollectPackageReferences">
     <PropertyGroup>
+      <IsSourceGenerator Condition="'$(IsSourceGenerator)' != 'true'">false</IsSourceGenerator>
       <UseMicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' != 'false'">true</UseMicrosoftCodeAnalysisAlias>
-      <_MicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' == 'true'">MSCA</_MicrosoftCodeAnalysisAlias>
-    <DefineConstants>MSCA;$(DefineConstants)</DefineConstants>
+
+      <_MicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' == 'false'"></_MicrosoftCodeAnalysisAlias>
+      <_MicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' != 'false' and '$(MicrosoftCodeAnalysisAlias)' != ''">$(MicrosoftCodeAnalysisAlias)</_MicrosoftCodeAnalysisAlias>
+      <_MicrosoftCodeAnalysisAlias Condition="'$(UseMicrosoftCodeAnalysisAlias)' != 'false' and '$(MicrosoftCodeAnalysisAlias)' == ''">MSCA</_MicrosoftCodeAnalysisAlias>
+
+      <DefineConstants Condition="'$(_MicrosoftCodeAnalysisAlias)' != ''">$(_MicrosoftCodeAnalysisAlias);$(DefineConstants)</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,7 +20,8 @@
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" Aliases="$(_MicrosoftCodeAnalysisAlias)"/>
+      <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(SourceGeneratorMicrosoftCodeAnalysisVersion)" Condition="'$(IsSourceGenerator)' == 'true'" PrivateAssets="all" Aliases="$(_MicrosoftCodeAnalysisAlias)"/>
+      <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" Condition="'$(IsSourceGenerator)' != 'true'" Aliases="$(_MicrosoftCodeAnalysisAlias)"/>
     </ItemGroup>
   </Target>
 

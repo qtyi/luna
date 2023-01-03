@@ -2,9 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Microsoft.CodeAnalysis;
+namespace Luna.Compilers.Generators;
 
-internal static class GreenNode
+internal static class Extensions
 {
-    internal const int ListKind = 1;
+    public static bool IsTrue(this string? val)
+        => val is not null && string.Compare(val, "true", true) == 0;
 }

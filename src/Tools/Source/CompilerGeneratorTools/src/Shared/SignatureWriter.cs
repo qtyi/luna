@@ -1,4 +1,8 @@
-﻿using Luna.Compilers.Generators.Model;
+﻿// Licensed to the Qtyi under one or more agreements.
+// The Qtyi licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Luna.Compilers.Generators.Syntax.Model;
 
 namespace Luna.Compilers.Generators;
 
@@ -6,7 +10,7 @@ internal class SignatureWriter
 {
     private readonly TextWriter _writer;
     private readonly Tree _tree;
-    private readonly Dictionary<string, string> _typeMap;
+    private readonly Dictionary<string, string?> _typeMap;
 
     private SignatureWriter(TextWriter writer, Tree tree)
     {

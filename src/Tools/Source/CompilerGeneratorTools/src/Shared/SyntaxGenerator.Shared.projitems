@@ -14,4 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SyntaxGeneratorMain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestWriter.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net462'))" />
+  </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <TargetFrameworks>$(ExecutableTargetFrameworks)</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Luna.Compilers.Tools</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,10 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="LuaCodeAnalysisSourceGenerators.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" Condition="'$(TargetFramework)' != 'net7.0'" />
   </ItemGroup>
 
   <Import Project="..\Shared\ErrorFactsGenerators.Shared.projitems" Label="Shared" />

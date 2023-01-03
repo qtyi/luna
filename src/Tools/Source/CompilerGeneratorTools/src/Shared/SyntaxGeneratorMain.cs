@@ -1,9 +1,15 @@
-﻿using System.Reflection;
+﻿// Licensed to the Qtyi under one or more agreements.
+// The Qtyi licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using Luna.Compilers.Generators;
-using Luna.Compilers.Generators.Model;
+using Luna.Compilers.Generators.Syntax;
+using Luna.Compilers.Generators.Syntax.Model;
 
 namespace Luna.Compilers.Tools;
 
@@ -19,7 +25,7 @@ internal static class Program
         string inputFile = args[0];
         if (!File.Exists(inputFile))
         {
-            Console.WriteLine(inputFile + " not found.");
+            Console.WriteLine("未找到 " + inputFile + "。");
             return 1;
         }
 
@@ -27,7 +33,7 @@ internal static class Program
         bool writeTests = false;
         bool writeSignatures = false;
         bool writeGrammar = false;
-        string outputFile = null;
+        string? outputFile = null;
 
         if (args.Length == 3)
         {
@@ -58,6 +64,7 @@ internal static class Program
                 outputFile = args[1];
             }
         }
+        Debug.Assert(outputFile is not null);
 
         return writeGrammar
             ? WriteGrammarFile(inputFile, outputFile)
@@ -77,7 +84,10 @@ internal static class Program
     {
         var reader = XmlReader.Create(inputFile, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
         var serializer = new XmlSerializer(typeof(Tree));
-        return (Tree)serializer.Deserialize(reader);
+        if (serializer.Deserialize(reader) is Tree tree)
+            return tree;
+
+        throw new InvalidOperationException("文件" + inputFile + "的格式不支持。");
     }
 
     private static int WriteGrammarFile(string inputFile, string outputLocation)
@@ -129,9 +139,9 @@ internal static class Program
                 var outputInternalFile = Path.Combine(outputPath, $"{prefix}.Internal.Generated.cs");
                 var outputSyntaxFile = Path.Combine(outputPath, $"{prefix}.Syntax.Generated.cs");
 
-                WriteToFile(writer => SourceWriter.WriteMain(writer, tree), outputMainFile);
-                WriteToFile(writer => SourceWriter.WriteInternal(writer, tree), outputInternalFile);
-                WriteToFile(writer => SourceWriter.WriteSyntax(writer, tree), outputSyntaxFile);
+                WriteToFile(writer => SyntaxSourceWriter.WriteMain(writer, tree), outputMainFile);
+                WriteToFile(writer => SyntaxSourceWriter.WriteInternal(writer, tree), outputInternalFile);
+                WriteToFile(writer => SyntaxSourceWriter.WriteSyntax(writer, tree), outputSyntaxFile);
             }
             if (writeTests)
             {

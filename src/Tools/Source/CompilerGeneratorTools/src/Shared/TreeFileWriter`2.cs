@@ -46,9 +46,6 @@ internal abstract class TreeFileWriter<TTree, TTreeType, TTreeTypeChild> : Inden
     protected TTreeType? GetTreeType(string? typeName)
         => typeName is not null && _typeMap.TryGetValue(typeName, out var type) ? type : default;
 
-    protected static bool IsTrue(string? val)
-        => val is not null && string.Compare(val, "true", true) == 0;
-
     protected static string CamelCase(string name)
     {
         if (char.IsUpper(name[0]))

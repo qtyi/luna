@@ -1,6 +1,10 @@
-﻿using System.Collections.Immutable;
+﻿// Licensed to the Qtyi under one or more agreements.
+// The Qtyi licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
-using Luna.Compilers.Generators.Model;
+using Luna.Compilers.Generators.Syntax.Model;
 
 #if LANG_LUA
 using Qtyi.CodeAnalysis.Lua;
@@ -105,9 +109,9 @@ internal static partial class GrammarGenerator
 
     private static Production HandleChildren(IEnumerable<TreeTypeChild> children, string delim = " ")
         => Join(delim, children.Select(child =>
-            child is Choice c ? HandleChildren(c.Children, delim: " | ").Parenthesize().Suffix("?", when: c.IsOptional) :
+            child is Choice c ? HandleChildren(c.Children, delim: " | ").Parenthesize() :
             child is Sequence s ? HandleChildren(s.Children).Parenthesize() :
-            child is Field f ? HandleField(f).Suffix("?", when: f.IsOptional) : throw new InvalidOperationException()));
+            child is Field f ? HandleField(f).Suffix("?", when: f.IsOptional()) : throw new InvalidOperationException()));
 
     private static Production HandleField(Field field)
         // 'bool' fields are for a few properties we generate on DirectiveTrivia. They're not
@@ -163,7 +167,7 @@ internal struct Production : IComparable<Production>
     public readonly string Text;
     public readonly ImmutableArray<string> ReferencedRules;
 
-    public Production(string text, IEnumerable<string> referencedRules = null)
+    public Production(string text, IEnumerable<string>? referencedRules = null)
     {
         Text = text;
         ReferencedRules = referencedRules?.ToImmutableArray() ?? ImmutableArray<string>.Empty;
