@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\README.md" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingAnalyzer.cs" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingGenerator.cs" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingSuppressor.cs" />

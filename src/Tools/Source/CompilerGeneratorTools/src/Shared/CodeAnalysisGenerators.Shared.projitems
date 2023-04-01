@@ -9,16 +9,16 @@
     <Import_RootNamespace>Luna.Compilers.Generators</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\ModelExtensions.cs" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\IsExternalInit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\IndentWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\StringBuilderReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\ErrorFactsGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ITree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ITreeType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ITreeTypeChild.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\AbstractSymbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\ModelExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\SymbolTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\SymbolTreeType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\PredefinedSymbol.cs" />

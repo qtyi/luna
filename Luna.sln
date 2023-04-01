@@ -40,15 +40,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "luac-arm64", "src\Compilers\Lua\luac\arm64\luac-arm64.csproj", "{3D6DCE12-F596-4697-87A5-41F033E00335}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{F0AC91C6-F4A1-437B-A3A5-039F84FD50DB}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\sanmuru\luna\src\Compilers\Shared\BuildClient.cs = ..\..\sanmuru\luna\src\Compilers\Shared\BuildClient.cs
-		..\..\sanmuru\luna\src\Compilers\Shared\BuildServerConnection.cs = ..\..\sanmuru\luna\src\Compilers\Shared\BuildServerConnection.cs
-		..\..\sanmuru\luna\src\Compilers\Shared\ExitingTraceListener.cs = ..\..\sanmuru\luna\src\Compilers\Shared\ExitingTraceListener.cs
-		src\Compilers\Shared\LunaBuildClient.cs = src\Compilers\Shared\LunaBuildClient.cs
-		src\Compilers\Shared\LunaBuildServerConnection.cs = src\Compilers\Shared\LunaBuildServerConnection.cs
-		..\..\sanmuru\luna\src\Compilers\Shared\NamedPipeUtil.cs = ..\..\sanmuru\luna\src\Compilers\Shared\NamedPipeUtil.cs
-		..\..\sanmuru\luna\src\Compilers\Shared\RuntimeHostInfo.cs = ..\..\sanmuru\luna\src\Compilers\Shared\RuntimeHostInfo.cs
-	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MooncCommandLine", "src\Compilers\MoonScript\moonc\MooncCommandLine.shproj", "{4CEC9807-0CF3-4AAB-91B7-7E5C68159520}"
 EndProject
@@ -56,25 +47,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "moonc", "src\Compilers\Moon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "moonc-arm64", "src\Compilers\MoonScript\moonc\arm64\moonc-arm64.csproj", "{30E834DF-72C7-476D-8D3B-777AADCC89FF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommandLine", "CommandLine", "{A3174681-E2D6-4EA6-85A5-1F330B15433F}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\sanmuru\luna\src\Compilers\Core\CommandLine\BuildProtocol.cs = ..\..\sanmuru\luna\src\Compilers\Core\CommandLine\BuildProtocol.cs
-		src\Compilers\Shared\CommandLine\Compiler.cs = src\Compilers\Shared\CommandLine\Compiler.cs
-		..\..\sanmuru\luna\src\Compilers\Core\CommandLine\CompilerServerLogger.cs = ..\..\sanmuru\luna\src\Compilers\Core\CommandLine\CompilerServerLogger.cs
-		..\..\sanmuru\luna\src\Compilers\Core\CommandLine\ConsoleUtil.cs = ..\..\sanmuru\luna\src\Compilers\Core\CommandLine\ConsoleUtil.cs
-		src\Compilers\Core\CommandLine\LunaBuildProtocol.cs = src\Compilers\Core\CommandLine\LunaBuildProtocol.cs
-		src\Compilers\Core\CommandLine\LunaCompilerServerLogger.cs = src\Compilers\Core\CommandLine\LunaCompilerServerLogger.cs
-		..\..\sanmuru\luna\src\Compilers\Core\CommandLine\NativeMethods.cs = ..\..\sanmuru\luna\src\Compilers\Core\CommandLine\NativeMethods.cs
-		src\Compilers\Shared\CommandLine\Program.cs = src\Compilers\Shared\CommandLine\Program.cs
-	EndProjectSection
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CodeAnalysisGenerators.Shared", "src\Tools\Source\CompilerGeneratorTools\src\Shared\CodeAnalysisGenerators.Shared.shproj", "{B2D21490-8284-48C7-8E96-85EBFB70C11F}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.CodeAnalysis.Collections", "..\..\sanmuru\luna\src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.shproj", "{E919DD77-34F8-4F57-8058-4D3FF4C2B241}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.CodeAnalysis.Debugging", "..\..\sanmuru\luna\src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.shproj", "{D73ADF7D-2C1C-42AE-B2AB-EDC9497E4B71}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.CodeAnalysis.PooledObjects", "..\..\sanmuru\luna\src\Dependencies\PooledObjects\Microsoft.CodeAnalysis.PooledObjects.shproj", "{C1930979-C824-496B-A630-70F5369A636F}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Qtyi.CodeAnalysis.Shared", "src\Compilers\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.shproj", "{48CCBB50-B9E9-4A5A-AD46-91D80519B95E}"
 EndProject
@@ -84,7 +57,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.CodeAnalysis.MoonScrip
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luna.Test.PdbUtilities", "src\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj", "{84799CBA-6653-444C-8246-B3C1E5034F4D}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AnalyzerDriver", "..\..\sanmuru\luna\src\Compilers\Core\AnalyzerDriver\AnalyzerDriver.shproj", "{D0BC9BE7-24F6-40CA-8DC6-FCB93BD44B34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.CodeAnalysis", "src\Compilers\Core\RoslynPortable\Microsoft.CodeAnalysis.csproj", "{CF536160-1997-415B-88D8-D78A9230BD12}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.CodeAnalysis.Debugging", "src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.shproj", "{5735432E-3055-4995-AB09-AC9AD3712D95}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.CodeAnalysis.Collections", "src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.shproj", "{E919DD77-34F8-4F57-8058-4D3FF4C2B241}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.CodeAnalysis.PooledObjects", "src\Dependencies\PooledObjects\Microsoft.CodeAnalysis.PooledObjects.shproj", "{C1930979-C824-496B-A630-70F5369A636F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,6 +131,10 @@ Global
 		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84799CBA-6653-444C-8246-B3C1E5034F4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF536160-1997-415B-88D8-D78A9230BD12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF536160-1997-415B-88D8-D78A9230BD12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF536160-1997-415B-88D8-D78A9230BD12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF536160-1997-415B-88D8-D78A9230BD12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,16 +159,15 @@ Global
 		{4CEC9807-0CF3-4AAB-91B7-7E5C68159520} = {43AD8ACC-F5F5-4937-9397-CD7EC0B01202}
 		{307FCDCE-6B60-49D3-8944-C99E75FF38ED} = {43AD8ACC-F5F5-4937-9397-CD7EC0B01202}
 		{30E834DF-72C7-476D-8D3B-777AADCC89FF} = {43AD8ACC-F5F5-4937-9397-CD7EC0B01202}
-		{A3174681-E2D6-4EA6-85A5-1F330B15433F} = {F0AC91C6-F4A1-437B-A3A5-039F84FD50DB}
 		{B2D21490-8284-48C7-8E96-85EBFB70C11F} = {3AD9BF10-CC44-4E04-9F00-8C8CC217E23F}
-		{E919DD77-34F8-4F57-8058-4D3FF4C2B241} = {33C0CD6D-286A-4405-8749-C089CC8C49F2}
-		{D73ADF7D-2C1C-42AE-B2AB-EDC9497E4B71} = {33C0CD6D-286A-4405-8749-C089CC8C49F2}
-		{C1930979-C824-496B-A630-70F5369A636F} = {33C0CD6D-286A-4405-8749-C089CC8C49F2}
 		{48CCBB50-B9E9-4A5A-AD46-91D80519B95E} = {F0AC91C6-F4A1-437B-A3A5-039F84FD50DB}
 		{D8A79D84-6B22-417B-87C0-AAB4B1BF0D7E} = {C18EFA03-23EF-4681-A503-290B17577587}
 		{D829CC3D-D8F2-40B7-902C-733B259DA0CC} = {43AD8ACC-F5F5-4937-9397-CD7EC0B01202}
 		{84799CBA-6653-444C-8246-B3C1E5034F4D} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
-		{D0BC9BE7-24F6-40CA-8DC6-FCB93BD44B34} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
+		{CF536160-1997-415B-88D8-D78A9230BD12} = {1EFCD563-A706-4F35-BCDB-3DED21D02AF9}
+		{5735432E-3055-4995-AB09-AC9AD3712D95} = {33C0CD6D-286A-4405-8749-C089CC8C49F2}
+		{E919DD77-34F8-4F57-8058-4D3FF4C2B241} = {33C0CD6D-286A-4405-8749-C089CC8C49F2}
+		{C1930979-C824-496B-A630-70F5369A636F} = {33C0CD6D-286A-4405-8749-C089CC8C49F2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FBFA7D01-8DCA-472B-B849-F9824DCB855F}
@@ -196,16 +178,17 @@ Global
 		src\Compilers\Lua\luac\LuacCommandLine.projitems*{3d6dce12-f596-4697-87a5-41f033e00335}*SharedItemsImports = 5
 		src\Compilers\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems*{48ccbb50-b9e9-4a5a-ad46-91d80519b95e}*SharedItemsImports = 13
 		src\Compilers\MoonScript\moonc\MooncCommandLine.projitems*{4cec9807-0cf3-4aab-91b7-7e5c68159520}*SharedItemsImports = 13
+		.externalrepos\dotnet\roslyn\6a5a63bbc9f4449d9bd1e95a8f9624939c3ccdc3\src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems*{5735432e-3055-4995-ab09-ac9ad3712d95}*SharedItemsImports = 13
 		src\Tools\Source\CompilerGeneratorTools\src\Shared\CodeAnalysisGenerators.Shared.projitems*{58832da7-9e93-4598-89a8-aebc0dcdb538}*SharedItemsImports = 5
 		src\Compilers\Lua\luac\LuacCommandLine.projitems*{5bff9a10-48fa-4769-b3e3-c1a51b0959a2}*SharedItemsImports = 5
 		src\Compilers\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems*{ab9ed4cc-c856-457d-9727-6514136b99ac}*SharedItemsImports = 5
 		src\Compilers\Lua\luac\LuacCommandLine.projitems*{ae16b937-88b4-406c-beb3-d22de9e6c887}*SharedItemsImports = 13
 		src\Tools\Source\CompilerGeneratorTools\src\Shared\CodeAnalysisGenerators.Shared.projitems*{b2d21490-8284-48c7-8e96-85ebfb70c11f}*SharedItemsImports = 13
-		..\..\sanmuru\luna\src\Dependencies\PooledObjects\Microsoft.CodeAnalysis.PooledObjects.projitems*{c1930979-c824-496b-a630-70f5369a636f}*SharedItemsImports = 13
-		..\..\sanmuru\luna\src\Compilers\Core\AnalyzerDriver\AnalyzerDriver.projitems*{d0bc9be7-24f6-40ca-8dc6-fcb93bd44b34}*SharedItemsImports = 13
-		..\..\sanmuru\luna\src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems*{d73adf7d-2c1c-42ae-b2ab-edc9497e4b71}*SharedItemsImports = 13
+		.externalrepos\dotnet\roslyn\6a5a63bbc9f4449d9bd1e95a8f9624939c3ccdc3\src\Compilers\Core\AnalyzerDriver\AnalyzerDriver.projitems*{cf536160-1997-415b-88d8-d78a9230bd12}*SharedItemsImports = 5
+		.externalrepos\dotnet\roslyn\6a5a63bbc9f4449d9bd1e95a8f9624939c3ccdc3\src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems*{cf536160-1997-415b-88d8-d78a9230bd12}*SharedItemsImports = 5
+		.externalrepos\dotnet\roslyn\6a5a63bbc9f4449d9bd1e95a8f9624939c3ccdc3\src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.projitems*{cf536160-1997-415b-88d8-d78a9230bd12}*SharedItemsImports = 5
+		.externalrepos\dotnet\roslyn\6a5a63bbc9f4449d9bd1e95a8f9624939c3ccdc3\src\Dependencies\PooledObjects\Microsoft.CodeAnalysis.PooledObjects.projitems*{cf536160-1997-415b-88d8-d78a9230bd12}*SharedItemsImports = 5
 		src\Tools\Source\CompilerGeneratorTools\src\Shared\CodeAnalysisGenerators.Shared.projitems*{d9e8b235-24cf-4072-8e72-cd104b6b5e9c}*SharedItemsImports = 5
-		..\..\sanmuru\luna\src\Dependencies\Collections\Microsoft.CodeAnalysis.Collections.projitems*{e919dd77-34f8-4f57-8058-4d3ff4c2b241}*SharedItemsImports = 13
 		src\Compilers\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems*{f79b66d5-56db-4f7c-b589-0338ee3f9f15}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
