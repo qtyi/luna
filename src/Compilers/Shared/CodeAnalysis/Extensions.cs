@@ -2,13 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
 using System.Diagnostics.CodeAnalysis;
-#if !NETCOREAPP
-using NotNullWhenAttribute = MSCA.System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
-#endif
-
 #if LANG_LUA
 using SyntaxKind = Qtyi.CodeAnalysis.Lua.SyntaxKind;
 #elif LANG_MOONSCRIPT
@@ -17,7 +11,6 @@ using SyntaxKind = Qtyi.CodeAnalysis.MoonScript.SyntaxKind;
 
 namespace Microsoft.CodeAnalysis
 {
-    using MSCA::Microsoft.CodeAnalysis;
 
     public static partial class
 #if LANG_LUA
@@ -73,7 +66,7 @@ namespace Qtyi.CodeAnalysis.Lua
 namespace Qtyi.CodeAnalysis.MoonScript
 #endif
 {
-    using MSCA::Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis;
 
     public static class
 #if LANG_LUA

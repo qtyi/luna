@@ -2,17 +2,12 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using MSCA::Microsoft.CodeAnalysis;
-using MSCA::Microsoft.CodeAnalysis.Text;
-using MSCA::Roslyn.Utilities;
-#if !NETCOREAPP
-using NotNullWhenAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
-#endif
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;

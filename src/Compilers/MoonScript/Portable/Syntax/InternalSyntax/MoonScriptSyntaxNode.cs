@@ -2,9 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
-using MSCA::Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
@@ -20,7 +18,7 @@ internal partial class MoonScriptSyntaxNode
 
     internal static partial NodeFlags SetFactoryContext(NodeFlags flags, SyntaxFactoryContext context) => flags;
 
-    public override partial MSCA::Microsoft.CodeAnalysis.SyntaxToken CreateSeparator<TNode>(SyntaxNode element) => MoonScript.SyntaxFactory.Token(SyntaxKind.CommaToken);
+    public override partial Microsoft.CodeAnalysis.SyntaxToken CreateSeparator<TNode>(SyntaxNode element) => MoonScript.SyntaxFactory.Token(SyntaxKind.CommaToken);
 
     public override partial bool IsTriviaWithEndOfLine() =>
         this.Kind switch

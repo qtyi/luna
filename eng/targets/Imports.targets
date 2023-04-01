@@ -116,15 +116,11 @@
     Chain before the .NET Core SDK GetAssemblyAttributes target to add the additional attribute.
   -->
   <Target Name="_AddCommitHashAttribute"
-          DependsOnTargets="InitializeSourceControlInformation;ReferenceMicrosoftCodeAnalysisCommon"
+          DependsOnTargets="InitializeSourceControlInformation"
           BeforeTargets="GetAssemblyAttributes"
           Condition="'$(GenerateMicrosoftCodeAnalysisCommitHashAttribute)' == 'true' AND '$(SourceControlInformationFeatureSupported)' == 'true'">
     <ItemGroup>
-      <AssemblyAttribute Include="Microsoft.CodeAnalysis.CommitHashAttribute" Condition="'$(_MicrosoftCodeAnalysisAlias)' == '' or '$(Language)' != 'C#'">
-        <_Parameter1 Condition="'$(OfficialBuild)' == 'true'">$(SourceRevisionId)</_Parameter1>
-        <_Parameter1 Condition="'$(OfficialBuild)' != 'true'">&lt;developer build&gt;</_Parameter1>
-      </AssemblyAttribute>
-      <AssemblyAttribute Include="$(_MicrosoftCodeAnalysisAlias)::Microsoft.CodeAnalysis.CommitHashAttribute" Condition="'$(_MicrosoftCodeAnalysisAlias)' != '' and '$(Language)' == 'C#'">
+      <AssemblyAttribute Include="Microsoft.CodeAnalysis.CommitHashAttribute">
         <_Parameter1 Condition="'$(OfficialBuild)' == 'true'">$(SourceRevisionId)</_Parameter1>
         <_Parameter1 Condition="'$(OfficialBuild)' != 'true'">&lt;developer build&gt;</_Parameter1>
       </AssemblyAttribute>
@@ -134,41 +130,6 @@
   <PropertyGroup>
     <TargetFrameworkMonikerAssemblyAttributesPath>$(IntermediateOutputPath)$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)</TargetFrameworkMonikerAssemblyAttributesPath>
   </PropertyGroup>
-
-  <!--
-    在 CoreGenerateAssemblyInfo 任务生成的 AssemblyInfo 头部插入引用外部的程序集别名语句（如果指定）。
-  -->
-  <Target Name="InsertExternAliasToAssemblyInfoFile"
-          AfterTargets="CoreGenerateAssemblyInfo"
-          Condition="'$(Language)' == 'C#'">
-    <RemoveDuplicates Inputs="@(AssemblyAttributeExternAliases)">
-      <Output TaskParameter="Filtered"
-              ItemName="_AssemblyAttributeExternAliases"/>
-    </RemoveDuplicates>
-
-    <ItemGroup Condition="@(_AssemblyAttributeExternAliases->Count()) &gt; 0">
-      <_GeneratedAssemblyInfoFileLines Include="#pragma warning disable IDE0073"/>
-      <_GeneratedAssemblyInfoFileLines Include="// 由 InsertExternAliasToAssemblyInfoFile 任务生成。"/>
-      <_GeneratedAssemblyInfoFileLines Include="extern alias %(_AssemblyAttributeExternAliases.Identity)%3B"/>
-    </ItemGroup>
-
-    <ReadLinesFromFile File="$(GeneratedAssemblyInfoFile)">
-      <Output TaskParameter="Lines"
-              ItemName="_GeneratedAssemblyInfoFileLines"/>
-    </ReadLinesFromFile>
-
-    <ItemGroup>
-      <!-- Ensure the generated assemblyinfo file is not already part of the Compile sources, as a workaround for https://github.com/dotnet/sdk/issues/114 -->
-      <Compile Remove="$(GeneratedAssemblyInfoFile)" />
-    </ItemGroup>
-
-    <WriteLinesToFile File="$(GeneratedAssemblyInfoFile)" Lines="@(_GeneratedAssemblyInfoFileLines)" Overwrite="true"/>
-
-    <ItemGroup>
-      <Compile Include="$(GeneratedAssemblyInfoFile)" />
-      <FileWrites Include="$(GeneratedAssemblyInfoFile)" />
-    </ItemGroup>
-  </Target>
 
   <Import Project="Bootstrap.targets" Condition="'$(BootstrapBuildPath)' != ''" />
 

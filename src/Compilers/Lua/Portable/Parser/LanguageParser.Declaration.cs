@@ -2,16 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
-using MSCA::Roslyn.Utilities;
-#if !NETCOREAPP
-using NotNullWhenAttribute = MSCA::System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
-using DoesNotReturnAttribute = MSCA::System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
-#endif
+using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
@@ -349,7 +343,7 @@ partial class LanguageParser
 #endif
         bool TryParseAttributeList(
         [NotNullWhen(true)] out AttributeListSyntax? attributeList,
-        out MSCA::Microsoft.CodeAnalysis.GreenNode? skippedSyntax)
+        out Microsoft.CodeAnalysis.GreenNode? skippedSyntax)
     {
         if (this.CurrentTokenKind != SyntaxKind.LessThanToken) // 无特性列表。
         {

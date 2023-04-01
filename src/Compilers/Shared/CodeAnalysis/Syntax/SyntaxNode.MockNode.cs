@@ -4,9 +4,7 @@
 
 #if DEBUG
 
-extern alias MSCA;
-
-using MSCA::Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;

@@ -2,10 +2,8 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
 using System.Diagnostics;
-using MSCA::Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax.LuaSyntaxNode;
@@ -17,7 +15,7 @@ using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSynta
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 #endif
 
-using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 /// <summary>
 /// 此类型提供构造各种内部的语法节点、标志和琐碎内容的工厂方法。

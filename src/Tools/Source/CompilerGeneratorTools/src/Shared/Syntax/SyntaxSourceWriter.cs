@@ -36,15 +36,13 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         WriteLine();
         WriteLine("#nullable enable");
         WriteLine();
-        WriteLine("extern alias MSCA;");
-        WriteLine();
         WriteLine("using System;");
         WriteLine("using System.Collections.Generic;");
         WriteLine("using System.Diagnostics.CodeAnalysis;");
-        WriteLine("using MSCA::Microsoft.CodeAnalysis;");
-        WriteLine("using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;");
-        WriteLine("using MSCA::Roslyn.Utilities;");
+        WriteLine("using Microsoft.CodeAnalysis;");
+        WriteLine("using Microsoft.CodeAnalysis.Syntax.InternalSyntax;");
         WriteLine($"using Qtyi.CodeAnalysis.{LanguageNames.This};");
+        WriteLine("using Roslyn.Utilities;");
         WriteLine();
     }
 
@@ -54,7 +52,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         WriteLine($"namespace Qtyi.CodeAnalysis.{LanguageNames.This}");
         OpenBlock();
         WriteLine("using System.Diagnostics.CodeAnalysis;");
-        WriteLine("using MSCA::Microsoft.CodeAnalysis;");
+        WriteLine("using Microsoft.CodeAnalysis;");
         WriteLine($"using Qtyi.CodeAnalysis.{LanguageNames.This}.Syntax;");
         this.WriteRedVisitors();
         this.WriteRedRewriter();
@@ -82,7 +80,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         WriteFileHeader();
         WriteLine($"namespace Qtyi.CodeAnalysis.{LanguageNames.This}.Syntax");
         OpenBlock();
-        WriteLine("using MSCA::Microsoft.CodeAnalysis;");
+        WriteLine("using Microsoft.CodeAnalysis;");
         this.WriteRedTypes();
         CloseBlock();
     }
@@ -149,7 +147,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
                 if (IsSeparatedNodeList(field.Type) ||
                     IsNodeList(field.Type))
                 {
-                    WriteLine($"public abstract {(IsNew(field) ? "new " : "")}MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {field.Name} {{ get; }}");
+                    WriteLine($"public abstract {(IsNew(field) ? "new " : "")}Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {field.Name} {{ get; }}");
                 }
                 else
                 {
@@ -236,21 +234,21 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
                 WriteComment(field.PropertyComment, "");
                 if (IsNodeList(field.Type))
                 {
-                    WriteLine($"public {OverrideOrNewModifier(field)}MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {overriddenName} => new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(this.{CamelCase(field.Name)});");
+                    WriteLine($"public {OverrideOrNewModifier(field)}Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {overriddenName} => new Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(this.{CamelCase(field.Name)});");
                     if (IsOverride(field) && !directlyOverride)
-                        WriteLine($"public MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {field.Name} => new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(this.{CamelCase(field.Name)});");
+                        WriteLine($"public Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {field.Name} => new Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(this.{CamelCase(field.Name)});");
                 }
                 else if (IsSeparatedNodeList(field.Type))
                 {
-                    WriteLine($"public {OverrideOrNewModifier(field)}MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {overriddenName} => new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)}));");
+                    WriteLine($"public {OverrideOrNewModifier(field)}Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {overriddenName} => new Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)}));");
                     if (IsOverride(field) && !directlyOverride)
-                        WriteLine($"public MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {field.Name} => new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)}));");
+                        WriteLine($"public Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type} {field.Name} => new Microsoft.CodeAnalysis.Syntax.InternalSyntax.{field.Type}(new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)}));");
                 }
                 else if (field.Type == "SyntaxNodeOrTokenList")
                 {
-                    WriteLine($"public {OverrideOrNewModifier(field)}MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode> {overriddenName} => new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)});");
+                    WriteLine($"public {OverrideOrNewModifier(field)}Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode> {overriddenName} => new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)});");
                     if (IsOverride(field) && !directlyOverride)
-                        WriteLine($"public MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode> {field.Name} => new MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)});");
+                        WriteLine($"public Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode> {field.Name} => new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>(this.{CamelCase(field.Name)});");
                 }
                 else
                 {
@@ -497,10 +495,10 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         Write(CommaJoin(node.Fields.Select(f =>
         {
             var type =
-                f.Type == "SyntaxNodeOrTokenList" ? $"MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>" :
-                f.Type == "SyntaxTokenList" ? "MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<SyntaxToken>" :
-                IsNodeList(f.Type) ? "MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax." + f.Type :
-                IsSeparatedNodeList(f.Type) ? "MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax." + f.Type :
+                f.Type == "SyntaxNodeOrTokenList" ? $"Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>" :
+                f.Type == "SyntaxTokenList" ? "Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<SyntaxToken>" :
+                IsNodeList(f.Type) ? "Microsoft.CodeAnalysis.Syntax.InternalSyntax." + f.Type :
+                IsSeparatedNodeList(f.Type) ? "Microsoft.CodeAnalysis.Syntax.InternalSyntax." + f.Type :
                 f.Type + (IsOptional(f) ? "?" : string.Empty);
 
             return $"{type} {CamelCase(f.Name)}";
@@ -879,8 +877,8 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
             {
                 var type = f.Type switch
                 {
-                    "SyntaxNodeOrTokenList" => $"MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>",
-                    _ when IsSeparatedNodeList(f.Type) || IsNodeList(f.Type) => $"MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax.{f.Type}",
+                    "SyntaxNodeOrTokenList" => $"Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<{LanguageNames.This}SyntaxNode>",
+                    _ when IsSeparatedNodeList(f.Type) || IsNodeList(f.Type) => $"Microsoft.CodeAnalysis.Syntax.InternalSyntax.{f.Type}",
                     _ => GetFieldType(f, green: true),
                 };
 

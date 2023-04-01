@@ -2,12 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
 using System.Collections.Immutable;
 using System.Text;
-using MSCA::Microsoft.CodeAnalysis.Text;
-using MSCA::Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 using Qtyi.CodeAnalysis.Lua;

@@ -2,17 +2,11 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using MSCA::Microsoft.CodeAnalysis;
-using MSCA::Microsoft.CodeAnalysis.PooledObjects;
-using MSCA::Microsoft.CodeAnalysis.Text;
-#if !NETCOREAPP || NETCOREAPP3_1
-using MemberNotNullAttribute = MSCA::System.Diagnostics.CodeAnalysis.MemberNotNullAttribute;
-using MemberNotNullWhenAttribute = MSCA::System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute;
-#endif
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.PooledObjects;
+using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -28,7 +22,7 @@ using ThisSyntaxNode = MoonScript.MoonScriptSyntaxNode;
 using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
-using MSCA::Microsoft.CodeAnalysis.Syntax.InternalSyntax;
+using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 /// <summary>
 /// 表示语法解析器，提供语法解析器的必要约束和部分实现，此类必须被继承。

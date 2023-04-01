@@ -2,15 +2,13 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias MSCA;
-
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using MSCA::Microsoft.Cci;
-using MSCA::Microsoft.CodeAnalysis;
-using MSCA::Microsoft.CodeAnalysis.PooledObjects;
+using Microsoft.Cci;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.PooledObjects;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols.Metadata.PE;
