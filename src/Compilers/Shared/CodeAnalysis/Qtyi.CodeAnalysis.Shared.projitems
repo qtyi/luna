@@ -10,7 +10,7 @@
     <Import_RootNamespace>Qtyi.CodeAnalysis</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup Label="InternalUtilities" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\IsExternalInit.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\IsExternalInit.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Binder\BindingDiagnosticBag.cs" />

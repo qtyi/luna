@@ -11,7 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\ModelExtensions.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\IsExternalInit.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\IsExternalInit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\IndentWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\StringBuilderReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\ErrorFactsGenerator.cs" />

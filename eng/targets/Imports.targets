@@ -44,6 +44,8 @@
       Disable code style analyzers in "older" targets for a multi-targeted project. These analyzers don't
       impact the correctness of the output, so we avoid the performance overhead where it's easy to do so.
     -->
+    <RoslynCheckCodeStyle Condition="'$(RoslynCheckCodeStyle)' == '' AND '$(DisableNullableWarnings)' == 'true'">false</RoslynCheckCodeStyle>
+    <RoslynCheckCodeStyle Condition="'$(RoslynCheckCodeStyle)' == '' AND ('$(ContinuousIntegrationBuild)' != 'true' OR '$(RoslynEnforceCodeStyle)' == 'true')">true</RoslynCheckCodeStyle>
     <LunaCheckCodeStyle Condition="'$(LunaCheckCodeStyle)' == '' AND '$(DisableNullableWarnings)' == 'true'">false</LunaCheckCodeStyle>
     <LunaCheckCodeStyle Condition="'$(LunaCheckCodeStyle)' == '' AND ('$(ContinuousIntegrationBuild)' != 'true' OR '$(LunaEnforceCodeStyle)' == 'true')">true</LunaCheckCodeStyle>
   </PropertyGroup>
@@ -51,12 +53,12 @@
   <!--
     PERF: Set default value for 'RunAnalyzersDuringBuild' to determine if analyzers should be executed.
           Default to 'false' in all non-CI builds to improve local build time (i.e. csc/vbc invocations both inside Visual Studio and from command line prompt), except if:
-            1. We are enforcing code style, i.e. '$(LunaEnforceCodeStyle)' == 'true' OR
+            1. We are enforcing code style, i.e. '$(RoslynEnforceCodeStyle)' == 'true' OR '$(LunaEnforceCodeStyle)' == 'true' OR
             2. We are explicitly running code analysis via "Run Code Analysis" command, i.e. '$(RunCodeAnalysis)' == 'true'.
           Otherwise, default to 'true'.
   -->
   <PropertyGroup Condition="'$(RunAnalyzersDuringBuild)' == ''">
-    <RunAnalyzersDuringBuild Condition="'$(LunaEnforceCodeStyle)' != 'true' AND '$(RunCodeAnalysis)' != 'true'">false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringBuild Condition="('$(RoslynEnforceCodeStyle)' != 'true' AND '$(LunaEnforceCodeStyle)' != 'true') AND '$(RunCodeAnalysis)' != 'true'">false</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringBuild Condition="'$(RunAnalyzersDuringBuild)' == ''">true</RunAnalyzersDuringBuild>
   </PropertyGroup>
 
@@ -231,7 +233,7 @@
   <!-- 
     Add ThirdPartyNotices.rtf to all shipping NuGet packages.
   -->
-  <ItemGroup Condition="'$(IsPackable)' == 'true' and '$(IsShipping)' == 'true' and '$(ThirdPartyNotices)' != 'false'">
+  <ItemGroup Condition="'$(IsPackable)' == 'true' and '$(IsShipping)' == 'true'">
     <None Include="$(ThirdPartyNoticesFilePath)" PackagePath="ThirdPartyNotices.rtf" Visible="false" Pack="true"/>
   </ItemGroup>
 
@@ -241,11 +243,11 @@
   <Target Name="_AppendCommonPackageDescription" 
           BeforeTargets="InitializeStandardNuspecProperties;GenerateNuspec" 
           DependsOnTargets="InitializeSourceControlInformation"
-          Condition="'$(IsPackable)' == 'true' AND '$(SourceControlInformationFeatureSupported)' == 'true' AND '$(AppendCommonPackageDescription)' != 'false'">
+          Condition="'$(IsPackable)' == 'true' AND '$(SourceControlInformationFeatureSupported)' == 'true'">
     <PropertyGroup>
       <PackageDescription>
       $(PackageDescription)
-      More details at $(PrivateRepositoryUrl)/blob/main/docs/wiki/NuGet-packages.md
+      More details at https://aka.ms/roslyn-packages
       This package was built from the source at $(PrivateRepositoryUrl)/commit/$(SourceRevisionId).
       </PackageDescription>
     </PropertyGroup>
@@ -401,23 +403,6 @@
     <Touch Files="@(CopyUpToDateMarker)"
            AlwaysCreate="true"
            Condition="'@(ReferencesCopiedInThisBuild)' != ''"/>
-  </Target>
-
-  <!-- Workaround for https://github.com/dotnet/roslyn/issues/63189 -->
-  <Target Name="DisableJsonGenerator"
-           AfterTargets="ResolvePackageAssets">
-    <ItemGroup>
-      <ResolvedAnalyzers Remove="@(ResolvedAnalyzers)" Condition="'%(NuGetPackageId)' == 'System.Text.Json'" />
-    </ItemGroup>
-  </Target>
-  
-  <!-- Workaround for https://github.com/dotnet/wpf/issues/6792 -->
-  <Target Name="RemoveDuplicateAnalyzers" BeforeTargets="CoreCompile" Condition="'$(UseWpf)' == 'true'">
-    <ItemGroup>
-        <FilteredAnalyzer Include="@(Analyzer->Distinct())" />
-        <Analyzer Remove="@(Analyzer)" />
-        <Analyzer Include="@(FilteredAnalyzer)" />
-    </ItemGroup>
   </Target>
 
   <Import Project="DoNotGenerateSatelliteAssemblies_Workaround.targets" Condition="'$(GenerateSatelliteAssemblies)' == 'false'" />

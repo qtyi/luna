@@ -9,6 +9,9 @@ $ErrorActionPreference="Stop"
 $VSSetupDir = Join-Path $ArtifactsDir "VSSetup\$configuration"
 $PackagesDir = Join-Path $ArtifactsDir "packages\$configuration"
 $PublishDataUrl = "https://raw.githubusercontent.com/qtyi/luna/main/eng/config/PublishData.json"
+$ExternalReposDir = Join-Path $RepoRoot ".externalrepos"
+
+Create-Directory $ExternalReposDir
 
 $binaryLog = if (Test-Path variable:binaryLog) { $binaryLog } else { $false }
 $nodeReuse = if (Test-Path variable:nodeReuse) { $nodeReuse } else { $false }
@@ -261,82 +264,91 @@ function Get-PackageDir([string]$name, [string]$version = "") {
   return $p
 }
 
-function Run-MSBuild([string]$projectFilePath, [string]$buildArgs = "", [string]$logFileName = "", [switch]$parallel = $true, [switch]$summary = $true, [switch]$warnAsError = $true, [string]$configuration = $script:configuration, [switch]$runAnalyzers = $false) {
-  # Because we override the C#/VB toolset to build against our LKG package, it is important
-  # that we do not reuse MSBuild nodes from other jobs/builds on the machine. Otherwise,
-  # we'll run into issues such as https://github.com/dotnet/roslyn/issues/6211.
-  # MSBuildAdditionalCommandLineArgs=
-  $args = "/p:TreatWarningsAsErrors=true /nologo /nodeReuse:false /p:Configuration=$configuration ";
-
-  if ($warnAsError) {
-    $args += " /warnaserror"
-  }
-
-  if ($summary) {
-    $args += " /consoleloggerparameters:Verbosity=minimal;summary"
-  } else {        
-    $args += " /consoleloggerparameters:Verbosity=minimal"
-  }
-
-  if ($parallel) {
-    $args += " /m"
-  }
-
-  if ($runAnalyzers) {
-    $args += " /p:RunAnalyzersDuringBuild=true"
-  }
-
-  if ($binaryLog) {
-    if ($logFileName -eq "") {
-      $logFileName = [IO.Path]::GetFileNameWithoutExtension($projectFilePath)
-    }
-    $logFileName = [IO.Path]::ChangeExtension($logFileName, ".binlog")
-    $logFilePath = Join-Path $LogDir $logFileName
-    $args += " /bl:$logFilePath"
-  }
-
-  if ($officialBuildId) {
-    $args += " /p:OfficialBuildId=" + $officialBuildId
-  }
-
-  if ($ci) {
-    $args += " /p:ContinuousIntegrationBuild=true"
-  }
-
-  if ($bootstrapDir -ne "") {
-    $args += " /p:BootstrapBuildPath=$bootstrapDir"
-  }
-
-  $args += " $buildArgs"
-  $args += " $projectFilePath"
-  $args += " $properties"
-
-  $buildTool = InitializeBuildTool
-  Exec-Console $buildTool.Path "$($buildTool.Command) $args"
-}
-
 # Create a bootstrap build of the compiler.  Returns the directory where the bootstrap build
 # is located.
 #
 # Important to not set $script:bootstrapDir here yet as we're actually in the process of
 # building the bootstrap.
-function Make-BootstrapBuild([switch]$force32 = $false) {
+function Make-BootstrapBuild([string]$bootstrapToolset = "") {
+
+  function Run-MSBuild([string]$projectFilePath, [string]$buildArgs = "", [string]$logFileName = "", [string]$configuration = $script:configuration) {
+    # Because we override the C#/VB toolset to build against our LKG package, it is important
+    # that we do not reuse MSBuild nodes from other jobs/builds on the machine. Otherwise,
+    # we'll run into issues such as https://github.com/dotnet/roslyn/issues/6211.
+    # MSBuildAdditionalCommandLineArgs=
+    $args = "/p:TreatWarningsAsErrors=true /nologo /nodeReuse:false /p:Configuration=$configuration /v:m ";
+
+    if ($warnAsError) {
+      $args += " /warnaserror"
+    }
+
+    if ($runAnalyzers) {
+      $args += " /p:RunAnalyzersDuringBuild=true"
+    }
+
+    if ($binaryLog) {
+      if ($logFileName -eq "") {
+        $logFileName = [IO.Path]::GetFileNameWithoutExtension($projectFilePath)
+      }
+      $logFileName = [IO.Path]::ChangeExtension($logFileName, ".binlog")
+      $logFilePath = Join-Path $LogDir $logFileName
+      $args += " /bl:$logFilePath"
+    }
+
+    if ($officialBuildId) {
+      $args += " /p:OfficialBuildId=" + $officialBuildId
+    }
+
+    if ($ci) {
+      $args += " /p:ContinuousIntegrationBuild=true"
+      # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
+      # in our CI builds
+      # https://github.com/NuGet/Home/issues/12373
+      $args += " /p:RestoreUseStaticGraphEvaluation=false"
+    }
+
+    if ($bootstrapDir -ne "") {
+      $args += " /p:BootstrapBuildPath=$bootstrapDir"
+    }
+
+    $args += " $buildArgs"
+    $args += " $projectFilePath"
+    $args += " $properties"
+
+    $buildTool = InitializeBuildTool
+    Exec-Console $buildTool.Path "$($buildTool.Command) $args"
+  }
+
   Write-Host "Building bootstrap compiler"
 
   $dir = Join-Path $ArtifactsDir "Bootstrap"
   Remove-Item -re $dir -ErrorAction SilentlyContinue
   Create-Directory $dir
 
-  $packageName = "Microsoft.Net.Compilers.Toolset"
-  $projectPath = "src\NuGet\$packageName\AnyCpu\$packageName.Package.csproj"
-  $force32Flag = if ($force32) { " /p:BOOTSTRAP32=true" } else { "" }
+  if ($bootstrapToolset -eq "" -or $bootstrapToolset -eq "AnyCPU") {
+    $projectPath = "src\NuGet\Microsoft.Net.Compilers.Toolset\AnyCpu\Microsoft.Net.Compilers.Toolset.Package.csproj"
+    $packageName = "Microsoft.Net.Compilers.Toolset"
+  }
+  elseif ($bootstrapToolset -eq "Framework") {
+    $projectPath = "src\NuGet\Microsoft.Net.Compilers.Toolset\Framework\Microsoft.Net.Compilers.Toolset.Framework.Package.csproj"
+    $packageName = "Microsoft.Net.Compilers.Toolset.Framework"
+  }
+  else {
+    throw "Unsupported bootstrap toolset $bootstrapToolset"
+  }
 
-  Run-MSBuild $projectPath "/restore /t:Pack /p:LunaEnforceCodeStyle=false /p:RunAnalyzersDuringBuild=false /p:DotNetUseShippingVersions=true /p:InitialDefineConstants=BOOTSTRAP /p:PackageOutputPath=`"$dir`" /p:EnableNgenOptimization=false /p:PublishWindowsPdb=false $force32Flag" -logFileName "Bootstrap" -configuration $bootstrapConfiguration -runAnalyzers
+  Run-MSBuild $projectPath "/restore /t:Pack /p:RoslynEnforceCodeStyle=false /p:RunAnalyzersDuringBuild=false /p:DotNetUseShippingVersions=true /p:InitialDefineConstants=BOOTSTRAP /p:PackageOutputPath=`"$dir`" /p:EnableNgenOptimization=false /p:PublishWindowsPdb=false" -logFileName "Bootstrap" -configuration $bootstrapConfiguration
   $packageFile = Get-ChildItem -Path $dir -Filter "$packageName.*.nupkg"
   Unzip (Join-Path $dir $packageFile.Name) $dir
 
   Write-Host "Cleaning Bootstrap compiler artifacts"
   Run-MSBuild $projectPath "/t:Clean" -logFileName "BootstrapClean"
+
+  # Work around NuGet bug that doesn't correctly re-generate our project.assets.json files.
+  # Deleting everything forces a regen
+  # https://github.com/NuGet/Home/issues/12437
+  Remove-Item -Recurse -Force (Join-Path $ArtifactsDir "bin")
+  Remove-Item -Recurse -Force (Join-Path $ArtifactsDir "obj")
 
   return $dir
 }
@@ -354,4 +366,133 @@ function Unsubst-TempDir() {
   if ($ci) {
     Exec-Command "subst" "T: /d"
   }
+}
+
+# Download an archive from a GitHub repository.
+# Set $branch to specify a certain branch name to search for commit id, or the default branch name if it is empty.
+# Set $commitId to specify a certain commit id, or the latest if it is empty.
+# Set $force switch to update even if the codebase of $commitId exist.
+function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch = "", [string]$commidId = "", [switch]$force) {
+  if ($commitId -eq "") {
+    while ($true) {
+      try {
+        Write-Host "Fetching HEAD commit SHA for $repoOwner/$repoName."
+        if ($branch -ne "") {
+          $commitInfo = ((Invoke-WebRequest -Uri "https://api.github.com/repos/$repoOwner/$repoName/branches/$branch" -UseBasicParsing).Content | ConvertFrom-Json).commit
+        }
+        else {
+          # Set per_page to 1 to avoid exceeding API rate limit.
+          $commitInfo = ((Invoke-WebRequest -Uri "https://api.github.com/repos/$repoOwner/$repoName/commits?per_page=1" -UseBasicParsing).Content | ConvertFrom-Json)[0]
+        }
+        $commitId = $commitInfo.sha
+        Write-Host "HEAD commit SHA for $repoOwner/$repoName$(&{ if ($branch -ne '') { '/' + $branch } else { '' } }) is $commitId."
+        break
+      }
+      catch {
+        $response = $_.Exception.Response
+        if ($response.StatusCode.value__ -eq 403) {
+          Write-Host "API rate limit exceeded exceeded for current IP."
+          if ($response.Headers.ContainsKey("retry-after")) {
+            $retryAfterSeconds = [int]$response.Headers["retry-after"]
+          }
+          elseif ($response.Headers.ContainsKey("x-ratelimit-reset")) {
+            $retryAfterSeconds = [int]$response.Headers["x-ratelimit-reset"] - [int](New-TimeSpan -Start (Get-Date "01/01/1970") -End (Get-Date)).TotalSeconds
+          }
+          else {
+            # Retry after two minutes by default.
+            $retryAfterSeconds = 120
+          }
+          Write-Host "Retry after $retryAfterSeconds seconds."
+          Start-Sleep -Seconds $retryAfterSeconds
+
+          continue
+        }
+
+        # Throw again if we cannot recover from this situation.
+        throw
+      }
+    }
+  }
+
+  $repoDir = Join-Path (Join-Path $ExternalReposDir $repoOwner) $repoName
+  $commitDir = Join-Path $repoDir $commidId
+  if (-not $force -and (Test-Path $commitDir)) {
+    # Return immediately if codebase already exist.
+    return $commitDir
+  }
+
+  Create-Directory $repoDir
+  $commitFilePath = Join-Path $repoDir $commitId
+  Invoke-WebRequest "https://github.com/$repoOwner/$repoName/archive/$commitId.zip" -OutFile $commitFilePath
+  Unzip $commitFilePath $repoDir
+  # Rename directory from $repoName-$commidId to $commidId only (eq to $commitDir).
+  Rename-Item -Path (Join-Path $repoDir "$repoName-$commidId") -NewName $commidId
+  # Delete zip file downloaded.
+  Remove-Item -Path $commitFilePath
+
+  return $commitDir
+}
+
+# Get source-link GitHub repository location.
+# Set $packageVersion to return location for a certain package version, or all locations with version infos if it is empty.
+function Get-SourceLink([string]$packageName, [string]$packageVersion = "") {
+  function GetSourceLinkFromNuspec([string]$existingVersion) {
+    $lowercasePackageName = $packageName.ToLowerInvariant()
+    $nuspecUrl = "https://api.nuget.org/v3-flatcontainer/$lowercasePackageName/$existingVersion/$lowercasePackageName.nuspec"
+    $nuspec = [xml](Invoke-RestMethod -Uri $nuspecUrl)
+    $repository = $nuspec.package.metadata.repository
+    $projectUrl = $nuspec.package.metadata.projectUrl
+
+    if ($repository -eq $null) {
+      throw "Nuspec file do not have repository information for $packageName ($version)."
+    }
+
+    if ($repository.type -ne "git") {
+      throw "Unsupported repository metadata type '$repository.type'."
+    }
+
+    if ($repository.url -ne $null) {
+      if (-not $repository.url -match "github.com/(?<owner>[^/]+)/(?<name>[^/]+?)(\.git)?$") {
+        throw "Unsupported repository git url '" + $repository.url + "'."
+      }
+    }
+    elseif ($projectUrl -ne $null) {
+      if (-not $repository.url -match "github.com/(?<owner>[^/]+)/(?<name>[^/]+)") {
+        throw "Unsupported project url '" + $repository.url + "'."
+      }
+    }
+    else {
+      throw "Nuspec file do not have repository information for $packageName ($version)."
+    }
+    
+    return [PSCustomObject]@{
+      Owner = $Matches.owner
+      Name = $Matches.name
+      Branch = if ($repository.branch -ne $null) { $repository.branch } else { "" }
+      CommitId = if ($repository.commit -ne $null) { $repository.commit } else { "" }
+    }
+  }
+
+  $registrationUrl = "https://api.nuget.org/v3/registration5-gz-semver2/"+ $packageName.ToLowerInvariant() + "/index.json"
+  $registration = (Invoke-WebRequest -Uri $registrationUrl -UseBasicParsing).Content | ConvertFrom-Json
+
+  if ($packageVersion -ne "") {
+    return GetSourceLinkFromNuspec $packageVersion
+  }
+
+  $list = New-Object System.Collections.Generic.List[PSCustomObject]
+  foreach ($itemgroup in $registration.items)
+  {
+    foreach ($item in $itemgroup.items)
+    {
+      try {
+        $list.Add((GetSourceLinkFromNuspec $item.catalogEntry.version))
+      }
+      catch {
+        Write-Warning $_
+      }
+    }
+  }
+
+  return $list.ToArray()
 }

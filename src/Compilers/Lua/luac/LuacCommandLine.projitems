@@ -19,15 +19,15 @@
     <Import_RootNamespace>CommandLine</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Core\CommandLine\BuildProtocol.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Core\CommandLine\CompilerServerLogger.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Core\CommandLine\ConsoleUtil.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Core\CommandLine\NativeMethods.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Shared\BuildClient.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Shared\BuildServerConnection.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Shared\ExitingTraceListener.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Shared\NamedPipeUtil.cs" />
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Shared\RuntimeHostInfo.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\BuildProtocol.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\CompilerServerLogger.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\ConsoleUtil.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\CommandLine\NativeMethods.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\BuildClient.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\BuildServerConnection.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\ExitingTraceListener.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\NamedPipeUtil.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\RuntimeHostInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\LunaBuildProtocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Core\CommandLine\LunaCompilerServerLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\Shared\LunaBuildClient.cs" />
