@@ -148,7 +148,7 @@ function Process-Arguments() {
     }
   }
 
-  if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
+  if ($help -or (($null -ne $properties) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
        Print-Usage
        exit 0
   }
@@ -219,40 +219,13 @@ function Process-Arguments() {
 }
 
 function Restore-ExternalRepos() {
-  # Read version configuration of Luna from "eng/Versions.props" and return full version string.
-  function GetLunaVersion()
-  {
-    [xml]$VersionsProps = Get-Content (Join-Path $EngRoot "Versions.props")
-    $properties = $VersionsProps.Project.PropertyGroup
-    $major = [int]$properties.MajorVersion[0]
-    $minor = [int]$properties.MinorVersion[0]
-    $patch = [int]$properties.PatchVersion[0]
-    $prerelease = $properties.PreReleaseVersionLabel[0]
-
-    $version = [string]$major + "." + [string]$minor + "." + [string]$patch;
-    if ([string]::IsNullOrWhiteSpace($prerelease))
-    {
-      return $version
-    }
-
-    # Before 3.5.* prerelese version string of Roslyn ends with '-beta[prerelease].final'.
-    # Start from 3.6.* prerelese version string of Roslyn ends with '-[prerelease].final'.
-    if (($major -le 3) -and ($minor -le 5))
-    {
-      $prerelease = "beta" + $prerelease
-    }
-    return $version + "-" + $prerelease + ".final"
-  }
+  # Archive dotnet/roslyn repository from GitHub that our work is based on.
+  # We get its source link from NuGet with version exactly the same as Luna.
+  $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" (Get-LunaVersion)
+  Archive-Codebase $dotnetRoslynRepo.Owner $dotnetRoslynRepo.Name $dotnetRoslynRepo.Branch $dotnetRoslynRepo.CommitId
 
   # Archive latest qtyi/roslyn repository from GitHub that our work is based on.
   Archive-Codebase "qtyi" "roslyn"
-
-  # Archive dotnet/roslyn repository from GitHub that our work is based on.
-  # We get its source link from NuGet with version exactly the same as Luna.
-  $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" GetLunaVersion
-  Archive-Codebase $dotnetRoslynRepo.Owner $dotnetRoslynRepo.Name $dotnetRoslynRepo.Branch $dotnetRoslynRepo.CommitId
-
-  # Archive
 }
 
 function BuildSolution() {
@@ -773,6 +746,7 @@ try {
 
   if ($restore) {
     &(Ensure-DotNetSdk) tool restore
+    Restore-ExternalRepos
   }
 
   try

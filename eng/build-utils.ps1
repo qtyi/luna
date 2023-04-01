@@ -231,6 +231,27 @@ function Get-VersionCore([string]$name, [string]$versionFile) {
 
 }
 
+# Read version configuration of Luna from "eng/Versions.props" and return full version string.
+function Get-LunaVersion() {
+  $x = [xml](Get-Content -Raw (Join-Path $EngRoot "Versions.props"))
+  $major = [int]$x.SelectSingleNode("//Project/PropertyGroup/MajorVersion").InnerText
+  $minor = [int]$x.SelectSingleNode("//Project/PropertyGroup/MinorVersion").InnerText
+  $patch = [int]$x.SelectSingleNode("//Project/PropertyGroup/PatchVersion").InnerText
+  $prerelease = $x.SelectSingleNode("//Project/PropertyGroup/PreReleaseVersionLabel").InnerText
+
+  $version = [string]$major + "." + [string]$minor + "." + [string]$patch;
+  if ([string]::IsNullOrWhiteSpace($prerelease)) {
+    return $version
+  }
+
+  # Before 3.5.* prerelese version string of Roslyn ends with '-beta[prerelease].final'.
+  # Start from 3.6.* prerelese version string of Roslyn ends with '-[prerelease].final'.
+  if (($major -le 3) -and ($minor -le 5)) {
+    $prerelease = "beta" + $prerelease
+  }
+  return $version + "-" + $prerelease + ".final"
+}
+
 # Return the version of the NuGet package as used in this repo
 function Get-PackageVersion([string]$name) {
   return Get-VersionCore $name (Join-Path $EngRoot "Versions.props")
@@ -372,7 +393,7 @@ function Unsubst-TempDir() {
 # Set $branch to specify a certain branch name to search for commit id, or the default branch name if it is empty.
 # Set $commitId to specify a certain commit id, or the latest if it is empty.
 # Set $force switch to update even if the codebase of $commitId exist.
-function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch = "", [string]$commidId = "", [switch]$force) {
+function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch = "", [string]$commitId = "", [switch]$force) {
   if ($commitId -eq "") {
     while ($true) {
       try {
@@ -391,11 +412,11 @@ function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch
       catch {
         $response = $_.Exception.Response
         if ($response.StatusCode.value__ -eq 403) {
-          Write-Host "API rate limit exceeded exceeded for current IP."
-          if ($response.Headers.ContainsKey("retry-after")) {
+          Write-Host "API rate limit exceeded for current IP."
+          if ($null -ne $response.Headers["retry-after"]) {
             $retryAfterSeconds = [int]$response.Headers["retry-after"]
           }
-          elseif ($response.Headers.ContainsKey("x-ratelimit-reset")) {
+          elseif ($null -ne $response.Headers["x-ratelimit-reset"]) {
             $retryAfterSeconds = [int]$response.Headers["x-ratelimit-reset"] - [int](New-TimeSpan -Start (Get-Date "01/01/1970") -End (Get-Date)).TotalSeconds
           }
           else {
@@ -415,22 +436,95 @@ function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch
   }
 
   $repoDir = Join-Path (Join-Path $ExternalReposDir $repoOwner) $repoName
-  $commitDir = Join-Path $repoDir $commidId
-  if (-not $force -and (Test-Path $commitDir)) {
-    # Return immediately if codebase already exist.
-    return $commitDir
+  $commitDir = Join-Path $repoDir $commitId
+  if ($force -or -not (Test-Path $commitDir)) {
+    Download
+  }
+  else {
+    Write-Host "$repoOwner/$repoName already been restored."
   }
 
-  Create-Directory $repoDir
-  $commitFilePath = Join-Path $repoDir $commitId
-  Invoke-WebRequest "https://github.com/$repoOwner/$repoName/archive/$commitId.zip" -OutFile $commitFilePath
-  Unzip $commitFilePath $repoDir
-  # Rename directory from $repoName-$commidId to $commidId only (eq to $commitDir).
-  Rename-Item -Path (Join-Path $repoDir "$repoName-$commidId") -NewName $commidId
-  # Delete zip file downloaded.
-  Remove-Item -Path $commitFilePath
+  # This function do the actual download job.
+  function Download() {
+    $ProgressPreference = 'SilentlyContinue' # Don't display the console progress UI.
 
-  return $commitDir
+    $commitFilePath = Join-Path $repoDir "$commitId.zip"
+    if ($force -or -not (Test-Path $commitFilePath)) {
+      Create-Directory $repoDir
+      $archiveUrl = "https://github.com/$repoOwner/$repoName/archive/$commitId.zip"
+      try {
+        Write-Host "Downloading archive from $archiveUrl."
+        Invoke-WebRequest $archiveUrl -OutFile $commitFilePath
+      }
+      catch {
+        # Downloading failed.
+        Write-Host "Downloading failed with $_."
+        if (Test-Path $commitFilePath) {
+          Remove-Item -Path $commitFilePath
+        }
+      }
+    }
+
+    try {
+      Write-Host "Unzipping $commitFilePath."
+      Unzip $commitFilePath $repoDir
+      # Rename directory from $repoName-$commitId to $commitId only (eq to $commitDir).
+      Rename-Item -Path (Join-Path $repoDir "$repoName-$commitId") -NewName $commitId
+    }
+    catch {
+      Write-Host "Unzipping failed with $_."
+    }
+    finally {
+      # Delete zip file downloaded.
+      Remove-Item -Path $commitFilePath
+    }
+  }
+
+  Update-ExternalDirectoriesProps $repoOwner $repoName $commitId
+}
+
+function Update-ExternalDirectoriesProps([string]$repoOwner, [string]$repoName, [string]$commitId)
+{
+  $propsPath = Join-Path $ExternalReposDir "ExternalDirectories.props"
+  if (-not (Test-Path $propsPath))
+  {
+    [xml]$props = New-Object System.Xml.XmlDocument
+    $props.AppendChild($props.CreateXmlDeclaration("1.0", "utf-8", $null))
+    $props.AppendChild($props.CreateComment("Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information."))
+    $props.AppendChild($props.CreateElement("Project"))
+  }
+  else
+  {
+    [xml]$props = Get-Content $propsPath
+  }
+  
+  $propertyGroupLabel = "$repoOwner/$repoName"
+  $propertyGroup = ($props.Project.PropertyGroup | Where-Object Label -EQ $propertyGroupLabel)
+  if ($null -eq $propertyGroup)
+  {
+    $propertyGroup = $props.CreateElement("PropertyGroup")
+    $propertyGroup.SetAttribute("Label", $propertyGroupLabel)
+    $props.DocumentElement.AppendChild($propertyGroup)
+  }
+
+  function ConvertTo-PascalCase([string]$value){
+    $spans = $value -split "-" | ForEach-Object {
+      [regex]::Replace($_.ToLower(), "(^|_)(.)", { $args[0].Groups[2].Value.ToUpper()})
+    }
+    return $spans -join ""
+  }
+
+  $propNamePrefix = "$(ConvertTo-PascalCase $repoOwner)$(ConvertTo-PascalCase $repoName)"
+  $repoDirPropName = $propNamePrefix + "RepositoryDirectory";
+  $repoDir = $propertyGroup[$repoDirPropName]
+  if ($null -eq $repoDir)
+  {
+    $repoDir = $props.CreateElement($repoDirPropName)
+    $propertyGroup.AppendChild($repoDir)
+  }
+  $repoDir.InnerText = "`$(MSBuildThisFileDirectory)" + (@($repoOwner, $repoName, $commitId, "") -join [System.IO.Path]::DirectorySeparatorChar)
+
+  $props.Save($propsPath)
 }
 
 # Get source-link GitHub repository location.
@@ -439,37 +533,47 @@ function Get-SourceLink([string]$packageName, [string]$packageVersion = "") {
   function GetSourceLinkFromNuspec([string]$existingVersion) {
     $lowercasePackageName = $packageName.ToLowerInvariant()
     $nuspecUrl = "https://api.nuget.org/v3-flatcontainer/$lowercasePackageName/$existingVersion/$lowercasePackageName.nuspec"
+    Write-Host "GET $nuspecUrl"
     $nuspec = [xml](Invoke-RestMethod -Uri $nuspecUrl)
     $repository = $nuspec.package.metadata.repository
     $projectUrl = $nuspec.package.metadata.projectUrl
 
-    if ($repository -eq $null) {
-      throw "Nuspec file do not have repository information for $packageName ($version)."
+    if ($null -eq $repository) {
+      throw "Nuspec file do not have repository information for $packageName ($packageVersion)."
     }
 
     if ($repository.type -ne "git") {
       throw "Unsupported repository metadata type '$repository.type'."
     }
 
-    if ($repository.url -ne $null) {
-      if (-not $repository.url -match "github.com/(?<owner>[^/]+)/(?<name>[^/]+?)(\.git)?$") {
+    if ($null -ne $repository.url) {
+      if ($repository.url -match "github.com/(?<owner>[^/]+)/(?<name>[^/]+?)(\.git)?$") {
+        $owner = $Matches.owner
+        $name = $Matches.name
+      }
+      else {
         throw "Unsupported repository git url '" + $repository.url + "'."
       }
     }
-    elseif ($projectUrl -ne $null) {
-      if (-not $repository.url -match "github.com/(?<owner>[^/]+)/(?<name>[^/]+)") {
+    elseif ($null -ne $projectUrl) {
+      if (-not $projectUrl -match "github.com/(?<owner>[^/]+)/(?<name>[^/]+)") {
+        $owner = $Matches.owner
+        $name = $Matches.name
+      }
+      else {
         throw "Unsupported project url '" + $repository.url + "'."
       }
     }
     else {
-      throw "Nuspec file do not have repository information for $packageName ($version)."
+      throw "Nuspec file do not have repository information for $packageName ($packageVersion)."
     }
-    
+    Write-Host "Repository of $packageName ($packageVersion) is $owner/$name"
+
     return [PSCustomObject]@{
-      Owner = $Matches.owner
-      Name = $Matches.name
-      Branch = if ($repository.branch -ne $null) { $repository.branch } else { "" }
-      CommitId = if ($repository.commit -ne $null) { $repository.commit } else { "" }
+      Owner = $owner
+      Name = $name
+      Branch = if ($repository.HasAttribute("branch")) { $repository.branch } else { "" }
+      CommitId = if ($repository.HasAttribute("commit")) { $repository.commit } else { "" }
     }
   }
 
