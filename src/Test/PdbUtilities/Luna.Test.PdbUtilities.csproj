@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(RoslynRepositoryDirectory)src\Test\PdbUtilities\**\*.cs" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Test\PdbUtilities\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(RoslynRepositoryDirectory)src\Compilers\Shared\GlobalAssemblyCacheHelpers\FusionAssemblyIdentity.cs" Link="FusionAssemblyIdentity" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\GlobalAssemblyCacheHelpers\FusionAssemblyIdentity.cs" Link="FusionAssemblyIdentity" />
   </ItemGroup>
 
   <ItemGroup>

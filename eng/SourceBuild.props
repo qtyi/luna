@@ -3,6 +3,7 @@
   <PropertyGroup>
     <GitHubRepositoryName>luna</GitHubRepositoryName>
     <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
+    <SourceBuildTrimNetFrameworkTargets>true</SourceBuildTrimNetFrameworkTargets>
   </PropertyGroup>
 
   <!--

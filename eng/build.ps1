@@ -33,8 +33,9 @@ param (
   # Options
   [switch]$bootstrap,
   [string]$bootstrapConfiguration = "Release",
+  [string]$bootstrapToolset = "",
   [switch][Alias('bl')]$binaryLog,
-  [switch]$buildServerLog,
+  [string]$binaryLogName = "",
   [switch]$ci,
   [switch]$collectDumps,
   [switch][Alias('a')]$runAnalyzers,
@@ -79,7 +80,7 @@ function Print-Usage() {
   Write-Host "  -verbosity <value>        Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]"
   Write-Host "  -deployExtensions         Deploy built vsixes (short: -d)"
   Write-Host "  -binaryLog                Create MSBuild binary log (short: -bl)"
-  Write-Host "  -buildServerLog           Create Luna build server log"
+  Write-Host "  -binaryLogName            Name of the binary log (default Build.binlog)"
   Write-Host ""
   Write-Host "Actions:"
   Write-Host "  -restore                  Restore packages (short: -r)"
@@ -98,7 +99,7 @@ function Print-Usage() {
   Write-Host "  -testCompilerOnly         Run only the compiler unit tests"
   Write-Host "  -testVsi                  Run all integration tests"
   Write-Host "  -testIOperation           Run extra checks to validate IOperations"
-  Write-Host "  -testUsedAssemblies       Run extra checks to validate used assemblies feature (see LUNA_TEST_USEDASSEMBLIES in codebase)"
+  Write-Host "  -testUsedAssemblies       Run extra checks to validate used assemblies feature (see ROSLYN_TEST_USEDASSEMBLIES & LUNA_TEST_USEDASSEMBLIES in codebase)"
   Write-Host ""
   Write-Host "Advanced settings:"
   Write-Host "  -ci                       Set when running on CI server"
@@ -166,11 +167,16 @@ function Process-Arguments() {
     $script:applyOptimizationData = $false
   }
 
+  if ($binaryLogName -ne "") {
+    $script:binaryLog = $true
+  }
+
   if ($ci) {
     $script:binaryLog = $true
-    if ($bootstrap) {
-      $script:buildServerLog = $true
-    }
+  }
+
+  if ($binaryLog -and ($binaryLogName -eq "")) {
+    $script:binaryLogName = "Build.binlog"
   }
 
   $anyUnit = $testDesktop -or $testCoreClr
@@ -199,6 +205,10 @@ function Process-Arguments() {
     $script:restore = $true
   }
 
+  if ($sourceBuild) {
+    $script:msbuildEngine = "dotnet"
+  }
+
   foreach ($property in $properties) {
     if (!$property.StartsWith("/p:", "InvariantCultureIgnoreCase")) {
       Write-Host "Invalid argument: $property"
@@ -208,15 +218,57 @@ function Process-Arguments() {
   }
 }
 
+function Restore-ExternalRepos() {
+  # Read version configuration of Luna from "eng/Versions.props" and return full version string.
+  function GetLunaVersion()
+  {
+    [xml]$VersionsProps = Get-Content (Join-Path $EngRoot "Versions.props")
+    $properties = $VersionsProps.Project.PropertyGroup
+    $major = [int]$properties.MajorVersion[0]
+    $minor = [int]$properties.MinorVersion[0]
+    $patch = [int]$properties.PatchVersion[0]
+    $prerelease = $properties.PreReleaseVersionLabel[0]
+
+    $version = [string]$major + "." + [string]$minor + "." + [string]$patch;
+    if ([string]::IsNullOrWhiteSpace($prerelease))
+    {
+      return $version
+    }
+
+    # Before 3.5.* prerelese version string of Roslyn ends with '-beta[prerelease].final'.
+    # Start from 3.6.* prerelese version string of Roslyn ends with '-[prerelease].final'.
+    if (($major -le 3) -and ($minor -le 5))
+    {
+      $prerelease = "beta" + $prerelease
+    }
+    return $version + "-" + $prerelease + ".final"
+  }
+
+  # Archive latest qtyi/roslyn repository from GitHub that our work is based on.
+  Archive-Codebase "qtyi" "roslyn"
+
+  # Archive dotnet/roslyn repository from GitHub that our work is based on.
+  # We get its source link from NuGet with version exactly the same as Luna.
+  $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" GetLunaVersion
+  Archive-Codebase $dotnetRoslynRepo.Owner $dotnetRoslynRepo.Name $dotnetRoslynRepo.Branch $dotnetRoslynRepo.CommitId
+
+  # Archive
+}
+
 function BuildSolution() {
   $solution = "Luna.sln"
 
   Write-Host "$($solution):"
 
-  $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "Build.binlog") } else { "" }
+  $bl = ""
+  if ($binaryLog) {
+    $binaryLogPath = Join-Path $LogDir $binaryLogName
+    $bl = "/bl:" + $binaryLogPath
+    if ($ci -and (Test-Path $binaryLogPath)) {
+      Write-LogIssue -Type "error" -Message "Overwriting binary log file $($binaryLogPath)"
+      throw "Overwriting binary log files"
+    }
 
-  if ($buildServerLog) {
-    ${env:LUNACOMMANDLINELOGFILE} = Join-Path $LogDir "Build.Server.log"
   }
 
   $projects = Join-Path $RepoRoot $solution
@@ -240,6 +292,11 @@ function BuildSolution() {
   $generateDocumentationFile = if ($skipDocumentation) { "/p:GenerateDocumentationFile=false" } else { "" }
   $lunaUseHardLinks = if ($ci) { "/p:LUNAUSEHARDLINKS=true" } else { "" }
 
+ # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
+  # in our CI builds
+  # https://github.com/NuGet/Home/issues/12373
+  $restoreUseStaticGraphEvaluation = if ($ci) { $false } else { $true }
+  
   try {
     MSBuild $toolsetBuildProj `
       $bl `
@@ -259,7 +316,7 @@ function BuildSolution() {
       /p:TreatWarningsAsErrors=$warnAsError `
       /p:EnableNgenOptimization=$applyOptimizationData `
       /p:IbcOptimizationDataDir=$ibcDir `
-      /p:RestoreUseStaticGraphEvaluation=true `
+      /p:RestoreUseStaticGraphEvaluation=$restoreUseStaticGraphEvaluation `
       /p:VisualStudioIbcDrop=$ibcDropName `
       /p:VisualStudioDropAccessToken=$officialVisualStudioDropAccessToken `
       $suppressExtensionDeployment `
@@ -273,7 +330,6 @@ function BuildSolution() {
     ${env:LUNACOMMANDLINELOGFILE} = $null
   }
 }
-
 
 # Get the branch that produced the IBC data this build is going to consume.
 # IBC data are only merged in official built, but we want to test some of the logic in CI builds as well.
@@ -323,21 +379,10 @@ function GetIbcDropName() {
 }
 
 function GetCompilerTestAssembliesIncludePaths() {
-  $assemblies = " --include '^Microsoft\.CodeAnalysis\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CompilerServer\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CSharp\.Syntax\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CSharp\.Symbol\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CSharp\.Semantic\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CSharp\.Emit\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CSharp\.Emit2\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CSharp\.IOperation\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.CSharp\.CommandLine\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.VisualBasic\.Syntax\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.VisualBasic\.Symbol\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.VisualBasic\.Semantic\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.VisualBasic\.Emit\.UnitTests$'"
-  $assemblies += " --include '^Luna\.Compilers\.VisualBasic\.IOperation\.UnitTests$'"
-  $assemblies += " --include '^Microsoft\.CodeAnalysis\.VisualBasic\.CommandLine\.UnitTests$'"
+  $assemblies = " --include '^Qtyi\.CodeAnalysis\.UnitTests$'"
+  #$assemblies += " --include '^Qtyi\.CodeAnalysis\.CompilerServer\.UnitTests$'"
+  $assemblies += " --include '^Qtyi\.CodeAnalysis\.Lua\.Parser\.UnitTests$'"
+  $assemblies += " --include '^Qtyi\.CodeAnalysis\.MoonScript\.Parser\.UnitTests$'"
   return $assemblies
 }
 
@@ -358,14 +403,17 @@ function TestUsingRunTests() {
   }
 
   if ($ci) {
+    $env:ROSLYN_TEST_CI = "true"
     $env:LUNA_TEST_CI = "true"
   }
 
   if ($testIOperation) {
+    $env:ROSLYN_TEST_IOPERATION = "true"
     $env:LUNA_TEST_IOPERATION = "true"
   }
 
   if ($testUsedAssemblies) {
+    $env:ROSLYN_TEST_USEDASSEMBLIES = "true"
     $env:LUNA_TEST_USEDASSEMBLIES = "true"
   }
 
@@ -411,7 +459,7 @@ function TestUsingRunTests() {
     $args += " --retry"
     $args += " --sequential"
     $args += " --include '\.IntegrationTests'"
-    $args += " --include 'Microsoft.CodeAnalysis.Workspaces.MSBuild.UnitTests'"
+    $args += " --include 'Qtyi.CodeAnalysis.Workspaces.MSBuild.UnitTests'"
 
     if ($lspEditor) {
       $args += " --testfilter Editor=LanguageServerProtocol"
@@ -448,16 +496,19 @@ function TestUsingRunTests() {
   } finally {
     Get-Process "xunit*" -ErrorAction SilentlyContinue | Stop-Process
     if ($ci) {
+      Remove-Item env:\ROSLYN_TEST_CI
       Remove-Item env:\LUNA_TEST_CI
     }
 
     # Note: remember to update TestRunner when using new environment variables
     # (they need to be transferred over to the Helix machines that run the tests)
     if ($testIOperation) {
+      Remove-Item env:\ROSLYN_TEST_IOPERATION
       Remove-Item env:\LUNA_TEST_IOPERATION
     }
 
     if ($testUsedAssemblies) {
+      Remove-Item env:\ROSLYN_TEST_USEDASSEMBLIES
       Remove-Item env:\LUNA_TEST_USEDASSEMBLIES
     }
 
@@ -468,6 +519,14 @@ function TestUsingRunTests() {
         Copy-Item -Path $serviceHubLogs -Destination (Join-Path $LogDir "servicehub") -Recurse
       } else {
         Write-Host "No ServiceHub logs found to copy"
+      }
+
+      $projectFaultLogs = Join-Path $TempDir "VsProjectFault_*.failure.txt"
+      if (Test-Path $projectFaultLogs) {
+        Write-Host "Copying VsProjectFault logs to $LogDir"
+        Copy-Item -Path $projectFaultLogs -Destination $LogDir
+      } else {
+        Write-Host "No VsProjectFault logs found to copy"
       }
 
       if ($lspEditor) {
@@ -507,7 +566,7 @@ function EnablePreviewSdks() {
   'UsePreviews=True' | Set-Content $sdkFile
 }
 
-# Deploy our core VSIX libraries to Visual Studio via the Luna VSIX tool.  This is an alternative to
+# Deploy our core VSIX libraries to Visual Studio via the Roslyn VSIX tool.  This is an alternative to
 # deploying at build time.
 function Deploy-VsixViaTool() {
   $vsixDir = Get-PackageDir "RoslynTools.VSIXExpInstaller"
@@ -523,7 +582,6 @@ function Deploy-VsixViaTool() {
   $vsMajorVersion = $vsInfo.installationVersion.Split('.')[0]
   $displayVersion = $vsInfo.catalog.productDisplayVersion
 
-  $hive = "LunaDev"
   Write-Host "Using VS Instance $vsId ($displayVersion) at `"$vsDir`""
   $baseArgs = "/rootSuffix:$hive /vsInstallDir:`"$vsDir`""
 
@@ -673,7 +731,8 @@ function List-Processes() {
   Write-Host "Listing running build processes..."
   Get-Process -Name "msbuild" -ErrorAction SilentlyContinue | Out-Host
   Get-Process -Name "vbcscompiler" -ErrorAction SilentlyContinue | Out-Host
-  Get-Process -Name "dotnet" -ErrorAction SilentlyContinue | where { $_.Modules | select { $_.ModuleName -eq "VBCSCompiler.dll" } } | Out-Host
+  Get-Process -Name "lunacompiler" -ErrorAction SilentlyContinue | Out-Host
+  Get-Process -Name "dotnet" -ErrorAction SilentlyContinue | where { $_.Modules | select { $_.ModuleName -eq "VBCSCompiler.dll" -or $_.ModuleName -eq "LunaCompiler.dll" } } | Out-Host
   Get-Process -Name "devenv" -ErrorAction SilentlyContinue | Out-Host
 }
 
@@ -719,14 +778,13 @@ try {
   try
   {
     if ($bootstrap) {
-      $force32 = $testArch -eq "x86"
-      $bootstrapDir = Make-BootstrapBuild -force32:$force32
+      $bootstrapDir = Make-BootstrapBuild $bootstrapToolset
     }
   }
   catch
   {
     if ($ci) {
-      echo "##vso[task.logissue type=error](NETCORE_ENGINEERING_TELEMETRY=Build) Build failed"
+      Write-LogIssue -Type "error" -Message "(NETCORE_ENGINEERING_TELEMETRY=Build) Build failed"
     }
     throw $_
   }
@@ -744,7 +802,7 @@ try {
   catch
   {
     if ($ci) {
-      echo "##vso[task.logissue type=error](NETCORE_ENGINEERING_TELEMETRY=Test) Tests failed"
+      Write-LogIssue -Type "error" -Message "(NETCORE_ENGINEERING_TELEMETRY=Test) Tests failed"
     }
     throw $_
   }
@@ -755,7 +813,8 @@ try {
     }
 
     $devenvExe = Join-Path $env:VSINSTALLDIR 'Common7\IDE\devenv.exe'
-    &$devenvExe /rootSuffix LunaDev
+    $hive = "LunaDev"
+    &$devenvExe /rootSuffix $hive
   }
 
   ExitWithExitCode 0
