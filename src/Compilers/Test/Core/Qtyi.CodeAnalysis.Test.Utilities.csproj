@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
   </PropertyGroup>
@@ -28,6 +28,7 @@
   
   <ItemGroup>
     <PackageReference Include="DiffPlex" Version="$(DiffPlexVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Test.Resources.Proprietary" Version="$(MicrosoftCodeAnalysisTestResourcesProprietaryVersion)" />
     <PackageReference Include="Microsoft.DiaSymReader.Converter.Xml" Version="$(MicrosoftDiaSymReaderConverterXmlVersion)" />
     <PackageReference Include="Microsoft.Metadata.Visualizer" Version="$(MicrosoftMetadataVisualizerVersion)" />
@@ -64,8 +65,6 @@
     <ProjectReference Include="..\..\..\Compilers\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
   </ItemGroup>
   
-  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
-
   <Import Project="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Core\Generated.targets" />
   
 </Project>

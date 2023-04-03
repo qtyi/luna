@@ -46,14 +46,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
     <ProjectReference Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\LuaCodeAnalysisSourceGenerators\LuaCodeAnalysisSourceGenerators.csproj">
       <OutputItemType>Analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
-
-  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
 
   <Import Project="..\..\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems" Label="Shared" />
 

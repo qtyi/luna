@@ -20,11 +20,13 @@
   <ItemGroup>
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\nativeCOFFResources.obj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
-  
-  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
 
 </Project>

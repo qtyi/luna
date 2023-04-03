@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
     <NoStdLib>true</NoStdLib>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
@@ -15,14 +15,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\..\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj" />
     <ProjectReference Include="..\..\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
     <ProjectReference Include="..\..\..\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
     <ProjectReference Include="..\..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
   </ItemGroup>
-  
-  <Import Project="$(RepositoryEngineeringDir)targets\ReferenceMicrosoftCodeAnalysisCommon.targets" />
 
   <ProjectExtensions>
     <VisualStudio>

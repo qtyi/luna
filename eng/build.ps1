@@ -219,6 +219,8 @@ function Process-Arguments() {
 }
 
 function Restore-ExternalRepos() {
+  Prepare-ExternalReposDir
+
   # Archive dotnet/roslyn repository from GitHub that our work is based on.
   # We get its source link from NuGet with version exactly the same as Luna.
   $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" (Get-LunaVersion)

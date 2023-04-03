@@ -5,7 +5,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>moonc</AssemblyName>
     <PlatformTarget>ARM64</PlatformTarget>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>$(Arm64ExecutableTargetFrameworks)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsSymbolPublishingPackage>true</IsSymbolPublishingPackage>

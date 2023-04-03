@@ -11,8 +11,6 @@ $PackagesDir = Join-Path $ArtifactsDir "packages\$configuration"
 $PublishDataUrl = "https://raw.githubusercontent.com/qtyi/luna/main/eng/config/PublishData.json"
 $ExternalReposDir = Join-Path $RepoRoot ".externalrepos"
 
-Create-Directory $ExternalReposDir
-
 $binaryLog = if (Test-Path variable:binaryLog) { $binaryLog } else { $false }
 $nodeReuse = if (Test-Path variable:nodeReuse) { $nodeReuse } else { $false }
 $bootstrapDir = if (Test-Path variable:bootstrapDir) { $bootstrapDir } else { "" }
@@ -387,6 +385,28 @@ function Unsubst-TempDir() {
   if ($ci) {
     Exec-Command "subst" "T: /d"
   }
+}
+
+function Prepare-ExternalReposDir() {
+  Create-Directory $ExternalReposDir
+
+  @"
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project>
+  <!-- This file intentionally left blank to avoid global settings of Luna repository accidentally blend into those of external repositories. -->
+</Project>
+"@ | Set-Content (Join-Path $ExternalReposDir "Directory.Build.props")
+
+  @"
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project>
+  <!-- This file intentionally left blank to avoid global settings of Luna repository accidentally blend into those of external repositories. -->
+</Project>
+"@ | Set-Content (Join-Path $ExternalReposDir "Directory.Build.targets")
+
+  @"
+# This file intentionally left blank to avoid global settings of Luna repository accidentally blend into those of external repositories.
+"@ | Set-Content (Join-Path $ExternalReposDir "Directory.Build.rsp")
 }
 
 # Download an archive from a GitHub repository.

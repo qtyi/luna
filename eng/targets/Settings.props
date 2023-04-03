@@ -2,10 +2,6 @@
 <!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project>
   <PropertyGroup>
-    <CoreLibraryTargetFrameworks>netcoreapp3.1;netstandard2.0</CoreLibraryTargetFrameworks>
-    <ExecutableTargetFrameworks>net7.0;net472</ExecutableTargetFrameworks>
-    <TestTargetFrameworks>net7.0;net472</TestTargetFrameworks>
-    
     <Copyright>$(CopyrightMicrosoft)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
@@ -15,7 +11,7 @@
     <VSSDKTargetPlatformRegRootSuffix>LunaDev</VSSDKTargetPlatformRegRootSuffix>
 
     <CommonExtensionInstallationRoot>CommonExtensions</CommonExtensionInstallationRoot>
-    <LanguageServicesExtensionInstallationFolder>Microsoft\VBCSharp\LanguageServices</LanguageServicesExtensionInstallationFolder>
+    <LanguageServicesExtensionInstallationFolder>Microsoft\Luna\LanguageServices</LanguageServicesExtensionInstallationFolder>
 
     <RestoreUseStaticGraphEvaluation>true</RestoreUseStaticGraphEvaluation>
 
@@ -55,6 +51,21 @@
     <PublishWindowsPdb>false</PublishWindowsPdb>
     <EnforceExtendedAnalyzerRules>false</EnforceExtendedAnalyzerRules>
     <EnforceExtendedAnalyzerRules Condition="'$(IsAnalyzer)' == 'true'">true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SourceBuildTargetFrameworks>net6.0</SourceBuildTargetFrameworks>
+    <SourceBuildTargetFrameworks Condition="'$(ContinuousIntegrationBuild)' == 'true'">net8.0;$(SourceBuildTargetFrameworks)</SourceBuildTargetFrameworks>
+    <SourceBuildTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0</SourceBuildTargetFrameworks>
+
+    <SourceBuildTargetFrameworksNetFx>$(SourceBuildTargetFrameworks)</SourceBuildTargetFrameworksNetFx>
+    <SourceBuildTargetFrameworksNetFx Condition="'$(DotNetBuildFromSource)' != 'true'">$(SourceBuildTargetFrameworksNetFx);net472</SourceBuildTargetFrameworksNetFx>
+
+    <CoreLibraryTargetFrameworks>netcoreapp3.1;netstandard2.0</CoreLibraryTargetFrameworks>
+    <ExecutableTargetFrameworks>net6.0;net472</ExecutableTargetFrameworks>
+    <Arm64ExecutableTargetFrameworks>net472</Arm64ExecutableTargetFrameworks>
+    <WpfExecutableTargetFrameworks>net6.0-windows;net472</WpfExecutableTargetFrameworks>
+    <TestTargetFrameworks>net6.0;net472</TestTargetFrameworks>
   </PropertyGroup>
 
   <!--

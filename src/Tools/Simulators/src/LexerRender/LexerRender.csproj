@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>$(ExecutableTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Luna.Compilers.Tools</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
