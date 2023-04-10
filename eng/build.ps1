@@ -33,9 +33,8 @@ param (
   # Options
   [switch]$bootstrap,
   [string]$bootstrapConfiguration = "Release",
-  [string]$bootstrapToolset = "",
   [switch][Alias('bl')]$binaryLog,
-  [string]$binaryLogName = "",
+  [switch]$buildServerLog,
   [switch]$ci,
   [switch]$collectDumps,
   [switch][Alias('a')]$runAnalyzers,
@@ -80,7 +79,7 @@ function Print-Usage() {
   Write-Host "  -verbosity <value>        Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]"
   Write-Host "  -deployExtensions         Deploy built vsixes (short: -d)"
   Write-Host "  -binaryLog                Create MSBuild binary log (short: -bl)"
-  Write-Host "  -binaryLogName            Name of the binary log (default Build.binlog)"
+  Write-Host "  -buildServerLog           Create Luna build server log"
   Write-Host ""
   Write-Host "Actions:"
   Write-Host "  -restore                  Restore packages (short: -r)"
@@ -167,16 +166,11 @@ function Process-Arguments() {
     $script:applyOptimizationData = $false
   }
 
-  if ($binaryLogName -ne "") {
-    $script:binaryLog = $true
-  }
-
   if ($ci) {
     $script:binaryLog = $true
-  }
-
-  if ($binaryLog -and ($binaryLogName -eq "")) {
-    $script:binaryLogName = "Build.binlog"
+    if ($bootstrap) {
+      $script:buildServerLog = $true
+    }
   }
 
   $anyUnit = $testDesktop -or $testCoreClr
@@ -205,10 +199,6 @@ function Process-Arguments() {
     $script:restore = $true
   }
 
-  if ($sourceBuild) {
-    $script:msbuildEngine = "dotnet"
-  }
-
   foreach ($property in $properties) {
     if (!$property.StartsWith("/p:", "InvariantCultureIgnoreCase")) {
       Write-Host "Invalid argument: $property"
@@ -225,9 +215,6 @@ function Restore-ExternalRepos() {
   # We get its source link from NuGet with version exactly the same as Luna.
   $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" (Get-LunaVersion)
   Archive-Codebase $dotnetRoslynRepo.Owner $dotnetRoslynRepo.Name $dotnetRoslynRepo.Branch $dotnetRoslynRepo.CommitId
-
-  # Archive latest qtyi/roslyn repository from GitHub that our work is based on.
-  Archive-Codebase "qtyi" "roslyn"
 }
 
 function BuildSolution() {
@@ -235,15 +222,10 @@ function BuildSolution() {
 
   Write-Host "$($solution):"
 
-  $bl = ""
-  if ($binaryLog) {
-    $binaryLogPath = Join-Path $LogDir $binaryLogName
-    $bl = "/bl:" + $binaryLogPath
-    if ($ci -and (Test-Path $binaryLogPath)) {
-      Write-LogIssue -Type "error" -Message "Overwriting binary log file $($binaryLogPath)"
-      throw "Overwriting binary log files"
-    }
+  $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "Build.binlog") } else { "" }
 
+  if ($buildServerLog) {
+    ${env:ROSLYNCOMMANDLINELOGFILE} = Join-Path $LogDir "Build.Server.log"
   }
 
   $projects = Join-Path $RepoRoot $solution
@@ -267,11 +249,6 @@ function BuildSolution() {
   $generateDocumentationFile = if ($skipDocumentation) { "/p:GenerateDocumentationFile=false" } else { "" }
   $lunaUseHardLinks = if ($ci) { "/p:LUNAUSEHARDLINKS=true" } else { "" }
 
- # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
-  # in our CI builds
-  # https://github.com/NuGet/Home/issues/12373
-  $restoreUseStaticGraphEvaluation = if ($ci) { $false } else { $true }
-  
   try {
     MSBuild $toolsetBuildProj `
       $bl `
@@ -291,7 +268,7 @@ function BuildSolution() {
       /p:TreatWarningsAsErrors=$warnAsError `
       /p:EnableNgenOptimization=$applyOptimizationData `
       /p:IbcOptimizationDataDir=$ibcDir `
-      /p:RestoreUseStaticGraphEvaluation=$restoreUseStaticGraphEvaluation `
+      /p:RestoreUseStaticGraphEvaluation=true `
       /p:VisualStudioIbcDrop=$ibcDropName `
       /p:VisualStudioDropAccessToken=$officialVisualStudioDropAccessToken `
       $suppressExtensionDeployment `
@@ -302,6 +279,7 @@ function BuildSolution() {
       @properties
   }
   finally {
+    ${env:ROSLYNCOMMANDLINELOGFILE} = $null
     ${env:LUNACOMMANDLINELOGFILE} = $null
   }
 }
@@ -689,8 +667,11 @@ function Setup-IntegrationTestRun() {
     Capture-Screenshot $screenshotPath
   }
 
+  $env:ROSLYN_OOP64BIT = "$oop64bit"
   $env:LUNA_OOP64BIT = "$oop64bit"
+  $env:ROSLYN_OOPCORECLR = "$oopCoreClr"
   $env:LUNA_OOPCORECLR = "$oopCoreClr"
+  $env:ROSLYN_LSPEDITOR = "$lspEditor"
   $env:LUNA_LSPEDITOR = "$lspEditor"
 }
 
@@ -754,13 +735,14 @@ try {
   try
   {
     if ($bootstrap) {
-      $bootstrapDir = Make-BootstrapBuild $bootstrapToolset
+      $force32 = $testArch -eq "x86"
+      $bootstrapDir = Make-BootstrapBuild -force32:$force32
     }
   }
   catch
   {
     if ($ci) {
-      Write-LogIssue -Type "error" -Message "(NETCORE_ENGINEERING_TELEMETRY=Build) Build failed"
+      echo "##vso[task.logissue type=error](NETCORE_ENGINEERING_TELEMETRY=Build) Build failed"
     }
     throw $_
   }
@@ -778,7 +760,7 @@ try {
   catch
   {
     if ($ci) {
-      Write-LogIssue -Type "error" -Message "(NETCORE_ENGINEERING_TELEMETRY=Test) Tests failed"
+      echo "##vso[task.logissue type=error](NETCORE_ENGINEERING_TELEMETRY=Test) Tests failed"
     }
     throw $_
   }
