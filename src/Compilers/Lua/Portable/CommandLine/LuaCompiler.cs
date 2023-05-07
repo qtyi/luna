@@ -10,7 +10,7 @@ namespace Qtyi.CodeAnalysis.Lua;
 
 partial class LuaCompiler
 {
-    /// <summary>可执行应用名称。</summary>
+    /// <summary>Name of executable file without extension.</summary>
     internal const string ExecutableName = "luac";
 
     protected override partial void ResolveAnalyzersFromArguments(
@@ -28,5 +28,10 @@ partial class LuaCompiler
             skipAnalyzers,
             out analyzers,
             out generators);
+    }
+
+    public override partial void PrintHelp(TextWriter consoleOutput)
+    {
+        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_LUACHelp, this.Culture));
     }
 }

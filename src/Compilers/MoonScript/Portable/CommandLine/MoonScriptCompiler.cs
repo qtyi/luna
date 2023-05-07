@@ -10,7 +10,7 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 
 partial class MoonScriptCompiler
 {
-    /// <summary>可执行应用名称。</summary>
+    /// <summary>Name of executable file without extension.</summary>
     internal const string ExecutableName = "moonc";
 
     protected override partial void ResolveAnalyzersFromArguments(
@@ -28,5 +28,10 @@ partial class MoonScriptCompiler
             skipAnalyzers,
             out analyzers,
             out generators);
+    }
+
+    public override partial void PrintHelp(TextWriter consoleOutput)
+    {
+        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_MOONCHelp, this.Culture));
     }
 }

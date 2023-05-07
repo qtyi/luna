@@ -12,6 +12,12 @@ internal enum MessageID
     None = 0,
     MessageBase = 1200,
 
+    IDS_LangVersions,
+    IDS_ToolName,
+    IDS_LogoLine1,
+    IDS_LogoLine2,
+    IDS_LUACHelp,
+
     IDS_FeatureHexadecimalFloatConstant,
     IDS_FeatureBinaryExponent
 }

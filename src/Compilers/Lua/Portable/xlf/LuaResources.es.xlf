@@ -162,6 +162,11 @@
         <target state="new">Unterminated string literal.</target>
         <note />
       </trans-unit>
+      <trans-unit id="IDS_LUACHelp">
+        <source>No help message found.</source>
+        <target state="new">No help message found.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IDS_LangVersions">
         <source>Supported language versions:</source>
         <target state="new">Supported language versions:</target>
@@ -185,17 +190,17 @@
       <trans-unit id="ThisMethodCanOnlyBeUsedToCreateTokens">
         <source>This method can only be used to create tokens - {0} is not a token kind.</source>
         <target state="new">This method can only be used to create tokens - {0} is not a token kind.</target>
-        <note>此方法仅用于创建标志。</note>
+        <note />
       </trans-unit>
       <trans-unit id="UseIdentifierForTokens">
         <source>Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier to create tokens.</source>
         <target state="new">Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier to create tokens.</target>
-        <note>应使用Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier创建标志。</note>
+        <note />
       </trans-unit>
       <trans-unit id="UseLiteralForNumeric">
         <source>Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal to create numeric literal tokens.</source>
         <target state="new">Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal to create numeric literal tokens.</target>
-        <note>应使用Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal创建数字字面量标志。</note>
+        <note />
       </trans-unit>
       <trans-unit id="WRN_ErrorOverride">
         <source>{0}. See also error LUA{1}.</source>

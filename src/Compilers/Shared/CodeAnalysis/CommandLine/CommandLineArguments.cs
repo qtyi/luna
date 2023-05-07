@@ -23,7 +23,7 @@ using ThisCommandLineParser = MoonScriptCommandLineParser;
 #endif
 
 /// <summary>
-/// 此类表示<see cref="ThisCompiler"/>的命令行参数。
+/// The command line arguments to a(n) <see cref="ThisCompiler"/>.
 /// </summary>
 public sealed partial class
 #if LANG_LUA
@@ -34,25 +34,34 @@ public sealed partial class
     : CommandLineArguments
 {
     /// <summary>
-    /// 获取或设置<see cref="ThisCompiler"/>创建的编译内容选项集。
+    /// Gets the compilation options for the <see cref="ThisCompilation"/>
+    /// created from the <see cref="ThisCompiler"/>.
     /// </summary>
+    /// <value>
+    /// The compilation options for the <see cref="ThisCompilation"/>.
+    /// </value>
     public new ThisCompilationOptions CompilationOptions { get; internal set; }
 
     /// <summary>
-    /// 获取或设置<see cref="ThisCompilation"/>的解析选项集。
+    /// Gets the parse options for the <see cref="ThisCompilation"/>.
     /// </summary>
+    /// <value>
+    /// The parse options for the <see cref="ThisCompilation"/>.
+    /// </value>
     public new ThisParseOptions ParseOptions { get; internal set; }
 
     /// <summary>
-    /// 获取或设置一个值，指示命令行错误信息是否应当包含错误文本的结尾行号和列号。
+    /// Should the format of error messages include the line and column of
+    /// the end of the offending text.
     /// </summary>
     /// <value>
-    /// 若命令行错误信息应当包含错误文本的结尾行号和列号，则为<see langword="true"/>；否则为<see langword="false"/>。
+    /// <see langword="True"/> if the line and column of the end of the
+    /// offending text should be included; otherwise, <see langword="false"/>.
     /// </value>
     internal bool ShouldIncludeErrorEndLocation { get; set; }
 
     /// <remarks>
-    /// 应由<see cref="ThisCommandLineParser.Parse(IEnumerable{string}, string?, string?, string?)"/>初始化各属性。
+    /// Always initialized by <see cref="ThisCommandLineParser.Parse(IEnumerable{string}, string?, string?, string?)"/>.
     /// </remarks>
 #pragma warning disable CS8618
     internal

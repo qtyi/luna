@@ -222,20 +222,20 @@
   <data name="IDS_LogoLine2" xml:space="preserve">
     <value>Copyright (C) Qtyi. All rights reserved.</value>
   </data>
+  <data name="IDS_LUACHelp" xml:space="preserve">
+    <value>No help message found.</value>
+  </data>
   <data name="IDS_ToolName" xml:space="preserve">
     <value>Lua Compiler</value>
   </data>
   <data name="ThisMethodCanOnlyBeUsedToCreateTokens" xml:space="preserve">
     <value>This method can only be used to create tokens - {0} is not a token kind.</value>
-    <comment>此方法仅用于创建标志。</comment>
   </data>
   <data name="UseIdentifierForTokens" xml:space="preserve">
     <value>Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier to create tokens.</value>
-    <comment>应使用Qtyi.CodeAnalysis.Lua.SyntaxFactory.Identifier创建标志。</comment>
   </data>
   <data name="UseLiteralForNumeric" xml:space="preserve">
     <value>Use Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal to create numeric literal tokens.</value>
-    <comment>应使用Qtyi.CodeAnalysis.Lua.SyntaxFactory.Literal创建数字字面量标志。</comment>
   </data>
   <data name="WRN_ErrorOverride" xml:space="preserve">
     <value>{0}. See also error LUA{1}.</value>

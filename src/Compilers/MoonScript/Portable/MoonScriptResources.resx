@@ -129,20 +129,20 @@
   <data name="IDS_LogoLine2" xml:space="preserve">
     <value>Copyright (C) Qtyi. All rights reserved.</value>
   </data>
+  <data name="IDS_MOONCHelp" xml:space="preserve">
+    <value>No help message found.</value>
+  </data>
   <data name="IDS_ToolName" xml:space="preserve">
     <value>MoonScript Compiler</value>
   </data>
   <data name="ThisMethodCanOnlyBeUsedToCreateTokens" xml:space="preserve">
     <value>This method can only be used to create tokens - {0} is not a token kind.</value>
-    <comment>此方法仅用于创建标志。</comment>
   </data>
   <data name="UseIdentifierForTokens" xml:space="preserve">
     <value>Use Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Identifier to create tokens.</value>
-    <comment>应使用Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Identifier创建标志。</comment>
   </data>
   <data name="UseLiteralForNumeric" xml:space="preserve">
     <value>Use Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Literal to create numeric literal tokens.</value>
-    <comment>应使用Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Literal创建数字字面量标志。</comment>
   </data>
   <data name="WRN_FileAlreadyIncluded" xml:space="preserve">
     <value>Source file '{0}' specified multiple times.</value>

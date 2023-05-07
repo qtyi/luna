@@ -2,7 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
@@ -19,6 +18,15 @@ using ThisCommandLineParser = MoonScriptCommandLineParser;
 using ThisMessageProvider = MessageProvider;
 #endif
 
+#if LANG_LUA
+/// <summary>
+/// The Lua command line parser.
+/// </summary>
+#elif LANG_MOONSCRIPT
+/// <summary>
+/// The MoonScript command line parser.
+/// </summary>
+#endif
 public partial class
 #if LANG_LUA
     LuaCommandLineParser
@@ -28,15 +36,27 @@ public partial class
     : CommandLineParser
 {
     /// <summary>
-    /// 获取默认的命令行解析器。
+    /// Gets a default command line parser for compiler.
     /// </summary>
+    /// <value>
+    /// An object that inherits <see cref="CommandLineParser"/> and serves as a command line parser.
+    /// </value>
     public static ThisCommandLineParser Default { get; } = new();
     /// <summary>
-    /// 获取默认的脚本的命令行解析器。
+    /// Gets a default command line parser for script.
     /// </summary>
+    /// <value>
+    /// An object that inherits <see cref="CommandLineParser"/> and serves as a command line parser.
+    /// </value>
     public static ThisCommandLineParser Script { get; } = new(isScriptCommandLineParser: true);
 
+    /// <summary>
+    /// An array of <c>"</c> and <c>=</c>.
+    /// </summary>
     private static readonly char[] s_quoteOrEquals = new[] { '"', '=' };
+    /// <summary>
+    /// An array of warning separators.
+    /// </summary>
     private static readonly char[] s_warningSeparators = new[] { ',', ';', ' ' };
 
     internal
@@ -49,13 +69,13 @@ public partial class
         : base(ThisMessageProvider.Instance, isScriptCommandLineParser) { }
 
     /// <summary>
-    /// 解析命令行参数。
+    /// Parses a command line.
     /// </summary>
-    /// <param name="args">尚未解析的命令行参数，可能仍保留一些供解析器识别的语法信息。</param>
-    /// <param name="baseDirectory">编译环境的基文件夹。</param>
-    /// <param name="sdkDirectory">SDK所在文件夹。</param>
-    /// <param name="additionalReferenceDirectories">附加的引用文件夹。</param>
-    /// <returns>解析后的结果。</returns>
+    /// <param name="args">A collection of <see cref="string"/>s representing the command line arguments.</param>
+    /// <param name="baseDirectory">The base directory used for qualifying file locations.</param>
+    /// <param name="sdkDirectory">The directory to search for mscorlib, or <see langword="null"/> if not available.</param>
+    /// <param name="additionalReferenceDirectories">A <see cref="string"/> representing additional reference paths.</param>
+    /// <returns>A(n) <see cref="ThisCommandLineArguments"/> object representing the parsed command line.</returns>
     public new partial ThisCommandLineArguments Parse(
         IEnumerable<string> args,
         string? baseDirectory,
@@ -64,26 +84,26 @@ public partial class
 
     #region AddDiagnostic
     /// <summary>
-    /// 添加包含指定错误码的诊断错误。
+    /// Add diagnostic for the <paramref name="errorCode"/>.
     /// </summary>
     /// <inheritdoc cref="AddDiagnostic(IList{Diagnostic}, Dictionary{string, ReportDiagnostic}, ErrorCode, object[])"/>
     private static void AddDiagnostic(IList<Diagnostic> diagnostics, ErrorCode errorCode) =>
         diagnostics.Add(Diagnostic.Create(ThisMessageProvider.Instance, (int)errorCode));
 
     /// <summary>
-    /// 添加包含指定错误码和其他参数的诊断错误。
+    /// Add diagnostic for the <paramref name="errorCode"/> with message arguments.
     /// </summary>
     /// <inheritdoc cref="AddDiagnostic(IList{Diagnostic}, Dictionary{string, ReportDiagnostic}, ErrorCode, object[])"/>
     private static void AddDiagnostic(IList<Diagnostic> diagnostics, ErrorCode errorCode, params object[] arguments) =>
         diagnostics.Add(Diagnostic.Create(ThisMessageProvider.Instance, (int)errorCode, arguments));
 
     /// <summary>
-    /// 若<paramref name="warningOptions"/>未提及抑制<paramref name="errorCode"/>，则添加包含其的诊断错误。
+    /// Diagnostic for the <paramref name="errorCode"/> added if the <paramref name="warningOptions"/> does not mention suppressed for the <paramref name="errorCode"/>.
     /// </summary>
-    /// <param name="diagnostics">容纳诊断错误的列表。</param>
-    /// <param name="warningOptions">对警告的设置，决定是否抑制某些错误。</param>
-    /// <param name="errorCode">要报告的诊断错误的错误码。</param>
-    /// <param name="arguments">要报告的诊断错误的其他参数。</param>
+    /// <param name="diagnostics">A list of diagnostics reported.</param>
+    /// <param name="warningOptions">Describes how to report warning diagnostics.</param>
+    /// <param name="errorCode">The error code of a warning diagnostic.</param>
+    /// <param name="arguments">Arguments to the message of the diagnostic</param>
     private static void AddDiagnostic(
         IList<Diagnostic> diagnostics,
         Dictionary<string, ReportDiagnostic> warningOptions,
@@ -98,7 +118,7 @@ public partial class
 
     #region CommandLineParser
     /// <remarks>
-    /// 此为供基类调用的通用方法，使用子类时应调用<see cref="Parse(IEnumerable{string}, string?, string?, string?)"/>
+    /// Use <see cref="Parse(IEnumerable{string}, string?, string?, string?)"/> instead.
     /// </remarks>
     /// <inheritdoc cref="Parse(IEnumerable{string}, string?, string?, string?)"/>
     internal override CommandLineArguments CommonParse(

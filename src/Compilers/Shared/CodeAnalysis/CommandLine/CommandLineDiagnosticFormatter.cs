@@ -16,22 +16,22 @@ using ThisDiagnosticFormatter = MoonScriptDiagnosticFormatter;
 #endif
 
 /// <summary>
-/// 此类型表示命令行诊断消息的格式化器。
+/// The formatter to format a diagnostic reported from command line.
 /// </summary>
 internal sealed partial class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
 {
-    /// <summary>基地址。</summary>
+    /// <summary>The base directory path.</summary>
     private readonly string _baseDirectory;
-    /// <summary>标准化的基地址。</summary>
+    /// <summary>Normalized base directory path.</summary>
     private readonly Lazy<string?> _lazyNormalizedBaseDirectory;
-    /// <summary>是否显示文件完整路径。</summary>
+    /// <summary>Should display the full path of source files.</summary>
     private readonly bool _displayFullPaths;
-    /// <summary>是否显示结尾位置。</summary>
+    /// <summary>Should display the end location.</summary>
     private readonly bool _displayEndLocations;
 
-    /// <param name="baseDirectory">基地址。</param>
-    /// <param name="displayFullPaths">是否显示文件完整路径。</param>
-    /// <param name="displayEndLocation">是否显示结尾位置。</param>
+    /// <param name="baseDirectory">The base directory path.</param>
+    /// <param name="displayFullPaths">Should display the full path of source files.</param>
+    /// <param name="displayEndLocation">Should display the end location.</param>
     internal CommandLineDiagnosticFormatter(
         string baseDirectory,
         bool displayFullPaths,
@@ -44,47 +44,49 @@ internal sealed partial class CommandLineDiagnosticFormatter : ThisDiagnosticFor
     }
 
     /// <summary>
-    /// 格式化一个源代码文本区域。
+    /// Format a source text span.
     /// </summary>
-    /// <param name="span">要格式化的源代码文本区域。</param>
-    /// <param name="formatter">格式化使用的格式提供器。传入<see langword="null"/>时使用默认的格式提供器。</param>
-    /// <returns>格式化后信息。</returns>
+    /// <param name="span">The source text span.</param>
+    /// <param name="formatter">The formatter, or <see langword="null"/> to use the default.</param>
+    /// <returns>The formatted message.</returns>
     internal override string FormatSourceSpan(LinePositionSpan span, IFormatProvider? formatter)
     {
         if (this._displayEndLocations)
             return string.Format(formatter, "({0},{1},{2},{3})",
-                span.Start.Line + 1,        // 起始行号
-                span.Start.Character + 1,   // 起始列号
-                span.End.Line + 1,          // 结尾行号
-                span.End.Character + 1      // 结尾列号
+                span.Start.Line + 1,        // start line num.
+                span.Start.Character + 1,   // start column num.
+                span.End.Line + 1,          // end line num.
+                span.End.Character + 1      // end column num.
             );
         else
             return string.Format(formatter, "({0},{1})",
-                span.Start.Line + 1,        // 起始行号
-                span.Start.Character + 1   // 起始列号
+                span.Start.Line + 1,        // start line num.
+                span.Start.Character + 1    // start column num.
             );
     }
 
     /// <summary>
-    /// 格式化一个源代码文件路径。
+    /// Format the path of a source file.
     /// </summary>
-    /// <param name="path">要格式化的源代码文件路径。</param>
-    /// <param name="basePath">相对路径的基地址。</param>
-    /// <param name="formatter">格式化使用的格式提供器。传入<see langword="null"/>时使用默认的格式提供器。</param>
-    /// <returns>格式化后信息。</returns>
+    /// <param name="path">The source file path.</param>
+    /// <param name="basePath">The source path the result should be relative to. This path is always considered to be a directory.</param>
+    /// <param name="formatter">The formatter, or <see langword="null"/> to use the default.</param>
+    /// <returns>The formatted message.</returns>
     internal override string FormatSourcePath(string path, string? basePath, IFormatProvider? formatter)
     {
         var normalizedPath = FileUtilities.NormalizeRelativePath(path, basePath, this._baseDirectory);
         if (normalizedPath is null) return path;
 
+        // By default, specify the name of the file in which an error was found.
+        // When The /fullpaths option is present, specify the full path to the file.
         return this._displayFullPaths ? normalizedPath : this.RelativizeNormalizedPath(normalizedPath);
     }
 
     /// <summary>
-    /// 生成以<see cref="_baseDirectory"/>为基准的，到<paramref name="normalizedPath"/>的相对路径。
+    /// Get the path name starting from the <see cref="_baseDirectory"/> to <paramref name="normalizedPath"/>.
     /// </summary>
-    /// <param name="normalizedPath">要生成的目标路径。</param>
-    /// <returns>以<see cref="_baseDirectory"/>为基准的，到<paramref name="normalizedPath"/>的相对路径。</returns>
+    /// <param name="normalizedPath">The destination path.</param>
+    /// <returns>The path name starting from the <see cref="_baseDirectory"/> to <paramref name="normalizedPath"/>.</returns>
     internal string RelativizeNormalizedPath(string normalizedPath)
     {
         var normalizedBaseDirectory = this._lazyNormalizedBaseDirectory.Value;
