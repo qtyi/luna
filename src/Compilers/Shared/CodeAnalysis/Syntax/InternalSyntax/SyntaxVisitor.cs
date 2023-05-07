@@ -37,9 +37,9 @@ internal abstract partial class
     }
 
     /// <summary>
-    /// 处理这个标志并产生结果。
+    /// 处理这个标记并产生结果。
     /// </summary>
-    /// <param name="token">要进行处理的标志。</param>
+    /// <param name="token">要进行处理的标记。</param>
     /// <returns>产生的结果。</returns>
     public virtual TResult? VisitToken(SyntaxToken token) => this.DefaultVisit(token);
 
@@ -80,9 +80,9 @@ internal abstract partial class
     }
 
     /// <summary>
-    /// 处理这个标志。
+    /// 处理这个标记。
     /// </summary>
-    /// <param name="token">要进行处理的标志。</param>
+    /// <param name="token">要进行处理的标记。</param>
     public virtual void VisitToken(SyntaxToken token) => this.DefaultVisit(token);
 
     /// <summary>

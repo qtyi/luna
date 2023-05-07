@@ -16,7 +16,7 @@
   <AbstractNode Name="SimpleNameSyntax" Base="NameSyntax">
     <Field Name="Identifier" Type="SyntaxToken">
       <PropertyComment>
-        <summary>表示简单名称的语法标志。</summary>
+        <summary>表示简单名称的语法标记。</summary>
       </PropertyComment>
       <Kind Name="IdentifierToken" />
     </Field>

@@ -14,34 +14,350 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 #endif
 
-/// <inheritdoc/>
-internal sealed class SlidingTextWindow : Qtyi.CodeAnalysis.Syntax.InternalSyntax.SlidingTextWindow
+/// <summary>
+/// 为词法器分析的代码文本建立一个滑动的缓冲区域。通过设置记号及预先查看前方的字符，为词法器提供追踪当前“词素”的能力。词法器基于这些信息便可决定是移除记号来保留词素，或是回退偏移量到记号的位置来丢弃当前的词素。
+/// </summary>
+internal sealed class SlidingTextWindow : IDisposable
 {
-    public SlidingTextWindow(SourceText text) : base(text) { }
-
-    public override int GetNewLineWidth() => SlidingTextWindow.GetNewLineWidth(this.PeekChar(0), this.PeekChar(1));
+    /// <summary>
+    /// 选取<see cref="char.MaxValue"/>作为代码中的非法字符，表示文件流已到达结尾或读取到无法识别的字符。
+    /// </summary>
+    public const char InvalidCharacter = char.MaxValue;
+    /// <summary>
+    /// 默认的缓冲区域的长度。
+    /// </summary>
+    private const int DefaultWindowLength = 2048;
 
     /// <summary>
-    /// 获取换行字符序列的宽度。
+    /// 词法器解析的代码文本。
     /// </summary>
-    /// <param name="currentChar">第一个字符。</param>
-    /// <param name="nextChars">后续的字符序列。</param>
-    /// <returns>换行字符序列的宽度。</returns>
-    public static int GetNewLineWidth(char currentChar, params char[] nextChars)
-    {
-        Debug.Assert(SyntaxFacts.IsNewLine(currentChar));
+    private readonly SourceText _text;
+    /// <summary>
+    /// 缓冲区域相对于代码文本的起始位置的偏移量。
+    /// </summary>
+    private int _basis;
+    /// <summary>
+    /// 当前处理的字符相对于缓冲区域的起始位置的偏移量。
+    /// </summary>
+    private int _offset;
+    /// <summary>
+    /// 代码文本的结束的绝对位置。
+    /// </summary>
+    private readonly int _textEnd;
+    /// <summary>
+    /// 储存缓冲区域范围内的代码文本中的字符的数组。
+    /// </summary>
+    private char[] _characterWindow;
+    /// <summary>
+    /// 字符数组中有效字符的数量。
+    /// </summary>
+    private int _characterWindowCount;
+    /// <summary>
+    /// 当前识别到的词素的起始位置相对于缓冲区域的起始位置的偏移量。
+    /// </summary>
+    private int _lexemeStart;
 
-        if (nextChars.Length >= 1 && SyntaxFacts.IsNewLine(currentChar, nextChars[0]))
-            // "\r\n"
-            return 2;
-        else
-            // 其他1个字符宽度的换行字符序列。
-            return 1;
+    /// <summary>
+    /// 储存常用字符串的表。
+    /// </summary>
+    private readonly StringTable _strings;
+
+    /// <summary>
+    /// 循环利用的对象池。
+    /// </summary>
+    private static readonly ObjectPool<char[]> s_windowPool = new(() => new char[SlidingTextWindow.DefaultWindowLength]);
+
+    /// <summary>
+    /// 获取词法器解析的代码文本。
+    /// </summary>
+    public SourceText Text => this._text;
+
+    /// <summary>
+    /// 获取当前处理的字符相对于代码文本的起始位置的偏移量。
+    /// </summary>
+    public int Position => this._basis + this._offset;
+
+    /// <summary>
+    /// 获取当前处理的字符相对于缓冲区域的起始位置的偏移量。
+    /// </summary>
+    public int Offset => this._offset;
+
+    /// <summary>
+    /// 获取储存缓冲区域范围内的代码文本中的字符的数组。
+    /// </summary>
+    public char[] CharacterWindow => this._characterWindow;
+
+    /// <summary>
+    /// 获取字符数组中有效字符的数量。
+    /// </summary>
+    public int CharacterWindowCount => this._characterWindowCount;
+
+    /// <summary>
+    /// 获取当前识别到的标记的起始位置相对于缓冲区域的起始位置的偏移量。
+    /// </summary>
+    public int LexemeRelativeStart => this._lexemeStart;
+
+    /// <summary>
+    /// 获取当前识别到的标记的起始位置相对于代码文本的起始位置的偏移量。
+    /// </summary>
+    public int LexemeStartPosition => this._basis + this._lexemeStart;
+
+    /// <summary>
+    /// 获取当前识别到的标记的宽度。
+    /// </summary>
+    public int Width => this._offset - this._lexemeStart;
+
+    /// <summary>
+    /// 使用代码文本初始化<see cref="SlidingTextWindow"/>的新实例。
+    /// </summary>
+    /// <param name="text"></param>
+    public SlidingTextWindow(SourceText text)
+    {
+        this._text = text;
+        this._basis = 0;
+        this._offset = 0;
+        this._textEnd = text.Length;
+        this._strings = StringTable.GetInstance();
+        this._characterWindow = SlidingTextWindow.s_windowPool.Allocate();
+        this._lexemeStart = 0;
     }
 
-    public override string GetText(int position, int length, bool intern)
+#pragma warning disable CS8625
+    public void Dispose()
     {
-        int offset = position - this._basis;
+        if (this._characterWindow is not null)
+        {
+            SlidingTextWindow.s_windowPool.Free(this._characterWindow);
+            this._characterWindow = null;
+            this._strings.Free();
+        }
+    }
+#pragma warning restore CS8625
+
+    /// <summary>
+    /// 开始解析一个新标记。
+    /// </summary>
+    public void Start() => this._lexemeStart = this._offset;
+
+    /// <summary>
+    /// 重置当前识别的字符的偏移量到指定的位置。
+    /// </summary>
+    /// <param name="position">要重置到的位置。</param>
+    public void Reset(int position)
+    {
+        // 获取当前的相对位置。
+        var relative = position - this._basis;
+        if (relative >= 0 && relative <= this._characterWindowCount)
+            // 若当前位置在已读取的字符范围中，则使用已有的字符缓冲数组。
+            this._offset = relative;
+        else
+        {
+            // 需要重新读取文本缓冲数组。
+            var amountToRead = Math.Max(
+                0, // 读取字符数需大于0。
+                Math.Min(
+                    this._text.Length, // 不能超过代码文本的结尾。
+                    position + this._characterWindow.Length
+                ) - position
+            );
+            if (amountToRead > 0)
+                // 填充字符缓冲数组。
+                this._text.CopyTo(position, this._characterWindow, 0, amountToRead);
+
+            this._lexemeStart = 0;
+            this._offset = 0;
+            this._basis = position;
+            this._characterWindowCount = amountToRead;
+        }
+    }
+
+    /// <summary>
+    /// 移动或扩充字符缓冲数组以容纳更多的字符。
+    /// </summary>
+    /// <returns>若操作成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
+    private bool MoreChars()
+    {
+        if (this._offset >= this._characterWindowCount)
+        {
+            if (this.Position >= this._textEnd) return false; // 已经处理到代码文本的结尾。
+
+            // 若标记扫描已很大程度地深入了字符缓冲数组，则滑动字符缓冲范围，使其起始位置对准当前识别到的标记的起始位置。
+            if (this._lexemeStart > (this._characterWindowCount / 4))
+            {
+                // 将从标记起始位置开始的字符数据复制到缓冲数组的开头。
+                Array.Copy(
+                    this._characterWindow, this._lexemeStart,
+                    this._characterWindow, 0,
+                    this._characterWindowCount - this._lexemeStart);
+
+                this._characterWindowCount -= this._lexemeStart;
+                this._offset -= this._lexemeStart;
+                this._basis += this._lexemeStart;
+                this._lexemeStart = 0;
+            }
+
+            if (this._characterWindowCount >= this._characterWindow.Length)
+            {
+                // 扩大字符缓冲数组的容量以容纳后续更多的字符。
+                var oldWindow = this._characterWindow;
+                var newWindow = new char[this._characterWindow.Length * 2]; // 扩大两倍。
+                Array.Copy(oldWindow, 0, newWindow, 0, this._characterWindow.Length);
+                SlidingTextWindow.s_windowPool.ForgetTrackedObject(oldWindow, newWindow);
+                this._characterWindow = newWindow;
+            }
+
+            var amountToRead = Math.Min(
+                this._textEnd - (this._basis + this.CharacterWindowCount), // 不能超过代码文本的结尾。
+                this._characterWindow.Length - this._characterWindowCount // 把缓冲数组读满。
+            );
+            this._text.CopyTo(this._basis + this._characterWindowCount, this._characterWindow, this._characterWindowCount, amountToRead);
+            this._characterWindowCount += amountToRead;
+
+            return amountToRead > 0; // 读取到更多字符。
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 当前是否读到代码文本的结尾。
+    /// </summary>
+    /// <returns>若为<see langword="true"/>时，表示已读到代码文本的结尾；为<see langword="false"/>时，表示未读到代码文本的结尾。</returns>
+    internal bool IsReallyAtEnd() => this._offset >= this._characterWindowCount && this.Position >= this._textEnd;
+
+    /// <summary>
+    /// 将当前识别的字符偏移量向前推进<paramref name="n"/>个字符，不检查最终位置是否超出范围。
+    /// </summary>
+    /// <param name="n">将当前识别的字符偏移量向前推进的字符数。</param>
+    [DebuggerStepThrough]
+    public void AdvanceChar(int n = 1)
+    {
+        Debug.Assert(n >= 1);
+        this._offset += n;
+    }
+
+    /// <summary>
+    /// 将当前识别的字符偏移量向前推进，越过当前紧跟着的换行字符序列。若当前紧跟着的不是换行字符序列，则只推进1个字符。
+    /// </summary>
+    [DebuggerStepThrough]
+    public void AdvancePastNewLine() => this.AdvanceChar(this.GetNewLineWidth());
+
+    /// <summary>
+    /// 抓取下一个字符并推进字符偏移量1个字符位置。
+    /// </summary>
+    /// <returns>下一个字符。若已到达结尾，则返回<see cref="SlidingTextWindow.InvalidCharacter"/>。</returns>
+    [DebuggerStepThrough]
+    public char NextChar()
+    {
+        var c = this.PeekChar();
+        if (c != SlidingTextWindow.InvalidCharacter)
+            this.AdvanceChar();
+        return c;
+    }
+
+    /// <summary>
+    /// 查看后方第<paramref name="delta"/>位上的字符。
+    /// </summary>
+    /// <param name="delta">相对于当前识别的字符位置的偏移量。</param>
+    /// <returns>后方第<paramref name="delta"/>位上的字符。若已到达结尾，则返回<see cref="SlidingTextWindow.InvalidCharacter"/>。</returns>
+    [DebuggerStepThrough]
+    public char PeekChar(int delta = 0)
+    {
+        var position = this.Position;
+        this.AdvanceChar(delta);
+
+        char c;
+        if (this._offset >= this._characterWindowCount && !this.MoreChars())
+            c = SlidingTextWindow.InvalidCharacter;
+        else
+            c = this._characterWindow[this._offset];
+
+        this.Reset(position);
+        return c;
+    }
+
+    /// <summary>
+    /// 查看后方共<paramref name="count"/>位字符。
+    /// </summary>
+    /// <param name="count">查看的字符位数。</param>
+    /// <returns>后方共<paramref name="count"/>位字符。若已到达结尾，则该位上的字符为<see cref="SlidingTextWindow.InvalidCharacter"/>。</returns>
+    [DebuggerStepThrough]
+    public string PeekChars(int count)
+    {
+        if (count is < 0) throw new ArgumentOutOfRangeException(nameof(count));
+        else if (count is 0) return string.Empty;
+
+        for (var i = 0; i < count; i++)
+        {
+            var position = this._offset + i;
+            if (position >= this._characterWindowCount && !this.MoreChars())
+            {
+                count = i + 1;
+                break;
+            }
+        }
+
+        return this.GetText(this._offset, count, intern: true);
+    }
+
+    /// <summary>
+    /// 若紧跟着的字符序列匹配指定的字符串，则推进字符偏移量，越过匹配的字符串；否则不做任何变动。
+    /// </summary>
+    /// <param name="desired">作为匹配对象的字符串。</param>
+    /// <returns>若为<see langword="true"/>时，表示已匹配并推进；为<see langword="false"/>时，表示未推进。</returns>
+    private bool AdvanceIfMatches(string desired)
+    {
+        var length = desired.Length;
+
+        for (var i = 0; i < length; i++)
+        {
+            if (this.PeekChar(i) != desired[i]) return false;
+        }
+
+        this.AdvanceChar(length);
+        return true;
+    }
+
+    /// <summary>
+    /// 搜索与<see cref="StringBuilder"/>匹配的字符串。
+    /// </summary>
+    /// <returns>搜索到的字符串。</returns>
+    [DebuggerStepThrough]
+    public string Intern(StringBuilder text) => this._strings.Add(text);
+
+    /// <summary>
+    /// 搜索与字符数组匹配的字符串。
+    /// </summary>
+    /// <returns>搜索到的字符串。</returns>
+    [DebuggerStepThrough]
+    public string Intern(char[] array, int start, int length) => this._strings.Add(array, start, length);
+
+    /// <summary>
+    /// 获取与当前识别到的标记匹配的字符串。
+    /// </summary>
+    /// <returns>与当前识别到的标记匹配的字符串。</returns>
+    [DebuggerStepThrough]
+    public string GetInternedText() => this.Intern(this._characterWindow, this._lexemeStart, this.Width);
+
+    /// <summary>
+    /// 获取表示当前识别到的标记的字符串。
+    /// </summary>
+    /// <param name="intern">是否搜索匹配的字符串。</param>
+    /// <returns>表示当前识别到的标记的字符串。</returns>
+    [DebuggerStepThrough]
+    public string GetText(bool intern) => this.GetText(this.LexemeStartPosition, this.Width, intern);
+
+    /// <summary>
+    /// 获取一个范围内的字符串。
+    /// </summary>
+    /// <param name="position">相对于代码文本起始位置的偏移量。</param>
+    /// <param name="length">字符范围的宽度。</param>
+    /// <param name="intern">是否搜索匹配的字符串。</param>
+    /// <returns></returns>
+    [DebuggerStepThrough]
+    public string GetText(int position, int length, bool intern)
+    {
+        var offset = position - this._basis;
 
         switch (length)
         {
@@ -53,8 +369,8 @@ internal sealed class SlidingTextWindow : Qtyi.CodeAnalysis.Syntax.InternalSynta
                     return "\n";
                 break;
             case 2:
-                char firstChar = this._characterWindow[offset];
-                char nextChar = this._characterWindow[offset + 1];
+                var firstChar = this._characterWindow[offset];
+                var nextChar = this._characterWindow[offset + 1];
                 if (firstChar == '\r' && nextChar == '\n')
                     return "\r\n";
                 else if (firstChar == '-' && nextChar == '-')
@@ -72,99 +388,77 @@ internal sealed class SlidingTextWindow : Qtyi.CodeAnalysis.Syntax.InternalSynta
         else return new string(this._characterWindow, offset, length);
     }
 
-    public char NextByteEscape(out SyntaxDiagnosticInfo? info, out char surrogate)
+    [DebuggerStepThrough]
+    public int GetNewLineWidth() => SlidingTextWindow.GetNewLineWidth(this.PeekChar(0), this.PeekChar(1));
+
+    /// <summary>
+    /// 获取换行字符序列的宽度。
+    /// </summary>
+    /// <param name="currentChar">第一个字符。</param>
+    /// <param name="nextChars">后续的字符序列。</param>
+    /// <returns>换行字符序列的宽度。</returns>
+    [DebuggerStepThrough]
+    public static int GetNewLineWidth(char currentChar, params char[] nextChars)
     {
-        Debug.Assert(this.PeekChar(0) == '\\' || this.PeekChar(1) == 'x' || SyntaxFacts.IsDecDigit(this.PeekChar(1)));
+        Debug.Assert(SyntaxFacts.IsNewLine(currentChar));
 
-        int start = this.Position;
+        if (nextChars.Length >= 1 && SyntaxFacts.IsNewLine(currentChar, nextChars[0]))
+            // "\r\n"
+            return 2;
+        else
+            // 其他1个字符宽度的换行字符序列。
+            return 1;
+    }
 
-        /* 对于每个字节，都先检查NextByteEscapeCore的传出参数byteError，看是否在处理转义期间就产生了错误。
-         * 若转义期间产生了错误，就直接终止后续扫描。
-         * 再检查字节是否在指定位置应有的范围内，若不在则错误的范围应划定到此字节转义的前方（除了第一个字节）。
-         * 第一个字节就不在范围内，则错误的范围应划定到此字节转义的后方（至少要吃掉一个字节转义）。
-         */
+    public byte NextByteEscape(out SyntaxDiagnosticInfo? info)
+    {
+        Debug.Assert(this.PeekChar(0) == '\\' && (this.PeekChar(1) == 'x' || SyntaxFacts.IsDecDigit(this.PeekChar(1))));
 
-        bool success = this.NextByteEscapeCore(out var firstByte, out var firstByteError);
-        Debug.Assert(success); // 第一个byte必定能获取到。
-
-        if (firstByteError is not null) // 此字节转义产生错误，立即中断后续扫描并返回。
-        {
-            info = firstByteError;
-            surrogate = SlidingTextWindow.InvalidCharacter;
-            return SlidingTextWindow.InvalidCharacter;
-        }
-        else if (!IsUtf8ByteSequenceValidAt(0, firstByte)) // 此字节不在指定位置应有的范围内，立即中断后续扫描并返回。
-        {
-            info = this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalUtf8ByteSequence);
-            surrogate = SlidingTextWindow.InvalidCharacter;
-            return SlidingTextWindow.InvalidCharacter;
-        }
-
-        // 获取第一个转义后字节指示的UTF-8字节序列总长度。
-        int count = firstByte switch
-        {
-            <= 0b01111111 => 1,
-            >= 0b11000000 and <= 0b11011111 => 2,
-            >= 0b11100000 and <= 0b11101111 => 3,
-            >= 0b11110000 and <= 0b11110111 => 4,
-            _ => throw ExceptionUtilities.Unreachable // 前面已经检查过了。
-        };
-        var utf8Bytes = new byte[count];
-        utf8Bytes[0] = firstByte;
-
-        bool recovering = false; // 是否处于错误恢复状态（查找下一个起始字节）。
-        for (int index = 1; index < count;)
-        {
-            int byteStart = this.Position;
-
-            success = this.NextByteEscapeCore(out var byteValue, out var byteError);
-            if (!success) // 后方不是字节转义，UTF-8字节序列未完成。
-            {
-                info = this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalUtf8ByteSequence);
-                surrogate = SlidingTextWindow.InvalidCharacter;
-                return SlidingTextWindow.InvalidCharacter;
-            }
-            else if (byteError is not null) // 此字节转义产生错误，立即中断后续扫描并返回。
-            {
-                info = byteError;
-                surrogate = SlidingTextWindow.InvalidCharacter;
-                return SlidingTextWindow.InvalidCharacter;
-            }
-            else if (IsUtf8ByteSequenceValidAt(0, byteValue)) // 此字节是下一个起始字节，则将前方的序列都划入错误范围，立即中断后续扫描并返回。
-            {
-                this.Reset(byteStart);
-
-                info = this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalUtf8ByteSequence);
-                surrogate = SlidingTextWindow.InvalidCharacter;
-                return SlidingTextWindow.InvalidCharacter;
-            }
-            else if (recovering || !IsUtf8ByteSequenceValidAt(index, byteValue)) // 此字节不在指定位置应有的范围内。
-            {
-                // UTF-8字节序列出现错误字节，需要向后查找，直到找到另一个起始字节或到达结尾。
-                // 由于我们限制了index的变化，因此循环将一直持续下去，必然会符合上方的某项失败条件。
-                recovering = true; // 进入错误恢复状态。
-                continue;
-            }
-            else // 终于找到正确的字节。
-            {
-                utf8Bytes[index] = byteValue;
-                index++; // 处理下一个字节转义。
-            }
-        }
-
-        // 不再会有错误了。
+        byte byteValue = 0;
         info = null;
-        uint codepoint = firstByte switch
+
+        var start = this.Position;
+
+        this.AdvanceChar();
+        if (this.PeekChar() == 'x')
         {
-            <= 0b01111111 => firstByte,
-            >= 0b11000000 and <= 0b11011111 => firstByte & (uint)0b11111,
-            >= 0b11100000 and <= 0b11101111 => firstByte & (uint)0b1111,
-            >= 0b11110000 and <= 0b11110111 => firstByte & (uint)0b111,
-            _ => throw ExceptionUtilities.Unreachable // 前面已经检查过了。
-        };
-        for (int index = 1; index < utf8Bytes.Length; index++)
-            codepoint = (codepoint << 6) + (utf8Bytes[index] & (uint)0b111111);
-        return SlidingTextWindow.GetCharsFromUtf32(codepoint, out surrogate);
+            this.AdvanceChar();
+
+            // 识别2位十六进制数字。
+            if (SyntaxFacts.IsHexDigit(this.PeekChar()))
+            {
+                byteValue = (byte)SyntaxFacts.HexValue(this.NextChar());
+
+                if (SyntaxFacts.IsHexDigit(this.PeekChar()))
+                {
+                    byteValue = (byte)((byteValue << 4) + SyntaxFacts.HexValue(this.NextChar()));
+                }
+                else info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
+            }
+            else info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
+        }
+        // 识别3位十进制数字。
+        else if (SyntaxFacts.IsDecDigit(this.PeekChar()))
+        {
+            var uintValue = (uint)SyntaxFacts.HexValue(this.NextChar());
+
+            if (SyntaxFacts.IsDecDigit(this.PeekChar()))
+            {
+                uintValue = (uint)(uintValue * 10 + SyntaxFacts.HexValue(this.NextChar()));
+
+                if (SyntaxFacts.IsDecDigit(this.PeekChar()))
+                {
+                    uintValue = (uint)(uintValue * 10 + SyntaxFacts.HexValue(this.NextChar()));
+                }
+            }
+
+            if (uintValue > byte.MaxValue)
+                info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
+            else
+                byteValue = (byte)uintValue;
+        }
+
+        return byteValue;
     }
 
     private bool NextByteEscapeCore(out byte byteValue, out SyntaxDiagnosticInfo? info)
@@ -172,25 +466,21 @@ internal sealed class SlidingTextWindow : Qtyi.CodeAnalysis.Syntax.InternalSynta
         byteValue = 0;
         info = null;
 
-        char c;
-        int start = this.Position;
+        var start = this.Position;
 
-        if (this.PeekChar(0) != '\\')
-            return false;
-        else if (this.PeekChar(1) == 'x')
+        this.AdvanceChar();
+        if (this.PeekChar() == 'x')
         {
-            this.AdvanceChar(2);
+            this.AdvanceChar();
 
             // 识别2位十六进制数字。
             if (SyntaxFacts.IsHexDigit(this.PeekChar()))
             {
-                c = this.NextChar();
-                byteValue = (byte)SyntaxFacts.HexValue(c);
+                byteValue = (byte)SyntaxFacts.HexValue(this.NextChar());
 
                 if (SyntaxFacts.IsHexDigit(this.PeekChar()))
                 {
-                    c = this.NextChar();
-                    byteValue = (byte)((byteValue << 4) + SyntaxFacts.HexValue(c));
+                    byteValue = (byte)((byteValue << 4) + SyntaxFacts.HexValue(this.NextChar()));
                 }
                 else info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
             }
@@ -199,23 +489,17 @@ internal sealed class SlidingTextWindow : Qtyi.CodeAnalysis.Syntax.InternalSynta
             return true;
         }
         // 识别3位十进制数字。
-        else if (SyntaxFacts.IsDecDigit(this.PeekChar(1)))
+        else if (SyntaxFacts.IsDecDigit(this.PeekChar()))
         {
-            this.AdvanceChar(1);
-
-            uint uintValue = 0;
-            c = this.NextChar();
-            uintValue = (uint)SyntaxFacts.HexValue(c);
+            var uintValue = (uint)SyntaxFacts.HexValue(this.NextChar());
 
             if (SyntaxFacts.IsDecDigit(this.PeekChar()))
             {
-                c = this.NextChar();
-                uintValue = (byte)(uintValue * 10 + SyntaxFacts.HexValue(c));
+                uintValue = (uint)(uintValue * 10 + SyntaxFacts.HexValue(this.NextChar()));
 
                 if (SyntaxFacts.IsDecDigit(this.PeekChar()))
                 {
-                    c = this.NextChar();
-                    uintValue = (byte)(uintValue * 10 + SyntaxFacts.HexValue(c));
+                    uintValue = (uint)(uintValue * 10 + SyntaxFacts.HexValue(this.NextChar()));
                 }
             }
 
@@ -249,9 +533,9 @@ internal sealed class SlidingTextWindow : Qtyi.CodeAnalysis.Syntax.InternalSynta
     {
         info = null;
 
-        int start = this.Position;
+        var start = this.Position;
 
-        char c = this.NextChar();
+        var c = this.NextChar();
         surrogate = SlidingTextWindow.InvalidCharacter;
         Debug.Assert(c == '\\');
 
@@ -276,7 +560,7 @@ internal sealed class SlidingTextWindow : Qtyi.CodeAnalysis.Syntax.InternalSynta
 
         // 最少识别1位十六进制数字，提前遇到非十六进制数字字符时中断。
         uint codepoint = 0;
-        for (int i = 1; ; i++)
+        for (var i = 1; ; i++)
         {
             if (codepoint <= 0x7FFFFFFF)
                 codepoint = (codepoint << 4) + (uint)SyntaxFacts.HexValue(c);

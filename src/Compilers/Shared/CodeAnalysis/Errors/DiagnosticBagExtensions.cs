@@ -59,7 +59,7 @@ internal static class DiagnosticBagExtensions
     {
         if (useSiteDiagnostics.IsNullOrEmpty()) return false;
 
-        bool haveErrors = false;
+        var haveErrors = false;
 
         foreach (var info in useSiteDiagnostics)
         {

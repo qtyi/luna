@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
@@ -13,7 +12,7 @@ partial class Lexer
     {
         internal int InnerIndent;
         /// <summary>
-        /// 语法标志的语法标志列表类型值。
+        /// 语法标记的语法标记列表类型值。
         /// </summary>
         internal ImmutableArray<SyntaxToken> SyntaxTokenArrayValue;
     }

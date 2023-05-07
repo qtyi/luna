@@ -91,11 +91,11 @@ internal abstract partial class
         var fullSpan = this.Root.FullSpan;
         var position = node.SpanStart;
 
-        // 跳过零宽语法标志，但不跳过语法节点末尾。
+        // 跳过零宽语法标记，但不跳过语法节点末尾。
         var firstToken = node.GetFirstToken(includeZeroWidth: false);
         if (firstToken.Node is not null)
         {
-            int betterPosition = firstToken.SpanStart;
+            var betterPosition = firstToken.SpanStart;
             if (betterPosition < node.Span.End) // 防止跳出语法节点范围。
                 position = betterPosition;
         }
@@ -134,24 +134,24 @@ internal abstract partial class
     }
 
     /// <summary>
-    /// 检查指定位置是否是某一个语法标志的起始位置，若不是则调整到这个起始位置。
+    /// 检查指定位置是否是某一个语法标记的起始位置，若不是则调整到这个起始位置。
     /// </summary>
-    /// <returns><see cref="Root"/>中的某一个语法标志的起始位置，与<paramref name="position"/>可能相等。</returns>
+    /// <returns><see cref="Root"/>中的某一个语法标记的起始位置，与<paramref name="position"/>可能相等。</returns>
     /// <inheritdoc cref="CheckAndAdjustPosition(int, out SyntaxToken)"/>
     protected int CheckAndAdjustPosition(int position) => this.CheckAndAdjustPosition(position, out _);
 
     /// <summary>
-    /// 检查指定位置是否是某一个语法标志的起始位置并返回后者，若不是则调整到这个起始位置。
+    /// 检查指定位置是否是某一个语法标记的起始位置并返回后者，若不是则调整到这个起始位置。
     /// </summary>
     /// <param name="position">要检查的位置。</param>
-    /// <param name="token">传出<paramref name="position"/>落在其范围中的语法标志。</param>
+    /// <param name="token">传出<paramref name="position"/>落在其范围中的语法标记。</param>
     /// <returns><paramref name="token"/>的起始位置，与<paramref name="position"/>可能相等。</returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="position"/>落在<see cref="Root"/>根语法节点的范围之外。</exception>
     protected int CheckAndAdjustPosition(int position, out SyntaxToken token)
     {
-        int fullStart = this.Root.Position;
-        int fullEnd = this.Root.FullSpan.End;
-        bool atEOF = position == fullEnd && position == this.SyntaxTree.GetRoot().FullSpan.End;
+        var fullStart = this.Root.Position;
+        var fullEnd = this.Root.FullSpan.End;
+        var atEOF = position == fullEnd && position == this.SyntaxTree.GetRoot().FullSpan.End;
 
         if ((fullStart <= position && position < fullEnd) || atEOF)
         {
@@ -162,11 +162,11 @@ internal abstract partial class
 
             if (position < token.SpanStart)
             {
-                // 若此时已经是第一个语法标志，则返回SyntaxToken的默认值。
+                // 若此时已经是第一个语法标记，则返回SyntaxToken的默认值。
                 token = token.GetPreviousToken();
             }
 
-            // 根节点可能缺失第一个语法标志，因此需防止越界。
+            // 根节点可能缺失第一个语法标记，因此需防止越界。
             return Math.Max(token.SpanStart, fullStart);
         }
         else if (fullStart == fullEnd && position == fullEnd)
@@ -181,12 +181,12 @@ internal abstract partial class
     }
 
     /// <summary>
-    /// 返回指定根节点中的某个语法标志，指定位置落在其范围中。
+    /// 返回指定根节点中的某个语法标记，指定位置落在其范围中。
     /// </summary>
-    /// <param name="root">要查找的语法标志所在的根语法节点。</param>
-    /// <param name="position">落于要查找的语法标志的范围内的位置。</param>
-    /// <param name="atEOF">要查找的语法标志是否位于<paramref name="root"/>的结尾。</param>
-    /// <returns><paramref name="root"/>中的某个语法标志，<paramref name="position"/>落在其范围中。</returns>
+    /// <param name="root">要查找的语法标记所在的根语法节点。</param>
+    /// <param name="position">落于要查找的语法标记的范围内的位置。</param>
+    /// <param name="atEOF">要查找的语法标记是否位于<paramref name="root"/>的结尾。</param>
+    /// <returns><paramref name="root"/>中的某个语法标记，<paramref name="position"/>落在其范围中。</returns>
     private partial SyntaxToken FindTokenAtPosition(ThisSyntaxNode root, int position, bool atEOF);
 
     /// <summary>

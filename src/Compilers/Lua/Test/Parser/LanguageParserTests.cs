@@ -2,9 +2,7 @@
 
 namespace Qtyi.CodeAnalysis.Lua.Parser.UnitTests;
 
-using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 using Microsoft.CodeAnalysis.Text;
-using Utilities;
 
 [TestClass]
 public partial class LanguageParserTests
@@ -147,7 +145,7 @@ public partial class LanguageParserTests
             Assert.That.NotContainsDiagnostics(name);
             Assert.That.AtEndOfFile(parser);
         }
-        { // 多重限定名称缺少点标志
+        { // 多重限定名称缺少点标记
             // 会被分拆成两个名称语法。
             var parser = LanguageParserTests.CreateLanguageParser(" a.b.c d.e.f ");
             {
@@ -171,7 +169,7 @@ public partial class LanguageParserTests
                 Assert.That.AtEndOfFile(parser);
             }
         }
-        { // 多重限定隐式self参数名称缺少点标志
+        { // 多重限定隐式self参数名称缺少点标记
             // 会被分拆成两个名称语法。
             var parser = LanguageParserTests.CreateLanguageParser(" a.b.c d.e:f ");
             {
@@ -1249,8 +1247,8 @@ public partial class LanguageParserTests
             Assert.That.NotContainsDiagnostics(expr);
             Assert.That.AtEndOfFile(parser);
         }
-        { // 字段值为合法表达式，但后方错误追加了其他标志和表达式
-            // 只识别第一个合法表达式，后方的标志和表达式作为前者的被跳过的标志的语法琐碎内容，并报告错误。
+        { // 字段值为合法表达式，但后方错误追加了其他标记和表达式
+            // 只识别第一个合法表达式，后方的标记和表达式作为前者的被跳过的标记的语法琐碎内容，并报告错误。
             var parser = LanguageParserTests.CreateLanguageParser("a if b + c then return true end");
             var expr = parser.ParseFieldValue();
             Assert.IsInstanceOfType(expr, typeof(IdentifierNameSyntax));

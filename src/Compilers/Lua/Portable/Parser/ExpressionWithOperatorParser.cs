@@ -28,7 +28,7 @@ partial class LanguageParser
             UnaryStart,         // 一元运算符后方
             BinaryStart,        // 二元运算符后方
             Terminal,           // 可以结束
-            Skip = Bad - 1,     // 跳过当前标志后继续
+            Skip = Bad - 1,     // 跳过当前标记后继续
             Bad = byte.MaxValue // 立即错误
         }
 
@@ -118,9 +118,9 @@ partial class LanguageParser
 
             skippedTokensTrivia = this.CreateSkippedTokensTrivia(skippedTokenListBuilder, ErrorCode.ERR_InvalidExprTerm);
 
-            // 若遇到Bad情况直接退出，表示没有下一个可接受的标志或表达式语法，则将skippedTokensTrivia传出，交给调用方法处理；
+            // 若遇到Bad情况直接退出，表示没有下一个可接受的标记或表达式语法，则将skippedTokensTrivia传出，交给调用方法处理；
             if (result is null) return false;
-            // 若能找到下一个可接受的标志或表达式语法，则将skippedTokensTrivia添加到这个语法节点的前方语法琐碎内容中，不传出此方法。
+            // 若能找到下一个可接受的标记或表达式语法，则将skippedTokensTrivia添加到这个语法节点的前方语法琐碎内容中，不传出此方法。
             else
             {
                 if (skippedTokensTrivia is not null)
@@ -146,7 +146,7 @@ partial class LanguageParser
 
         private bool CanAssociate(SyntaxToken nextOpt)
         {
-            bool nextIsUnary = this.CurrentTokenIsUnary;
+            var nextIsUnary = this.CurrentTokenIsUnary;
             (var opt, var isUnary) = this._optStack.Peek();
 
             if (!isUnary && nextIsUnary) return false; // 上一个运算符是二元运算符且下一个运算符是一元运算符时不可以。

@@ -8,14 +8,16 @@ using Microsoft.CodeAnalysis;
 namespace Qtyi.CodeAnalysis.Lua;
 
 using ThisDiagnostic = LuaDiagnostic;
+using ThisDiagnosticFormatter = LuaDiagnosticFormatter;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
 
 using ThisDiagnostic = MoonScriptDiagnostic;
+using ThisDiagnosticFormatter = MoonScriptDiagnosticFormatter;
 #endif
 
 /// <summary>
-/// 此类型表示一个诊断格式化器，提供格式化<see cref="ThisDiagnostic"/>所需的方法。
+/// The formatter to format a <see cref="ThisDiagnostic"/>.
 /// </summary>
 public class
 #if LANG_LUA
@@ -26,49 +28,22 @@ public class
     : DiagnosticFormatter
 {
     /// <remarks>
-    /// 仅编译器能创建实例。
+    /// Prevent anyone else from deriving from this class.
     /// </remarks>
     internal
 #if LANG_LUA
-    LuaDiagnosticFormatter
+        LuaDiagnosticFormatter
 #elif LANG_MOONSCRIPT
-    MoonScriptDiagnosticFormatter
+        MoonScriptDiagnosticFormatter
 #endif
         ()
     { }
 
     /// <summary>
-    /// 获取诊断格式化器的新实例。
+    /// Get the unique instance of <see cref="ThisDiagnosticFormatter"/>.
     /// </summary>
     /// <value>
-    /// 一个诊断格式化器的新实例。
+    /// The unique instance of <see cref="ThisDiagnosticFormatter"/>.
     /// </value>
-    public static new
-#if LANG_LUA
-    LuaDiagnosticFormatter
-#elif LANG_MOONSCRIPT
-    MoonScriptDiagnosticFormatter
-#endif
-        Instance
-    { get; } = new();
-
-    /// <summary>
-    /// 使用可选的<see cref="IFormatProvider"/>格式化<see cref="Diagnostic"/>信息。
-    /// </summary>
-    /// <inheritdoc cref="Format(ThisDiagnostic, IFormatProvider?)"/>
-    public sealed override string Format(Diagnostic diagnostic, IFormatProvider? formatter = null)
-    {
-        if (diagnostic is not ThisDiagnostic d)
-            return base.Format(diagnostic, formatter);
-
-        return this.Format(d, formatter);
-    }
-
-    /// <summary>
-    /// 使用可选的<see cref="IFormatProvider"/>格式化<see cref="ThisDiagnostic"/>信息。
-    /// </summary>
-    /// <param name="diagnostic">要格式化的诊断。</param>
-    /// <param name="formatter">格式化使用的格式提供器。传入<see langword="null"/>时使用默认的格式提供器。</param>
-    /// <returns>格式化后的信息。</returns>
-    internal virtual string Format(ThisDiagnostic diagnostic, IFormatProvider? formatter = null) => base.Format(diagnostic, formatter);
+    public static new ThisDiagnosticFormatter Instance { get; } = new();
 }

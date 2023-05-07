@@ -90,7 +90,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     private void SetFullWidth() => this.FullWidth = this.Text.Length;
 
     /// <summary>
-    /// 在此基类上添加<see cref="Microsoft.CodeAnalysis.GreenNode.NodeFlags.IsNotMissing"/>标志。若子类要表示缺失的语法标志，则在子类中移除这个标志。
+    /// 在此基类上添加<see cref="Microsoft.CodeAnalysis.GreenNode.NodeFlags.IsNotMissing"/>标记。若子类要表示缺失的语法标记，则在子类中移除这个标记。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void SetIsNotMissingFlag() => this.SetFlags(NodeFlags.IsNotMissing);
@@ -105,7 +105,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     // s_tokensWithSingleTrailingCRLF字段
 
     /// <summary>
-    /// 在<see cref="SyntaxToken"/>的静态构造函数中初始化所有已知文本的标志。
+    /// 在<see cref="SyntaxToken"/>的静态构造函数中初始化所有已知文本的标记。
     /// </summary>
     protected static partial void InitializeTokensWithWellKnownText();
     #endregion
@@ -173,16 +173,16 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     internal static SyntaxToken WithValue<T>(SyntaxKind kind, GreenNode? leading, string text, T? value, GreenNode? trailing) => new SyntaxTokenWithValueAndTrivia<T>(kind, text, value, leading, trailing);
 
     /// <summary>
-    /// 表示语法标志在序列化过程中是否应被重用。
+    /// 表示语法标记在序列化过程中是否应被重用。
     /// </summary>
     internal override bool ShouldReuseInSerialization => base.ShouldReuseInSerialization &&
-        // 同时不应超过词法器的最大缓存标志空间。
+        // 同时不应超过词法器的最大缓存标记空间。
         this.FullWidth < Lexer.MaxCachedTokenSize;
 
     /// <exception cref="InvalidOperationException">此方法永远不会被调用。</exception>
     internal sealed override GreenNode? GetSlot(int index) => throw ExceptionUtilities.Unreachable;
 
-    #region 常见标志
+    #region 常见标记
     private static readonly ArrayElement<SyntaxToken>[] s_tokensWithNoTrivia = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];
     private static readonly ArrayElement<SyntaxToken>[] s_tokensWithElasticTrivia = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];
     private static readonly ArrayElement<SyntaxToken>[] s_tokensWithSingleTrailingSpace = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];

@@ -70,8 +70,8 @@ internal sealed class CompilerServerLogger : ICompilerServerLogger, IDisposable
         {
             var threadId = Environment.CurrentManagedThreadId;
             var prefix = $"ID={_identifier} TID={threadId}: ";
-            string output = prefix + message + Environment.NewLine;
-            byte[] bytes = Encoding.UTF8.GetBytes(output);
+            var output = prefix + message + Environment.NewLine;
+            var bytes = Encoding.UTF8.GetBytes(output);
 
             // Because multiple processes might be logging to the same file, we always seek to the end,
             // write, and flush.

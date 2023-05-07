@@ -12,12 +12,12 @@ partial class Lexer
 {
     private partial bool ScanStringLiteral(ref TokenInfo info)
     {
-        char quote = this.TextWindow.PeekChar();
+        var quote = this.TextWindow.PeekChar();
         Debug.Assert(quote == '\'' || quote == '"');
 
         if (quote == '"') // 可能是插值字符串字面量。
         {
-            int start = this.TextWindow.Position; // 记录起始位置。
+            var start = this.TextWindow.Position; // 记录起始位置。
 
             var scanner = new InterpolatedStringScanner(this);
             if (scanner.ScanInterpolatedStringLiteral(ref info)) return true;
@@ -36,7 +36,7 @@ partial class Lexer
 
             while (true)
             {
-                char c = this.TextWindow.PeekChar();
+                var c = this.TextWindow.PeekChar();
                 if (c == quote) // 字符串结尾
                 {
                     this.TextWindow.AdvanceChar();
@@ -45,7 +45,7 @@ partial class Lexer
                         spanBuilder.Add(this._builder.ToString());
                     break;
                 }
-                // 字符串中可能包含非正规的Utf-16以外的字符，检查是否真正到达文本结尾来验证这些字符不是由用户代码引入的情况。
+                // 字符串中可能包含非正规的UTF-16以外的字符，检查是否真正到达文本结尾来验证这些字符不是由用户代码引入的情况。
                 else if (c == SlidingTextWindow.InvalidCharacter && this.TextWindow.IsReallyAtEnd())
                 {
                     Debug.Assert(this.TextWindow.Width > 0);
@@ -99,10 +99,10 @@ partial class Lexer
             if (spanBuilder.Count > 1)
             {
                 // 找到最小缩进量。
-                int minIndent = int.MaxValue;
-                for (int i = 1; i < spanBuilder.Count; i += 2)
+                var minIndent = int.MaxValue;
+                for (var i = 1; i < spanBuilder.Count; i += 2)
                 {
-                    string? span = spanBuilder[i];
+                    var span = spanBuilder[i];
                     if (span is null) // 遇到无缩进量的行，快速退出。
                     {
                         minIndent = 0;
@@ -138,16 +138,16 @@ partial class Lexer
     private static void TrimIndent(ArrayBuilder<string?> spans, int innerIndent)
     {
         // 修剪缩进量。
-        for (int i = 1; i < spans.Count; i += 2)
+        for (var i = 1; i < spans.Count; i += 2)
         {
-            int indent = 0;
-            int start = 0;
-            string? span = spans[i];
+            var indent = 0;
+            var start = 0;
+            var span = spans[i];
             if (span is null) continue; // 遇到无缩进量的行，跳过。
 
             while (indent <= innerIndent && start < span.Length)
             {
-                int nextIndent = SyntaxFacts.WhiteSpaceIndent(span[start]);
+                var nextIndent = SyntaxFacts.WhiteSpaceIndent(span[start]);
                 if (indent == innerIndent && nextIndent != 0) break; // 缩进量正好相等。
 
                 indent += nextIndent;
@@ -155,10 +155,10 @@ partial class Lexer
             };
             if (indent > innerIndent)
             {
-                int indentLength = indent - innerIndent;
-                int spanLength = span.Length - start;
-                char[] buffer = new char[spanLength + indentLength];
-                for (int _i = 0; _i < indentLength; i++)
+                var indentLength = indent - innerIndent;
+                var spanLength = span.Length - start;
+                var buffer = new char[spanLength + indentLength];
+                for (var _i = 0; _i < indentLength; i++)
                     buffer[_i] = ' '; // 前导空格符。
                 if (start < span.Length)
                 {

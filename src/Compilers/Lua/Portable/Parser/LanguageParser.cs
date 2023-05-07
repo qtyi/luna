@@ -2,12 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.PooledObjects;
-using Microsoft.CodeAnalysis.Text;
-using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
@@ -45,7 +40,7 @@ partial class LanguageParser
         var returnStat = this.CurrentTokenKind == SyntaxKind.ReturnKeyword ? this.ParseReturnStatement() : null;
         if (returnStat is not null)
         {
-            // 跳过后方的连续的表示空语句的分号标志。
+            // 跳过后方的连续的表示空语句的分号标记。
             var skippedSyntax = this.SkipTokens(token => token.Kind == SyntaxKind.SemicolonToken);
             if (skippedSyntax is not null)
                 returnStat = this.AddTrailingSkippedSyntax(returnStat, skippedSyntax);

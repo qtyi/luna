@@ -194,7 +194,7 @@ public abstract partial class
     /// 从字节流中反序列化语法节点。
     /// </summary>
     /// <param name="stream">从中读取数据的流。</param>
-    /// <param name="cancellationToken">取消操作的标志。</param>
+    /// <param name="cancellationToken">取消操作的标记。</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"><paramref name="stream"/>的值为<see langword="null"/>。</exception>
     /// <exception cref="InvalidOperationException"><paramref name="stream"/>流不可读。</exception>
@@ -216,22 +216,22 @@ public abstract partial class
     }
     #endregion
 
-    #region 查找标志
+    #region 查找标记
     /// <summary>
-    /// 获取以此节点为根节点的语法树的第一个标志。
+    /// 获取以此节点为根节点的语法树的第一个标记。
     /// </summary>
-    /// <param name="predicate">筛选符合条件的标志的方法。若要允许所有标志，则传入<see langword="null"/>。</param>
+    /// <param name="predicate">筛选符合条件的标记的方法。若要允许所有标记，则传入<see langword="null"/>。</param>
     /// <param name="stepInto">若值不是<see langword="null"/>时深入语法琐碎内容。仅此委托返回<see langword="true"/>时语法琐碎内容才会被包含在内。</param>
-    /// <returns>以此节点为根节点的语法树的第一个标志。</returns>
+    /// <returns>以此节点为根节点的语法树的第一个标记。</returns>
     internal SyntaxToken GetFirstToken(Func<SyntaxToken, bool>? predicate, Func<SyntaxTrivia, bool>? stepInto = null) =>
         SyntaxNavigator.Instance.GetFirstToken(this, predicate, stepInto);
 
     /// <summary>
-    /// 获取以此节点为根节点的语法树的最后一个标志。
+    /// 获取以此节点为根节点的语法树的最后一个标记。
     /// </summary>
-    /// <param name="predicate">筛选符合条件的标志的方法。</param>
+    /// <param name="predicate">筛选符合条件的标记的方法。</param>
     /// <param name="stepInto">若值不是<see langword="null"/>时深入语法琐碎内容。仅此委托返回<see langword="true"/>时语法琐碎内容才会被包含在内。</param>
-    /// <returns>以此节点为根节点的语法树的最后一个标志。</returns>
+    /// <returns>以此节点为根节点的语法树的最后一个标记。</returns>
     internal SyntaxToken GetLastToken(Func<SyntaxToken, bool> predicate, Func<SyntaxTrivia, bool>? stepInto = null) =>
         SyntaxNavigator.Instance.GetLastToken(this, predicate, stepInto);
     #endregion

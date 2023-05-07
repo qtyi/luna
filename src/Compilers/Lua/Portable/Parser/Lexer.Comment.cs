@@ -8,7 +8,7 @@ partial class Lexer
 {
     private partial SyntaxTrivia ScanComment()
     {
-        if (this.ScanLongBrackets(out bool isTerminal))
+        if (this.ScanLongBrackets(out var isTerminal))
         {
             if (!isTerminal)
                 this.AddError(ErrorCode.ERR_OpenEndedComment);

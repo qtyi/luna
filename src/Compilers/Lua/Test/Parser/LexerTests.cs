@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.Text;
 namespace Qtyi.CodeAnalysis.Lua.Parser.UnitTests;
 
-using Utilities;
 using Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
 [TestClass]
@@ -13,11 +12,11 @@ public partial class LexerTests
     [TestMethod]
     public void SimpleLexTest()
     {
-        string source = @"local i = 1";
+        var source = @"local i = 1";
         Lexer lexer = LexerTests.CreateLexer(source);
 
         SyntaxToken token;
-        LexerMode mode = LexerMode.Syntax;
+        var mode = LexerMode.Syntax;
 
         token = lexer.Lex(mode);
         Assert.That.IsKeyword(token, "local");
@@ -44,7 +43,7 @@ public partial class LexerTests
             var lexer = new Lexer(SourceText.From(File.OpenRead(path)), LuaParseOptions.Default);
             var mode = LexerMode.Syntax;
 
-            int position = 0;
+            var position = 0;
             SyntaxToken token;
             Stack<SyntaxToken> stack = new();
             do
@@ -67,8 +66,8 @@ public partial class LexerTests
         Assert.AreEqual(double.MinValue.ToString("G17").Substring(1), double.MaxValue.ToString("G17"));
         LiteralLexTest(double.MinValue.ToString("G17"), double.MaxValue);
 
-        double value = 31.4568156151E-45;
-        string hexValue = value.ToHexString();
+        var value = 31.4568156151E-45;
+        var hexValue = value.ToHexString();
         LiteralLexTest(hexValue, value); // 十六进制浮点数。
 
         LiteralLexTest("31415", 31415L); // 正常十进制整数，long类型。
@@ -124,12 +123,12 @@ public partial class LexerTests
             const string raw = "some text";
             const int maxLevel = 100;
             var buffer = new char[maxLevel + 2];
-            for (int level = 0; level <= maxLevel; level++)
+            for (var level = 0; level <= maxLevel; level++)
             {
                 string openLongBracket, closeLongBracket;
                 // 构造左右长方括号。
                 {
-                    for (int i = 1; i <= level; i++) buffer[i] = '=';
+                    for (var i = 1; i <= level; i++) buffer[i] = '=';
 
                     buffer[0] = buffer[level + 1] = '[';
                     openLongBracket = new string(buffer, 0, level + 2);
@@ -149,7 +148,7 @@ public partial class LexerTests
     public void CommentLexTests()
     {
         {
-            string source = """
+            var source = """
             --     a single line comment.       
             --[=a=[also a single line comment because of character 'a'.]=a=]
             -- [==[another single line comment because of the space before long bracket.]==]
@@ -161,7 +160,7 @@ public partial class LexerTests
             ]==]     --last single line comment.
             """;
             Lexer lexer = LexerTests.CreateLexer(source);
-            LexerMode mode = LexerMode.Syntax;
+            var mode = LexerMode.Syntax;
             SyntaxToken token;
 
             token = lexer.Lex(mode);
@@ -196,12 +195,12 @@ public partial class LexerTests
             const string raw = "some text";
             const int maxLevel = 100;
             var buffer = new char[maxLevel + 2];
-            for (int level = 0; level <= maxLevel; level++)
+            for (var level = 0; level <= maxLevel; level++)
             {
                 string openLongBracket, closeLongBracket;
                 // 构造左右长方括号。
                 {
-                    for (int i = 1; i <= level; i++) buffer[i] = '=';
+                    for (var i = 1; i <= level; i++) buffer[i] = '=';
 
                     buffer[0] = buffer[level + 1] = '[';
                     openLongBracket = new string(buffer, 0, level + 2);
@@ -213,7 +212,7 @@ public partial class LexerTests
                 var source = "--" + openLongBracket + raw + closeLongBracket;
 
                 Lexer lexer = LexerTests.CreateLexer(source);
-                LexerMode mode = LexerMode.Syntax;
+                var mode = LexerMode.Syntax;
                 SyntaxToken token;
 
                 token = lexer.Lex(mode);

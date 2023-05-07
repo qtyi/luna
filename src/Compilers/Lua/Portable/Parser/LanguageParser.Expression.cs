@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 using Roslyn.Utilities;
 
@@ -112,7 +111,7 @@ partial class LanguageParser
 
     private ExpressionSyntax ParseExpressionCore()
     {
-        Debug.Assert(this.IsPossibleExpression(), "必须先检查当前标志是否可能为表达式的开始，请使用ParseExpression。");
+        Debug.Assert(this.IsPossibleExpression(), "必须先检查当前标记是否可能为表达式的开始，请使用ParseExpression。");
 
         ExpressionSyntax expr;
         if (SyntaxFacts.IsUnaryExpressionOperatorToken(this.CurrentTokenKind))
@@ -202,7 +201,7 @@ partial class LanguageParser
                 throw ExceptionUtilities.Unreachable
         };
 
-        int lastTokenPosition = -1;
+        var lastTokenPosition = -1;
         while (IsMakingProgress(ref lastTokenPosition))
         {
             switch (this.CurrentTokenKind)

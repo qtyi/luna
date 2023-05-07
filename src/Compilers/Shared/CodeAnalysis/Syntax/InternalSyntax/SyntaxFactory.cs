@@ -2,23 +2,24 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax.LuaSyntaxNode;
-
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-#elif LANG_MOONSCRIPT
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax.MoonScriptSyntaxNode;
 
+using ThisInternalSyntaxNode = LuaSyntaxNode;
+#elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
+
+using ThisInternalSyntaxNode = MoonScriptSyntaxNode
 #endif
 
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 /// <summary>
-/// 此类型提供构造各种内部的语法节点、标志和琐碎内容的工厂方法。
+/// 此类型提供构造各种内部的语法节点、标记和琐碎内容的工厂方法。
 /// </summary>
 internal static partial class SyntaxFactory
 {
@@ -117,7 +118,7 @@ internal static partial class SyntaxFactory
         // 检测text是否为多行注释的格式（“--[”与“[”之间间隔零个或复数个“=”）。
         if (text.Length > 2 && text[2] == '[')
         {
-            for (int i = 3; i < text.Length; i++)
+            for (var i = 3; i < text.Length; i++)
             {
                 if (text[i] == '[')
                     return SyntaxTrivia.Create(SyntaxKind.MultiLineCommentTrivia, text);
@@ -144,7 +145,7 @@ internal static partial class SyntaxFactory
     {
         SyntaxFactory.ValidateTokenKind(kind); // 检查不接受的语法分类。
 
-        string defaultText = SyntaxFacts.GetText(kind);
+        var defaultText = SyntaxFacts.GetText(kind);
         return kind >= SyntaxToken.FirstTokenWithWellKnownText && kind <= SyntaxToken.LastTokenWithWellKnownText && text == defaultText && valueText == defaultText
             ? SyntaxFactory.Token(leading, kind, trailing)
             : SyntaxToken.WithValue(kind, leading, text, valueText, trailing);
@@ -173,7 +174,7 @@ internal static partial class SyntaxFactory
 
     internal static SyntaxToken Literal(GreenNode? leading, string text, string value, GreenNode? trailing) => SyntaxToken.WithValue(SyntaxKind.StringLiteralToken, leading, text, value, trailing);
 
-    internal static SyntaxToken Literal(GreenNode? leading, string text, SyntaxKind kind, string value, GreenNode? trailing) => SyntaxToken.WithValue(kind, leading, text, value, trailing);
+    internal static SyntaxToken Literal(GreenNode? leading, string text, SyntaxKind kind, ImmutableArray<byte> value, GreenNode? trailing) => SyntaxToken.WithValue(kind, leading, text, value, trailing);
 
     #region SyntaxKind到SyntaxToken的转换方法
     // 各种语法部分的转换方法在各语言的独立项目中定义

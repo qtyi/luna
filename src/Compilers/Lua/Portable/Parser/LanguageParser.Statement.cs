@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
-using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
@@ -390,11 +389,11 @@ partial class LanguageParser
                     return this.ParseNumericalForStatement(forKeyword, (IdentifierNameSyntax)namesBuilder[0]!);
                 else // 定义了多个标识符。
                 {
-                    // 将标识符标志及分隔符标志均处理为被跳过的语法标志。
+                    // 将标识符标记及分隔符标记均处理为被跳过的语法标记。
                     var name = this.CreateMissingIdentifierName();
                     var skippedSyntax = this._pool.ToListAndFree(namesBuilder).Node;
 
-                    // 添加被跳过的语法标志。
+                    // 添加被跳过的语法标记。
                     Debug.Assert(skippedSyntax is not null);
                     name = this.AddTrailingSkippedSyntax(name, skippedSyntax);
 
@@ -561,7 +560,7 @@ partial class LanguageParser
         }
         else
         {
-            // 否则解析为空语句，报告不合法语句错误，将整个表达式列表添加入空语句的前方跳过的标志的语法琐碎。
+            // 否则解析为空语句，报告不合法语句错误，将整个表达式列表添加入空语句的前方跳过的标记的语法琐碎。
             var semicolon = this.AddLeadingSkippedSyntax(
                 SyntaxFactory.MissingToken(SyntaxKind.SemicolonToken),
                 this.AddError(exprList.Node!, ErrorCode.ERR_IllegalStatement));

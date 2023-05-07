@@ -23,7 +23,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)CompilationOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\SemanticModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\SemanticModel.SymbolInfoOptions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)compilation\SyntaxAndDeclarationManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compilation\SyntaxAndDeclarationManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compilation\SyntaxAndDeclarationManager.LazyState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)declarations\Declaration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)declarations\DeclarationTable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)declarations\DeclarationTreeBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)declarations\ModuleDeclaration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\Diagnostic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\DiagnosticBagExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Errors\DiagnosticFormatter.cs" />
@@ -99,6 +104,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\SyntaxTokenAccumulator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\InternalSyntax\SyntaxTraverser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\NameSyntax.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\SimpleSyntaxReference.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\SkippedTokensTriviaSyntax.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxEquivalence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxFactory.Parser.cs" />
@@ -133,5 +139,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Symbols\Source\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Declarations\" />
   </ItemGroup>
 </Project>

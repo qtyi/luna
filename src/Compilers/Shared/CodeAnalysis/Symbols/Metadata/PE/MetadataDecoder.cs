@@ -11,7 +11,7 @@ namespace Qtyi.CodeAnalysis.MoonScript.Symbols.Metadata.PE;
 #endif
 
 /// <summary>
-/// 提供决定元数据标志和签名的方法的帮助类。
+/// 提供决定元数据标记和签名的方法的帮助类。
 /// </summary>
 internal partial class MetadataDecoder : Microsoft.CodeAnalysis.MetadataDecoder<PEModuleSymbol, TypeSymbol, PEMethodSymbol, PEFieldSymbol, Symbol>
 {

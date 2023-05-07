@@ -51,10 +51,10 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     #endregion
 
     /// <summary>
-    /// 获取此符号在元数据中表示的标志。
+    /// 获取此符号在元数据中表示的标记。
     /// </summary>
     /// <value>
-    /// 此符号在元数据中表示的标志。通常情况下符号并未从元数据中加载，这种情况下元数据标志为<c>0</c>。
+    /// 此符号在元数据中表示的标记。通常情况下符号并未从元数据中加载，这种情况下元数据标记为<c>0</c>。
     /// </value>
     public virtual int MetadataToken => 0;
 
@@ -171,14 +171,14 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
         if (locations.IsEmpty)
             return ImmutableArray<SyntaxReference>.Empty;
 
-        ArrayBuilder<SyntaxReference> builder = ArrayBuilder<SyntaxReference>.GetInstance();
-        foreach (Location location in locations)
+        var builder = ArrayBuilder<SyntaxReference>.GetInstance();
+        foreach (var location in locations)
         {
             if (!location.IsInSource) continue;
 
             if (location.SourceSpan.Length != 0)
             {
-                SyntaxToken token = location.SourceTree.GetRoot().FindToken(location.SourceSpan.Start);
+                var token = location.SourceTree.GetRoot().FindToken(location.SourceSpan.Start);
                 if (token.Kind() != SyntaxKind.None)
                 {
                     var node = token.Parent?.FirstAncestorOrSelf<TNode>();
@@ -188,7 +188,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
             }
             else
             {
-                SyntaxNode parent = location.SourceTree.GetRoot();
+                var parent = location.SourceTree.GetRoot();
                 SyntaxNode? found = null;
                 foreach (var descendant in parent.DescendantNodesAndSelf(c => c.Location.SourceSpan.Contains(location.SourceSpan)))
                 {
@@ -308,7 +308,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// 调用以强制完成此符号。
     /// </summary>
     /// <param name="location">此符号的位置。若传入<see langword="null"/>，则表示不指定位置。</param>
-    /// <param name="cancellationToken">取消操作的标志。</param>
+    /// <param name="cancellationToken">取消操作的标记。</param>
     internal virtual void ForceComplete(SourceLocation? location, CancellationToken cancellationToken)
     {
         // 源代码符号必须重写此方法。
@@ -510,9 +510,9 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// </summary>
     internal bool MergeUseSiteInfo(ref UseSiteInfo<AssemblySymbol> result, UseSiteInfo<AssemblySymbol> info)
     {
-        DiagnosticInfo diagnosticInfo = result.DiagnosticInfo;
+        var diagnosticInfo = result.DiagnosticInfo;
 
-        bool retVal = MergeUseSiteDiagnostics(ref diagnosticInfo, info.DiagnosticInfo);
+        var retVal = MergeUseSiteDiagnostics(ref diagnosticInfo, info.DiagnosticInfo);
 
         if (diagnosticInfo?.Severity == DiagnosticSeverity.Error)
         {
@@ -565,7 +565,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// </summary>
     internal bool DeriveUseSiteInfoFromType(ref UseSiteInfo<AssemblySymbol> result, TypeSymbol type)
     {
-        UseSiteInfo<AssemblySymbol> info = type.GetUseSiteInfo();
+        var info = type.GetUseSiteInfo();
         if (info.DiagnosticInfo?.Code == (int)ErrorCode.ERR_BogusType)
         {
             GetSymbolSpecificUnsupportedMetadataUseSiteErrorInfo(ref info);
@@ -611,7 +611,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
 
     internal bool DeriveUseSiteInfoFromParameters(ref UseSiteInfo<AssemblySymbol> result, ImmutableArray<ParameterSymbol> parameters)
     {
-        foreach (ParameterSymbol param in parameters)
+        foreach (var param in parameters)
         {
             if (DeriveUseSiteInfoFromParameter(ref result, param))
             {
@@ -634,16 +634,16 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
 
     internal bool DeriveUseSiteInfoFromCustomModifiers(ref UseSiteInfo<AssemblySymbol> result, ImmutableArray<CustomModifier> customModifiers, AllowedRequiredModifierType allowedRequiredModifierType)
     {
-        AllowedRequiredModifierType requiredModifiersFound = AllowedRequiredModifierType.None;
-        bool checkRequiredModifiers = true;
+        var requiredModifiersFound = AllowedRequiredModifierType.None;
+        var checkRequiredModifiers = true;
 
-        foreach (CustomModifier modifier in customModifiers)
+        foreach (var modifier in customModifiers)
         {
             NamedTypeSymbol modifierType = ((CSharpCustomModifier)modifier).ModifierSymbol;
 
             if (checkRequiredModifiers && !modifier.IsOptional)
             {
-                AllowedRequiredModifierType current = AllowedRequiredModifierType.None;
+                var current = AllowedRequiredModifierType.None;
 
                 if ((allowedRequiredModifierType & AllowedRequiredModifierType.System_Runtime_InteropServices_InAttribute) != 0 &&
                     modifierType.IsWellKnownTypeInAttribute())

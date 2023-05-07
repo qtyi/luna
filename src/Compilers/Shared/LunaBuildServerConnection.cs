@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO.Pipes;
-using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CommandLine;
-using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.CommandLine;
 

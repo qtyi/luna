@@ -11,12 +11,12 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 internal partial class SyntaxToken
 {
     /// <summary>
-    /// 获取此语法标志的空白缩进量。
+    /// 获取此语法标记的空白缩进量。
     /// </summary>
     public virtual int GetWhiteSpaceIndent()
     {
-        int indent = 0;
-        bool isContinuedWhiteSpace = true;
+        var indent = 0;
+        var isContinuedWhiteSpace = true;
         foreach (var node in this.LeadingTrivia)
         {
             Debug.Assert(node is SyntaxTrivia);

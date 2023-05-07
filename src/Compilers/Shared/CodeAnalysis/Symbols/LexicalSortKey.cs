@@ -106,7 +106,7 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
 
     public static LexicalSortKey First(LexicalSortKey xSortKey, LexicalSortKey ySortKey)
     {
-        int comparison = LexicalSortKey.Compare(xSortKey, ySortKey);
+        var comparison = LexicalSortKey.Compare(xSortKey, ySortKey);
         return comparison > 0 ? ySortKey : xSortKey;
     }
 

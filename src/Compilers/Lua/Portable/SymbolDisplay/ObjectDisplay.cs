@@ -163,11 +163,11 @@ internal static class ObjectDisplay
             {
                 sb.Append("0x1");
 
-                long longValue = BitConverter.DoubleToInt64Bits(value);
-                long mantissa = longValue & 0xFFFFFFFFFFFFF;
-                long exponent = (longValue >> 52) - 0x3FF;
+                var longValue = BitConverter.DoubleToInt64Bits(value);
+                var mantissa = longValue & 0xFFFFFFFFFFFFF;
+                var exponent = (longValue >> 52) - 0x3FF;
 
-                string mantissaStr = mantissa.ToString("X");
+                var mantissaStr = mantissa.ToString("X");
                 mantissaStr = mantissaStr.TrimEnd('0');
                 if (mantissaStr.Length != 0)
                 {
@@ -207,12 +207,12 @@ internal static class ObjectDisplay
         var escapeNonPrintable = options.IncludesOption(ObjectDisplayOptions.EscapeNonPrintableCharacters);
         var isVerbatim = useQuote && !escapeNonPrintable && ObjectDisplay.ContainsNewLine(value);
 
-        int longBracketLevel = -1; // 逐字字符串两端的长方括号级数。
+        var longBracketLevel = -1; // 逐字字符串两端的长方括号级数。
         var disabledLevels = PooledHashSet<int>.GetInstance(); // 不能使用的长方括号级数。
 
-        for (int i = 0; i < value.Length; i++)
+        for (var i = 0; i < value.Length; i++)
         {
-            char c = value[i];
+            var c = value[i];
 
             // 检查长方括号级数。
             switch (c)
@@ -285,11 +285,11 @@ internal static class ObjectDisplay
             if (isVerbatim)
             {
                 // 找到可用的长方括号级数。
-                int avaliableLevel = 0;
+                var avaliableLevel = 0;
                 while (disabledLevels.Contains(avaliableLevel)) avaliableLevel++;
 
-                char[] chars = new char[avaliableLevel + 2];
-                for (int i = 1; i <= avaliableLevel; i++)
+                var chars = new char[avaliableLevel + 2];
+                for (var i = 1; i <= avaliableLevel; i++)
                     chars[i] = '=';
 
                 chars[0] = chars[^1] = '[';
@@ -313,7 +313,7 @@ internal static class ObjectDisplay
     /// </summary>
     private static bool ContainsNewLine(string s)
     {
-        foreach (char c in s)
+        foreach (var c in s)
         {
             if (SyntaxFacts.IsNewLine(c))
                 return true;

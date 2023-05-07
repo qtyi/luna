@@ -133,7 +133,7 @@ public sealed partial class
     /// </summary>
     /// <param name="input">生成后的源文件。</param>
     /// <param name="fileName">源文件的文件名称。</param>
-    /// <param name="cancellationToken">取消操作的标志。</param>
+    /// <param name="cancellationToken">取消操作的标记。</param>
     /// <returns>解析后的与<paramref name="input"/>对应的语法树。</returns>
     internal override SyntaxTree ParseGeneratedSourceText(GeneratedSourceText input, string fileName, CancellationToken cancellationToken) =>
         ThisSyntaxTree.ParseTextLazy(input.Text, (ThisParseOptions)base._state.ParseOptions, fileName);

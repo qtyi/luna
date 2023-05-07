@@ -65,7 +65,7 @@ internal partial class SyntaxTrivia :
     /// <remarks>此属性的值永远为<see langword="false"/>。</remarks>
     public sealed override bool IsDirective => false;
 
-    /// <summary>此语法节点是否为标志。</summary>
+    /// <summary>此语法节点是否为标记。</summary>
     /// <remarks>此属性的值永远为<see langword="false"/>。</remarks>
     public sealed override bool IsToken => false;
 

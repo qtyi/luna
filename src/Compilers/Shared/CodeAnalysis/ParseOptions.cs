@@ -157,7 +157,7 @@ public sealed partial class
 
     internal bool IsFeatureEnabled(MessageID feature)
     {
-        string? featureFlag = feature.RequiredFeature();
+        var featureFlag = feature.RequiredFeature();
         if (featureFlag is not null) return this.Features.ContainsKey(featureFlag);
 
         var avaliableVersion = this.LanguageVersion;

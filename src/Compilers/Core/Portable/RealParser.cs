@@ -10,15 +10,15 @@ internal static class RealParser
 {
     public static bool TryParseHexadecimalDouble(string s, out double d)
     {
-        bool isHex = s.StartsWith("0x", StringComparison.OrdinalIgnoreCase);
+        var isHex = s.StartsWith("0x", StringComparison.OrdinalIgnoreCase);
 
-        int exponentIndex = s.Length; // 默认指数前缀的位置超出字符串末尾（即不存在指数）。
-        int decimalSeparaterIndex = exponentIndex; // 默认小数点的位置为指数前缀的位置（即不含小数点和小数部分）
+        var exponentIndex = s.Length; // 默认指数前缀的位置超出字符串末尾（即不存在指数）。
+        var decimalSeparaterIndex = exponentIndex; // 默认小数点的位置为指数前缀的位置（即不含小数点和小数部分）
         ulong mantissa = 0;
-        int shiftedDigits = 0;
-        for (int i = isHex ? 2 : 0; i < exponentIndex; i++)
+        var shiftedDigits = 0;
+        for (var i = isHex ? 2 : 0; i < exponentIndex; i++)
         {
-            char c = s[i];
+            var c = s[i];
             switch (c)
             {
                 case '.':
@@ -46,7 +46,7 @@ internal static class RealParser
             }
         }
         // 1234.56789 => 123456789.0, decimalSeparaterOffset = decimalSeparaterIndex - exponentIndex. (< 0 because of left shift)
-        int offset = (decimalSeparaterIndex - exponentIndex + shiftedDigits) * 4 - 1;
+        var offset = (decimalSeparaterIndex - exponentIndex + shiftedDigits) * 4 - 1;
         // 若第54-56位上不全为0，则右移尾数部分，直到高位上只有第53位为1，计算偏移量。
         while (mantissa > 0x1FFFFFFFFFFFFF)
         {

@@ -35,7 +35,7 @@ partial class LanguageParser
         var parameters = this.ParseSeparatedSyntaxList(
             predicateNode: index =>
             {
-                // 检查当前的标志的种类，决定是否解析第一个形参，即是否为空的形参列表。
+                // 检查当前的标记的种类，决定是否解析第一个形参，即是否为空的形参列表。
                 if (index == 0) return this.CurrentTokenKind is not (
                     SyntaxKind.CloseParenToken or // 紧跟着右圆括号，则是空列表。
                     SyntaxKind.EndOfFileToken // 到达文件结尾，则视为空列表。
@@ -81,7 +81,7 @@ partial class LanguageParser
             predicateNode: _ =>
                 this.IsPossibleField() ||                // 是可能的字段
                 this.IsPossibleFieldListSeparator() &&   // 是可能的字段列表分隔（此时字段缺失）
-                this.CurrentTokenKind is not (           // 遇到以下语法标志都将不尝试解析字段并直接退出：
+                this.CurrentTokenKind is not (           // 遇到以下语法标记都将不尝试解析字段并直接退出：
                     SyntaxKind.CloseBraceToken or        // 表示字段列表的结尾
                     SyntaxKind.EndOfFileToken),          // 表示文件结尾
             parseNode: (_, _) => this.ParseField(),
@@ -175,7 +175,7 @@ partial class LanguageParser
     {
         var expr = this.ParseExpression();
 
-        // 跳过后方的标志和表达式直到等于符号或右方括号。
+        // 跳过后方的标记和表达式直到等于符号或右方括号。
         var skippedSyntax = this.SkipTokensAndExpressions(
             token => token.Kind is not (SyntaxKind.EqualsToken or SyntaxKind.CloseBracketToken or SyntaxKind.EndOfFileToken),
             new FieldKeySkippedNodesVisitor(this));
@@ -186,7 +186,7 @@ partial class LanguageParser
     }
 
     /// <summary>
-    /// 处理字段键表达式后方需要跳过的语法标志和语法节点的访问器。
+    /// 处理字段键表达式后方需要跳过的语法标记和语法节点的访问器。
     /// </summary>
     private sealed class FieldKeySkippedNodesVisitor : LuaSyntaxVisitor<LuaSyntaxNode>
     {
@@ -195,9 +195,9 @@ partial class LanguageParser
         public FieldKeySkippedNodesVisitor(LanguageParser parser) => this._parser = parser;
 
         /// <summary>
-        /// 处理语法标志，向语法标志添加<see cref="ErrorCode.ERR_InvalidExprTerm"/>错误。
+        /// 处理语法标记，向语法标记添加<see cref="ErrorCode.ERR_InvalidExprTerm"/>错误。
         /// </summary>
-        /// <param name="token">要处理的语法标志。</param>
+        /// <param name="token">要处理的语法标记。</param>
         /// <returns>处理后的<paramref name="token"/>。</returns>
         public override LuaSyntaxNode VisitToken(SyntaxToken token) =>
             this._parser.AddError(token, ErrorCode.ERR_InvalidExprTerm, SyntaxFacts.GetText(token.Kind));
@@ -224,9 +224,9 @@ partial class LanguageParser
         if (this.IsPossibleExpression())
             expr = this.ParseExpressionCore();
 
-        // 跳过后方的标志和表达式直到字段结束。
+        // 跳过后方的标记和表达式直到字段结束。
         var skippedSyntax = this.SkipTokensAndExpressions(token => !LanguageParser.IsPossibleFieldListSeparator(token.Kind) && token.Kind is not (SyntaxKind.CloseBraceToken or SyntaxKind.EndOfFileToken));
-        if (skippedSyntax is null) // 后方没有需要跳过的标志和表达式。
+        if (skippedSyntax is null) // 后方没有需要跳过的标记和表达式。
             expr ??= this.ReportMissingExpression(this.CreateMissingIdentifierName());
         else
         {
@@ -409,7 +409,7 @@ partial class LanguageParser
     }
 
     /// <summary>
-    /// 处理特性后方需要跳过的语法标志的访问器。
+    /// 处理特性后方需要跳过的语法标记的访问器。
     /// </summary>
     private sealed class AttributeSkippedTokensVisitor : LuaSyntaxVisitor<SyntaxToken>
     {
@@ -418,9 +418,9 @@ partial class LanguageParser
         public AttributeSkippedTokensVisitor(LanguageParser parser) => this._parser = parser;
 
         /// <summary>
-        /// 处理语法标志，向语法标志添加<see cref="ErrorCode.ERR_InvalidAttrTerm"/>错误。
+        /// 处理语法标记，向语法标记添加<see cref="ErrorCode.ERR_InvalidAttrTerm"/>错误。
         /// </summary>
-        /// <param name="token">要处理的语法标志。</param>
+        /// <param name="token">要处理的语法标记。</param>
         /// <returns>处理后的<paramref name="token"/>。</returns>
         public override SyntaxToken VisitToken(SyntaxToken token) =>
             this._parser.AddError(token, ErrorCode.ERR_InvalidAttrTerm, SyntaxFacts.GetText(token.Kind));

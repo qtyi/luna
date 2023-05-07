@@ -5,7 +5,6 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -24,7 +23,7 @@ using ThisParseOptions = MoonScriptParseOptions;
 using InternalSyntax = Syntax.InternalSyntax;
 
 /// <summary>
-/// 此类型提供构造各种语法节点、标志和琐碎内容的工厂方法。
+/// 此类型提供构造各种语法节点、标记和琐碎内容的工厂方法。
 /// </summary>
 public static partial class SyntaxFactory
 {
@@ -158,7 +157,7 @@ public static partial class SyntaxFactory
     public static SyntaxTrivia Trivia(Syntax.StructuredTriviaSyntax node) => new(default, node.Green, position: 0, index: 0);
     #endregion
 
-    #region 标志
+    #region 标记
     public static SyntaxToken Token(SyntaxKind kind) =>
         new(InternalSyntax.SyntaxFactory.Token(
             SyntaxFactory.ElasticMarker.UnderlyingNode,
@@ -257,28 +256,28 @@ public static partial class SyntaxFactory
 
     #region 字面量
     /// <summary>
-    /// 构造表示64位有符号整数的语法标志。
+    /// 构造表示64位有符号整数的语法标记。
     /// </summary>
     /// <param name="value">表示的64位有符号整数。</param>
-    /// <returns>表示64位有符号整数的语法标志。</returns>
+    /// <returns>表示64位有符号整数的语法标记。</returns>
     public static partial SyntaxToken Literal(long value);
 
     /// <summary>
-    /// 构造表示64位有符号整数的语法标志，使用指定的字符串表示。
+    /// 构造表示64位有符号整数的语法标记，使用指定的字符串表示。
     /// </summary>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的64位有符号整数。</param>
-    /// <returns>表示64位有符号整数的语法标志。</returns>
+    /// <returns>表示64位有符号整数的语法标记。</returns>
     public static partial SyntaxToken Literal(string text, long value);
 
     /// <summary>
-    /// 构造表示64位有符号整数的语法标志，使用指定的字符串表示以及前后方语法琐碎内容。
+    /// 构造表示64位有符号整数的语法标记，使用指定的字符串表示以及前后方语法琐碎内容。
     /// </summary>
     /// <param name="leading">指定的前方语法琐碎内容。</param>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的64位有符号整数。</param>
     /// <param name="trailing">指定的后方语法琐碎内容。</param>
-    /// <returns>表示64位有符号整数的语法标志。</returns>
+    /// <returns>表示64位有符号整数的语法标记。</returns>
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
         string text,
@@ -286,28 +285,28 @@ public static partial class SyntaxFactory
         SyntaxTriviaList trailing);
 
     /// <summary>
-    /// 构造表示64位无符号整数的语法标志。
+    /// 构造表示64位无符号整数的语法标记。
     /// </summary>
     /// <param name="value">表示的64位无符号整数。</param>
-    /// <returns>表示64位无符号整数的语法标志。</returns>
+    /// <returns>表示64位无符号整数的语法标记。</returns>
     public static partial SyntaxToken Literal(ulong value);
 
     /// <summary>
-    /// 构造表示64位无符号整数的语法标志，使用指定的字符串表示。
+    /// 构造表示64位无符号整数的语法标记，使用指定的字符串表示。
     /// </summary>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的64位无符号整数。</param>
-    /// <returns>表示64位无符号整数的语法标志。</returns>
+    /// <returns>表示64位无符号整数的语法标记。</returns>
     public static partial SyntaxToken Literal(string text, ulong value);
 
     /// <summary>
-    /// 构造表示64位无符号整数的语法标志，使用指定的字符串表示以及前后方语法琐碎内容。
+    /// 构造表示64位无符号整数的语法标记，使用指定的字符串表示以及前后方语法琐碎内容。
     /// </summary>
     /// <param name="leading">指定的前方语法琐碎内容。</param>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的64位无符号整数。</param>
     /// <param name="trailing">指定的后方语法琐碎内容。</param>
-    /// <returns>表示64位无符号整数的语法标志。</returns>
+    /// <returns>表示64位无符号整数的语法标记。</returns>
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
         string text,
@@ -315,28 +314,28 @@ public static partial class SyntaxFactory
         SyntaxTriviaList trailing);
 
     /// <summary>
-    /// 构造表示双精度浮点数的语法标志。
+    /// 构造表示双精度浮点数的语法标记。
     /// </summary>
     /// <param name="value">表示的双精度浮点数。</param>
-    /// <returns>表示双精度浮点数的语法标志。</returns>
+    /// <returns>表示双精度浮点数的语法标记。</returns>
     public static partial SyntaxToken Literal(double value);
 
     /// <summary>
-    /// 构造表示双精度浮点数的语法标志，使用指定的字符串表示。
+    /// 构造表示双精度浮点数的语法标记，使用指定的字符串表示。
     /// </summary>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的双精度浮点数。</param>
-    /// <returns>表示双精度浮点数的语法标志。</returns>
+    /// <returns>表示双精度浮点数的语法标记。</returns>
     public static partial SyntaxToken Literal(string text, double value);
 
     /// <summary>
-    /// 构造表示双精度浮点数的语法标志，使用指定的字符串表示以及前后方语法琐碎内容。
+    /// 构造表示双精度浮点数的语法标记，使用指定的字符串表示以及前后方语法琐碎内容。
     /// </summary>
     /// <param name="leading">指定的前方语法琐碎内容。</param>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的双精度浮点数。</param>
     /// <param name="trailing">指定的后方语法琐碎内容。</param>
-    /// <returns>表示双精度浮点数的语法标志。</returns>
+    /// <returns>表示双精度浮点数的语法标记。</returns>
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
         string text,
@@ -344,28 +343,28 @@ public static partial class SyntaxFactory
         SyntaxTriviaList trailing);
 
     /// <summary>
-    /// 构造表示字符串的语法标志。
+    /// 构造表示字符串的语法标记。
     /// </summary>
     /// <param name="value">表示的字符串。</param>
-    /// <returns>表示字符串的语法标志。</returns>
+    /// <returns>表示字符串的语法标记。</returns>
     public static partial SyntaxToken Literal(string value);
 
     /// <summary>
-    /// 构造表示字符串的语法标志，使用指定的字符串表示。
+    /// 构造表示字符串的语法标记，使用指定的字符串表示。
     /// </summary>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的字符串。</param>
-    /// <returns>表示字符串的语法标志。</returns>
+    /// <returns>表示字符串的语法标记。</returns>
     public static partial SyntaxToken Literal(string text, string value);
 
     /// <summary>
-    /// 构造表示字符串的语法标志，使用指定的字符串表示以及前后方语法琐碎内容。
+    /// 构造表示字符串的语法标记，使用指定的字符串表示以及前后方语法琐碎内容。
     /// </summary>
     /// <param name="leading">指定的前方语法琐碎内容。</param>
     /// <param name="text">指定的<paramref name="value"/>的字符串表示。</param>
     /// <param name="value">表示的字符串。</param>
     /// <param name="trailing">指定的后方语法琐碎内容。</param>
-    /// <returns>表示字符串的语法标志。</returns>
+    /// <returns>表示字符串的语法标记。</returns>
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
         string text,
@@ -382,7 +381,7 @@ public static partial class SyntaxFactory
     public static SyntaxList<TNode> List<TNode>(IEnumerable<TNode> nodes) where TNode : ThisSyntaxNode => new(nodes);
     #endregion
 
-    #region 标志列表
+    #region 标记列表
     public static SyntaxTokenList TokenList() => default;
 
     public static SyntaxTokenList TokenList(SyntaxToken token) => new(token);
@@ -507,7 +506,7 @@ public static partial class SyntaxFactory
     }
     #endregion
 
-    #region 节点或标志列表
+    #region 节点或标记列表
     public static SyntaxNodeOrTokenList NodeOrTokenList() => default;
 
     public static SyntaxNodeOrTokenList NodeOrTokenList(IEnumerable<SyntaxNodeOrToken> nodesAndTokens) => new(nodesAndTokens);

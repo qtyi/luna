@@ -264,7 +264,7 @@ public enum SyntaxKind : ushort
     #endregion
 
     /// <summary>表示文件的结尾。</summary>
-    EndOfFileToken = 9216, // 假定此类型为最后一个无文本标志。
+    EndOfFileToken = 9216, // 假定此类型为最后一个无文本标记。
 
     #region 文本标记
     /// <summary>表示不应出现在此位置的错误标记。</summary>
@@ -303,7 +303,7 @@ public enum SyntaxKind : ushort
     /// <summary>表示多行注释。</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     MultiLineCommentTrivia,
-    /// <summary>表示被跳过的多个语法标志。</summary>
+    /// <summary>表示被跳过的多个语法标记。</summary>
     SkippedTokensTrivia,
     #endregion
 

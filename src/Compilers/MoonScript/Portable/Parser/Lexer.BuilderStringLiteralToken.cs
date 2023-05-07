@@ -7,7 +7,6 @@ using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
 using Roslyn.Utilities;
-using Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 

@@ -13,10 +13,10 @@ public class IntegerParserTests
 
     protected internal static BigInteger NextRandomBigInteger()
     {
-        int sign = s_random.Next(2) * 2 - 1;
-        int bits = s_random.Next(2, 310); // 稍微比double.MaxValue大一些。
-        char[] chars = new char[bits];
-        for (int i = 0; i < chars.Length; i++)
+        var sign = s_random.Next(2) * 2 - 1;
+        var bits = s_random.Next(2, 310); // 稍微比double.MaxValue大一些。
+        var chars = new char[bits];
+        for (var i = 0; i < chars.Length; i++)
             chars[i] = (char)(s_random.Next(10) + '0');
         var result = BigInteger.Parse(new string(chars));
 

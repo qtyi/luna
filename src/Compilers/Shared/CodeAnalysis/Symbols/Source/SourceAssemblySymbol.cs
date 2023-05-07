@@ -230,8 +230,8 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
         {
             if (reference is PortableExecutableReference fileRef && fileRef.FilePath is not null)
             {
-                string fileName = FileNameUtilities.GetFileName(fileRef.FilePath);
-                string moduleName = this._modules[index].Name;
+                var fileName = FileNameUtilities.GetFileName(fileRef.FilePath);
+                var moduleName = this._modules[index].Name;
 
                 if (!string.Equals(fileName, moduleName, StringComparison.OrdinalIgnoreCase))
                     diagnostics.Add(ErrorCode.ERR_NetModuleNameMismatch, NoLocation.Singleton, moduleName, fileName);
@@ -242,7 +242,7 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
         if (this._modules.Length > 1 && !this._compilation.Options.OutputKind.IsNetModule())
         {
             var assemblyMachine = this.Machine;
-            bool isPlatformAgnostic = (assemblyMachine == Machine.I386 && !this.Bit32Required);
+            var isPlatformAgnostic = (assemblyMachine == Machine.I386 && !this.Bit32Required);
             var knownModuleNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var m in this._modules)
@@ -352,7 +352,7 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
             Debug.Assert(x is not null);
             Debug.Assert(y is not null);
 
-            int result = string.CompareOrdinal(x.Name, y.Name);
+            var result = string.CompareOrdinal(x.Name, y.Name);
 
             if (result == 0)
             {

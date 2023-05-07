@@ -2,11 +2,8 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
@@ -72,7 +69,7 @@ internal struct SyntaxTreeDiagnosticEnumerator : IEnumerator<ThisDiagnostic>
                 // node既可能是标识符也可能是节点。
                 // 当node是标识符时，起始语法琐碎内容已经在栈中计算过，因此需要回滚。
                 // 当node是节点时，正好在计算起始语法琐碎内容。
-                int leadingWidtchAlreadyCounted = node.IsToken ? node.GetLeadingTriviaWidth() : 0;
+                var leadingWidtchAlreadyCounted = node.IsToken ? node.GetLeadingTriviaWidth() : 0;
 
                 // 避免产生超出树范围的位置信息。
                 Debug.Assert(this._syntaxTree is not null);
@@ -184,7 +181,7 @@ tryAgain:
             var trailing = token.GetTrailingTrivia();
             if (trailing is not null) this.Push(trailing); // 压入结束的语法琐碎内容。
 
-            this.Push(token); // 压入语法标志。
+            this.Push(token); // 压入语法标记。
             var leading = token.GetLeadingTrivia();
             if (leading is not null) this.Push(leading); // 压入起始的语法琐碎内容。
         }

@@ -6,7 +6,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
-using Microsoft.CodeAnalysis.Syntax;
 using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
@@ -18,17 +17,17 @@ partial class Lexer
     internal readonly struct Interpolation
     {
         /// <summary>
-        /// 插值语法的起始语法（“#{”）的语法标志。
+        /// 插值语法的起始语法（“#{”）的语法标记。
         /// </summary>
         public readonly SyntaxToken StartToken;
 
         /// <summary>
-        /// 插值语法的起始语法（“#{”）的内部的语法标志数组。
+        /// 插值语法的起始语法（“#{”）的内部的语法标记数组。
         /// </summary>
         public readonly ImmutableArray<SyntaxToken> InnerTokens;
 
         /// <summary>
-        /// 插值语法的结尾语法（“}”）的语法标志。
+        /// 插值语法的结尾语法（“}”）的语法标记。
         /// </summary>
         public readonly SyntaxToken EndToken;
 
@@ -75,7 +74,7 @@ partial class Lexer
 
         private bool IsAtEnd(bool allowNewline)
         {
-            char c = this._lexer.TextWindow.PeekChar();
+            var c = this._lexer.TextWindow.PeekChar();
             return
                 (!allowNewline && SyntaxFacts.IsNewLine(c)) ||
                 (c == SlidingTextWindow.InvalidCharacter && _lexer.TextWindow.IsReallyAtEnd());
@@ -83,13 +82,13 @@ partial class Lexer
 
         public bool ScanInterpolatedStringLiteral(ref TokenInfo info)
         {
-            char quote = this._lexer.TextWindow.NextChar();
+            var quote = this._lexer.TextWindow.NextChar();
             Debug.Assert(quote == '"');
 
-            var buffer = ArrayBuilder<BuilderStringLiteralToken>.GetInstance(); // 缓存需要重设缩进量的语法标志。
+            var buffer = ArrayBuilder<BuilderStringLiteralToken>.GetInstance(); // 缓存需要重设缩进量的语法标记。
             var builder = ArrayBuilder<SyntaxToken>.GetInstance();
-            /* 按照合法语法，插值字符串字面量由至少两个插值字符串字面量文本标志构成。
-             * 因为进行向后扫描，所以仅有最后一个插值字符串字面量文本标志不会检测到存在插值语法。
+            /* 按照合法语法，插值字符串字面量由至少两个插值字符串字面量文本标记构成。
+             * 因为进行向后扫描，所以仅有最后一个插值字符串字面量文本标记不会检测到存在插值语法。
              */
             var hasInterpolation = false;
             var minIndent = int.MaxValue;
@@ -99,21 +98,21 @@ partial class Lexer
                 // 扫描一个字符串字面量。
                 if (this.ScanInterpolatedStringLiteralText(quote, ref hasInterpolation, out var textRange, out var spanBuilder, ref minIndent))
                 {
-                    // 扫描到符合字符串字面量格式的标志。
-                    SyntaxDiagnosticInfo[]? errors = this.Error is null ? null : new[] { this.Error };
-                    if (hasInterpolation) // 存在插值语法，则是插值字符串字面量文本标志。
+                    // 扫描到符合字符串字面量格式的标记。
+                    var errors = this.Error is null ? null : new[] { this.Error };
+                    if (hasInterpolation) // 存在插值语法，则是插值字符串字面量文本标记。
                     {
                         var builderToken = createBuilderToken(this._lexer, textRange, spanBuilder, errors);
                         buffer.Add(builderToken);
                         builder.Add(builderToken);
-                        // 若上一个标志位于行尾，则表明需要检查扫描到的字符串字面量的缩进量。
+                        // 若上一个标记位于行尾，则表明需要检查扫描到的字符串字面量的缩进量。
                         if (isLastTokenAtEndOfLine)
                         {
                             minIndent = Math.Min(minIndent, builderToken.GetWhiteSpaceIndent());
                         }
                         isLastTokenAtEndOfLine = builderToken.IsTokenAtEndOfLine();
 
-                        // 添加插值内容的语法标志。
+                        // 添加插值内容的语法标记。
                         var contents = this.ScanInterpolatedStringContent(
                             out var startRange,
                             out var endRange,
@@ -133,14 +132,14 @@ partial class Lexer
                     }
                     else // 不存在插值语法。
                     {
-                        if (builder.Count == 0) // 若是第一个扫描到的标志，则表示普通字符串字面量标志；
+                        if (builder.Count == 0) // 若是第一个扫描到的标记，则表示普通字符串字面量标记；
                             return false; // 此方法仅处理插值字符串字面量，因此返回失败。
 
-                        // 最后一个也应为插值字符串字面量文本标志。
+                        // 最后一个也应为插值字符串字面量文本标记。
                         var builderToken = createBuilderToken(this._lexer, textRange, spanBuilder, errors);
                         buffer.Add(builderToken);
                         builder.Add(builderToken);
-                        // 若上一个标志位于行尾，则表明需要检查扫描到的字符串字面量的缩进量。
+                        // 若上一个标记位于行尾，则表明需要检查扫描到的字符串字面量的缩进量。
                         if (isLastTokenAtEndOfLine)
                         {
                             minIndent = Math.Min(minIndent, builderToken.GetWhiteSpaceIndent());
@@ -170,7 +169,7 @@ partial class Lexer
 
             return true;
 
-            // 创建一个构建中的插值字符串字面量文本标志。
+            // 创建一个构建中的插值字符串字面量文本标记。
             static BuilderStringLiteralToken createBuilderToken(Lexer lexer, in Range textRange, ArrayBuilder<string?> spanBuilder, SyntaxDiagnosticInfo[]? errors) =>
                 new(
                     SyntaxKind.InterpolatedStringTextToken,
@@ -201,14 +200,14 @@ partial class Lexer
             out ArrayBuilder<string?> spanBuilder,
             ref int minIndent)
         {
-            int textRangeStart = this._lexer.TextWindow.Position;
+            var textRangeStart = this._lexer.TextWindow.Position;
 
             spanBuilder = ArrayBuilder<string?>.GetInstance();
             this._lexer._builder.Clear();
 
             while (true)
             {
-                char c = this._lexer.TextWindow.PeekChar();
+                var c = this._lexer.TextWindow.PeekChar();
                 if (c == quote) // 字符串结尾
                 {
                     this._lexer.TextWindow.AdvanceChar();
@@ -219,7 +218,7 @@ partial class Lexer
                     hasInterpolation = false;
                     break;
                 }
-                // 字符串中可能包含非正规的Utf-16以外的字符，检查是否真正到达文本结尾来验证这些字符不是由用户代码引入的情况。
+                // 字符串中可能包含非正规的UTF-16以外的字符，检查是否真正到达文本结尾来验证这些字符不是由用户代码引入的情况。
                 else if (c == SlidingTextWindow.InvalidCharacter && this._lexer.TextWindow.IsReallyAtEnd())
                 {
                     Debug.Assert(this._lexer.TextWindow.Width > 0);
@@ -282,9 +281,9 @@ partial class Lexer
             // 找到最小缩进量。
             if (spanBuilder.Count > 1)
             {
-                for (int i = 1; i < spanBuilder.Count; i += 2)
+                for (var i = 1; i < spanBuilder.Count; i += 2)
                 {
-                    string? span = spanBuilder[i];
+                    var span = spanBuilder[i];
                     if (span is null) // 遇到无缩进量的行，快速退出。
                     {
                         minIndent = 0;
@@ -294,7 +293,7 @@ partial class Lexer
                 }
             }
 
-            int textRangeEnd = this._lexer.TextWindow.Position - 1;
+            var textRangeEnd = this._lexer.TextWindow.Position - 1;
             textRange = textRangeStart..textRangeEnd;
             return true;
         }
@@ -311,7 +310,7 @@ partial class Lexer
 
             var tokens = ArrayBuilder<SyntaxToken>.GetInstance();
 
-            int braceBalance = 0;
+            var braceBalance = 0;
             var mode = LexerMode.Syntax;
             while (true)
             {
@@ -322,7 +321,7 @@ partial class Lexer
                         braceBalance++;
                         break;
                     case SyntaxKind.CloseBraceToken:
-                        // 花括号已平衡，且下一个是右花括号标志，终止枚举。
+                        // 花括号已平衡，且下一个是右花括号标记，终止枚举。
                         if (braceBalance == 0)
                         {
                             this._lexer.Reset(this._lexer.TextWindow.Position - token.GetTrailingTriviaWidth()); // 回退到右花括号的下一个字符位置。
@@ -349,12 +348,12 @@ partial class Lexer
                         }
                 }
 
-                tokens.Add(token); // 枚举识别到的内部标志。
+                tokens.Add(token); // 枚举识别到的内部标记。
             }
 
             void appendTrailingTrivia(SyntaxToken token)
             {
-                // 将这个右花括号标志的前方琐碎内容组合到上一个标志的后方琐碎内容中。
+                // 将这个右花括号标记的前方琐碎内容组合到上一个标记的后方琐碎内容中。
                 var lastToken = tokens[tokens.Count - 1];
                 SyntaxListBuilder triviaBuilder = new(lastToken.TrailingTrivia.Count + token.LeadingTrivia.Count);
                 triviaBuilder.AddRange(lastToken.TrailingTrivia);

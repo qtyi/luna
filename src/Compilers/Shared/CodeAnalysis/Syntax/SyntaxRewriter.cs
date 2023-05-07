@@ -44,7 +44,7 @@ public abstract partial class
     private int _recursionDepth;
 
     [return: NotNullIfNotNull(nameof(node))]
-    public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
+    public override ThisSyntaxNode? Visit(SyntaxNode? node)
     {
         if (node is null) return null;
 
@@ -52,7 +52,7 @@ public abstract partial class
         this._recursionDepth++;
         StackGuard.EnsureSufficientExecutionStack(this._recursionDepth);
 
-        var result = node.Accept(this); // 获取访问结果。
+        var result = ((ThisSyntaxNode)node).Accept(this); // 获取访问结果。
         Debug.Assert(result is not null);
 
         this._recursionDepth--;
@@ -61,9 +61,9 @@ public abstract partial class
     }
 
     /// <summary>
-    /// 处理语法标志并产生结果。
+    /// 处理语法标记并产生结果。
     /// </summary>
-    /// <param name="token">要进行处理的语法标志。</param>
+    /// <param name="token">要进行处理的语法标记。</param>
     /// <returns>产生的结果。</returns>
     public virtual SyntaxToken VisitToken(SyntaxToken token)
     {
@@ -169,7 +169,7 @@ public abstract partial class
 
         SeparatedSyntaxListBuilder<TNode> alternate = default;
 
-        int i = 0;
+        var i = 0;
         for (; i < sepCount; i++)
         {
             var node = list[i];

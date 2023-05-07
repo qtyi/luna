@@ -25,11 +25,11 @@ partial class Lexer
     {
         this.Start();
         var state = QuickScanState.Initial; // 初始状态。
-        int i = this.TextWindow.Offset;
-        int n = this.TextWindow.CharacterWindowCount;
+        var i = this.TextWindow.Offset;
+        var n = this.TextWindow.CharacterWindowCount;
         n = Math.Min(n, i + MaxCachedTokenSize);
 
-        int hashCode = Hash.FnvOffsetBias;
+        var hashCode = Hash.FnvOffsetBias;
 
         var charWindow = this.TextWindow.CharacterWindow;
         var charProp = CharProperties;
@@ -56,7 +56,7 @@ exitWhile:
         this.TextWindow.AdvanceChar(i - this.TextWindow.Offset);
         Debug.Assert(state == QuickScanState.Bad || state == QuickScanState.Done, "无法在Bad和Done的状态下退出。");
 
-        if (state == QuickScanState.Done) // 成功扫描到标志。
+        if (state == QuickScanState.Done) // 成功扫描到标记。
         {
             var token = _cache.LookupToken(
                 this.TextWindow.CharacterWindow,

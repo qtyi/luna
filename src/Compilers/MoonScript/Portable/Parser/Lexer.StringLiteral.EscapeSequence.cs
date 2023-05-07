@@ -15,7 +15,7 @@ partial class Lexer
     {
         var start = this.TextWindow.Position;
 
-        char c = this.TextWindow.NextChar();
+        var c = this.TextWindow.NextChar();
         SyntaxDiagnosticInfo? error;
         char surrogate;
 

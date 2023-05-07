@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>Luna.Compilers.Simulators.Roslyn</AssemblyName>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(TestResourcesTargetFrameworks)</TargetFrameworks>
     <Configurations>Debug;Release</Configurations>
     <Nullable>enable</Nullable>
     <RootNamespace>Luna.Compilers.Simulators</RootNamespace>

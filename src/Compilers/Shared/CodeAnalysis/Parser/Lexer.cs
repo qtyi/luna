@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.PooledObjects;
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -25,7 +26,7 @@ internal partial class Lexer : AbstractLexer
 {
     /// <summary>标识符缓冲数组初始容量（表示标识符字符长度的初始值）。</summary>
     private const int IdentifierBufferInitialCapacity = 32;
-    /// <summary>语法琐碎内容列表初始容量（表示连续的语法琐碎内容中标志数量的初始值）。</summary>
+    /// <summary>语法琐碎内容列表初始容量（表示连续的语法琐碎内容中标记数量的初始值）。</summary>
     private const int TriviaListInitialCapacity = 8;
 
     /// <summary>与解析相关的选项。</summary>
@@ -39,13 +40,14 @@ internal partial class Lexer : AbstractLexer
 #endif
         LexerMode _mode;
     private readonly StringBuilder _builder;
+    private readonly ArrayBuilder<byte> _utf8Builder;
     /// <summary>标识符缓冲数组。</summary>
     private char[] _identifierBuffer;
     /// <summary>标识符字符长度。</summary>
     private int _identifierLength;
     /// <summary>词法分析器缓存。</summary>
     private readonly LexerCache _cache;
-    /// <summary>产生的坏标志的累计数量。</summary>
+    /// <summary>产生的坏标记的累计数量。</summary>
     private int _badTokenCount;
 
     /// <summary>
@@ -65,6 +67,7 @@ internal partial class Lexer : AbstractLexer
     {
         this._options = options;
         this._builder = new();
+        this._utf8Builder = ArrayBuilder<byte>.GetInstance();
         this._identifierBuffer = new char[Lexer.IdentifierBufferInitialCapacity];
         this._cache = new();
         this._createQuickTokenFunction = this.CreateQuickToken;
@@ -74,6 +77,7 @@ internal partial class Lexer : AbstractLexer
     public override void Dispose()
     {
         this._cache.Free();
+        this._utf8Builder.Free();
 
         base.Dispose();
     }
@@ -110,10 +114,10 @@ internal partial class Lexer : AbstractLexer
     private bool ModeIs(LexerMode mode) => Lexer.ModeOf(this._mode) == mode;
 
     /// <summary>
-    /// 使用指定的词法分析器模式分析一个语法标志，并将它调整为分析后的词法分析器的当前模式。
+    /// 使用指定的词法分析器模式分析一个语法标记，并将它调整为分析后的词法分析器的当前模式。
     /// </summary>
     /// <param name="mode">词法分析器的模式。</param>
-    /// <returns>分析得到的语法标志。</returns>
+    /// <returns>分析得到的语法标记。</returns>
     public SyntaxToken Lex(ref LexerMode mode)
     {
         var result = this.Lex(mode);
@@ -122,10 +126,10 @@ internal partial class Lexer : AbstractLexer
     }
 
     /// <summary>
-    /// 使用指定的词法分析器模式分析一个语法标志。
+    /// 使用指定的词法分析器模式分析一个语法标记。
     /// </summary>
     /// <param name="mode">词法分析器的模式。</param>
-    /// <returns>分析得到的语法标志。</returns>
+    /// <returns>分析得到的语法标记。</returns>
     public partial SyntaxToken Lex(LexerMode mode);
 
     /// <summary>前方语法琐碎内容缓存。</summary>
@@ -140,8 +144,8 @@ internal partial class Lexer : AbstractLexer
     {
         if (builder is null) return 0;
 
-        int width = 0;
-        for (int i = 0; i < builder.Count; i++)
+        var width = 0;
+        for (var i = 0; i < builder.Count; i++)
         {
             var node = builder[i];
             Debug.Assert(node is not null);
@@ -152,9 +156,9 @@ internal partial class Lexer : AbstractLexer
     }
 
     /// <summary>
-    /// 分析一个语法标志。
+    /// 分析一个语法标记。
     /// </summary>
-    /// <returns>分析得到的语法标志。</returns>
+    /// <returns>分析得到的语法标记。</returns>
 #if TESTING
     internal
 #else
@@ -166,7 +170,7 @@ internal partial class Lexer : AbstractLexer
         this.LexSyntaxLeadingTriviaCore();
         var leading = this._leadingTriviaCache;
 
-        // 分析语法标志，并获得标志信息。
+        // 分析语法标记，并获得标记信息。
         TokenInfo tokenInfo = default;
         this.Start();
         this.ScanSyntaxToken(ref tokenInfo);
@@ -229,13 +233,13 @@ internal partial class Lexer : AbstractLexer
     }
 
     /// <summary>
-    /// 创建一个语法标志。
+    /// 创建一个语法标记。
     /// </summary>
-    /// <param name="info">语法标志的相关信息。</param>
+    /// <param name="info">语法标记的相关信息。</param>
     /// <param name="leading">起始的语法列表构造器。</param>
     /// <param name="trailing">结尾的语法列表构造器。</param>
     /// <param name="errors">语法诊断消息数组。</param>
-    /// <returns>新的语法标志。</returns>
+    /// <returns>新的语法标记。</returns>
     /// <remarks>
     /// <paramref name="info"/>应表示标识符，或其字符串值不为<see langword="null"/>。
     /// </remarks>
@@ -246,15 +250,15 @@ internal partial class Lexer : AbstractLexer
         SyntaxDiagnosticInfo[]? errors);
 
     /// <summary>
-    /// 扫描一个完整的语法标志。
+    /// 扫描一个完整的语法标记。
     /// </summary>
-    /// <param name="info">指定的标志信息，它将在扫描过程中被修改。</param>
+    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
     private partial void ScanSyntaxToken(ref TokenInfo info);
 
     /// <summary>
     /// 扫描一个整形数字字面量。
     /// </summary>
-    /// <param name="info">指定的标志信息，它将在扫描过程中被修改。</param>
+    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
     /// <returns>
     /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
     /// </returns>
@@ -263,16 +267,31 @@ internal partial class Lexer : AbstractLexer
     /// <summary>
     /// 扫描一个字符串字面量。
     /// </summary>
-    /// <param name="info">指定的标志信息，它将在扫描过程中被修改。</param>
+    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
     /// <returns>
     /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
     /// </returns>
     private partial bool ScanStringLiteral(ref TokenInfo info);
 
     /// <summary>
+    /// 将UTF-16字符串从<see cref="_builder"/>中转换成UTF-8字节序列，并输入到<see cref="_utf8Builder"/>中。
+    /// </summary>
+    /// <param name="additionalBytes">在后方追加的字节序列。</param>
+    private void FlushToUtf8Builder(params byte[] additionalBytes)
+    {
+        if (this._builder.Length == 0) return;
+
+        var strValue = this.TextWindow.Intern(this._builder);
+        var utf8Bytes = Encoding.UTF8.GetBytes(strValue);
+        this._utf8Builder.AddRange(utf8Bytes);
+
+        this._utf8Builder.AddRange(additionalBytes);
+    }
+
+    /// <summary>
     /// 扫描一个多行原始字符串字面量。
     /// </summary>
-    /// <param name="info">指定的标志信息，它将在扫描过程中被修改。</param>
+    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
     /// <returns>
     /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
     /// </returns>
@@ -281,7 +300,7 @@ internal partial class Lexer : AbstractLexer
     /// <summary>
     /// 扫描一个标识符或关键字。
     /// </summary>
-    /// <param name="info">指定的标志信息，它将在扫描过程中被修改。</param>
+    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
     /// <returns>
     /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
     /// </returns>
@@ -316,16 +335,16 @@ internal partial class Lexer : AbstractLexer
     private void ScanToEndOfLine(bool isTrim = true)
     {
         this._builder.Clear();
-        int length = 0;
+        var length = 0;
         for (
-            char c = this.TextWindow.PeekChar();
+            var c = this.TextWindow.PeekChar();
             !SyntaxFacts.IsNewLine(c) && (c != SlidingTextWindow.InvalidCharacter || !this.TextWindow.IsReallyAtEnd());
             c = this.TextWindow.PeekChar()
         )
         {
             if (isTrim)
             {
-                bool isWhiteSpace = SyntaxFacts.IsWhiteSpace(c);
+                var isWhiteSpace = SyntaxFacts.IsWhiteSpace(c);
                 if (length != 0 || !isWhiteSpace)
                 {
                     this._builder.Append(c);
@@ -363,7 +382,7 @@ internal partial class Lexer : AbstractLexer
             level = 0;
             while (true)
             {
-                char c = this.TextWindow.PeekChar(level + 1);
+                var c = this.TextWindow.PeekChar(level + 1);
                 if (c == '=') // 优先扫描等号字符。
                 {
                     level++;
@@ -386,7 +405,7 @@ internal partial class Lexer : AbstractLexer
          */
         while (true)
         {
-            char c = this.TextWindow.NextChar();
+            var c = this.TextWindow.NextChar();
             if (c == SlidingTextWindow.InvalidCharacter && this.TextWindow.IsReallyAtEnd()) break;
 
             if (c == '\n' && (this._builder.Length > 0 && this._builder[this._builder.Length - 1] == '\r'))
@@ -399,8 +418,8 @@ internal partial class Lexer : AbstractLexer
 
             if (c != ']') continue; // 不进入匹配结束长方括号的代码区域。
 
-            bool isPairedLevel = true;
-            for (int i = 0; i < level; i++)
+            var isPairedLevel = true;
+            for (var i = 0; i < level; i++)
             {
                 if (this.TextWindow.PeekChar() == '=')
                     this._builder.Append(this.TextWindow.NextChar());

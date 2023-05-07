@@ -54,7 +54,7 @@ namespace Microsoft.CodeAnalysis
 
         internal static SyntaxToken FirstOrDefault(this SyntaxTokenList list, SyntaxKind kind)
         {
-            int index = list.IndexOf(kind);
+            var index = list.IndexOf(kind);
             return (index >= 0) ? list[index] : default;
         }
     }

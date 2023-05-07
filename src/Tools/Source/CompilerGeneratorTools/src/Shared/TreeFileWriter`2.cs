@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Luna.Compilers.Generators.Model;
-using Luna.Compilers.Generators.Syntax.Model;
 
 namespace Luna.Compilers.Generators;
 

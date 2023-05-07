@@ -1,10 +1,8 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Parser.UnitTests;
 
-using Utilities;
 using Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 [TestClass]
@@ -22,8 +20,8 @@ public partial class LexerTests
         Assert.AreEqual(double.MinValue.ToString("G17").Substring(1), double.MaxValue.ToString("G17"));
         LiteralLexTest(double.MinValue.ToString("G17"), double.MaxValue);
 
-        double value = 31.4568156151E-45;
-        string hexValue = value.ToHexString();
+        var value = 31.4568156151E-45;
+        var hexValue = value.ToHexString();
         LiteralLexTest(hexValue, value); // 十六进制浮点数。
 
         LiteralLexTest("31415", 31415L); // 正常十进制整数，long类型。
@@ -77,7 +75,7 @@ public partial class LexerTests
         var lexer = LexerTests.CreateLexer(source, options);
 
         var token = lexer.Lex(LexerMode.Syntax);
-        Assert.IsTrue(token.Kind == SyntaxKind.InterpolatedStringLiteralToken, "不是差值字符串标志。");
+        Assert.IsTrue(token.Kind == SyntaxKind.InterpolatedStringLiteralToken, "不是差值字符串标记。");
 
         Assert.IsNotNull(token.Value);
         var innerTokens = (ImmutableArray<SyntaxToken>)token.Value;
@@ -89,7 +87,7 @@ public partial class LexerTests
             {
                 Assert.AreEqual(SyntaxKind.InterpolatedStringTextToken, innerToken.Kind);
                 Assert.IsInstanceOfType(innerToken.Value, typeof(string));
-                int index = i / 2;
+                var index = i / 2;
                 if (index < texts.Length) // 防止索引超出范围。
                     Assert.AreEqual(texts[index], innerToken.Value);
             }
@@ -99,7 +97,7 @@ public partial class LexerTests
                 Assert.IsNotNull(innerToken.Value);
                 Assert.IsInstanceOfType(innerToken.Value, typeof(Lexer.Interpolation));
                 var interpolation = (Lexer.Interpolation)innerToken.Value;
-                int index = (i - 1) / 2;
+                var index = (i - 1) / 2;
                 if (index < interpolationRanges.Length) // 防止索引超出范围。
                     Assert.AreEqual(interpolationRanges[index], interpolation.StartRange.Start..interpolation.EndRange.End);
             }
@@ -168,7 +166,7 @@ public partial class LexerTests
     [TestMethod]
     public void CommentLexTests()
     {
-        string source = """
+        var source = """
             --     a single line comment.       
             --[=a=[also a single line comment because of character 'a'.]=a=]
             -- [==[another single line comment because of the space before long bracket.]==]
@@ -180,7 +178,7 @@ public partial class LexerTests
             ]==]     --last single line comment.
             """;
         Lexer lexer = LexerTests.CreateLexer(source);
-        LexerMode mode = LexerMode.Syntax;
+        var mode = LexerMode.Syntax;
         SyntaxToken token;
 
         token = lexer.Lex(mode);

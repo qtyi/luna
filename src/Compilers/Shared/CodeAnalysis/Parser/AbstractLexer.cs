@@ -63,7 +63,7 @@ internal abstract partial class AbstractLexer : IDisposable
         {
             // 调整偏移量，加上起始语法琐碎内容的宽度。
             var array = new SyntaxDiagnosticInfo[this._errors.Count];
-            for (int i = 0; i < this._errors.Count; i++)
+            for (var i = 0; i < this._errors.Count; i++)
                 array[i] = this._errors[i].WithOffset(this._errors[i].Offset + leadingTriviaWidth);
 
             return array;

@@ -8,7 +8,7 @@ partial class Lexer
 {
     private partial SyntaxTrivia ScanComment()
     {
-        if (this.ScanLongBrackets(out bool isTerminal))
+        if (this.ScanLongBrackets(out var isTerminal))
         {
             this.CheckFeatureAvaliability(MessageID.IDS_FeatureMultiLineComment);
             if (!isTerminal)

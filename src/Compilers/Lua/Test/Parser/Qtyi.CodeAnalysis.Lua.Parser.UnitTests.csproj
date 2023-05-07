@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>Qtyi.CodeAnalysis.Lua.Parser.UnitTests</RootNamespace>
-    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>

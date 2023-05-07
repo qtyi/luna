@@ -19,13 +19,13 @@ using ThisSyntaxNode = Qtyi.CodeAnalysis.MoonScript.MoonScriptSyntaxNode;
 internal partial struct Blender
 {
     /// <summary>
-    /// 表示指向一个节点或标志的指针。
+    /// 表示指向一个节点或标记的指针。
     /// </summary>
     private struct Cursor
     {
-        /// <summary>当前节点或标志。</summary>
+        /// <summary>当前节点或标记。</summary>
         public readonly SyntaxNodeOrToken CurrentNodeOrToken;
-        /// <summary>当前节点或标志在父节点中的索引位置。</summary>
+        /// <summary>当前节点或标记在父节点中的索引位置。</summary>
         private readonly int _indexInParent;
 
         /// <summary>
@@ -56,9 +56,9 @@ internal partial struct Blender
         public static Cursor FromRoot(ThisSyntaxNode node) => new(node, indexInParent: 0);
 
         /// <summary>
-        /// 判断一个节点是否为零宽标志或文件结尾标志。
+        /// 判断一个节点是否为零宽标记或文件结尾标记。
         /// </summary>
-        /// <returns>若为<see langword="true"/>，则节点是零宽标志或文件结尾标志；若为<see langword="false"/>，则节点不是零宽标志或文件结尾标志。</returns>
+        /// <returns>若为<see langword="true"/>，则节点是零宽标记或文件结尾标记；若为<see langword="false"/>，则节点不是零宽标记或文件结尾标记。</returns>
         private static bool IsNonZeroWidthOrIsEndOfFile(SyntaxNodeOrToken token) => token.Kind() == SyntaxKind.EndOfFileToken || token.FullWidth != 0;
 
         /// <summary>
@@ -147,9 +147,9 @@ internal partial struct Blender
         }
 
         /// <summary>
-        /// 移动到第一个标志。
+        /// 移动到第一个标记。
         /// </summary>
-        /// <returns>指向第一个标志的指针。</returns>
+        /// <returns>指向第一个标记的指针。</returns>
         public Cursor MoveToFirstToken()
         {
             var cursor = this;

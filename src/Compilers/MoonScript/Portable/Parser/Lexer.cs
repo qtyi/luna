@@ -56,12 +56,12 @@ partial class Lexer
         var leadingNode = leading?.ToListNode();
         var trailingNode = trailing?.ToListNode();
 
-        SyntaxToken token = info.Kind switch
+        var token = info.Kind switch
         {
-            // 标识符标志
+            // 标识符标记
             SyntaxKind.IdentifierToken => SyntaxFactory.Identifier(info.ContextualKind, leadingNode, info.Text!, info.StringValue!, trailingNode),
 
-            // 数字字面量标志
+            // 数字字面量标记
             SyntaxKind.NumericLiteralToken =>
                 info.ValueKind switch
                 {
@@ -73,16 +73,16 @@ partial class Lexer
                     _ => throw ExceptionUtilities.UnexpectedValue(info.ValueKind),
                 },
 
-            // 字符串字面量标志
+            // 字符串字面量标记
             SyntaxKind.StringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.StringValue!, info.InnerIndent, trailingNode),
 
-            // 多行原始字符串字面量标志
+            // 多行原始字符串字面量标记
             SyntaxKind.MultiLineRawStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.StringValue!, trailingNode),
 
-            // 插值字符串标志
+            // 插值字符串标记
             SyntaxKind.InterpolatedStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.SyntaxTokenArrayValue, info.InnerIndent, trailingNode),
 
-            // 文件结尾标志
+            // 文件结尾标记
             SyntaxKind.EndOfFileToken => SyntaxFactory.Token(leadingNode, SyntaxKind.EndOfFileToken, trailingNode),
 
             // 异常枚举值
@@ -92,7 +92,7 @@ partial class Lexer
             _ => SyntaxFactory.Token(leadingNode, info.Kind, trailingNode)
         };
 
-        // 为标志添加诊断。
+        // 为标记添加诊断。
         if (errors is not null)
             token = token.WithDiagnosticsGreen(errors);
 
@@ -101,14 +101,14 @@ partial class Lexer
 
     private partial void ScanSyntaxToken(ref TokenInfo info)
     {
-        // 初始化以准备新的标志扫描。
+        // 初始化以准备新的标记扫描。
         info.Kind = SyntaxKind.None;
         info.ContextualKind = SyntaxKind.None;
         info.Text = null;
         char c;
-        int startingPosition = this.TextWindow.Position;
+        var startingPosition = this.TextWindow.Position;
 
-        // 开始扫描标志。
+        // 开始扫描标记。
         c = this.TextWindow.PeekChar();
         switch (c)
         {
@@ -357,9 +357,9 @@ partial class Lexer
                         break;
 
                     case '=':
-                        for (int i = 2; ; i++)
+                        for (var i = 2; ; i++)
                         {
-                            char nextChar = this.TextWindow.PeekChar(i);
+                            var nextChar = this.TextWindow.PeekChar(i);
                             if (nextChar == '=') continue;
                             else if (nextChar == '[')
                             {
@@ -538,8 +538,8 @@ partial class Lexer
                 if (this._badTokenCount++ > 200)
                 {
                     //当遇到大量无法决定的字符时，将剩下的输出也合并入。
-                    int end = this.TextWindow.Text.Length;
-                    int width = end - startingPosition;
+                    var end = this.TextWindow.Text.Length;
+                    var width = end - startingPosition;
                     info.Text = this.TextWindow.Text.ToString(new(startingPosition, width));
                     this.TextWindow.Reset(end);
                 }
@@ -559,7 +559,7 @@ partial class Lexer
         while (true)
         {
             this.Start();
-            char c = this.TextWindow.PeekChar();
+            var c = this.TextWindow.PeekChar();
             if (c == ' ')
             {
                 this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
@@ -600,7 +600,7 @@ partial class Lexer
                             this.AddTrivia(endOfLine, ref triviaList);
 
                             /* 为了适应MoonScript根据缩进来表示块体，在识别后方琐碎内容时，连续的语法琐碎内容应在行尾换行后截断。
-                             * 并且将下一行起始的连续空白字符作为下一个语法标志的前方语法琐碎内容；
+                             * 并且将下一行起始的连续空白字符作为下一个语法标记的前方语法琐碎内容；
                              * 但是当识别前方琐碎内容时，遇到多个空行（行中没有或只有空白字符）时，不应截断。
                              * 应将所有空白字符和换行字符保存在同一个前方语法琐碎内容中，用于后续分析。
                              */

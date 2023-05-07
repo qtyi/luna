@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Text;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -91,7 +90,7 @@ static partial class SyntaxFactory
         while (true)
         {
             var green = lexer.Lex(LexerMode.Syntax);
-            // 创建红树标志并枚举。
+            // 创建红树标记并枚举。
             foreach (var token in SyntaxFactory.ParseTokens(green, position))
             {
                 yield return token;
@@ -103,10 +102,10 @@ static partial class SyntaxFactory
     }
 
     /// <summary>
-    /// 从表示标志的绿树节点中创建一个或多个红树标志。
+    /// 从表示标记的绿树节点中创建一个或多个红树标记。
     /// </summary>
-    /// <param name="green">要处理的表示标志的绿树节点。</param>
+    /// <param name="green">要处理的表示标记的绿树节点。</param>
     /// <param name="position"><paramref name="green"/>的起始位置。</param>
-    /// <returns>从<paramref name="green"/>中创建一个或多个红树标志。</returns>
+    /// <returns>从<paramref name="green"/>中创建一个或多个红树标记。</returns>
     internal static partial IEnumerable<SyntaxToken> ParseTokens(Syntax.InternalSyntax.SyntaxToken green, int position);
 }

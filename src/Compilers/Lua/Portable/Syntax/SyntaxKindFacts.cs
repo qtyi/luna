@@ -132,7 +132,7 @@ public static partial class SyntaxFacts
     /// <returns>所有保留关键字语法种类。</returns>
     public static IEnumerable<SyntaxKind> GetReservedKeywordKinds()
     {
-        for (int i = (int)SyntaxKind.AndKeyword; i <= (int)SyntaxKind.WhileKeyword; i++)
+        for (var i = (int)SyntaxKind.AndKeyword; i <= (int)SyntaxKind.WhileKeyword; i++)
             yield return (SyntaxKind)i;
     }
 
@@ -187,15 +187,15 @@ public static partial class SyntaxFacts
     public static IEnumerable<SyntaxKind> GetContextualKeywordKinds()
     {
         // 上下文关键词
-        for (int i = (int)SyntaxKind.GlobalEnvironmentKeyword; i <= (int)SyntaxKind.EnvironmentKeyword; i++)
+        for (var i = (int)SyntaxKind.GlobalEnvironmentKeyword; i <= (int)SyntaxKind.EnvironmentKeyword; i++)
             yield return (SyntaxKind)i;
 
         // 元字段和元方法
-        for (int i = (int)SyntaxKind.MetatableMetafield; i <= (int)SyntaxKind.NameMetafield; i++)
+        for (var i = (int)SyntaxKind.MetatableMetafield; i <= (int)SyntaxKind.NameMetafield; i++)
             yield return (SyntaxKind)i;
 
         // 特性
-        for (int i = (int)SyntaxKind.CloseKeyword; i <= (int)SyntaxKind.ConstKeyword; i++)
+        for (var i = (int)SyntaxKind.CloseKeyword; i <= (int)SyntaxKind.ConstKeyword; i++)
             yield return (SyntaxKind)i;
     }
 
@@ -263,7 +263,7 @@ public static partial class SyntaxFacts
     /// <returns>所有标点语法种类。</returns>
     public static IEnumerable<SyntaxKind> GetPunctuationKinds()
     {
-        for (int i = (int)SyntaxKind.PlusToken; i <= (int)SyntaxKind.DotDotDotToken; i++)
+        for (var i = (int)SyntaxKind.PlusToken; i <= (int)SyntaxKind.DotDotDotToken; i++)
             yield return (SyntaxKind)i;
     }
 
@@ -282,7 +282,7 @@ public static partial class SyntaxFacts
     #endregion
 
     /// <summary>
-    /// 指定语法种类是否表示标点或关键字（包含文件结尾标志）。
+    /// 指定语法种类是否表示标点或关键字（包含文件结尾标记）。
     /// </summary>
     /// <param name="kind">要查询的语法种类。</param>
     /// <returns>若<paramref name="kind"/>表示标点或关键字，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
@@ -305,10 +305,10 @@ public static partial class SyntaxFacts
         };
 
     /// <summary>
-    /// 指定语法种类是否表示标志。
+    /// 指定语法种类是否表示标记。
     /// </summary>
     /// <param name="kind">要查询的语法种类。</param>
-    /// <returns>若<paramref name="kind"/>表示标志，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
+    /// <returns>若<paramref name="kind"/>表示标记，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
     public static bool IsAnyToken(SyntaxKind kind)
     {
         Debug.Assert(Enum.IsDefined(typeof(SyntaxKind), kind));

@@ -2,6 +2,8 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.CodeAnalysis;
+
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
 
@@ -13,9 +15,13 @@ using ThisSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
 /// <summary>
-/// 表示访问者基类。访问者每次访问和处理一个<see cref="ThisSyntaxNode"/>节点并产生类型为<typeparamref name="TResult"/>的结果。
+/// Represents a <see cref="ThisSyntaxNode"/> visitor that visits only the single <see cref="ThisSyntaxNode"/>
+/// passed into its Visit method and produces 
+/// a value of the type specified by the <typeparamref name="TResult"/> parameter.
 /// </summary>
-/// <typeparam name="TResult">访问者的处理方法的返回结果的类型。</typeparam>
+/// <typeparam name="TResult">
+/// The type of the return value this visitor's Visit method.
+/// </typeparam>
 public abstract partial class
 #if LANG_LUA
      LuaSyntaxVisitor
@@ -25,27 +31,28 @@ public abstract partial class
     <TResult>
 {
     /// <summary>
-    /// 处理这个节点并产生结果。
+    /// Visit a syntax node and produce result.
     /// </summary>
-    /// <param name="node">要进行处理的节点。</param>
-    /// <returns>产生的结果。</returns>
-    public virtual TResult? Visit(ThisSyntaxNode? node)
+    /// <param name="node">The syntax node visited.</param>
+    /// <returns>The visiting result.</returns>
+    public virtual TResult? Visit(SyntaxNode? node)
     {
         if (node is null) return default;
 
-        return node.Accept(this);
+        return ((ThisSyntaxNode)node).Accept(this);
     }
 
     /// <summary>
-    /// 内部方法，被其他访问方法调用来处理这个节点并产生默认结果。
+    /// Gets the default result after visiting a syntax node.
     /// </summary>
-    /// <param name="node">要进行处理的节点。</param>
-    /// <returns>产生的结果。</returns>
-    protected virtual TResult? DefaultVisit(ThisSyntaxNode node) => default;
+    /// <param name="node">The syntax node visited.</param>
+    /// <returns>The visiting result.</returns>
+    protected virtual TResult? DefaultVisit(SyntaxNode node) => default;
 }
 
 /// <summary>
-/// 表示访问者基类。访问者每次访问和处理一个<see cref="ThisSyntaxNode"/>节点。
+/// Represents a <see cref="ThisSyntaxNode"/> visitor that visits only the single <see cref="ThisSyntaxNode"/>
+/// passed into its Visit method.
 /// </summary>
 public abstract partial class
 #if LANG_LUA
@@ -55,19 +62,19 @@ public abstract partial class
 #endif
 {
     /// <summary>
-    /// 处理这个节点。
+    /// Visit a syntax node.
     /// </summary>
-    /// <param name="node">要进行处理的节点。</param>
-    public virtual void Visit(ThisSyntaxNode? node)
+    /// <param name="node">The syntax node visited.</param>
+    public virtual void Visit(SyntaxNode? node)
     {
         if (node is null) return;
 
-        node.Accept(this);
+        ((ThisSyntaxNode)node).Accept(this);
     }
 
     /// <summary>
-    /// 内部方法，被其他访问方法调用来处理这个节点。
+    /// Do the default visit.
     /// </summary>
-    /// <param name="node">要进行处理的节点。</param>
-    protected virtual void DefaultVisit(ThisSyntaxNode node) { }
+    /// <param name="node">The syntax node visited.</param>
+    protected virtual void DefaultVisit(SyntaxNode node) { }
 }

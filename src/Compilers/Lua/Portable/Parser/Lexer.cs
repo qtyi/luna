@@ -56,12 +56,12 @@ internal partial class Lexer
         var leadingNode = leading?.ToListNode();
         var trailingNode = trailing?.ToListNode();
 
-        SyntaxToken token = info.Kind switch
+        var token = info.Kind switch
         {
-            // 标识符标志
+            // 标识符标记
             SyntaxKind.IdentifierToken => SyntaxFactory.Identifier(info.ContextualKind, leadingNode, info.Text!, info.StringValue!, trailingNode),
 
-            // 数字字面量标志
+            // 数字字面量标记
             SyntaxKind.NumericLiteralToken =>
                 info.ValueKind switch
                 {
@@ -73,12 +73,12 @@ internal partial class Lexer
                     _ => throw ExceptionUtilities.UnexpectedValue(info.ValueKind),
                 },
 
-            // 字符串字面量标志
+            // 字符串字面量标记
             SyntaxKind.StringLiteralToken or
-            // 多行原始字符串字面量标志
-            SyntaxKind.MultiLineRawStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.StringValue!, trailingNode),
+            // 多行原始字符串字面量标记
+            SyntaxKind.MultiLineRawStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.Utf8StringValue, trailingNode),
 
-            // 文件结尾标志
+            // 文件结尾标记
             SyntaxKind.EndOfFileToken => SyntaxFactory.Token(leadingNode, SyntaxKind.EndOfFileToken, trailingNode),
 
             // 异常枚举值
@@ -88,7 +88,7 @@ internal partial class Lexer
             _ => SyntaxFactory.Token(leadingNode, info.Kind, trailingNode)
         };
 
-        // 为标志添加诊断。
+        // 为标记添加诊断。
         if (errors is not null)
             token = token.WithDiagnosticsGreen(errors);
 
@@ -97,14 +97,14 @@ internal partial class Lexer
 
     private partial void ScanSyntaxToken(ref TokenInfo info)
     {
-        // 初始化以准备新的标志扫描。
+        // 初始化以准备新的标记扫描。
         info.Kind = SyntaxKind.None;
         info.ContextualKind = SyntaxKind.None;
         info.Text = null;
         char c;
-        int startingPosition = this.TextWindow.Position;
+        var startingPosition = this.TextWindow.Position;
 
-        // 开始扫描标志。
+        // 开始扫描标记。
         c = this.TextWindow.PeekChar();
         switch (c)
         {
@@ -247,9 +247,9 @@ internal partial class Lexer
                         break;
 
                     case '=':
-                        for (int i = 2; ; i++)
+                        for (var i = 2; ; i++)
                         {
-                            char nextChar = this.TextWindow.PeekChar(i);
+                            var nextChar = this.TextWindow.PeekChar(i);
                             if (nextChar == '=') continue;
                             else if (nextChar == '[')
                             {
@@ -404,8 +404,8 @@ internal partial class Lexer
                 if (this._badTokenCount++ > 200)
                 {
                     //当遇到大量无法决定的字符时，将剩下的输出也合并入。
-                    int end = this.TextWindow.Text.Length;
-                    int width = end - startingPosition;
+                    var end = this.TextWindow.Text.Length;
+                    var width = end - startingPosition;
                     info.Text = this.TextWindow.Text.ToString(new(startingPosition, width));
                     this.TextWindow.Reset(end);
                 }
@@ -425,7 +425,7 @@ internal partial class Lexer
         while (true)
         {
             this.Start();
-            char c = this.TextWindow.PeekChar();
+            var c = this.TextWindow.PeekChar();
             if (c == ' ')
             {
                 this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);

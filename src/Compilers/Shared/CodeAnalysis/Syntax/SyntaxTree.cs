@@ -112,7 +112,7 @@ public abstract partial class
     /// 若希望进行其他安排的实现，则应该重写 <see cref="GetRootAsync(CancellationToken)"/>。
     /// </remarks>
     public new virtual Task<ThisSyntaxNode> GetRootAsync(CancellationToken cancellationToken = default) =>
-        Task.FromResult(this.TryGetRoot(out ThisSyntaxNode? node) ? node : this.GetRoot(cancellationToken));
+        Task.FromResult(this.TryGetRoot(out var node) ? node : this.GetRoot(cancellationToken));
 
     /* GetCompilationUnitRoot方法在各语言特定的类库中定义。 */
 
@@ -121,8 +121,8 @@ public abstract partial class
     /// </summary>
     /// <param name="tree">与此语法树进行相等比较的语法树。</param>
     /// <param name="topLevel">
-    /// <para>设置为<see langword="true"/>时，仅要求语法树内部的定义了元数据可见符号信息的节点和标志相等，忽略位于方法体和初始化表达式内部的节点差异。</para>
-    /// <para>设置为<see langword="false"/>时，要求语法树内部的所有节点和标志必须全部相等。</para>
+    /// <para>设置为<see langword="true"/>时，仅要求语法树内部的定义了元数据可见符号信息的节点和标记相等，忽略位于方法体和初始化表达式内部的节点差异。</para>
+    /// <para>设置为<see langword="false"/>时，要求语法树内部的所有节点和标记必须全部相等。</para>
     /// </param>
     /// <returns>若此语法树与<paramref name="tree"/>相等时返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
     public override bool IsEquivalentTo(SyntaxTree tree, bool topLevel = false) =>
@@ -226,7 +226,7 @@ public abstract partial class
     /// <param name="text">要解析的代码文本。</param>
     /// <param name="options">解析选项。</param>
     /// <param name="path">代码文本的路径。</param>
-    /// <param name="cancellationToken">解析操作的取消标志。</param>
+    /// <param name="cancellationToken">解析操作的取消标记。</param>
     /// <returns>表示<paramref name="text"/>的所有信息的语法树。</returns>
     public static ThisSyntaxTree ParseText(
         SourceText text,

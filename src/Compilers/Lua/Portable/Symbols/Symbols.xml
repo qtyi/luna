@@ -11,12 +11,10 @@
   
   <AbstractSymbol Name="TypeSymbol" Base="ModuleSymbol"/>
   <AbstractSymbol Name="NamedTypeSymbol" Base="TypeSymbol"/>
-    <AbstractSymbol Name="ErrorTypeSymbol" Base="TypeSymbol"/>
+  <AbstractSymbol Name="ErrorTypeSymbol" Base="TypeSymbol"/>
 
   <AbstractSymbol Name="MemberSymbol" Base="Symbol"/>
   
-  <Symbol Name="LabelSymbol" Base="Symbol"/>
-
   <Symbol Name="LocalSymbol" Base="Symbol"/>
 
   <Symbol Name="ParameterSymbol" Base="Symbol"/>

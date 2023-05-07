@@ -39,7 +39,7 @@ partial class SyntaxParser
     protected partial TNode CheckFeatureAvailability<TNode>(TNode node, MessageID feature, bool forceWarning)
         where TNode : GreenNode
     {
-        LanguageVersion avaliableVersion = this.Options.LanguageVersion;
+        var avaliableVersion = this.Options.LanguageVersion;
 
         switch (feature)
         {

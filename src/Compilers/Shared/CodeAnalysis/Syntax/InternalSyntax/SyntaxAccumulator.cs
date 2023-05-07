@@ -54,7 +54,7 @@ internal abstract partial class
     }
 
     /// <summary>
-    /// 处理这个标志并产生累加结果。
+    /// 处理这个标记并产生累加结果。
     /// </summary>
     /// <returns>产生的累加结果。</returns>
     /// <inheritdoc/>

@@ -98,11 +98,11 @@ internal static partial class MessageIDExtensions
 
     internal static ThisDiagnosticInfo GetDisabledFeatureDiagnosticInfo(MessageID feature, LanguageVersion availableVersion)
     {
-        string? requiredFeature = feature.RequiredFeature();
+        var requiredFeature = feature.RequiredFeature();
         if (requiredFeature is not null)
             return new(ErrorCode.ERR_FeatureIsExperimental, feature.Localize(), requiredFeature);
 
-        LanguageVersion requiredVersion = feature.RequiredVersion();
+        var requiredVersion = feature.RequiredVersion();
         if (requiredVersion == LanguageVersion.Preview.MapSpecifiedToEffectiveVersion())
             return new(ErrorCode.ERR_FeatureInPreview, feature.Localize());
         else

@@ -27,7 +27,7 @@ internal partial class LexerCache
     );
     /// <summary>琐碎内容映射表。</summary>
     private readonly TextKeyedCache<SyntaxTrivia> _triviaMap;
-    /// <summary>标志映射表。</summary>
+    /// <summary>标记映射表。</summary>
     private readonly TextKeyedCache<SyntaxToken> _tokenMap;
     /// <summary>关键词映射表。</summary>
     private readonly CachingIdentityFactory<string, SyntaxKind> _keywordKindMap;
@@ -96,14 +96,14 @@ internal partial class LexerCache
     }
 
     /// <summary>
-    /// 在缓存中查找语法标志。
+    /// 在缓存中查找语法标记。
     /// </summary>
-    /// <param name="textBuffer">读取表示语法标志的字符缓存。</param>
+    /// <param name="textBuffer">读取表示语法标记的字符缓存。</param>
     /// <param name="keyStart">开始读取的字符位置</param>
     /// <param name="keyLength">读取的字符数量。</param>
     /// <param name="hashCode">指定的哈希码。</param>
-    /// <param name="createTokenFunction">从新创建语法标志的函数。</param>
-    /// <returns>查找到的语法标志。</returns>
+    /// <param name="createTokenFunction">从新创建语法标记的函数。</param>
+    /// <returns>查找到的语法标记。</returns>
     internal SyntaxToken LookupToken(
         char[] textBuffer,
         int keyStart,

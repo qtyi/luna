@@ -161,7 +161,7 @@ public static partial class SyntaxFacts
     /// <returns>所有保留关键字语法种类。</returns>
     public static IEnumerable<SyntaxKind> GetReservedKeywordKinds()
     {
-        for (int i = (int)SyntaxKind.AndKeyword; i <= (int)SyntaxKind.WithKeyword; i++)
+        for (var i = (int)SyntaxKind.AndKeyword; i <= (int)SyntaxKind.WithKeyword; i++)
             yield return (SyntaxKind)i;
     }
 
@@ -223,11 +223,11 @@ public static partial class SyntaxFacts
     public static IEnumerable<SyntaxKind> GetContextualKeywordKinds()
     {
         // 上下文关键词
-        for (int i = (int)SyntaxKind.GlobalEnvironmentKeyword; i <= (int)SyntaxKind.SuperKeyword; i++)
+        for (var i = (int)SyntaxKind.GlobalEnvironmentKeyword; i <= (int)SyntaxKind.SuperKeyword; i++)
             yield return (SyntaxKind)i;
 
         // 元字段和元方法
-        for (int i = (int)SyntaxKind.MetatableMetafield; i <= (int)SyntaxKind.WeakModeMetafield; i++)
+        for (var i = (int)SyntaxKind.MetatableMetafield; i <= (int)SyntaxKind.WeakModeMetafield; i++)
             yield return (SyntaxKind)i;
     }
 
@@ -283,7 +283,7 @@ public static partial class SyntaxFacts
     /// <returns>所有标点语法种类。</returns>
     public static IEnumerable<SyntaxKind> GetPunctuationKinds()
     {
-        for (int i = (int)SyntaxKind.PlusToken; i <= (int)SyntaxKind.OrEqualsToken; i++)
+        for (var i = (int)SyntaxKind.PlusToken; i <= (int)SyntaxKind.OrEqualsToken; i++)
             yield return (SyntaxKind)i;
     }
 

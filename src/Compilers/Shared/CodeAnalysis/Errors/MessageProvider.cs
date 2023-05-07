@@ -2,8 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
-using Microsoft.CodeAnalysis;
 using Roslyn.Utilities;
 
 #if LANG_LUA
@@ -12,6 +10,9 @@ namespace Qtyi.CodeAnalysis.Lua;
 namespace Qtyi.CodeAnalysis.MoonScript;
 #endif
 
+/// <summary>
+/// Provides the ability to classify and load messages for error codes.
+/// </summary>
 internal sealed partial class MessageProvider : IObjectWritable
 {
     public static readonly MessageProvider Instance = new();

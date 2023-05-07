@@ -64,7 +64,7 @@ partial class SyntaxParser
         this.prevTokenTrailingTrivia = point.PrevTokenTrailingTrivia;
         if (this.IsBlending())
         {
-            for (int i = this._tokenOffset; i < this._tokenCount; i++)
+            for (var i = this._tokenOffset; i < this._tokenCount; i++)
             {
                 if (this._blendedTokens[i].Token is null)
                 {

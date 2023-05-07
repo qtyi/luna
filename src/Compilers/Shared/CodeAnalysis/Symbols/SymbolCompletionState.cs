@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Roslyn.Utilities;
 
@@ -20,7 +19,7 @@ internal struct SymbolCompletionState
     /// 
     /// </summary>
     /// <remarks>
-    /// 由于此字段作为一个标志来指示其他赋值的完成情况，因此它必须为volatile以此确保先写后读操作而不会被打乱顺序或优化。
+    /// 由于此字段作为一个标记来指示其他赋值的完成情况，因此它必须为volatile以此确保先写后读操作而不会被打乱顺序或优化。
     /// </remarks>
     private volatile int _completeParts;
 
@@ -36,8 +35,8 @@ internal struct SymbolCompletionState
         {
             // 注：必须将IncompleteParts引入本地，因为属性值可能在两次访问之间发生变化。
             var incomplete = this.IncompleteParts;
-            int next = incomplete & ~(incomplete - 1);
-            Debug.Assert(SymbolCompletionState.HasAtMostOneBitSet(next), $"当设置多个标志位时，{nameof(ForceComplete)}无法正确处理结果。");
+            var next = incomplete & ~(incomplete - 1);
+            Debug.Assert(SymbolCompletionState.HasAtMostOneBitSet(next), $"当设置多个标记位时，{nameof(ForceComplete)}无法正确处理结果。");
             return (CompletionPart)next;
         }
     }
@@ -59,7 +58,7 @@ internal struct SymbolCompletionState
     /// 自旋等待直到指定组件完成。
     /// </summary>
     /// <param name="part">要完成的组件。</param>
-    /// <param name="cancellationToken">操作的取消标志。</param>
+    /// <param name="cancellationToken">操作的取消标记。</param>
     internal void SpinWaitComplete(CompletionPart part, CancellationToken cancellationToken)
     {
         if (this.HasComplete(part)) return;
@@ -78,7 +77,7 @@ internal struct SymbolCompletionState
     /// </summary>
     /// <returns>
     /// 形如“<c>CompletionParts(x, y, ..., z)</c>”的字符串。
-    /// 其中<c>x</c>、<c>y</c>、<c>z</c>均为各个已完成的组件对应的<see cref="CompletionPart"/>的标志位序数。
+    /// 其中<c>x</c>、<c>y</c>、<c>z</c>均为各个已完成的组件对应的<see cref="CompletionPart"/>的标记位序数。
     /// </returns>
     public override string ToString()
     {
@@ -89,7 +88,7 @@ internal struct SymbolCompletionState
         var any = false;
         for (var i = 0; ; i++)
         {
-            int bit = 1 << i;
+            var bit = 1 << i;
             if ((bit & (int)CompletionPart.All) == 0) break;
             if ((bit & parts) != 0)
             {

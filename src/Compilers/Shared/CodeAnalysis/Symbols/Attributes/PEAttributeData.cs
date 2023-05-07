@@ -5,7 +5,6 @@
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols.Metadata.PE;

@@ -26,11 +26,11 @@ partial class Lexer
     private SyntaxTrivia ScanWhiteSpace()
     {
         this._createWhiteSpaceTriviaFunction ??= this.CreateWhiteSpaceTrivia;
-        int hashCode = Hash.FnvOffsetBias;
-        bool onlySpaces = true;
+        var hashCode = Hash.FnvOffsetBias;
+        var onlySpaces = true;
 
 NextChar:
-        char c = this.TextWindow.PeekChar();
+        var c = this.TextWindow.PeekChar();
         switch (c)
         {
             // 连续处理空白符。

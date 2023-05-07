@@ -11,7 +11,7 @@ using Syntax;
 
 public static partial class SyntaxFactory
 {
-    #region 标志
+    #region 标记
     private static partial void ValidateTokenKind(SyntaxKind kind)
     {
         switch (kind)

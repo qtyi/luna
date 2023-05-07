@@ -19,7 +19,7 @@ using ThisSyntaxRewriter = MoonScriptSyntaxRewriter;
 #endif
 
 /// <summary>
-/// 此类型提供替换语法节点、标志和琐碎内容的方法。
+/// 此类型提供替换语法节点、标记和琐碎内容的方法。
 /// </summary>
 internal static partial class SyntaxReplacer
 {
@@ -130,9 +130,9 @@ internal static partial class SyntaxReplacer
         /// <returns><paramref name="spans"/>合并后的总文本范围。</returns>
         private static TextSpan ComputeTotalSpan(HashSet<TextSpan> spans)
         {
-            bool first = true;
-            int start = 0;
-            int end = 0;
+            var first = true;
+            var start = 0;
+            var end = 0;
 
             foreach (var span in spans)
             {
@@ -179,7 +179,7 @@ internal static partial class SyntaxReplacer
         /// </remarks>
         /// <inheritdoc/>
         [return: NotNullIfNotNull(nameof(node))]
-        public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
+        public override ThisSyntaxNode? Visit(SyntaxNode? node)
         {
             if (node is null) return null;
 
@@ -188,7 +188,7 @@ internal static partial class SyntaxReplacer
             if (this.ShouldVisit(node.FullSpan))
                 rewritten = base.Visit(node);
             else
-                rewritten = node;
+                rewritten = (ThisSyntaxNode)node;
 
             if (this._nodeSet.Contains(node) && this._computeReplacementNode is not null)
                 rewritten = this._computeReplacementNode((TNode)node, (TNode)rewritten);
@@ -197,11 +197,11 @@ internal static partial class SyntaxReplacer
         }
 
         /// <summary>
-        /// 处理语法标志并产生替换后的语法标志。
+        /// 处理语法标记并产生替换后的语法标记。
         /// </summary>
-        /// <returns>替换后的语法标志。</returns>
+        /// <returns>替换后的语法标记。</returns>
         /// <remarks>
-        /// 若<paramref name="token"/>不在需要替换的语法标志集中，或未指定用于计算替换后的语法标志的委托，则方法将返回<paramref name="token"/>本身。
+        /// 若<paramref name="token"/>不在需要替换的语法标记集中，或未指定用于计算替换后的语法标记的委托，则方法将返回<paramref name="token"/>本身。
         /// </remarks>
         /// <inheritdoc/>
         public override SyntaxToken VisitToken(SyntaxToken token)

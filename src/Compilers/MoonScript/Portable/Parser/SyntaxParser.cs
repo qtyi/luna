@@ -22,14 +22,14 @@ partial class SyntaxParser
     }
 
     /// <summary>
-    /// 获取一个错误码，对应未得到期望的标志。
+    /// 获取一个错误码，对应未得到期望的标记。
     /// </summary>
-    /// <returns>对应未得到期望的标志的错误码。</returns>
+    /// <returns>对应未得到期望的标记的错误码。</returns>
     /// <inheritdoc cref="SyntaxParser.GetExpectedTokenError(SyntaxKind, SyntaxKind)"/>
     private static ErrorCode GetExpectedTokenErrorCode(SyntaxKind expected, SyntaxKind actual) =>
         expected switch
         {
-#warning 需完善未得到期望的标志对应的错误码。
+#warning 需完善未得到期望的标记对应的错误码。
             _ => ErrorCode.ERR_SyntaxError
         };
 
@@ -37,7 +37,7 @@ partial class SyntaxParser
     protected partial TNode CheckFeatureAvailability<TNode>(TNode node, MessageID feature, bool forceWarning/* = false*/)
         where TNode : GreenNode
     {
-        LanguageVersion avaliableVersion = this.Options.LanguageVersion;
+        var avaliableVersion = this.Options.LanguageVersion;
 
         switch (feature)
         {

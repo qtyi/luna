@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -141,10 +140,10 @@ internal static partial class SyntaxEquivalence
         }
         else // 不忽略子节点。
         {
-            int slotCount = before.SlotCount;
+            var slotCount = before.SlotCount;
             if (slotCount != after.SlotCount) return false;
 
-            for (int i = 0; i < slotCount; i++)
+            for (var i = 0; i < slotCount; i++)
             {
                 var child1 = before.GetSlot(i);
                 var child2 = after.GetSlot(i);

@@ -55,7 +55,7 @@ internal partial struct Blender
                     return this.ReadNewToken(mode);
                 else
                 {
-                    if (this.TryTakeOldNodeOrToken(asToken, out BlendedNode blendedNode))
+                    if (this.TryTakeOldNodeOrToken(asToken, out var blendedNode))
                         return blendedNode;
 
                     if (this._oldTreeCursor.CurrentNodeOrToken.IsNode)
@@ -170,7 +170,7 @@ internal partial struct Blender
         /// 判断一个语法节点是否为未完成节点。
         /// </summary>
         private static bool IsIncomplete(ThisSyntaxNode node) =>
-            // 若最后一个标志为缺失标志，则这个节点为未完成节点。
+            // 若最后一个标记为缺失标记，则这个节点为未完成节点。
             // 使用绿树API比红树API更快。
             node.Green.GetLastTerminal()!.IsMissing;
 

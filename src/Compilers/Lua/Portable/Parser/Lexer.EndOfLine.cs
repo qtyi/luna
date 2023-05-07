@@ -16,8 +16,8 @@ partial class Lexer
 {
     private partial ThisInternalSyntaxNode? ScanEndOfLine()
     {
-        char c1 = this.TextWindow.PeekChar();
-        char c2 = this.TextWindow.PeekChar(1);
+        var c1 = this.TextWindow.PeekChar();
+        var c2 = this.TextWindow.PeekChar(1);
         if (SyntaxFacts.IsNewLine(c1, c2))
         {
             this.TextWindow.AdvanceChar(2);

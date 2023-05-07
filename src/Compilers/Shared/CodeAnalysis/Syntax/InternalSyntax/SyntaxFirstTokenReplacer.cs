@@ -75,7 +75,7 @@ internal class SyntaxFirstTokenReplacer :
         if (numDiagnostics == 0) return node;
 
         var newDiagnostics = new DiagnosticInfo[numDiagnostics];
-        for (int i = 0; i < numDiagnostics; i++)
+        for (var i = 0; i < numDiagnostics; i++)
         {
             var oldDiagnostic = oldDiagnostics[i];
             newDiagnostics[i] = oldDiagnostic is SyntaxDiagnosticInfo oldSyntaxDiagnostic ?

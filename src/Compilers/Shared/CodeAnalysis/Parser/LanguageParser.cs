@@ -75,7 +75,7 @@ internal partial class LanguageParser : SyntaxParser
     {
         if (this.CurrentTokenKind == SyntaxKind.EndOfFileToken) return true;
 
-        for (int i = 1; i < LanguageParser.LastTerminatorState; i <<= 1)
+        for (var i = 1; i < LanguageParser.LastTerminatorState; i <<= 1)
         {
             var state = (TerminatorState)i;
             if (IsTerminalCore(state)) return true;
@@ -112,7 +112,7 @@ internal partial class LanguageParser : SyntaxParser
     }
 
     /// <summary>
-    /// 将整个输入转换为单个语法标志，这个语法标志将被跳过。
+    /// 将整个输入转换为单个语法标记，这个语法标记将被跳过。
     /// </summary>
     private TNode CreateForGlobalFailure<TNode>(int position, TNode node)
         where TNode : ThisInternalSyntaxNode
@@ -122,7 +122,7 @@ internal partial class LanguageParser : SyntaxParser
         var fileAsTrivia = _syntaxFactory.SkippedTokensTrivia(builder.ToList<SyntaxToken>());
 
         node = AddLeadingSkippedSyntax(node, fileAsTrivia);
-        this.ForceEndOfFile(); // 强制使当前的语法标志为文件结尾标志。
+        this.ForceEndOfFile(); // 强制使当前的语法标记为文件结尾标记。
 
         return this.AddError(node, position, 0, ErrorCode.ERR_InsufficientStack);
     }
@@ -209,8 +209,8 @@ internal partial class LanguageParser : SyntaxParser
         int minCount = 0)
         where TNode : ThisInternalSyntaxNode
     {
-        int lastTokenPosition = -1;
-        int index = 0;
+        var lastTokenPosition = -1;
+        var index = 0;
         while (this.CurrentTokenKind != SyntaxKind.EndOfFileToken &&
             this.IsMakingProgress(ref lastTokenPosition))
         {
@@ -268,15 +268,15 @@ internal partial class LanguageParser : SyntaxParser
         where TNode : ThisInternalSyntaxNode
         where TSeparator : ThisInternalSyntaxNode
     {
-        int index = 0;
+        var index = 0;
         if (predicateNode(index))
         {
             const bool missing = false;
 
-            TNode node = parseNode(index, missing);
+            var node = parseNode(index, missing);
             builder.Add(node);
 
-            int lastTokenPosition = -1;
+            var lastTokenPosition = -1;
             index = 1;
             while (this.CurrentTokenKind != SyntaxKind.EndOfFileToken &&
                 this.IsMakingProgress(ref lastTokenPosition))
