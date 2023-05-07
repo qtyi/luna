@@ -2,7 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -14,9 +13,9 @@ partial class Lexer
         if (this.ScanLongBrackets(out var isTerminal, level))
         {
             info.Kind = SyntaxKind.MultiLineRawStringLiteralToken;
-            info.ValueKind = SpecialType.System_String;
             info.Text = this.TextWindow.GetText(intern: true);
-            info.StringValue = this.TextWindow.Intern(this._builder);
+            this.FlushToUtf8Builder();
+            info.Utf8StringValue = this._utf8Builder.ToImmutableAndClear();
 
             if (!isTerminal)
                 this.AddError(ErrorCode.ERR_UnterminatedStringLiteral);

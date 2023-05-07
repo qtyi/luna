@@ -19,9 +19,8 @@ partial class Lexer
     {
         var start = this.TextWindow.Position;
 
-        char c = this.TextWindow.NextChar();
+        var c = this.TextWindow.NextChar();
         SyntaxDiagnosticInfo? error;
-        char surrogate;
 
         Debug.Assert(c == '\\');
 
@@ -73,18 +72,16 @@ partial class Lexer
             // 十六进制数字表示的ASCII字符
             case 'x':
                 this.TextWindow.Reset(start);
-                c = this.TextWindow.NextByteEscape(out error, out surrogate);
-                if (c != SlidingTextWindow.InvalidCharacter)
-                    this._builder.Append(c);
-                if (surrogate != SlidingTextWindow.InvalidCharacter)
-                    this._builder.Append(surrogate);
+                var b = this.TextWindow.NextByteEscape(out error);
+                if (error is null)
+                    this.FlushToUtf8Builder(b);
                 this.AddError(error);
                 break;
 
             // 十六进制数字表示的Unicode字符
             case 'u':
                 this.TextWindow.Reset(start);
-                c = this.TextWindow.NextUnicodeEscape(out error, out surrogate);
+                c = this.TextWindow.NextUnicodeEscape(out error, out var surrogate);
                 if (c != SlidingTextWindow.InvalidCharacter)
                     this._builder.Append(c);
                 if (surrogate != SlidingTextWindow.InvalidCharacter)

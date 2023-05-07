@@ -2,6 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
@@ -13,7 +14,7 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 internal partial class Lexer
 {
     /// <summary>
-    /// 存放语法标志的必要信息。
+    /// 存放语法标记的必要信息。
     /// </summary>
     internal partial struct TokenInfo
     {
@@ -26,30 +27,37 @@ internal partial class Lexer
         /// </summary>
         internal SyntaxKind ContextualKind;
         /// <summary>
-        /// 语法标志的文本表示。
+        /// 语法标记的文本表示。
         /// </summary>
         internal string? Text;
         /// <summary>
-        /// 语法标志的值类别。
+        /// 语法标记的值类别。
         /// </summary>
         internal SpecialType ValueKind;
         /// <summary>
-        /// 语法标志的字符串类型值。
+        /// 语法标记的UTF-8字符串类型值。
+        /// </summary>
+        /// <remarks>
+        /// UTF-8字符串由不可变<see cref="byte"/>数组表示。
+        /// </remarks>
+        internal ImmutableArray<byte> Utf8StringValue;
+        /// <summary>
+        /// 语法标记的字符串类型值。
         /// </summary>
         internal string? StringValue;
         /// <summary>
-        /// 语法标志的64位整数类型值。
+        /// 语法标记的64位整数类型值。
         /// </summary>
         internal long LongValue;
         /// <summary>
-        /// 语法标志的64位整数类型值。
+        /// 语法标记的64位整数类型值。
         /// </summary>
         /// <remarks>
         /// 主要用于承载紧跟着一个负号（<c>-</c>）的<c>0x8000000000000000</c>。
         /// </remarks>
         internal ulong ULongValue;
         /// <summary>
-        /// 语法标志的64位双精度浮点数类型值。
+        /// 语法标记的64位双精度浮点数类型值。
         /// </summary>
         internal double DoubleValue;
     }
