@@ -2,6 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
@@ -10,7 +11,89 @@ namespace Qtyi.CodeAnalysis.Lua;
 namespace Qtyi.CodeAnalysis.MoonScript;
 #endif
 
+/// <summary>
+/// Provides the ability to manage syntax and declaration state.
+/// </summary>
 internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDeclarationManager
 {
+    /// <summary>
+    /// State of syntax and declaration.
+    /// </summary>
+    private State _lazyState;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SyntaxAndDeclarationManager"/> class with the specified <see cref="State"/>.
+    /// </summary>
+    /// <param name="externalSyntaxTrees">A collection of external syntax trees.</param>
+    /// <param name="scriptClassName">The name of script class.</param>
+    /// <param name="resolver">An object that resolves references to source documents specified in the source.</param>
+    /// <param name="messageProvider">An object that classify and load messages for error codes.</param>
+    /// <param name="isSubmission">Whether it is submission.</param>
+    /// <param name="state">An immutable state of syntax and declaration.</param>
+    internal SyntaxAndDeclarationManager(
+        ImmutableArray<SyntaxTree> externalSyntaxTrees,
+        string scriptClassName,
+        SourceReferenceResolver resolver,
+        CommonMessageProvider messageProvider,
+        bool isSubmission,
+        State state)
+        : base(externalSyntaxTrees, scriptClassName, resolver, messageProvider, isSubmission)
+    {
+        this._lazyState = state;
+    }
+
+    /// <summary>
+    /// Gets the current state of syntax and declaration.
+    /// </summary>
+    /// <returns>An object that represents the current state of syntax and declaration.</returns>
+    internal State GetLazyState()
+    {
+        if (this._lazyState is null)
+        {
+            Interlocked.CompareExchange(
+                ref this._lazyState,
+                SyntaxAndDeclarationManager.CreateState(
+                    this.ExternalSyntaxTrees,
+                    this.ScriptClassName,
+                    this.Resolver,
+                    this.MessageProvider,
+                    this.IsSubmission),
+                null);
+        }
+
+        return this._lazyState;
+    }
+
+    /// <summary>
+    /// Create a new instance of <see cref="SyntaxAndDeclarationManager"/> with specified external syntax trees.
+    /// </summary>
+    /// <param name="trees">The external syntax trees.</param>
+    /// <returns>A new instance of <see cref="SyntaxAndDeclarationManager"/>.</returns>
+    internal SyntaxAndDeclarationManager WithExternalSyntaxTrees(ImmutableArray<SyntaxTree> trees) =>
+        new(
+            trees,
+            this.ScriptClassName,
+            this.Resolver,
+            this.MessageProvider,
+            this.IsSubmission,
+            state: null);
+
+    /// <summary>
+    /// Create a new <see cref="State"/>.
+    /// </summary>
+    private static partial State CreateState(
+        ImmutableArray<SyntaxTree> externalSyntaxTrees,
+        string scriptClassName,
+        SourceReferenceResolver resolver,
+        CommonMessageProvider messageProvider,
+        bool isSubmission);
+
+    /// <summary>
+    /// Add other syntax trees.
+    /// </summary>
+    /// <param name="trees">A collection of syntax trees.</param>
+    /// <returns>A new instance of <see cref="SyntaxAndDeclarationManager"/>.</returns>
+    public partial SyntaxAndDeclarationManager AddSyntaxTrees(IEnumerable<SyntaxTree> trees);
+
+    public partial SyntaxAndDeclarationManager RemoveSyntaxTrees(HashSet<SyntaxTree> trees);
 }

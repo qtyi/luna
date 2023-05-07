@@ -2,9 +2,9 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Qtyi.CodeAnalysis.Lua;
+namespace Qtyi.CodeAnalysis.MoonScript;
 
-partial class LuaCompilation
+partial class MoonScriptCompilation
 {
     /// <summary>
     /// Gets the language name that this node is compilation of.
@@ -18,7 +18,7 @@ partial class LuaCompilation
     /// Gets a value indicating whether the compilation is case-sensitive.
     /// </summary>
     /// <value>
-    /// Always <see langword="true"/> as MoonScript is case-sensitive.
+    /// Always <see langword="true"/> as Lua is case-sensitive.
     /// </value>
     public sealed override bool IsCaseSensitive => true;
 }

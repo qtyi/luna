@@ -26,11 +26,16 @@ using ThisCompilationOptions = MoonScriptCompilationOptions;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
 #endif
 
+using Symbols;
+
 #warning 未实现。
 /// <summary>
-/// 此类表示编译器单次发起的一个不可变的内容。尽管不可变，但同时也按需分配，并且在需要时会提交和缓存数据。
-/// 可以在一个现有的编译内容的基础上应用一些微小的修改来产生一个新的编译内容。
-/// 很多场合下这样创建新编译内容更加高效，因为新的编译内容能重用旧的编译内容的信息。
+/// The compilation object is an immutable representation of a single invocation of the
+/// compiler. Although immutable, a compilation is also on-demand, and will realize and cache
+/// data as necessary. A compilation can produce a new compilation from existing compilation
+/// with the application of small deltas. In many cases, it is more efficient than creating a
+/// new compilation from scratch, as the new compilation can reuse information from the old
+/// compilation.
 /// </summary>
 public sealed partial class
 #if LANG_LUA
@@ -42,7 +47,63 @@ public sealed partial class
 {
     private readonly ThisCompilationOptions _options;
 
+    /// <summary>
+    /// Gets the options the compilation was created with.
+    /// </summary>
+    /// <value>
+    /// An object that is the options of this compilation.
+    /// </value>
     public new ThisCompilationOptions Options => this._options;
+
+    /// <summary>
+    /// The <see cref="SourceAssemblySymbol"/> for this compilation. Do not access directly, use Assembly property
+    /// instead. This field is lazily initialized by <see cref="ReferenceManager"/>, <see cref="ReferenceManager.CacheLockObject"/> must be locked
+    /// while <see cref="ReferenceManager"/> "calculates" the value and assigns it, several threads must not perform duplicate
+    /// "calculation" simultaneously.
+    /// </summary>
+    private SourceAssemblySymbol? _lazyAssemblySymbol;
+
+    /// <summary>
+    /// Holds onto data related to reference binding.
+    /// The manager is shared among multiple compilations that we expect to have the same result of reference binding.
+    /// In most cases this can be determined without performing the binding. If the compilation however contains a circular
+    /// metadata reference (a metadata reference that refers back to the compilation) we need to avoid sharing of the binding results.
+    /// We do so by creating a new reference manager for such compilation.
+    /// </summary>
+    private ReferenceManager _referenceManager;
+
+    private readonly SyntaxAndDeclarationManager _syntaxAndDeclarations;
+
+    /// <summary>
+    /// Contains the main method of this assembly, if there is one.
+    /// </summary>
+    private EntryPoint? _lazyEntryPoint;
+
+    #region Language Version and Features
+    /// <summary>
+    /// Gets the language version that was used to parse the syntax trees of this compilation.
+    /// </summary>
+    /// <value>
+    /// The language version that was used to parse the syntax trees of this compilation.
+    /// </value>
+    public LanguageVersion LanguageVersion { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the compiler is run in "strict" mode, in which it enforces the language specification
+    /// in some cases even at the expense of full compatibility. Such differences typically arise when
+    /// earlier versions of the compiler failed to enforce the full language specification.
+    /// </summary>
+    /// <value>
+    /// <see langword="true"/> when the compiler is run in "strict" mode; otherwise, <see langword="false"/>.
+    /// </value>
+    internal bool FeatureStrictEnabled => this.Feature("strict") is not null;
+    #endregion
+
+    #region Constructors and Factories
+    /// <summary>The default compilation options - to compile as a console application.</summary>
+    private static readonly ThisCompilationOptions s_defaultOptions = new(OutputKind.ConsoleApplication);
+    /// <summary>The default compilation options of submission - to compile as a dynamically linked library.</summary>
+    private static readonly ThisCompilationOptions s_defaultSubmissionOptions = new ThisCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithReferencesSupersedeLowerVersions(true);
 
     private
 #if LANG_LUA
@@ -101,12 +162,18 @@ public sealed partial class
         AsyncQueue<CompilationEvent>? eventQueue = null) :
         base(assemblyName, references, features, isSubmission, semanticModelProvider, eventQueue);
 
-    private static readonly ThisCompilationOptions s_defaultOptions = new(OutputKind.ConsoleApplication);
-    private static readonly ThisCompilationOptions s_defaultSubmissionOptions = new ThisCompilationOptions(OutputKind.NetModule).WithReferencesSupersedeLowerVersions(true);
-
+    /// <summary>
+    /// Creates a new compilation from scratch. Methods such as <see cref="AddSyntaxTrees(IEnumerable{SyntaxTree})"/> or <see cref="AddReferences"/>
+    /// on the returned object will allow to continue building up the compilation incrementally.
+    /// </summary>
+    /// <param name="assemblyName">Simple assembly name.</param>
+    /// <param name="syntaxTrees">The syntax trees with the source code for the new compilation.</param>
+    /// <param name="references">The references for the new compilation.</param>
+    /// <param name="options">The compiler options to use.</param>
+    /// <returns>A new compilation.</returns>
     public static ThisCompilation Create(
         string? assemblyName,
-        IEnumerable<ThisSyntaxTree>? syntaxTrees = null,
+        IEnumerable<SyntaxTree>? syntaxTrees = null,
         IEnumerable<MetadataReference>? references = null,
         ThisCompilationOptions? options = null) =>
         ThisCompilation.Create(
@@ -122,7 +189,7 @@ public sealed partial class
     private static ThisCompilation Create(
         string? assemblyName,
         ThisCompilationOptions options,
-        IEnumerable<ThisSyntaxTree>? syntaxTrees,
+        IEnumerable<SyntaxTree>? syntaxTrees,
         IEnumerable<MetadataReference>? references,
         ThisCompilation? previousSubmission,
         Type? returnType,
@@ -131,15 +198,27 @@ public sealed partial class
     {
         Debug.Assert(!isSubmission || options.ReferencesSupersedeLowerVersions);
     }
+    #endregion
+
+    #region Syntax Trees (maintain an ordered list)
+    /// <summary>
+    /// Gets the syntax trees (parsed from source code) that this compilation was created with.
+    /// </summary>
+    /// <value>
+    /// The syntax trees that this compilation was created with.
+    /// </value>
+    public new ImmutableArray<SyntaxTree> SyntaxTrees => this._syntaxAndDeclarations.GetLazyState().SyntaxTrees;
+
+    public new bool ContainsSyntaxTree(SyntaxTree? syntaxTree)
+    {
+        return syntaxTree != null && _syntaxAndDeclarations.GetLazyState().Modules.ContainsKey(syntaxTree);
+    }
+    #endregion
 
     #region Compilation
     protected override CompilationOptions CommonOptions => this._options;
 
-    public new ImmutableArray<SyntaxTree> SyntaxTrees => throw new NotImplementedException();
-
-    public SemanticModel GetSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility) => throw new NotImplementedException();
-
-    public LanguageVersion LanguageVersion { get; }
+    public new SemanticModel GetSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility) => throw new NotImplementedException();
 
     public override ImmutableArray<MetadataReference> DirectiveReferences => throw new NotImplementedException();
 
