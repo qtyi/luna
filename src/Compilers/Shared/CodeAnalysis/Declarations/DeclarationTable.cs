@@ -40,4 +40,48 @@ internal sealed partial class DeclarationTable
         _latestLazyRootDeclaration = latestLazyRootDeclaration;
     }
 
+    /// <summary>
+    /// Add a root declaration to the decl table.
+    /// </summary>
+    /// <param name="lazyRootDeclaration">A declaration which is added as a root declaration.</param>
+    /// <returns>A new instance of decl table with a root declaration added.</returns>
+    public DeclarationTable AddRootDeclaration(Lazy<ModuleDeclaration> lazyRootDeclaration)
+    {
+        // We can only re-use the cache if we don't already have a 'latest' item for the decl
+        // table.
+        if (_latestLazyRootDeclaration == null)
+        {
+            return new(_allOlderRootDeclarations, lazyRootDeclaration);
+        }
+        else
+        {
+            // we already had a 'latest' item.  This means we're hearing about a change to a
+            // different tree.  Add old latest item to the 'oldest' collection.
+            return new(_allOlderRootDeclarations.Add(_latestLazyRootDeclaration), lazyRootDeclaration);
+        }
+    }
+
+    /// <summary>
+    /// Remove a root declaration from the decl table.
+    /// </summary>
+    /// <param name="lazyRootDeclaration">A declaration which is removed as a root declaration.</param>
+    /// <returns>A new instance of decl table with a root declaration removed.</returns>
+    public DeclarationTable RemoveRootDeclaration(Lazy<ModuleDeclaration> lazyRootDeclaration)
+    {
+        // We can only reuse the cache if we're removing the decl that was just added.
+        if (_latestLazyRootDeclaration == lazyRootDeclaration)
+        {
+            return new(_allOlderRootDeclarations, latestLazyRootDeclaration: null);
+        }
+        else
+        {
+            // We're removing a different tree than the latest one added.  We need
+            // to remove the passed in root from our 'older' list.
+            //
+            // Note: we can keep around the 'latestLazyRootDeclaration'.
+            return new(_allOlderRootDeclarations.Remove(lazyRootDeclaration), _latestLazyRootDeclaration);
+        }
+    }
+
+#warning 未完成。
 }

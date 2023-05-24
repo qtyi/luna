@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CompilationMoonScript" xml:space="preserve">
+    <value>Compilation (MoonScript):</value>
+  </data>
   <data name="ERR_CantReadConfigFile" xml:space="preserve">
     <value>Cannot read config file '{0}' -- '{1}'</value>
   </data>
@@ -135,8 +138,29 @@
   <data name="IDS_ToolName" xml:space="preserve">
     <value>MoonScript Compiler</value>
   </data>
+  <data name="SubmissionCanHaveAtMostOne" xml:space="preserve">
+    <value>Submission can have at most one syntax tree.</value>
+  </data>
+  <data name="SubmissionCanOnlyInclude" xml:space="preserve">
+    <value>Submission can only include script code.</value>
+  </data>
+  <data name="SyntaxTreeAlreadyPresent" xml:space="preserve">
+    <value>Syntax tree already present.</value>
+  </data>
+  <data name="SyntaxTreeFromLoadNoRemoveReplace" xml:space="preserve">
+    <value>SyntaxTree cannot be removed or replaced directly.</value>
+  </data>
+  <data name="SyntaxTreeNotFoundToRemove" xml:space="preserve">
+    <value>SyntaxTree is not part of the compilation, so it cannot be removed.</value>
+  </data>
+  <data name="SyntaxTreeNotFoundWithFilePath" xml:space="preserve">
+    <value>Syntax tree not found with file path: {0}.</value>
+  </data>
   <data name="ThisMethodCanOnlyBeUsedToCreateTokens" xml:space="preserve">
     <value>This method can only be used to create tokens - {0} is not a token kind.</value>
+  </data>
+  <data name="TreeMustHaveARootNodeWith" xml:space="preserve">
+    <value>Tree must have a root node with SyntaxKind.Chunk.</value>
   </data>
   <data name="UseIdentifierForTokens" xml:space="preserve">
     <value>Use Qtyi.CodeAnalysis.MoonScript.SyntaxFactory.Identifier to create tokens.</value>

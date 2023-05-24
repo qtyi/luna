@@ -19,6 +19,10 @@ using ThisSyntaxNode = MoonScriptSyntaxNode;
 
 using Syntax;
 
+/// <summary>
+/// Represents a <see cref="ThisSyntaxVisitor{TResult}"/> which descends an entire <see cref="ThisSyntaxNode"/> graph and
+/// may replace or remove visited SyntaxNodes in depth-first order.
+/// </summary>
 public abstract partial class
 #if LANG_LUA
     LuaSyntaxRewriter
@@ -44,7 +48,7 @@ public abstract partial class
     private int _recursionDepth;
 
     [return: NotNullIfNotNull(nameof(node))]
-    public override ThisSyntaxNode? Visit(SyntaxNode? node)
+    public override SyntaxNode? Visit(SyntaxNode? node)
     {
         if (node is null) return null;
 
@@ -135,7 +139,7 @@ public abstract partial class
         return trivia;
     }
 
-    public virtual SyntaxList<TNode> VisitList<TNode>(SyntaxList<TNode> list) where TNode : ThisSyntaxNode
+    public virtual SyntaxList<TNode> VisitList<TNode>(SyntaxList<TNode> list) where TNode : SyntaxNode
     {
         SyntaxListBuilder? alternate = null;
         for (int i = 0, n = list.Count; i < n; i++)
@@ -159,10 +163,10 @@ public abstract partial class
     }
 
     [return: NotNullIfNotNull(nameof(node))]
-    public virtual TNode? VisitListElement<TNode>(TNode? node) where TNode : ThisSyntaxNode
+    public virtual TNode? VisitListElement<TNode>(TNode? node) where TNode : SyntaxNode
         => (TNode?)this.Visit(node);
 
-    public virtual SeparatedSyntaxList<TNode> VisitList<TNode>(SeparatedSyntaxList<TNode> list) where TNode : ThisSyntaxNode
+    public virtual SeparatedSyntaxList<TNode> VisitList<TNode>(SeparatedSyntaxList<TNode> list) where TNode : SyntaxNode
     {
         var count = list.Count;
         var sepCount = list.SeparatorCount;

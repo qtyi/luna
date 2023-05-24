@@ -13,7 +13,7 @@ using ThisInternalSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
-using ThisInternalSyntaxNode = MoonScriptSyntaxNode
+using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;

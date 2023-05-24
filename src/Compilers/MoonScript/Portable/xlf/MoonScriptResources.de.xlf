@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../MoonScriptResources.resx">
     <body>
+      <trans-unit id="CompilationMoonScript">
+        <source>Compilation (MoonScript):</source>
+        <target state="new">Compilation (MoonScript):</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_CantReadConfigFile">
         <source>Cannot read config file '{0}' -- '{1}'</source>
         <target state="new">Cannot read config file '{0}' -- '{1}'</target>
@@ -32,9 +37,44 @@
         <target state="new">MoonScript Compiler</target>
         <note />
       </trans-unit>
+      <trans-unit id="SubmissionCanHaveAtMostOne">
+        <source>Submission can have at most one syntax tree.</source>
+        <target state="new">Submission can have at most one syntax tree.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SubmissionCanOnlyInclude">
+        <source>Submission can only include script code.</source>
+        <target state="new">Submission can only include script code.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SyntaxTreeAlreadyPresent">
+        <source>Syntax tree already present.</source>
+        <target state="new">Syntax tree already present.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SyntaxTreeFromLoadNoRemoveReplace">
+        <source>SyntaxTree cannot be removed or replaced directly.</source>
+        <target state="new">SyntaxTree cannot be removed or replaced directly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SyntaxTreeNotFoundToRemove">
+        <source>SyntaxTree is not part of the compilation, so it cannot be removed.</source>
+        <target state="new">SyntaxTree is not part of the compilation, so it cannot be removed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SyntaxTreeNotFoundWithFilePath">
+        <source>Syntax tree not found with file path: {0}.</source>
+        <target state="new">Syntax tree not found with file path: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ThisMethodCanOnlyBeUsedToCreateTokens">
         <source>This method can only be used to create tokens - {0} is not a token kind.</source>
         <target state="new">This method can only be used to create tokens - {0} is not a token kind.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TreeMustHaveARootNodeWith">
+        <source>Tree must have a root node with SyntaxKind.Chunk.</source>
+        <target state="new">Tree must have a root node with SyntaxKind.Chunk.</target>
         <note />
       </trans-unit>
       <trans-unit id="UseIdentifierForTokens">

@@ -10,54 +10,51 @@ using Microsoft.CodeAnalysis.Text;
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
 
-using ThisSyntaxNode = LuaSyntaxNode;
 using ThisSyntaxRewriter = LuaSyntaxRewriter;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax;
 
-using ThisSyntaxNode = MoonScriptSyntaxNode;
 using ThisSyntaxRewriter = MoonScriptSyntaxRewriter;
 #endif
 
 static partial class SyntaxReplacer
 {
-
-    public static ThisSyntaxNode ReplaceNodeInList(ThisSyntaxNode root, ThisSyntaxNode nodeInList, IEnumerable<ThisSyntaxNode> newNodes) =>
+    public static SyntaxNode ReplaceNodeInList(SyntaxNode root, SyntaxNode nodeInList, IEnumerable<SyntaxNode> newNodes) =>
         new NodeListEditor(
             nodeInList,
             newNodes,
             ListEditKind.Replace)
         .Visit(root);
 
-    public static ThisSyntaxNode InsertNodeInList(ThisSyntaxNode root, ThisSyntaxNode nodeInList, IEnumerable<ThisSyntaxNode> nodesToInsert, bool insertBefore) =>
+    public static SyntaxNode InsertNodeInList(SyntaxNode root, SyntaxNode nodeInList, IEnumerable<SyntaxNode> nodesToInsert, bool insertBefore) =>
         new NodeListEditor(
             nodeInList,
             nodesToInsert,
             insertBefore ? ListEditKind.InsertBefore : ListEditKind.InsertAfter)
         .Visit(root);
 
-    public static ThisSyntaxNode ReplaceTokenInList(ThisSyntaxNode root, SyntaxToken tokenInList, IEnumerable<SyntaxToken> newTokens) =>
+    public static SyntaxNode ReplaceTokenInList(SyntaxNode root, SyntaxToken tokenInList, IEnumerable<SyntaxToken> newTokens) =>
         new TokenListEditor(
             tokenInList,
             newTokens,
             ListEditKind.Replace)
         .Visit(root);
 
-    public static ThisSyntaxNode InsertTokenInList(ThisSyntaxNode root, SyntaxToken tokenInList, IEnumerable<SyntaxToken> tokensToInsert, bool insertBefore) =>
+    public static SyntaxNode InsertTokenInList(SyntaxNode root, SyntaxToken tokenInList, IEnumerable<SyntaxToken> tokensToInsert, bool insertBefore) =>
         new TokenListEditor(
             tokenInList,
             tokensToInsert,
             insertBefore ? ListEditKind.InsertBefore : ListEditKind.InsertAfter)
         .Visit(root);
 
-    public static ThisSyntaxNode ReplaceTriviaInList(ThisSyntaxNode root, SyntaxTrivia triviaInList, IEnumerable<SyntaxTrivia> newTrivia) =>
+    public static SyntaxNode ReplaceTriviaInList(SyntaxNode root, SyntaxTrivia triviaInList, IEnumerable<SyntaxTrivia> newTrivia) =>
         new TriviaListEditor(
             triviaInList,
             newTrivia,
             ListEditKind.Replace)
         .Visit(root);
 
-    public static ThisSyntaxNode InsertTriviaInList(ThisSyntaxNode root, SyntaxTrivia triviaInList, IEnumerable<SyntaxTrivia> triviaToInsert, bool insertBefore) =>
+    public static SyntaxNode InsertTriviaInList(SyntaxNode root, SyntaxTrivia triviaInList, IEnumerable<SyntaxTrivia> triviaToInsert, bool insertBefore) =>
         new TriviaListEditor(
             triviaInList,
             triviaToInsert,
@@ -101,11 +98,11 @@ static partial class SyntaxReplacer
         private bool ShouldVisit(TextSpan span) => span.IntersectsWith(this._elementSpan);
 
         [return: NotNullIfNotNull(nameof(node))]
-        public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
+        public override SyntaxNode? Visit(SyntaxNode? node)
         {
             if (node is null) return null;
 
-            ThisSyntaxNode? rewritten;
+            SyntaxNode? rewritten;
 
             if (this.ShouldVisit(node.FullSpan))
                 rewritten = base.Visit(node);
@@ -142,12 +139,12 @@ static partial class SyntaxReplacer
 
     private class NodeListEditor : BaseListEditor
     {
-        private readonly ThisSyntaxNode _originalNode;
-        private readonly IEnumerable<ThisSyntaxNode> _newNodes;
+        private readonly SyntaxNode _originalNode;
+        private readonly IEnumerable<SyntaxNode> _newNodes;
 
         public NodeListEditor(
-            ThisSyntaxNode originalNode,
-            IEnumerable<ThisSyntaxNode> newNodes,
+            SyntaxNode originalNode,
+            IEnumerable<SyntaxNode> newNodes,
             ListEditKind editKind) : base(
                 elementSpan: originalNode.Span,
                 editKind: editKind,
@@ -159,7 +156,7 @@ static partial class SyntaxReplacer
         }
 
         [return: NotNullIfNotNull(nameof(node))]
-        public override ThisSyntaxNode? Visit(ThisSyntaxNode? node)
+        public override SyntaxNode? Visit(SyntaxNode? node)
         {
             if (node == this._originalNode)
                 throw SyntaxReplacer.GetItemNotListElementException();

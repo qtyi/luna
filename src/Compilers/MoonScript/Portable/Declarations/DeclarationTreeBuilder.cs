@@ -53,7 +53,7 @@ partial class DeclarationTreeBuilder
         diagnostics: ImmutableArray<Diagnostic>.Empty);
 
     private static readonly ObjectPool<ImmutableSegmentedDictionary<string, VoidResult>.Builder> s_memberNameBuilderPool =
-        new(() => ImmutableSegmentedDictionary.CreateBuilder<string, VoidResult>());
+        new(ImmutableSegmentedDictionary.CreateBuilder<string, VoidResult>);
 
     private static ImmutableSegmentedDictionary<string, VoidResult> ToImmutableAndFree(ImmutableSegmentedDictionary<string, VoidResult>.Builder builder)
     {

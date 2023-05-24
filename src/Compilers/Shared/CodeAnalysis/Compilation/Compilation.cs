@@ -10,23 +10,34 @@ using Microsoft.CodeAnalysis.CodeGen;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Operations;
+using Microsoft.CodeAnalysis.PooledObjects;
 using Microsoft.CodeAnalysis.Symbols;
+using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
 
 using ThisCompilation = LuaCompilation;
 using ThisCompilationOptions = LuaCompilationOptions;
+using ThisCompilationReference = LuaCompilationReference;
+using ThisMessageProvider = MessageProvider;
+using ThisScriptCompilationInfo = LuaScriptCompilationInfo;
 using ThisSyntaxTree = LuaSyntaxTree;
+using ThisResources = LuaResources;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
 
 using ThisCompilation = MoonScriptCompilation;
 using ThisCompilationOptions = MoonScriptCompilationOptions;
+using ThisCompilationReference = MoonScriptCompilationReference;
+using ThisMessageProvider = MessageProvider;
+using ThisScriptCompilationInfo = MoonScriptScriptCompilationInfo;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
+using ThisResources = MoonScriptResources;
 #endif
 
 using Symbols;
+using System;
 
 #warning 未实现。
 /// <summary>
@@ -160,10 +171,13 @@ public sealed partial class
         IReadOnlyDictionary<string, string> features,
         SemanticModelProvider? semanticModelProvider,
         AsyncQueue<CompilationEvent>? eventQueue = null) :
-        base(assemblyName, references, features, isSubmission, semanticModelProvider, eventQueue);
+        base(assemblyName, references, features, isSubmission, semanticModelProvider, eventQueue)
+    {
+#warning 未完成。
+    }
 
     /// <summary>
-    /// Creates a new compilation from scratch. Methods such as <see cref="AddSyntaxTrees(IEnumerable{SyntaxTree})"/> or <see cref="AddReferences"/>
+    /// Creates a new compilation from scratch. Methods such as AddSyntaxTrees or AddReferences
     /// on the returned object will allow to continue building up the compilation incrementally.
     /// </summary>
     /// <param name="assemblyName">Simple assembly name.</param>
@@ -186,6 +200,29 @@ public sealed partial class
             hostObjectType: null,
             isSubmission: false);
 
+    public static ThisCompilation CreateScriptCompilation(
+        string assemblyName,
+        SyntaxTree? syntaxTree = null,
+        IEnumerable<MetadataReference>? references = null,
+        ThisCompilationOptions? options = null,
+        ThisCompilation? previousScriptCompilation = null,
+        Type? returnType = null,
+        Type? globalsType = null)
+    {
+        Compilation.CheckSubmissionOptions(options);
+        Compilation.ValidateScriptCompilationParameters(previousScriptCompilation, returnType, ref globalsType);
+
+        return ThisCompilation.Create(
+            assemblyName,
+            options?.WithReferencesSupersedeLowerVersions(true) ?? ThisCompilation.s_defaultSubmissionOptions,
+            syntaxTree is not null ? new[] { syntaxTree } : SpecializedCollections.EmptyEnumerable<SyntaxTree>(),
+            references,
+            previousScriptCompilation,
+            returnType,
+            globalsType,
+            isSubmission: true);
+    }
+
     private static ThisCompilation Create(
         string? assemblyName,
         ThisCompilationOptions options,
@@ -197,7 +234,92 @@ public sealed partial class
         bool isSubmission)
     {
         Debug.Assert(!isSubmission || options.ReferencesSupersedeLowerVersions);
+
+        var validatedReferences = Compilation.ValidateReferences<ThisCompilationReference>(references);
+
+        // We can't reuse the whole Reference Manager entirely (reuseReferenceManager = false)
+        // because the set of references of this submission differs from the previous one.
+        // The submission inherits references of the previous submission, adds the previous submission reference
+        // and may add more references passed explicitly.
+        //
+        // TODO: Consider reusing some results of the assembly binding to improve perf
+        // since most of the binding work is similar.
+        // https://github.com/dotnet/roslyn/issues/43397
+
+        var compilation = new ThisCompilation(
+            assemblyName,
+            options,
+            validatedReferences,
+            previousSubmission,
+            returnType,
+            hostObjectType,
+            isSubmission,
+            referenceManager: null,
+            reuseReferenceManager: false,
+            syntaxAndDeclarations: new SyntaxAndDeclarationManager(
+                ImmutableArray<SyntaxTree>.Empty,
+                options.ScriptClassName,
+                options.SourceReferenceResolver,
+                ThisMessageProvider.Instance,
+                isSubmission,
+                state: null),
+            semanticModelProvider: null);
+
+        if (syntaxTrees is not null)
+            compilation = compilation.AddSyntaxTrees(syntaxTrees);
+
+        Debug.Assert(compilation._lazyAssemblySymbol is null);
+        return compilation;
     }
+
+#warning 未完成。
+
+    public new ThisCompilation Clone() => new(
+        this.AssemblyName,
+        this._options,
+        this.ExternalReferences,
+        this.PreviousSubmission,
+        this.SubmissionReturnType,
+        this.HostObjectType,
+        this.IsSubmission,
+        this._referenceManager,
+        reuseReferenceManager: true,
+        this._syntaxAndDeclarations,
+        this.SemanticModelProvider);
+
+    private ThisCompilation Update(
+        ReferenceManager referenceManager,
+        bool reuseReferenceManager,
+        SyntaxAndDeclarationManager syntaxAndDeclarations) => new(
+            this.AssemblyName,
+            this._options,
+            this.ExternalReferences,
+            this.PreviousSubmission,
+            this.SubmissionReturnType,
+            this.HostObjectType,
+            this.IsSubmission,
+            referenceManager,
+            reuseReferenceManager,
+            syntaxAndDeclarations,
+            this.SemanticModelProvider);
+
+#warning 未完成。
+    #endregion
+
+    #region Submission
+    /// <summary>
+    /// Gets information about script compilation.
+    /// </summary>
+    /// <value>
+    /// An object that collects information about script compilation.
+    /// </value>
+    public new ThisScriptCompilationInfo? ScriptCompilationInfo { get; }
+
+    internal override ScriptCompilationInfo? CommonScriptCompilationInfo => this.ScriptCompilationInfo;
+
+    internal ThisCompilation? PreviousSubmission => this.ScriptCompilationInfo?.PreviousScriptCompilation;
+
+#warning 未完成。
     #endregion
 
     #region Syntax Trees (maintain an ordered list)
@@ -209,9 +331,191 @@ public sealed partial class
     /// </value>
     public new ImmutableArray<SyntaxTree> SyntaxTrees => this._syntaxAndDeclarations.GetLazyState().SyntaxTrees;
 
+    /// <summary>
+    /// Gets a value indicate that whether this compilation contains the specified tree.
+    /// </summary>
+    /// <value>
+    /// <see langword="true"/> if this compilation contains the specified tree; otherwise, <see langword="false"/>.
+    /// </value>
     public new bool ContainsSyntaxTree(SyntaxTree? syntaxTree)
     {
         return syntaxTree != null && _syntaxAndDeclarations.GetLazyState().Modules.ContainsKey(syntaxTree);
+    }
+
+    /// <inheritdoc cref="Compilation.AddSyntaxTrees(SyntaxTree[])"/>
+    /// <inheritdoc cref="AddSyntaxTrees(IEnumerable{SyntaxTree})"/>
+    public new ThisCompilation AddSyntaxTrees(params SyntaxTree[] trees) => this.AddSyntaxTrees((IEnumerable<SyntaxTree>)trees);
+
+    /// <inheritdoc cref="Compilation.AddSyntaxTrees(IEnumerable{SyntaxTree})"/>
+    /// <exception cref="ArgumentNullException">
+    /// <para><paramref name="trees"/> is <see langword="null"/>.</para>
+    /// -or-
+    /// <para>Any entry in <paramref name="trees"/> is <see langword="null"/>.</para>
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <para>Any entry in <paramref name="trees"/> do not have a root node with <see cref="SyntaxKind"/> of compilation unit.</para>
+    /// -or-
+    /// <para>Any entry in <paramref name="trees"/> already present.</para>
+    /// -or-
+    /// <para>Submission include not script code.</para>
+    /// -or-
+    /// <para>Submission have more than one syntax tree.</para>
+    /// </exception>
+    public new ThisCompilation AddSyntaxTrees(IEnumerable<SyntaxTree> trees)
+    {
+        if (trees is null) throw new ArgumentNullException(nameof(trees));
+
+        if (trees.IsEmpty()) return this;
+
+        // This HashSet is needed so that we don't allow adding the same tree twice
+        // with a single call to AddSyntaxTrees.  Rather than using a separate HashSet,
+        // ReplaceSyntaxTrees can just check against ExternalSyntaxTrees, because we
+        // only allow replacing a single tree at a time.
+        var externalSyntaxTrees = PooledHashSet<SyntaxTree>.GetInstance();
+        var syntaxAndDeclarations = this._syntaxAndDeclarations;
+        externalSyntaxTrees.AddAll(syntaxAndDeclarations.ExternalSyntaxTrees);
+        var i = 0;
+        foreach (var tree in trees.Cast<ThisSyntaxTree>())
+        {
+            var paramName = $"{nameof(trees)}[{i}]";
+
+            if (tree is null) throw new ArgumentNullException(paramName);
+
+            if (!tree.HasCompilationUnitRoot) throw new ArgumentException(ThisResources.TreeMustHaveARootNodeWith, paramName);
+
+            if (externalSyntaxTrees.Contains(tree)) throw new ArgumentException(ThisResources.SyntaxTreeAlreadyPresent, paramName);
+
+            if (this.IsSubmission && tree.Options.Kind == SourceCodeKind.Regular) throw new ArgumentException(ThisResources.SubmissionCanOnlyInclude, paramName);
+
+            externalSyntaxTrees.Add(tree);
+
+            i++;
+        }
+        externalSyntaxTrees.Free();
+
+        if (this.IsSubmission && i > 1) throw new ArgumentException(ThisResources.SubmissionCanHaveAtMostOne, nameof(trees));
+
+        syntaxAndDeclarations = syntaxAndDeclarations.AddSyntaxTrees(trees);
+
+        return this.Update(this._referenceManager, reuseReferenceManager: false, syntaxAndDeclarations);
+    }
+
+    public new ThisCompilation RemoveSyntaxTrees(params SyntaxTree[] trees) => this.RemoveSyntaxTrees((IEnumerable<SyntaxTree>)trees);
+
+    /// <inheritdoc cref="Compilation.RemoveSyntaxTrees(IEnumerable{SyntaxTree})"/>
+    /// <exception cref="ArgumentNullException">
+    /// <para><paramref name="trees"/> is <see langword="null"/>.</para>
+    /// -or-
+    /// <para>Any entry in <paramref name="trees"/> is <see langword="null"/>.</para>
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <para>Syntax tree cannot be removed or replaced directly.</para>
+    /// -or-
+    /// <para>Syntax tree is not part of the compilation, so it cannot be removed.</para>
+    /// </exception>
+    public new ThisCompilation RemoveSyntaxTrees(IEnumerable<SyntaxTree> trees)
+    {
+        if (trees is null) throw new ArgumentNullException(nameof(trees));
+
+        if (trees.IsEmpty()) return this;
+
+        var removeSet = PooledHashSet<SyntaxTree>.GetInstance();
+        // This HashSet is needed so that we don't allow adding the same tree twice
+        // with a single call to AddSyntaxTrees.  Rather than using a separate HashSet,
+        // ReplaceSyntaxTrees can just check against ExternalSyntaxTrees, because we
+        // only allow replacing a single tree at a time.
+        var externalSyntaxTrees = PooledHashSet<SyntaxTree>.GetInstance();
+        var syntaxAndDeclarations = this._syntaxAndDeclarations;
+        externalSyntaxTrees.AddAll(syntaxAndDeclarations.ExternalSyntaxTrees);
+        var i = 0;
+        foreach (var tree in trees.Cast<ThisSyntaxTree>())
+        {
+            var paramName = $"{nameof(trees)}[{i}]";
+
+            if (tree is null) throw new ArgumentNullException(paramName);
+
+            if (!externalSyntaxTrees.Contains(tree))
+            {
+                // Check to make sure this is not a loaded tree.
+                var loadedSyntaxTreeMap = syntaxAndDeclarations.GetLazyState().LoadedSyntaxTreeMap;
+                if (SyntaxAndDeclarationManager.IsLoadedSyntaxTree(tree, loadedSyntaxTreeMap)) throw new ArgumentException(ThisResources.SyntaxTreeFromLoadNoRemoveReplace, paramName);
+
+                throw new ArgumentException(ThisResources.SyntaxTreeNotFoundToRemove, paramName);
+            }
+
+            removeSet.Add(tree);
+
+            i++;
+        }
+        externalSyntaxTrees.Free();
+
+        syntaxAndDeclarations = syntaxAndDeclarations.RemoveSyntaxTrees(removeSet);
+        removeSet.Free();
+
+        return this.Update(this._referenceManager, reuseReferenceManager: false, syntaxAndDeclarations);
+    }
+
+    /// <inheritdoc cref="Compilation.RemoveAllSyntaxTrees"/>
+    public new ThisCompilation RemoveAllSyntaxTrees()
+    {
+        var syntaxAndDeclarations = this._syntaxAndDeclarations;
+        return this.Update(
+            this._referenceManager,
+            reuseReferenceManager: false,
+            syntaxAndDeclarations: syntaxAndDeclarations.WithExternalSyntaxTrees(ImmutableArray<SyntaxTree>.Empty));
+    }
+
+    public new ThisCompilation ReplaceSyntaxTree(SyntaxTree oldTree, SyntaxTree? newTree)
+    {
+        // this is just to force a cast exception
+        oldTree = (ThisSyntaxTree)oldTree;
+        newTree = (ThisSyntaxTree)newTree;
+
+        if (oldTree is null) throw new ArgumentNullException(nameof(oldTree));
+
+        if (newTree is null) throw new ArgumentNullException(nameof(newTree));
+        else if (newTree == oldTree) return this;
+
+        if (!newTree.HasCompilationUnitRoot) throw new ArgumentException(ThisResources.TreeMustHaveARootNodeWith, nameof(newTree));
+
+        var syntaxAndDeclarations = this._syntaxAndDeclarations;
+        var externalSyntaxTrees = syntaxAndDeclarations.ExternalSyntaxTrees;
+        if (!externalSyntaxTrees.Contains(oldTree))
+        {
+            // Check to see if this is a #load'ed tree.
+            var loadedSyntaxTreeMap = syntaxAndDeclarations.GetLazyState().LoadedSyntaxTreeMap;
+            if (SyntaxAndDeclarationManager.IsLoadedSyntaxTree(oldTree, loadedSyntaxTreeMap)) throw new ArgumentException(ThisResources.SyntaxTreeFromLoadNoRemoveReplace, nameof(oldTree));
+
+            throw new ArgumentException(ThisResources.SyntaxTreeNotFoundToRemove, nameof(oldTree));
+        }
+
+        if (externalSyntaxTrees.Contains(newTree)) throw new ArgumentException(ThisResources.SyntaxTreeAlreadyPresent, nameof(newTree));
+
+        syntaxAndDeclarations = syntaxAndDeclarations.ReplaceSyntaxTree(oldTree, newTree);
+
+        return this.Update(_referenceManager, reuseReferenceManager: false, syntaxAndDeclarations);
+    }
+
+    /// <summary>
+    /// Get ordinal of a syntax tree.
+    /// </summary>
+    /// <param name="tree">The syntax tree to get ordinal of.</param>
+    /// <returns>Ordinal of <paramref name="tree"/>.</returns>
+    /// <exception cref="KeyNotFoundException">Syntax tree not found with file path.</exception>
+    internal override int GetSyntaxTreeOrdinal(SyntaxTree tree)
+    {
+        Debug.Assert(this.ContainsSyntaxTree(tree));
+
+        try
+        {
+            return _syntaxAndDeclarations.GetLazyState().OrdinalMap[tree];
+        }
+        catch (KeyNotFoundException)
+        {
+            // Explicitly catching and re-throwing exception so we don't send the syntax
+            // tree (potentially containing private user information) to telemetry.
+            throw new KeyNotFoundException(string.Format(ThisResources.SyntaxTreeNotFoundWithFilePath, tree.FilePath));
+        }
     }
     #endregion
 
@@ -239,8 +543,6 @@ public sealed partial class
     protected override ITypeSymbol? CommonScriptGlobalsType => throw new NotImplementedException();
 
     protected override INamedTypeSymbol? CommonScriptClass => throw new NotImplementedException();
-
-    internal override ScriptCompilationInfo? CommonScriptCompilationInfo => throw new NotImplementedException();
 
     internal override IEnumerable<ReferenceDirective> ReferenceDirectives => throw new NotImplementedException();
 
@@ -524,11 +826,6 @@ public sealed partial class
     }
 
     internal override void GetDiagnostics(CompilationStage stage, bool includeEarlierStages, DiagnosticBag diagnostics, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal override int GetSyntaxTreeOrdinal(SyntaxTree tree)
     {
         throw new NotImplementedException();
     }

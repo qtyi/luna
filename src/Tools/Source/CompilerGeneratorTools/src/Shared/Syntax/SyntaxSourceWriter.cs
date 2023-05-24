@@ -1547,7 +1547,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
 
         WriteLine();
-        WriteLine($"partial class {LanguageNames.This}SyntaxRewriter : {LanguageNames.This}SyntaxVisitor<{LanguageNames.This}SyntaxNode>");
+        WriteLine($"partial class {LanguageNames.This}SyntaxRewriter : {LanguageNames.This}SyntaxVisitor<SyntaxNode>");
         OpenBlock();
 
         int nWritten = 0;
@@ -1556,7 +1556,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
             if (nWritten > 0)
                 WriteLine();
             nWritten++;
-            WriteLine($"public override {LanguageNames.This}SyntaxNode Visit{StripPost(node.Name, "Syntax")}({node.Name} node)");
+            WriteLine($"public override SyntaxNode Visit{StripPost(node.Name, "Syntax")}({node.Name} node)");
 
             if (node.Fields.Count == 0)
             {
@@ -1677,7 +1677,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
     {
         this.WriteLine();
 
-        var valueFields = nd.Fields.Where(n => IsValueField(n)).ToList();
+        var valueFields = nd.Fields.Where(IsValueField).ToList();
         var nodeFields = nd.Fields.Where(n => !IsValueField(n)).ToList();
 
         WriteComment($"<summary>Creates a new {nd.Name} instance.</summary>");
@@ -1948,7 +1948,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         this.WriteLine();
 
         var hasOptional = minimalFactoryfields.Any(f => !IsRequiredFactoryField(nd, f));
-        var hasAttributeOrModifiersList = nd.Fields.Any(f => IsAttributeOrModifiersList(f));
+        var hasAttributeOrModifiersList = nd.Fields.Any(IsAttributeOrModifiersList);
 
         if (hasOptional && hasAttributeOrModifiersList)
         {

@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
 
-namespace Qtyi.CodeAnalysis.Lua;
+namespace Qtyi.CodeAnalysis.MoonScript;
 
 partial class SyntaxAndDeclarationManager
 {

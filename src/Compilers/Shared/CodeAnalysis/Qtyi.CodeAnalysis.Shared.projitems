@@ -21,6 +21,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\Compilation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\CompilationExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompilationOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)compilation\CompilationReference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)compilation\ScriptCompilationInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\SemanticModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\SemanticModel.SymbolInfoOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compilation\SyntaxAndDeclarationManager.cs" />

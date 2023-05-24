@@ -91,9 +91,16 @@ internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDecla
     /// <summary>
     /// Add other syntax trees.
     /// </summary>
-    /// <param name="trees">A collection of syntax trees.</param>
-    /// <returns>A new instance of <see cref="SyntaxAndDeclarationManager"/>.</returns>
+    /// <param name="trees">A collection of syntax trees to be added.</param>
+    /// <returns>A new instance of <see cref="SyntaxAndDeclarationManager"/> with other syntax trees added.</returns>
     public partial SyntaxAndDeclarationManager AddSyntaxTrees(IEnumerable<SyntaxTree> trees);
 
+    /// <summary>
+    /// Remove a collection of syntax trees.
+    /// </summary>
+    /// <param name="trees">A collection of syntax trees to be removed.</param>
+    /// <returns>A new instance of <see cref="SyntaxAndDeclarationManager"/> with some of syntax trees in the old one removed.</returns>
     public partial SyntaxAndDeclarationManager RemoveSyntaxTrees(HashSet<SyntaxTree> trees);
+
+    public partial SyntaxAndDeclarationManager ReplaceSyntaxTree(SyntaxTree oldTree, SyntaxTree newTree);
 }

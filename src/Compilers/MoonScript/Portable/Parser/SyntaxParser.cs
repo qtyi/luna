@@ -26,7 +26,7 @@ partial class SyntaxParser
     /// </summary>
     /// <returns>对应未得到期望的标记的错误码。</returns>
     /// <inheritdoc cref="SyntaxParser.GetExpectedTokenError(SyntaxKind, SyntaxKind)"/>
-    private static ErrorCode GetExpectedTokenErrorCode(SyntaxKind expected, SyntaxKind actual) =>
+    protected static partial ErrorCode GetExpectedTokenErrorCode(SyntaxKind expected, SyntaxKind actual) =>
         expected switch
         {
 #warning 需完善未得到期望的标记对应的错误码。
