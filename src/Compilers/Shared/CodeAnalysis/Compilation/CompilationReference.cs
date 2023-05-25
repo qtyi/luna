@@ -53,8 +53,8 @@ internal sealed partial class
     (
         ThisCompilation compilation,
         ImmutableArray<string> aliases = default,
-        bool embedInteropTypes = false) :
-        base(CompilationReference.GetProperties(compilation, aliases, embedInteropTypes)) =>
+        bool embedInteropTypes = false)
+        : base(CompilationReference.GetProperties(compilation, aliases, embedInteropTypes)) =>
         this.Compilation = compilation;
 
     private

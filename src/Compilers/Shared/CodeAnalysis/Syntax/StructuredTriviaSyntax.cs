@@ -29,8 +29,8 @@ public abstract partial class StructuredTriviaSyntax : ThisSyntaxNode, IStructur
     internal StructuredTriviaSyntax(
         ThisInternalSyntaxNode green,
         SyntaxNode? parent,
-        int position) :
-        base(
+        int position)
+        : base(
             green,
             position,
             parent?.SyntaxTree) =>

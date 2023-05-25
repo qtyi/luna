@@ -180,7 +180,7 @@ public sealed partial class
     /// Creates a new compilation from scratch. Methods such as AddSyntaxTrees or AddReferences
     /// on the returned object will allow to continue building up the compilation incrementally.
     /// </summary>
-    /// <param name="assemblyName">Simple assembly name.</param>
+    /// <param name="assemblyName">Simple assembly name. <see langword="null"/> if none.</param>
     /// <param name="syntaxTrees">The syntax trees with the source code for the new compilation.</param>
     /// <param name="references">The references for the new compilation.</param>
     /// <param name="options">The compiler options to use.</param>
@@ -200,6 +200,18 @@ public sealed partial class
             hostObjectType: null,
             isSubmission: false);
 
+    /// <summary>
+    /// Creates a new compilation from a previous script compilation. Methods such as AddSyntaxTrees or AddReferences
+    /// on the returned object will allow to continue building up the compilation incrementally.
+    /// </summary>
+    /// <param name="assemblyName">Simple assembly name.</param>
+    /// <param name="syntaxTree">The syntax trees with the source code for the new compilation.</param>
+    /// <param name="references">The references for the new compilation.</param>
+    /// <param name="options">The compiler options to use.</param>
+    /// <param name="previousScriptCompilation">A compilation that represent previous script.</param>
+    /// <param name="returnType">The return type of script.</param>
+    /// <param name="globalsType">The globals type.</param>
+    /// <returns>A new compilation.</returns>
     public static ThisCompilation CreateScriptCompilation(
         string assemblyName,
         SyntaxTree? syntaxTree = null,
@@ -223,6 +235,9 @@ public sealed partial class
             isSubmission: true);
     }
 
+    /// <summary>
+    /// Helper method to do the actual create job.
+    /// </summary>
     private static ThisCompilation Create(
         string? assemblyName,
         ThisCompilationOptions options,
@@ -274,6 +289,8 @@ public sealed partial class
 
 #warning 未完成。
 
+    /// <inheritdoc cref="Compilation.Clone()"/>
+    /// <returns>A new compilation.</returns>
     public new ThisCompilation Clone() => new(
         this.AssemblyName,
         this._options,
@@ -287,6 +304,13 @@ public sealed partial class
         this._syntaxAndDeclarations,
         this.SemanticModelProvider);
 
+    /// <summary>
+    /// Create a new compilation with ReferenceManager and SyntaxAndDeclarationManager updated.
+    /// </summary>
+    /// <param name="referenceManager">The new ReferenceManager.</param>
+    /// <param name="reuseReferenceManager">A value indicate whether previous ReferenceManager can reuse.</param>
+    /// <param name="syntaxAndDeclarations">The new SyntaxAndDeclarationManager.</param>
+    /// <returns>A new compilation.</returns>
     private ThisCompilation Update(
         ReferenceManager referenceManager,
         bool reuseReferenceManager,
@@ -317,6 +341,12 @@ public sealed partial class
 
     internal override ScriptCompilationInfo? CommonScriptCompilationInfo => this.ScriptCompilationInfo;
 
+    /// <summary>
+    /// Gets previous script submission.
+    /// </summary>
+    /// <value>
+    /// A compilation that represent previous script submission.
+    /// </value>
     internal ThisCompilation? PreviousSubmission => this.ScriptCompilationInfo?.PreviousScriptCompilation;
 
 #warning 未完成。

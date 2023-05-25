@@ -51,8 +51,8 @@ public sealed class
     (
         ThisCompilation? previousCompilation,
         Type? returnType,
-        Type? globalsType) :
-        base(returnType, globalsType)
+        Type? globalsType)
+        : base(returnType, globalsType)
     {
         Debug.Assert(previousCompilation is null || previousCompilation.HostObjectType == globalsType);
 

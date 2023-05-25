@@ -67,8 +67,8 @@ public sealed partial class
         (
         LanguageVersion languageVersion = LanguageVersion.Default,
         DocumentationMode documentationMode = DocumentationMode.Parse,
-        SourceCodeKind kind = SourceCodeKind.Regular) :
-            this(languageVersion, documentationMode, kind, ImmutableDictionary<string, string>.Empty)
+        SourceCodeKind kind = SourceCodeKind.Regular)
+            : this(languageVersion, documentationMode, kind, ImmutableDictionary<string, string>.Empty)
     { }
 
     internal
@@ -94,8 +94,8 @@ public sealed partial class
 #elif LANG_MOONSCRIPT
         MoonScriptParseOptions
 #endif
-        (ThisParseOptions other) :
-        this(
+        (ThisParseOptions other)
+        : this(
         languageVersion: other.SpecifiedLanguageVersion,
         documentationMode: other.DocumentationMode,
         kind: other.Kind,

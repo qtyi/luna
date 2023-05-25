@@ -36,8 +36,8 @@ partial class
         public ReferenceManager(
             string simpleAssemblyName,
             AssemblyIdentityComparer identityComparer,
-            Dictionary<MetadataReference, MetadataOrDiagnostic>? observedMetadata) :
-            base(simpleAssemblyName, identityComparer, observedMetadata)
+            Dictionary<MetadataReference, MetadataOrDiagnostic>? observedMetadata)
+            : base(simpleAssemblyName, identityComparer, observedMetadata)
         { }
 
         #region 未实现

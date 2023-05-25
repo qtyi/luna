@@ -43,20 +43,20 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
     private LexicalSortKey(
         SyntaxTree tree,
         int position,
-        ThisCompilation compilation) :
-        this(compilation.GetSyntaxTreeOrdinal(tree), position)
+        ThisCompilation compilation)
+        : this(compilation.GetSyntaxTreeOrdinal(tree), position)
     { }
 
     public LexicalSortKey(
         SyntaxReference syntaxRef,
-        ThisCompilation compilation) :
-        this(syntaxRef.SyntaxTree, syntaxRef.Span.Start, compilation)
+        ThisCompilation compilation)
+        : this(syntaxRef.SyntaxTree, syntaxRef.Span.Start, compilation)
     { }
 
     public LexicalSortKey(
         Location location,
-        ThisCompilation compilation) :
-        this(
+        ThisCompilation compilation)
+        : this(
             location.SourceTree ?? throw new ArgumentException(LunaResources.LocationIsNotInSyntaxTree, nameof(location)),
             location.SourceSpan.Start,
             compilation)
@@ -64,14 +64,14 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
 
     public LexicalSortKey(
         ThisSyntaxNode node,
-        ThisCompilation compilation) :
-        this(node.SyntaxTree, node.SpanStart, compilation)
+        ThisCompilation compilation)
+        : this(node.SyntaxTree, node.SpanStart, compilation)
     { }
 
     public LexicalSortKey(
         SyntaxToken token,
-        ThisCompilation compilation) :
-        this(
+        ThisCompilation compilation)
+        : this(
             token.SyntaxTree ?? throw new ArgumentException(LunaResources.SyntaxTokenIsNotInSyntaxTree, nameof(token)),
             token.SpanStart,
             compilation)
