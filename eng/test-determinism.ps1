@@ -23,11 +23,8 @@ if ($help) {
 # List of binary names that should be skipped because they have a known issue that
 # makes them non-deterministic.
 $script:skipList = @(
-  # Added to work around https://github.com/dotnet/roslyn/issues/48417
-  "Microsoft.CodeAnalysis.EditorFeatures2.UnitTests.dll",
-
   # Work around XLF issues https://github.com/dotnet/roslyn/issues/58840
-  "Luna.VisualStudio.DiagnosticsWindow.dll.key"
+  #"Luna.VisualStudio.DiagnosticsWindow.dll.key"
 )
 
 function Run-Build([string]$rootDir, [string]$logFileName) {
@@ -52,6 +49,11 @@ function Run-Build([string]$rootDir, [string]$logFileName) {
 
   Stop-Processes
 
+  # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
+  # in our CI builds
+  # https://github.com/NuGet/Home/issues/12373
+  $restoreUseStaticGraphEvaluation = if ($ci) { $false } else { $true }
+
   Write-Host "Building $solution using $bootstrapDir"
   MSBuild $toolsetBuildProj `
      /p:Projects=$solution `
@@ -65,7 +67,7 @@ function Run-Build([string]$rootDir, [string]$logFileName) {
      /p:BootstrapBuildPath=$bootstrapDir `
      /p:RunAnalyzers=false `
      /p:RunAnalyzersDuringBuild=false `
-     /p:RestoreUseStaticGraphEvaluation=true `
+     /p:RestoreUseStaticGraphEvaluation=$restoreUseStaticGraphEvaluation `
      /bl:$logFilePath
 
   Stop-Processes

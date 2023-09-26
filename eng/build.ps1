@@ -33,8 +33,9 @@ param (
   # Options
   [switch]$bootstrap,
   [string]$bootstrapConfiguration = "Release",
+  [string]$bootstrapToolset = "",
   [switch][Alias('bl')]$binaryLog,
-  [switch]$buildServerLog,
+  [string]$binaryLogName = "",
   [switch]$ci,
   [switch]$collectDumps,
   [switch][Alias('a')]$runAnalyzers,
@@ -79,7 +80,7 @@ function Print-Usage() {
   Write-Host "  -verbosity <value>        Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]"
   Write-Host "  -deployExtensions         Deploy built vsixes (short: -d)"
   Write-Host "  -binaryLog                Create MSBuild binary log (short: -bl)"
-  Write-Host "  -buildServerLog           Create Luna build server log"
+  Write-Host "  -binaryLogName            Name of the binary log (default Build.binlog)"
   Write-Host ""
   Write-Host "Actions:"
   Write-Host "  -restore                  Restore packages (short: -r)"
@@ -147,7 +148,7 @@ function Process-Arguments() {
     }
   }
 
-  if ($help -or (($null -ne $properties) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
+  if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
        Print-Usage
        exit 0
   }
@@ -166,11 +167,16 @@ function Process-Arguments() {
     $script:applyOptimizationData = $false
   }
 
+  if ($binaryLogName -ne "") {
+    $script:binaryLog = $true
+  }
+
   if ($ci) {
     $script:binaryLog = $true
-    if ($bootstrap) {
-      $script:buildServerLog = $true
-    }
+  }
+
+  if ($binaryLog -and ($binaryLogName -eq "")) {
+    $script:binaryLogName = "Build.binlog"
   }
 
   $anyUnit = $testDesktop -or $testCoreClr
@@ -199,6 +205,10 @@ function Process-Arguments() {
     $script:restore = $true
   }
 
+  if ($sourceBuild) {
+    $script:msbuildEngine = "dotnet"
+  }
+
   foreach ($property in $properties) {
     if (!$property.StartsWith("/p:", "InvariantCultureIgnoreCase")) {
       Write-Host "Invalid argument: $property"
@@ -222,10 +232,15 @@ function BuildSolution() {
 
   Write-Host "$($solution):"
 
-  $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "Build.binlog") } else { "" }
+  $bl = ""
+  if ($binaryLog) {
+    $binaryLogPath = Join-Path $LogDir $binaryLogName
+    $bl = "/bl:" + $binaryLogPath
+    if ($ci -and (Test-Path $binaryLogPath)) {
+      Write-LogIssue -Type "error" -Message "Overwriting binary log file $($binaryLogPath)"
+      throw "Overwriting binary log files"
+    }
 
-  if ($buildServerLog) {
-    ${env:ROSLYNCOMMANDLINELOGFILE} = Join-Path $LogDir "Build.Server.log"
   }
 
   $projects = Join-Path $RepoRoot $solution
@@ -249,6 +264,11 @@ function BuildSolution() {
   $generateDocumentationFile = if ($skipDocumentation) { "/p:GenerateDocumentationFile=false" } else { "" }
   $lunaUseHardLinks = if ($ci) { "/p:LUNAUSEHARDLINKS=true" } else { "" }
 
+ # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
+  # in our CI builds
+  # https://github.com/NuGet/Home/issues/12373
+  $restoreUseStaticGraphEvaluation = if ($ci) { $false } else { $true }
+  
   try {
     MSBuild $toolsetBuildProj `
       $bl `
@@ -268,7 +288,7 @@ function BuildSolution() {
       /p:TreatWarningsAsErrors=$warnAsError `
       /p:EnableNgenOptimization=$applyOptimizationData `
       /p:IbcOptimizationDataDir=$ibcDir `
-      /p:RestoreUseStaticGraphEvaluation=true `
+      /p:RestoreUseStaticGraphEvaluation=$restoreUseStaticGraphEvaluation `
       /p:VisualStudioIbcDrop=$ibcDropName `
       /p:VisualStudioDropAccessToken=$officialVisualStudioDropAccessToken `
       $suppressExtensionDeployment `
@@ -411,8 +431,8 @@ function TestUsingRunTests() {
     $args += " --tfm net472"
     $args += " --retry"
     $args += " --sequential"
-    $args += " --include '\.IntegrationTests'"
-    $args += " --include 'Qtyi.CodeAnalysis.Workspaces.MSBuild.UnitTests'"
+    #$args += " --include '\.IntegrationTests'"
+    #$args += " --include 'Qtyi.CodeAnalysis.Workspaces.MSBuild.UnitTests'"
 
     if ($lspEditor) {
       $args += " --testfilter Editor=LanguageServerProtocol"
@@ -555,12 +575,13 @@ function Deploy-VsixViaTool() {
 
   # VSIX files need to be installed in this specific order:
   $orderedVsixFileNames = @(
-    "Luna.Compilers.Extension.vsix",
-    "Luna.VisualStudio.Setup.vsix",
-    "Luna.VisualStudio.Setup.Dependencies.vsix",
-    "ExpressionEvaluatorPackage.vsix",
-    "Luna.VisualStudio.DiagnosticsWindow.vsix",
-    "Microsoft.VisualStudio.IntegrationTest.Setup.vsix")
+    #"Luna.Compilers.Extension.vsix",
+    #"Luna.VisualStudio.Setup.vsix",
+    #"Luna.VisualStudio.Setup.Dependencies.vsix",
+    #"ExpressionEvaluatorPackage.vsix",
+    #"Luna.VisualStudio.DiagnosticsWindow.vsix",
+    #"Microsoft.VisualStudio.IntegrationTest.Setup.vsix"
+  )
 
   foreach ($vsixFileName in $orderedVsixFileNames) {
     $vsixFile = Join-Path $VSSetupDir $vsixFileName
@@ -687,8 +708,7 @@ function List-Processes() {
   Write-Host "Listing running build processes..."
   Get-Process -Name "msbuild" -ErrorAction SilentlyContinue | Out-Host
   Get-Process -Name "vbcscompiler" -ErrorAction SilentlyContinue | Out-Host
-  Get-Process -Name "lunacompiler" -ErrorAction SilentlyContinue | Out-Host
-  Get-Process -Name "dotnet" -ErrorAction SilentlyContinue | where { $_.Modules | select { $_.ModuleName -eq "VBCSCompiler.dll" -or $_.ModuleName -eq "LunaCompiler.dll" } } | Out-Host
+  Get-Process -Name "dotnet" -ErrorAction SilentlyContinue | where { $_.Modules | select { $_.ModuleName -eq "VBCSCompiler.dll" } } | Out-Host
   Get-Process -Name "devenv" -ErrorAction SilentlyContinue | Out-Host
 }
 
@@ -735,14 +755,13 @@ try {
   try
   {
     if ($bootstrap) {
-      $force32 = $testArch -eq "x86"
-      $bootstrapDir = Make-BootstrapBuild -force32:$force32
+      $bootstrapDir = Make-BootstrapBuild $bootstrapToolset
     }
   }
   catch
   {
     if ($ci) {
-      echo "##vso[task.logissue type=error](NETCORE_ENGINEERING_TELEMETRY=Build) Build failed"
+      Write-LogIssue -Type "error" -Message "(NETCORE_ENGINEERING_TELEMETRY=Build) Build failed"
     }
     throw $_
   }
@@ -760,7 +779,7 @@ try {
   catch
   {
     if ($ci) {
-      echo "##vso[task.logissue type=error](NETCORE_ENGINEERING_TELEMETRY=Test) Tests failed"
+      Write-LogIssue -Type "error" -Message "(NETCORE_ENGINEERING_TELEMETRY=Test) Tests failed"
     }
     throw $_
   }

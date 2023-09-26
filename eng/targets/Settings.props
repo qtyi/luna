@@ -6,25 +6,26 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <CoreLibraryTargetFrameworks>netcoreapp3.1;netstandard2.0</CoreLibraryTargetFrameworks>
-    <MSBuildLibraryTargetFrameworks>netcoreapp3.1;netstandard2.0</MSBuildLibraryTargetFrameworks>
-    <RebuildLibraryTargetFrameworks>net6.0;netstandard2.0</RebuildLibraryTargetFrameworks>
+    <CoreLibraryTargetFrameworks>net6.0;netstandard2.0</CoreLibraryTargetFrameworks>
+    <CodeStyleLibraryTargetFrameworks>netstandard2.0</CodeStyleLibraryTargetFrameworks>
+    <MSBuildLibraryTargetFrameworks>net6.0;net472</MSBuildLibraryTargetFrameworks>
+    <RebuildLibraryTargetFrameworks>$(CoreLibraryTargetFrameworks)</RebuildLibraryTargetFrameworks>
     <ExpressionEvaluatorLibraryTargetFrameworks>netstandard2.0</ExpressionEvaluatorLibraryTargetFrameworks>
     <InteractiveHostLibraryTargetFrameworks>netstandard2.0</InteractiveHostLibraryTargetFrameworks>
-    <WorkspacesLibraryTargetFrameworks>netcoreapp3.1;net472</WorkspacesLibraryTargetFrameworks>
-    <RemoteWorkspacesLibraryTargetFrameworks>net6.0;netstandard2.0</RemoteWorkspacesLibraryTargetFrameworks>
+    <WorkspacesLibraryTargetFrameworks>$(CoreLibraryTargetFrameworks)</WorkspacesLibraryTargetFrameworks>
+    <RemoteWorkspacesLibraryTargetFrameworks>$(CoreLibraryTargetFrameworks)</RemoteWorkspacesLibraryTargetFrameworks>
     <ExecutableTargetFrameworks>net6.0;net472</ExecutableTargetFrameworks>
     <Arm64ExecutableTargetFrameworks>net472</Arm64ExecutableTargetFrameworks>
     <InteractiveHost32ExecutableTargetFrameworks>net472</InteractiveHost32ExecutableTargetFrameworks>
     <InteractiveHost64ExecutableTargetFrameworks>net6.0-windows7.0;net472</InteractiveHost64ExecutableTargetFrameworks>
     <InteractiveHost64ExecutableRuntimeIdentifier>win10-x64</InteractiveHost64ExecutableRuntimeIdentifier>
     <WpfExecutableTargetFrameworks>net6.0-windows;net472</WpfExecutableTargetFrameworks>
-    <TestTargetFrameworks>net7.0;net472</TestTargetFrameworks>
-    <TestUtilitiesTargetFrameworks>net6.0;net7.0;net472</TestUtilitiesTargetFrameworks>
+    <TestTargetFrameworks>net8.0;net6.0;net472</TestTargetFrameworks>
+    <TestUtilitiesTargetFrameworks>net8.0;net6.0;net472</TestUtilitiesTargetFrameworks>
     <TestResourcesTargetFrameworks>netstandard2.0</TestResourcesTargetFrameworks>
-    <ExpressionEvaluatorLibraryTargetFrameworksTestTargetFrameworks>net472</ExpressionEvaluatorLibraryTargetFrameworksTestTargetFrameworks>
+    <ExpressionEvaluatorLibraryTestTargetFrameworks>net472</ExpressionEvaluatorLibraryTestTargetFrameworks>
     <WorkspacesTestTargetFrameworks>net6.0-windows;net472</WorkspacesTestTargetFrameworks>
-    <WorkspacesTestUtilitiesTargetFrameworks>net6.0;net7.0;net472</WorkspacesTestUtilitiesTargetFrameworks>
+    <WorkspacesTestUtilitiesTargetFrameworks>$(WorkspacesTestTargetFrameworks)</WorkspacesTestUtilitiesTargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>

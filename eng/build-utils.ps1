@@ -241,6 +241,9 @@ function Get-LunaVersion() {
   if ([string]::IsNullOrWhiteSpace($prerelease)) {
     return $version
   }
+  elseif ($prerelease -eq "dev") {
+    return $version
+  }
 
   # Before 3.5.* prerelese version string of Roslyn ends with '-beta[prerelease].final'.
   # Start from 3.6.* prerelese version string of Roslyn ends with '-[prerelease].final'.
@@ -283,82 +286,92 @@ function Get-PackageDir([string]$name, [string]$version = "") {
   return $p
 }
 
-function Run-MSBuild([string]$projectFilePath, [string]$buildArgs = "", [string]$logFileName = "", [switch]$parallel = $true, [switch]$summary = $true, [switch]$warnAsError = $true, [string]$configuration = $script:configuration, [switch]$runAnalyzers = $false) {
-  # Because we override the C#/VB toolset to build against our LKG package, it is important
-  # that we do not reuse MSBuild nodes from other jobs/builds on the machine. Otherwise,
-  # we'll run into issues such as https://github.com/dotnet/roslyn/issues/6211.
-  # MSBuildAdditionalCommandLineArgs=
-  $args = "/p:TreatWarningsAsErrors=true /nologo /nodeReuse:false /p:Configuration=$configuration ";
-
-  if ($warnAsError) {
-    $args += " /warnaserror"
-  }
-
-  if ($summary) {
-    $args += " /consoleloggerparameters:Verbosity=minimal;summary"
-  } else {        
-    $args += " /consoleloggerparameters:Verbosity=minimal"
-  }
-
-  if ($parallel) {
-    $args += " /m"
-  }
-
-  if ($runAnalyzers) {
-    $args += " /p:RunAnalyzersDuringBuild=true"
-  }
-
-  if ($binaryLog) {
-    if ($logFileName -eq "") {
-      $logFileName = [IO.Path]::GetFileNameWithoutExtension($projectFilePath)
-    }
-    $logFileName = [IO.Path]::ChangeExtension($logFileName, ".binlog")
-    $logFilePath = Join-Path $LogDir $logFileName
-    $args += " /bl:$logFilePath"
-  }
-
-  if ($officialBuildId) {
-    $args += " /p:OfficialBuildId=" + $officialBuildId
-  }
-
-  if ($ci) {
-    $args += " /p:ContinuousIntegrationBuild=true"
-  }
-
-  if ($bootstrapDir -ne "") {
-    $args += " /p:BootstrapBuildPath=$bootstrapDir"
-  }
-
-  $args += " $buildArgs"
-  $args += " $projectFilePath"
-  $args += " $properties"
-
-  $buildTool = InitializeBuildTool
-  Exec-Console $buildTool.Path "$($buildTool.Command) $args"
-}
-
 # Create a bootstrap build of the compiler.  Returns the directory where the bootstrap build
 # is located.
 #
 # Important to not set $script:bootstrapDir here yet as we're actually in the process of
 # building the bootstrap.
-function Make-BootstrapBuild([switch]$force32 = $false) {
+function Make-BootstrapBuild([string]$bootstrapToolset = "") {
+
+  function Run-MSBuild([string]$projectFilePath, [string]$buildArgs = "", [string]$logFileName = "", [string]$configuration = $script:configuration) {
+    # Because we override the C#/VB toolset to build against our LKG package, it is important
+    # that we do not reuse MSBuild nodes from other jobs/builds on the machine. Otherwise,
+    # we'll run into issues such as https://github.com/dotnet/roslyn/issues/6211.
+    # MSBuildAdditionalCommandLineArgs=
+    $args = "/p:TreatWarningsAsErrors=true /nologo /nodeReuse:false /p:Configuration=$configuration /v:m ";
+
+    if ($warnAsError) {
+      $args += " /warnaserror"
+    }
+
+    if ($runAnalyzers) {
+      $args += " /p:RunAnalyzersDuringBuild=true"
+    }
+
+    if ($binaryLog) {
+      if ($logFileName -eq "") {
+        $logFileName = [IO.Path]::GetFileNameWithoutExtension($projectFilePath)
+      }
+      $logFileName = [IO.Path]::ChangeExtension($logFileName, ".binlog")
+      $logFilePath = Join-Path $LogDir $logFileName
+      $args += " /bl:$logFilePath"
+    }
+
+    if ($officialBuildId) {
+      $args += " /p:OfficialBuildId=" + $officialBuildId
+    }
+
+    if ($ci) {
+      $args += " /p:ContinuousIntegrationBuild=true"
+      # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
+      # in our CI builds
+      # https://github.com/NuGet/Home/issues/12373
+      $args += " /p:RestoreUseStaticGraphEvaluation=false"
+    }
+
+    if ($bootstrapDir -ne "") {
+      $args += " /p:BootstrapBuildPath=$bootstrapDir"
+    }
+
+    $args += " $buildArgs"
+    $args += " $projectFilePath"
+    $args += " $properties"
+
+    $buildTool = InitializeBuildTool
+    Exec-Console $buildTool.Path "$($buildTool.Command) $args"
+  }
+
   Write-Host "Building bootstrap compiler"
 
   $dir = Join-Path $ArtifactsDir "Bootstrap"
   Remove-Item -re $dir -ErrorAction SilentlyContinue
   Create-Directory $dir
 
-  $packageName = "Qtyi.Net.Compilers.Toolset"
-  $projectPath = "src\NuGet\$packageName\AnyCpu\$packageName.Package.csproj"
-  $force32Flag = if ($force32) { " /p:BOOTSTRAP32=true" } else { "" }
+  $lunaCompilersToolsetPackageName = "Qtyi.Net.Compilers.Toolset"
+  if ($bootstrapToolset -eq "" -or $bootstrapToolset -eq "AnyCPU") {
+    $packageName = $lunaCompilersToolsetPackageName
+    $projectPath = "src\NuGet\$lunaCompilersToolsetPackageName\AnyCpu\$packageName.Package.csproj"
+  }
+  elseif ($bootstrapToolset -eq "Framework") {
+    $packageName = "$lunaCompilersToolsetPackageName.Framework"
+    $projectPath = "src\NuGet\Microsoft.Net.Compilers.Toolset\Framework\$packageName.Package.csproj"
+  }
+  else {
+    throw "Unsupported bootstrap toolset $bootstrapToolset"
+  }
 
-  Run-MSBuild $projectPath "/restore /t:Pack /p:RoslynEnforceCodeStyle=false /p:LunaEnforceCodeStyle=false /p:RunAnalyzersDuringBuild=false /p:DotNetUseShippingVersions=true /p:InitialDefineConstants=BOOTSTRAP /p:PackageOutputPath=`"$dir`" /p:EnableNgenOptimization=false /p:PublishWindowsPdb=false $force32Flag" -logFileName "Bootstrap" -configuration $bootstrapConfiguration -runAnalyzers
+  Run-MSBuild $projectPath "/restore /t:Pack /p:RoslynEnforceCodeStyle=false /p:LunaEnforceCodeStyle=false /p:RunAnalyzersDuringBuild=false /p:DotNetUseShippingVersions=true /p:InitialDefineConstants=BOOTSTRAP /p:PackageOutputPath=`"$dir`" /p:EnableNgenOptimization=false /p:PublishWindowsPdb=false" -logFileName "Bootstrap" -configuration $bootstrapConfiguration
   $packageFile = Get-ChildItem -Path $dir -Filter "$packageName.*.nupkg"
   Unzip (Join-Path $dir $packageFile.Name) $dir
 
   Write-Host "Cleaning Bootstrap compiler artifacts"
   Run-MSBuild $projectPath "/t:Clean" -logFileName "BootstrapClean"
+
+  # Work around NuGet bug that doesn't correctly re-generate our project.assets.json files.
+  # Deleting everything forces a regen
+  # https://github.com/NuGet/Home/issues/12437
+  Remove-Item -Recurse -Force (Join-Path $ArtifactsDir "bin")
+  Remove-Item -Recurse -Force (Join-Path $ArtifactsDir "obj")
 
   return $dir
 }
@@ -409,9 +422,14 @@ function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch
   function Download() {
     $ProgressPreference = 'SilentlyContinue' # Don't display the console progress UI.
 
-    $commitFilePath = Join-Path $repoDir "$commitId.zip"
+    # Clean up repository owner directory.
+    if (Test-Path $repoDir) {
+      Remove-Item -Path $repoDir -Recurse
+    }
+
+    $commitFilePath = Join-Path $repoOwnerDir "$commitId.zip"
     if ($force -or -not (Test-Path $commitFilePath)) {
-      Create-Directory $repoDir
+      Create-Directory $repoOwnerDir
       $archiveUrl = "https://github.com/$repoOwner/$repoName/archive/$commitId.zip"
       try {
         Write-Host "Downloading archive from $archiveUrl."
@@ -428,9 +446,9 @@ function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch
 
     try {
       Write-Host "Unzipping $commitFilePath."
-      Unzip $commitFilePath $repoDir
-      # Rename directory from $repoName-$commitId to $commitId only (eq to $commitDir).
-      Rename-Item -Path (Join-Path $repoDir "$repoName-$commitId") -NewName $commitId
+      Unzip $commitFilePath $repoOwnerDir
+      # Rename directory from $repoName-$commitId to $repoName only (eq to $repoDir).
+      Rename-Item -Path (Join-Path $repoOwnerDir "$repoName-$commitId") -NewName $repoName
     }
     catch {
       Write-Host "Unzipping failed with $_."
@@ -482,9 +500,12 @@ function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch
     }
   }
 
-  $repoDir = Join-Path (Join-Path $ExternalReposDir $repoOwner) $repoName
-  $commitDir = Join-Path $repoDir $commitId
-  if ($force -or -not (Test-Path $commitDir)) {
+  $repoOwnerDir = Join-Path $ExternalReposDir $repoOwner
+  $repoDir = Join-Path $repoOwnerDir $repoName
+  # Get old commit id present in ExternalDirectories.props to check if we need to update.
+  $oldCommitId = Get-ExternalDirectoriesCommitId $repoOwner $repoName
+  if ($force -or ($null -eq $oldCommitId) -or ($oldCommitId -ne $commitId)) {
+    Write-Host "Restoring $repoOwner/$repoName."
     Download
   }
   else {
@@ -494,21 +515,18 @@ function Archive-Codebase([string]$repoOwner, [string]$repoName, [string]$branch
   Update-ExternalDirectoriesProps $repoOwner $repoName $commitId
 }
 
-function Update-ExternalDirectoriesProps([string]$repoOwner, [string]$repoName, [string]$commitId)
-{
+function Update-ExternalDirectoriesProps([string]$repoOwner, [string]$repoName, [string]$commitId) {
   $propsPath = Join-Path $ExternalReposDir "ExternalDirectories.props"
-  if (-not (Test-Path $propsPath))
-  {
+  if (-not (Test-Path $propsPath)) {
     [xml]$props = New-Object System.Xml.XmlDocument
     $props.AppendChild($props.CreateXmlDeclaration("1.0", "utf-8", $null)) | Out-Null
     $props.AppendChild($props.CreateComment("Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information.")) | Out-Null
     $props.AppendChild($props.CreateElement("Project")) | Out-Null
   }
-  else
-  {
+  else {
     [xml]$props = Get-Content $propsPath
   }
-  
+
   $propertyGroupLabel = "$repoOwner/$repoName"
   if ($null -eq $props.Project["PropertyGroup"]) {
     $propertyGroup = $null
@@ -516,14 +534,13 @@ function Update-ExternalDirectoriesProps([string]$repoOwner, [string]$repoName, 
   else {
     $propertyGroup = ($props.Project.PropertyGroup | Where-Object Label -EQ $propertyGroupLabel)
   }
-  if ($null -eq $propertyGroup)
-  {
+  if ($null -eq $propertyGroup) {
     $propertyGroup = $props.CreateElement("PropertyGroup")
     $propertyGroup.SetAttribute("Label", $propertyGroupLabel)
     $props.DocumentElement.AppendChild($propertyGroup) | Out-Null
   }
 
-  function ConvertTo-PascalCase([string]$value){
+  function ConvertTo-PascalCase([string]$value) {
     $spans = $value -split "-" | ForEach-Object {
       [regex]::Replace($_.ToLower(), "(^|_)(.)", { $args[0].Groups[2].Value.ToUpper()})
     }
@@ -531,16 +548,70 @@ function Update-ExternalDirectoriesProps([string]$repoOwner, [string]$repoName, 
   }
 
   $propNamePrefix = "$(ConvertTo-PascalCase $repoOwner)$(ConvertTo-PascalCase $repoName)"
+
+  # Repository directory property
   $repoDirPropName = $propNamePrefix + "RepositoryDirectory";
   $repoDir = $propertyGroup[$repoDirPropName]
-  if ($null -eq $repoDir)
-  {
+  if ($null -eq $repoDir) {
     $repoDir = $props.CreateElement($repoDirPropName)
     $propertyGroup.AppendChild($repoDir) | Out-Null
   }
-  $repoDir.InnerText = "`$(MSBuildThisFileDirectory)" + (@($repoOwner, $repoName, $commitId, "") -join [System.IO.Path]::DirectorySeparatorChar)
+  $repoDir.InnerText = "`$(MSBuildThisFileDirectory)" + (@($repoOwner, $repoName, "") -join [System.IO.Path]::DirectorySeparatorChar)
 
+  # Repository commit ID property
+  $repoCommitIdPropName = $propNamePrefix + "RepositoryCommitId";
+  $repoCommitId = $propertyGroup[$repoCommitIdPropName]
+  if ($null -eq $repoCommitId) {
+    $repoCommitId = $props.CreateElement($repoCommitIdPropName)
+    $propertyGroup.AppendChild($repoCommitId) | Out-Null
+  }
+  $repoCommitId.InnerText = $commitId
+  
   $props.Save($propsPath)
+}
+
+function Get-ExternalDirectoriesCommitId([string]$repoOwner, [string]$repoName) {
+  $propsPath = Join-Path $ExternalReposDir "ExternalDirectories.props"
+  if (-not (Test-Path $propsPath)) {
+    return;
+  }
+  [xml]$props = Get-Content $propsPath
+
+  $propertyGroupLabel = "$repoOwner/$repoName"
+  if ($null -eq $props.Project["PropertyGroup"]) {
+    return;
+  }
+  $propertyGroup = ($props.Project.PropertyGroup | Where-Object Label -EQ $propertyGroupLabel)
+  if ($null -eq $propertyGroup) {
+    return;
+  }
+
+  function ConvertTo-PascalCase([string]$value) {
+    $spans = $value -split "-" | ForEach-Object {
+      [regex]::Replace($_.ToLower(), "(^|_)(.)", { $args[0].Groups[2].Value.ToUpper()})
+    }
+    return $spans -join ""
+  }
+
+  $propNamePrefix = "$(ConvertTo-PascalCase $repoOwner)$(ConvertTo-PascalCase $repoName)"
+
+  # Repository directory property
+  $repoDirPropName = $propNamePrefix + "RepositoryDirectory";
+  $repoDirProp = $propertyGroup[$repoDirPropName]
+  if ($null -eq $repoDirProp) {
+    return;
+  }
+  if (-not (Test-Path (Join-Path (Join-Path $ExternalReposDir $repoOwner) $repoName))) {
+    return;
+  }
+
+  # Repository commit ID property
+  $repoCommitIdPropName = $propNamePrefix + "RepositoryCommitId";
+  $repoCommitIdProp = $propertyGroup[$repoCommitIdPropName]
+  if ($null -eq $repoCommitIdProp) {
+    return;
+  }
+  return $repoCommitIdProp.InnerText;
 }
 
 # Get source-link GitHub repository location.
@@ -593,12 +664,12 @@ function Get-SourceLink([string]$packageName, [string]$packageVersion = "") {
     }
   }
 
-  $registrationUrl = "https://api.nuget.org/v3/registration5-gz-semver2/"+ $packageName.ToLowerInvariant() + "/index.json"
-  $registration = (Invoke-WebRequest -Uri $registrationUrl -UseBasicParsing).Content | ConvertFrom-Json
-
   if ($packageVersion -ne "") {
     return GetSourceLinkFromNuspec $packageVersion
   }
+
+  $registrationUrl = "https://api.nuget.org/v3/registration5-gz-semver2/"+ $packageName.ToLowerInvariant() + "/index.json"
+  $registration = (Invoke-WebRequest -Uri $registrationUrl -UseBasicParsing).Content | ConvertFrom-Json
 
   $list = New-Object System.Collections.Generic.List[PSCustomObject]
   foreach ($itemgroup in $registration.items)

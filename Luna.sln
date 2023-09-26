@@ -171,7 +171,6 @@ Global
 		src\Compilers\Lua\luac\LuacCommandLine.projitems*{3d6dce12-f596-4697-87a5-41f033e00335}*SharedItemsImports = 5
 		src\Compilers\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems*{48ccbb50-b9e9-4a5a-ad46-91d80519b95e}*SharedItemsImports = 13
 		src\Compilers\MoonScript\moonc\MooncCommandLine.projitems*{4cec9807-0cf3-4aab-91b7-7e5c68159520}*SharedItemsImports = 13
-		.externalrepos\dotnet\roslyn\6a5a63bbc9f4449d9bd1e95a8f9624939c3ccdc3\src\Dependencies\CodeAnalysis.Debugging\Microsoft.CodeAnalysis.Debugging.projitems*{5735432e-3055-4995-ab09-ac9ad3712d95}*SharedItemsImports = 13
 		src\Tools\Source\CompilerGeneratorTools\src\Shared\CodeAnalysisGenerators.Shared.projitems*{58832da7-9e93-4598-89a8-aebc0dcdb538}*SharedItemsImports = 5
 		src\Compilers\Lua\luac\LuacCommandLine.projitems*{5bff9a10-48fa-4769-b3e3-c1a51b0959a2}*SharedItemsImports = 5
 		src\Compilers\Shared\CodeAnalysis\Qtyi.CodeAnalysis.Shared.projitems*{ab9ed4cc-c856-457d-9727-6514136b99ac}*SharedItemsImports = 5
