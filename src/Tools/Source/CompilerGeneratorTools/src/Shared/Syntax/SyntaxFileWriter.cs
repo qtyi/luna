@@ -7,11 +7,11 @@ namespace Luna.Compilers.Generators.Syntax;
 using System.Runtime.CompilerServices;
 using Model;
 
-internal abstract class SyntaxFileWriter : TreeFileWriter<Tree, TreeType, TreeTypeChild>
+internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTreeType, SyntaxTreeTypeChild>
 {
     private readonly IDictionary<string, Node> _nodeMap;
 
-    protected SyntaxFileWriter(TextWriter writer, Tree tree, CancellationToken cancellationToken) : base(writer, tree, cancellationToken)
+    protected SyntaxFileWriter(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken) : base(writer, tree, cancellationToken)
     {
         _nodeMap = tree.Types.OfType<Node>().ToDictionary(n => n.Name);
     }
@@ -126,7 +126,7 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<Tree, TreeType, TreeTy
         return n.Errors is null || string.Compare(n.Errors, "true", true) == 0;
     }
 
-    protected List<Kind> GetKindsOfFieldOrNearestParent(TreeType type, Field field)
+    protected List<Kind> GetKindsOfFieldOrNearestParent(SyntaxTreeType type, Field field)
     {
         while ((field.Kinds is null || field.Kinds.Count == 0) && IsOverride(field))
         {

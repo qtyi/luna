@@ -12,23 +12,23 @@ using Model;
 
 internal class SyntaxSourceWriter : SyntaxFileWriter
 {
-    private SyntaxSourceWriter(TextWriter writer, Tree tree, CancellationToken cancellationToken = default)
+    private SyntaxSourceWriter(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken = default)
         : base(writer, tree, cancellationToken) { }
 
     /// <summary>
     /// 写入红树节点的访问、重写和工厂方法。
     /// </summary>
-    public static void WriteMain(TextWriter writer, Tree tree, CancellationToken cancellationToken = default) => new SyntaxSourceWriter(writer, tree, cancellationToken).WriteMain();
+    public static void WriteMain(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken = default) => new SyntaxSourceWriter(writer, tree, cancellationToken).WriteMain();
 
     /// <summary>
     /// 写入绿树节点的类型定义及访问、重写和上下文、静态工厂方法。
     /// </summary>
-    public static void WriteInternal(TextWriter writer, Tree tree, CancellationToken cancellationToken = default) => new SyntaxSourceWriter(writer, tree, cancellationToken).WriteInternal();
+    public static void WriteInternal(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken = default) => new SyntaxSourceWriter(writer, tree, cancellationToken).WriteInternal();
 
     /// <summary>
     /// 写入红树节点的类型定义。
     /// </summary>
-    public static void WriteSyntax(TextWriter writer, Tree tree, CancellationToken cancellationToken = default) => new SyntaxSourceWriter(writer, tree, cancellationToken).WriteSyntax();
+    public static void WriteSyntax(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken = default) => new SyntaxSourceWriter(writer, tree, cancellationToken).WriteSyntax();
 
     private void WriteFileHeader()
     {
@@ -95,7 +95,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         }
     }
 
-    private void WriteGreenType(TreeType node)
+    private void WriteGreenType(SyntaxTreeType node)
     {
         WriteComment(node.TypeComment, "");
 
@@ -476,7 +476,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteGreenVisitor(bool withResult)
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
 
         WriteLine();
         WriteLine($"partial class {LanguageNames.This}SyntaxVisitor" + (withResult ? "<TResult>" : ""));
@@ -544,7 +544,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteGreenAccumulator()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
 
         WriteLine();
         WriteLine($"partial class {LanguageNames.This}SyntaxAccumulator<TResult> : {LanguageNames.This}SyntaxVisitor<IEnumerable<TResult>>");
@@ -591,7 +591,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteGreenTraverser()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
 
         WriteLine();
         WriteLine($"partial class {LanguageNames.This}SyntaxTraverser : {LanguageNames.This}SyntaxVisitor");
@@ -634,7 +634,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteGreenRewriter()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
 
         WriteLine();
         WriteLine($"partial class {LanguageNames.This}SyntaxRewriter : {LanguageNames.This}SyntaxVisitor<{LanguageNames.This}SyntaxNode>");
@@ -677,7 +677,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteContextualGreenFactories()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).ToList();
         WriteLine();
         WriteLine("partial class ContextAwareSyntax");
         OpenBlock();
@@ -694,7 +694,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteStaticGreenFactories()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).ToList();
         WriteLine();
         WriteLine("static partial class SyntaxFactory");
         OpenBlock();
@@ -703,7 +703,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         CloseBlock();
     }
 
-    private void WriteGreenFactories(List<TreeType> nodes, bool withSyntaxFactoryContext = false)
+    private void WriteGreenFactories(List<SyntaxTreeType> nodes, bool withSyntaxFactoryContext = false)
     {
         foreach (var node in nodes.OfType<Node>())
         {
@@ -720,7 +720,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         WriteLine("=> new Type[]");
         OpenBlock();
 
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).ToList();
         foreach (var node in nodes)
         {
             WriteLine($"typeof({node.Name}),");
@@ -901,7 +901,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteRedTypes()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
         foreach (var node in nodes)
         {
             WriteLine();
@@ -909,14 +909,14 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         }
     }
 
-    private List<Field> GetNodeOrNodeListFields(TreeType node)
+    private List<Field> GetNodeOrNodeListFields(SyntaxTreeType node)
         => node is AbstractNode an
             ? an.Fields.Where(n => IsNodeOrNodeList(n.Type)).ToList()
             : node is Node nd
                 ? nd.Fields.Where(n => IsNodeOrNodeList(n.Type)).ToList()
                 : new List<Field>();
 
-    private void WriteRedType(TreeType node)
+    private void WriteRedType(SyntaxTreeType node)
     {
         WriteComment(node.TypeComment, "");
 
@@ -1313,7 +1313,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
     private void WriteRedVisitor(bool genericResult)
     {
         string genericArgs = genericResult ? "<TResult>" : "";
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
 
         WriteLine();
         WriteLine($"partial class {LanguageNames.This}SyntaxVisitor{genericArgs}");
@@ -1411,9 +1411,9 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         }
     }
 
-    private (TreeType? type, Field? field) GetHighestBaseTypeWithField(TreeType node, string name)
+    private (SyntaxTreeType? type, Field? field) GetHighestBaseTypeWithField(SyntaxTreeType node, string name)
     {
-        TreeType? bestType = null;
+        SyntaxTreeType? bestType = null;
         Field? bestField = null;
         for (var current = node; current is not null; current = TryGetBaseType(current))
         {
@@ -1429,7 +1429,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
         return (bestType, bestField);
     }
 
-    private TreeType? TryGetBaseType(TreeType node)
+    private SyntaxTreeType? TryGetBaseType(SyntaxTreeType node)
         => node is AbstractNode an
             ? GetTreeType(an.Base)
             : node is Node n
@@ -1544,7 +1544,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteRedRewriter()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
 
         WriteLine();
         WriteLine($"partial class {LanguageNames.This}SyntaxRewriter : {LanguageNames.This}SyntaxVisitor<SyntaxNode>");
@@ -1590,7 +1590,7 @@ internal class SyntaxSourceWriter : SyntaxFileWriter
 
     private void WriteRedFactories()
     {
-        var nodes = Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).OfType<Node>().ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).OfType<Node>().ToList();
         WriteLine();
         WriteLine("public static partial class SyntaxFactory");
         OpenBlock();

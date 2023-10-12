@@ -9,11 +9,11 @@ namespace Luna.Compilers.Generators;
 
 internal class TestWriter : SyntaxFileWriter
 {
-    private TestWriter(TextWriter writer, Tree tree, CancellationToken cancellationToken = default) : base(writer, tree, cancellationToken)
+    private TestWriter(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken = default) : base(writer, tree, cancellationToken)
     {
     }
 
-    public static void Write(TextWriter writer, Tree tree)
+    public static void Write(TextWriter writer, SyntaxTree tree)
     {
         new TestWriter(writer, tree).WriteFile();
     }

@@ -6,11 +6,16 @@ using System.Collections.Immutable;
 
 namespace Luna.Compilers.Generators.Model;
 
-public interface ITree<TTreeType, TTreeTypeChild>
-    where TTreeType : ITreeType<TTreeTypeChild>
-    where TTreeTypeChild : ITreeTypeChild
+public interface ITree<TTreeType>
+    where TTreeType : ITreeType
 {
     string Root { get; }
 
     ImmutableList<TTreeType> Types { get; }
+}
+
+public interface ITree<TTreeType, TTreeTypeChild> : ITree<TTreeType>
+    where TTreeType : ITreeType<TTreeTypeChild>
+    where TTreeTypeChild : ITreeTypeChild
+{
 }

@@ -16,7 +16,7 @@ namespace Luna.Compilers.Generators;
 
 internal static partial class GrammarGenerator
 {
-    public static string Run(List<TreeType> types)
+    public static string Run(List<SyntaxTreeType> types)
     {
         var rules = types.ToDictionary(n => n.Name, _ => new List<Production>());
         foreach (var type in types)
@@ -107,7 +107,7 @@ internal static partial class GrammarGenerator
     private static Production Join(string delim, IEnumerable<Production> productions)
         => new Production(string.Join(delim, productions.Where(p => p.Text.Length > 0)), productions.SelectMany(p => p.ReferencedRules));
 
-    private static Production HandleChildren(IEnumerable<TreeTypeChild> children, string delim = " ")
+    private static Production HandleChildren(IEnumerable<SyntaxTreeTypeChild> children, string delim = " ")
         => Join(delim, children.Select(child =>
             child is Choice c ? HandleChildren(c.Children, delim: " | ").Parenthesize() :
             child is Sequence s ? HandleChildren(s.Children).Parenthesize() :

@@ -9,10 +9,10 @@ namespace Luna.Compilers.Generators;
 internal class SignatureWriter
 {
     private readonly TextWriter _writer;
-    private readonly Tree _tree;
+    private readonly SyntaxTree _tree;
     private readonly Dictionary<string, string?> _typeMap;
 
-    private SignatureWriter(TextWriter writer, Tree tree)
+    private SignatureWriter(TextWriter writer, SyntaxTree tree)
     {
         _writer = writer;
         _tree = tree;
@@ -20,7 +20,7 @@ internal class SignatureWriter
         _typeMap.Add(tree.Root, null);
     }
 
-    public static void Write(TextWriter writer, Tree tree)
+    public static void Write(TextWriter writer, SyntaxTree tree)
     {
         new SignatureWriter(writer, tree).WriteFile();
     }
@@ -52,7 +52,7 @@ internal class SignatureWriter
         }
     }
 
-    private void WriteType(TreeType node)
+    private void WriteType(SyntaxTreeType node)
     {
         if (node is AbstractNode)
         {

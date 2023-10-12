@@ -27,6 +27,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MoonScriptSyntaxGenerator",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MoonScriptErrorFactsGenerator", "src\MoonScriptCodeAnalysisSourceGenerators\MoonScriptErrorFactsGenerator.csproj", "{427FE16C-7A31-4BE7-A951-D45AFA842F41}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CompilationOptionsGenerators.Shared", "src\Shared\CompilationOptionsGenerators.Shared.shproj", "{9D348293-EB7A-42D9-A0D8-204A0CFC5728}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LuaCompilationOptionsGenerator", "src\LuaCodeAnalysisSourceGenerators\LuaCompilationOptionsGenerator.csproj", "{2F55CE4C-B893-4E32-BC15-8C542FD5DF3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MoonScriptCompilationOptionsGenerator", "src\MoonScriptCodeAnalysisSourceGenerators\MoonScriptCompilationOptionsGenerator.csproj", "{A8622686-C54E-471A-B93B-B57DEEE6557C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +63,14 @@ Global
 		{427FE16C-7A31-4BE7-A951-D45AFA842F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{427FE16C-7A31-4BE7-A951-D45AFA842F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{427FE16C-7A31-4BE7-A951-D45AFA842F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F55CE4C-B893-4E32-BC15-8C542FD5DF3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F55CE4C-B893-4E32-BC15-8C542FD5DF3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F55CE4C-B893-4E32-BC15-8C542FD5DF3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F55CE4C-B893-4E32-BC15-8C542FD5DF3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8622686-C54E-471A-B93B-B57DEEE6557C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8622686-C54E-471A-B93B-B57DEEE6557C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8622686-C54E-471A-B93B-B57DEEE6557C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8622686-C54E-471A-B93B-B57DEEE6557C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,18 +85,24 @@ Global
 		{469FA24E-8DDB-496A-A75B-40B082830D80} = {D5E3A6DA-929E-4B6B-9849-7DA0E411D5C2}
 		{BA77D25A-2565-4C89-898A-54B5CDB59C8B} = {D5E3A6DA-929E-4B6B-9849-7DA0E411D5C2}
 		{427FE16C-7A31-4BE7-A951-D45AFA842F41} = {D5E3A6DA-929E-4B6B-9849-7DA0E411D5C2}
+		{9D348293-EB7A-42D9-A0D8-204A0CFC5728} = {8D97F96D-BC12-459B-A46C-38BD2C817183}
+		{2F55CE4C-B893-4E32-BC15-8C542FD5DF3F} = {081DE8C4-8C41-4253-A297-0054911EBF8F}
+		{A8622686-C54E-471A-B93B-B57DEEE6557C} = {D5E3A6DA-929E-4B6B-9849-7DA0E411D5C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {111669A5-6F61-4184-AAA6-EE639B755D1F}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\Shared\ErrorFactsGenerators.Shared.projitems*{16d73ffe-6bec-4064-a313-898b5e231b6a}*SharedItemsImports = 13
+		src\Shared\CompilationOptionsGenerators.Shared.projitems*{2f55ce4c-b893-4e32-bc15-8c542fd5df3f}*SharedItemsImports = 5
 		src\Shared\CodeAnalysisGenerators.Shared.projitems*{37fd3add-848f-492b-89d8-f874fd4eff21}*SharedItemsImports = 5
 		src\Shared\ErrorFactsGenerators.Shared.projitems*{427fe16c-7a31-4be7-a951-d45afa842f41}*SharedItemsImports = 5
 		src\Shared\CodeAnalysisGenerators.Shared.projitems*{469fa24e-8ddb-496a-a75b-40b082830d80}*SharedItemsImports = 5
 		src\Shared\ErrorFactsGenerators.Shared.projitems*{5a1eaadd-dc3e-450b-9922-2f77c13fa160}*SharedItemsImports = 5
 		src\Shared\SyntaxGenerator.Shared.projitems*{663acc36-c493-4fa5-b8d7-a5124cb30514}*SharedItemsImports = 13
 		src\Shared\SyntaxGenerator.Shared.projitems*{99fe6f53-13af-4d94-b13f-b3803e9df22a}*SharedItemsImports = 5
+		src\Shared\CompilationOptionsGenerators.Shared.projitems*{9d348293-eb7a-42d9-a0d8-204a0cfc5728}*SharedItemsImports = 13
+		src\Shared\CompilationOptionsGenerators.Shared.projitems*{a8622686-c54e-471a-b93b-b57deee6557c}*SharedItemsImports = 5
 		src\Shared\CodeAnalysisGenerators.Shared.projitems*{b2d21490-8284-48c7-8e96-85ebfb70c11f}*SharedItemsImports = 13
 		src\Shared\SyntaxGenerator.Shared.projitems*{ba77d25a-2565-4c89-898a-54b5cdb59c8b}*SharedItemsImports = 5
 	EndGlobalSection

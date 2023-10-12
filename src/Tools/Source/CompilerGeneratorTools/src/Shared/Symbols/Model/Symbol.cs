@@ -10,4 +10,7 @@ public sealed class Symbol : SymbolTreeType
 {
     [XmlAttribute]
     public string? Implement;
+
+    [XmlAttribute]
+    public string? Sealed;
 }

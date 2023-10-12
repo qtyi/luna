@@ -6,5 +6,8 @@ namespace Qtyi.CodeAnalysis;
 
 partial class LanguageNames
 {
-    public const string This = LanguageNames.Lua;
+    /// <summary>
+    /// The common name used for this language.
+    /// </summary>
+    internal const string This = LanguageNames.Lua;
 }

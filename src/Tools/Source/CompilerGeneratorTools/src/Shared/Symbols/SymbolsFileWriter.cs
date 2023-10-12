@@ -7,7 +7,7 @@ namespace Luna.Compilers.Generators.Symbols;
 using Luna.Compilers.Generators.Model;
 using Model;
 
-internal abstract class SymbolsFileWriter : TreeFileWriter<SymbolTree, SymbolTreeType, ITreeTypeChild>
+internal abstract class SymbolsFileWriter : TreeFileWriter<SymbolTree, SymbolTreeType>
 {
     private readonly IDictionary<string, Symbol> _symbolMap;
 

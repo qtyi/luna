@@ -80,11 +80,11 @@ internal static class Program
         return 1;
     }
 
-    private static Tree ReadTree(string inputFile)
+    private static SyntaxTree ReadTree(string inputFile)
     {
         var reader = XmlReader.Create(inputFile, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
-        var serializer = new XmlSerializer(typeof(Tree));
-        if (serializer.Deserialize(reader) is Tree tree)
+        var serializer = new XmlSerializer(typeof(SyntaxTree));
+        if (serializer.Deserialize(reader) is SyntaxTree tree)
             return tree;
 
         throw new InvalidOperationException("文件" + inputFile + "的格式不支持。");
@@ -123,7 +123,7 @@ internal static class Program
         // between some fields (i.e. 'only one of these children can be non-null').  To make our
         // life easier, we just flatten all those nodes, grabbing all the nested `<Field>` nodes
         // and placing into a single linear list that we can then process.
-        TreeFlattening.FlattenChildren(tree);
+        SyntaxTreeFlattener.Instance.Flatten(tree);
 
         if (writeSignatures)
         {

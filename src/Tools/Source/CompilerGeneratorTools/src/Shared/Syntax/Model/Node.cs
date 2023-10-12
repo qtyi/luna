@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 namespace Luna.Compilers.Generators.Syntax.Model;
 
 #pragma warning disable CS8618
-public sealed class Node : TreeType
+public sealed class Node : SyntaxTreeType
 {
     [XmlAttribute]
     public string? Root;

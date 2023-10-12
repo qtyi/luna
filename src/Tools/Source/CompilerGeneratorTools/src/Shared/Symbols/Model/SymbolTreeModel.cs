@@ -10,7 +10,7 @@ namespace Luna.Compilers.Generators.Symbols.Model;
 
 #pragma warning disable CS8618
 [XmlRoot(ElementName = "Tree")]
-public class SymbolTree : ITree<SymbolTreeType, ITreeTypeChild>
+public class SymbolTree : ITree<SymbolTreeType>
 {
     [XmlAttribute]
     public string Root;
@@ -20,7 +20,19 @@ public class SymbolTree : ITree<SymbolTreeType, ITreeTypeChild>
     [XmlElement(ElementName = "PredefinedSymbol", Type = typeof(PredefinedSymbol))]
     public List<SymbolTreeType> Types;
 
-    string ITree<SymbolTreeType, ITreeTypeChild>.Root => this.Root;
-    ImmutableList<SymbolTreeType> ITree<SymbolTreeType, ITreeTypeChild>.Types => this.Types.ToImmutableList();
+    string ITree<SymbolTreeType>.Root => this.Root;
+    ImmutableList<SymbolTreeType> ITree<SymbolTreeType>.Types => this.Types.ToImmutableList();
+}
+
+public abstract class SymbolTreeType : ITreeType
+{
+    [XmlAttribute]
+    public string Name;
+
+    [XmlAttribute]
+    public string? Base;
+
+    string ITreeType.Name => this.Name;
+    string? ITreeType.Base => this.Base;
 }
 #pragma warning restore CS8618

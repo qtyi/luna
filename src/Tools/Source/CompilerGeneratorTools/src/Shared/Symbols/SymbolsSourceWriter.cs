@@ -61,7 +61,8 @@ internal class SymbolsSourceWriter : SymbolsFileWriter
     {
         if (symbol is AbstractSymbol or Symbol)
         {
-            WriteLine($"internal abstract partial class {symbol.Name} : {symbol.Base}");
+            bool isSealed = symbol is Symbol && ((Symbol)symbol).Sealed.IsTrue();
+            WriteLine($"internal {(isSealed ? "sealed" : "abstract")} partial class {symbol.Name} : {symbol.Base}");
             OpenBlock();
 
             this.WriteInternalAcceptMethods(symbol);

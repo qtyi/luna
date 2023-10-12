@@ -6,16 +6,15 @@ using Luna.Compilers.Generators.Model;
 
 namespace Luna.Compilers.Generators;
 
-internal abstract class TreeFileWriter<TTree, TTreeType, TTreeTypeChild> : IndentWriter
-    where TTree : ITree<TTreeType, TTreeTypeChild>
-    where TTreeType : ITreeType<TTreeTypeChild>
-    where TTreeTypeChild : ITreeTypeChild
+internal abstract class TreeFileWriter<TTree, TTreeType> : IndentWriter
+    where TTree : ITree<TTreeType>
+    where TTreeType : ITreeType
 {
     private readonly TTree _tree;
-    private readonly IDictionary<string, string?> _parentMap;
+    private readonly Dictionary<string, string?> _parentMap;
     private readonly ILookup<string, string> _childMap;
 
-    private readonly IDictionary<string, TTreeType> _typeMap;
+    private readonly Dictionary<string, TTreeType> _typeMap;
 
     protected IDictionary<string, string?> ParentMap => this._parentMap;
     protected ILookup<string, string> ChildMap => this._childMap;
@@ -30,7 +29,7 @@ internal abstract class TreeFileWriter<TTree, TTreeType, TTreeTypeChild> : Inden
         _childMap = tree.Types.Where(n => n.Base is not null).ToLookup(n => n.Base!, n => n.Name);
     }
 
-    #region 帮助方法
+    #region Helper Methods
     protected bool IsDerivedType(string typeName, string? derivedTypeName)
     {
         if (typeName == derivedTypeName)
