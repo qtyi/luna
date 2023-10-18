@@ -3,31 +3,28 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(CoreLibraryTargetFrameworks)</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
-
-    <!-- 将生成的文件在“Generated”文件夹中生成副本。 -->
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>
     <PackageId>Qtyi.CodeAnalysis.Common</PackageId>
     <PackageDescription>
-      .NET编译器平台（“Luna”）的共享程序集。
-      请不要尝试单独安装此包，你应该通过安装其他基于它的包来安装它。
+      A shared package used by the Microsoft .NET Compiler Platform ("Luna").
+      Do not install this package manually, it will be added as a prerequisite by other packages that require it.
     </PackageDescription>
     <PackageTags>Luna CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
   </PropertyGroup>
-  
-  <ItemGroup>
+
+  <ItemGroup Label="Resources">
     <EmbeddedResource Update="LunaResources.resx" GenerateSource="true" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="InternalsVisibles">
     <!-- InternalsVisibleTo -->
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua" />
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript" />
@@ -37,7 +34,7 @@
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="References">
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
   </ItemGroup>
 

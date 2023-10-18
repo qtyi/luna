@@ -70,11 +70,9 @@ partial class Lexer
             // 十六进制数字表示的ASCII字符
             case 'x':
                 this.TextWindow.Reset(start);
-                c = this.TextWindow.NextByteEscape(out error, out surrogate);
-                if (c != SlidingTextWindow.InvalidCharacter)
-                    this._builder.Append(c);
-                if (surrogate != SlidingTextWindow.InvalidCharacter)
-                    this._builder.Append(surrogate);
+                var b = this.TextWindow.NextByteEscape(out error);
+                if (error is null)
+                    this.FlushToUtf8Builder(b);
                 this.AddError(error);
                 break;
 

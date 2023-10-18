@@ -3,39 +3,44 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(CoreLibraryTargetFrameworks)</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
-
-    <!-- 将生成的文件在“Generated”文件夹中生成副本。 -->
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>
     <PackageDescription>
-      .NET编译器平台（“Luna”）的组件“Qtyi.CodeAnalysis.Lua.dll”，提供Lua语言支持。
+      .NET Compiler Platform ("Luna") support for Lua, Qtyi.CodeAnalysis.Lua.dll.
     </PackageDescription>
     <PackageTags>Luna Lua CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
+
+    <!-- Enable output of generated files back into our Generated directory -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
   
-  <ItemGroup>
+  <ItemGroup Label="AdditionalFiels">
+    <AdditionalFiles Include="CompilationOptions.xml" />
+    
     <None Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\Shared\Syntax.xsd" Link="Syntax\Syntax.xsd" />
     <AdditionalFiles Include="Syntax\Syntax.xml" />
 
     <AdditionalFiles Include="Symbols\Symbols.xml" />
 
-    <!-- 不将上一个源代码生成器产生的输出结果包含进入后续的运行流程。 -->
+    <!-- Don't include the output from a previous source generator execution into future runs; the */** trick here ensures that there's
+         at least one subdirectory, which is our key that it's coming from a source generator as opposed to something that is coming from
+         some other tool. -->
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/*/**/*.cs" />
   </ItemGroup>
-
-  <ItemGroup>
+  
+  <ItemGroup Label="Resources">
     <EmbeddedResource Update="LuaResources.resx" GenerateSource="true" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="InternalsVisibles">
     <!-- InternalsVisibleTo -->
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.Parser.UnitTests" />
     <InternalsVisibleTo Include="luac" />
@@ -45,11 +50,11 @@
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="References">
+    <!-- PackageReference -->
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-  </ItemGroup>
 
-  <ItemGroup>
+    <!-- ProjectReference -->
     <ProjectReference Include="..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
     <ProjectReference Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\LuaCodeAnalysisSourceGenerators\LuaCodeAnalysisSourceGenerators.csproj">
       <OutputItemType>Analyzer</OutputItemType>

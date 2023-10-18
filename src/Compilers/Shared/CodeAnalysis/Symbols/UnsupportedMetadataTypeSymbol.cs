@@ -18,11 +18,12 @@ internal sealed class UnsupportedMetadataTypeSymbol : ErrorTypeSymbol
 {
     private readonly BadImageFormatException? _mrEx;
 
-    internal override DiagnosticInfo? ErrorInfo => new ThisDiagnosticInfo(ErrorCode.ERR_BogusType, string.Empty);
-
-    internal override bool MangleName => false;
-
-    internal override FileIdentifier? AssociatedFileIdentifier => null;
-
     internal UnsupportedMetadataTypeSymbol(BadImageFormatException? mrEx = null) => this._mrEx = mrEx;
+
+    #region 未完成
+#warning 未完成
+    public override int Arity => throw new NotImplementedException();
+
+    internal override DiagnosticInfo? ErrorInfo => throw new NotImplementedException();
+    #endregion
 }

@@ -26,6 +26,11 @@
   <ItemGroup>
     <None Include="..\..\..\Test\tests\*.lua" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- InternalsVisibleFrom -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis"/>
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.2.0" />

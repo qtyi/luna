@@ -33,7 +33,7 @@ internal abstract partial class
     /// <summary>
     /// 获取应用的特性的构造函数。
     /// </summary>
-    public new abstract MemberSymbol? AttributeConstructor { get; }
+    public new abstract ModuleSymbol? AttributeConstructor { get; }
 
     public new abstract SyntaxReference? ApplicationSyntaxReference { get; }
 

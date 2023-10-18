@@ -38,7 +38,7 @@ internal static partial class SyntaxReplacer
             tokens, computeReplacementToken,
             trivia, computeReplacementTrivia);
 
-        if (replacer.HasWork) return replacer.Visit(root);
+        if (replacer.HasWork) return (ThisSyntaxNode)replacer.Visit(root);
         else return root;
     }
 
@@ -179,16 +179,16 @@ internal static partial class SyntaxReplacer
         /// </remarks>
         /// <inheritdoc/>
         [return: NotNullIfNotNull(nameof(node))]
-        public override ThisSyntaxNode? Visit(SyntaxNode? node)
+        public override SyntaxNode? Visit(SyntaxNode? node)
         {
             if (node is null) return null;
 
-            ThisSyntaxNode rewritten;
+            SyntaxNode rewritten;
 
             if (this.ShouldVisit(node.FullSpan))
                 rewritten = base.Visit(node);
             else
-                rewritten = (ThisSyntaxNode)node;
+                rewritten = node;
 
             if (this._nodeSet.Contains(node) && this._computeReplacementNode is not null)
                 rewritten = this._computeReplacementNode((TNode)node, (TNode)rewritten);

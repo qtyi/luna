@@ -54,7 +54,7 @@ partial class LanguageParser
                         return ParseState.Bad;
 
                 default:
-                    throw ExceptionUtilities.Unreachable;
+                    throw ExceptionUtilities.Unreachable();
             };
         }
 
@@ -112,7 +112,7 @@ partial class LanguageParser
                         break;
 
                     default:
-                        throw ExceptionUtilities.Unreachable;
+                        throw ExceptionUtilities.Unreachable();
                 }
             }
 

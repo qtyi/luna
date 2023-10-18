@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<OptionList>
+  <Option Name="OutputKind"/>
+  <Option Name="Platform"/>
+
+  <Option Name="NetmoduleName" Base="ModuleName"/>
+  <Option Name="MainModuleName" Base="MainTypeName"/>
+  <Option Name="ScriptModuleName" Base="ScriptClassName"/>
+
+  <Option Name="OptimizationLevel"/>
+  <Option Name="WarningLevel"/>
+
+  <Option Name="ConcurrentBuild"/>
+  <Option Name="Deterministic"/>
+
+  <Option Name="CurrentLocalTime"/>
+
+  <Option Name="CryptoKeyContainer"/>
+  <Option Name="CryptoKeyFile"/>
+  <Option Name="CryptoPublicKey"/>
+  <Option Name="DelaySign"/>
+  <Option Name="PublicSign"/>
+
+  <Option Name="ReferencesSupersedeLowerVersions"/>
+
+  <Option Name="GeneralDiagnosticOption"/>
+  <Option Name="SpecificDiagnosticOptions"/>
+  <Option Name="ReportSuppressedDiagnostics"/>
+
+  <Option Name="XmlReferenceResolver"/>
+  <Option Name="SourceReferenceResolver"/>
+  <Option Name="SyntaxTreeOptionsProvider"/>
+  <Option Name="MetadataReferenceResolver"/>
+  <Option Name="AssemblyIdentityComparer"/>
+  <Option Name="StrongNameProvider"/>
+
+  <Option Name="MetadataImportOptions"/>
+
+  <Option Name="DebugPlusMode"/>
+</OptionList>

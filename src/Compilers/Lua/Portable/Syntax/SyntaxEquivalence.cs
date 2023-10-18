@@ -8,7 +8,7 @@ namespace Qtyi.CodeAnalysis.Lua;
 
 using InternalSyntax = Syntax.InternalSyntax;
 
-static partial class SyntaxEquivalence
+partial class SyntaxEquivalence
 {
     private static partial bool AreTokensEquivalentCore(GreenNode before, GreenNode after, SyntaxKind kind) =>
         kind switch

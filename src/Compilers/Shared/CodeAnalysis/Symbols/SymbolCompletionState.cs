@@ -36,7 +36,7 @@ internal struct SymbolCompletionState
             // 注：必须将IncompleteParts引入本地，因为属性值可能在两次访问之间发生变化。
             var incomplete = this.IncompleteParts;
             var next = incomplete & ~(incomplete - 1);
-            Debug.Assert(SymbolCompletionState.HasAtMostOneBitSet(next), $"当设置多个标记位时，{nameof(ForceComplete)}无法正确处理结果。");
+            Debug.Assert(SymbolCompletionState.HasAtMostOneBitSet(next), $"当设置多个标记位时，{nameof(Symbol.ForceComplete)}无法正确处理结果。");
             return (CompletionPart)next;
         }
     }

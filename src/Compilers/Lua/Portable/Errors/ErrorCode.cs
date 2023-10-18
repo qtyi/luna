@@ -81,6 +81,19 @@ namespace Qtyi.CodeAnalysis.Lua
         ERR_MisplacedReturnStat,
         #endregion
 
+        WRN_UnifyReferenceMajMin,
+        WRN_UnifyReferenceBldRev,
+        ERR_AssemblyMatchBadVersion,
+
+        #region Forwarded Types
+        /// <summary>The type forwarder for a type causes a cycle.</summary>
+        ERR_CycleInTypeForwarder,
+        /// <summary>There are duplicate <see cref="System.Runtime.CompilerServices.TypeForwardedToAttribute"/>s.</summary>
+        ERR_DuplicateTypeForwarder,
+        /// <summary>A type is forwarded to multiple assemblies.</summary>
+        ERR_TypeForwardedToMultipleAssemblies,
+        #endregion
+
         #region Lua 1.0的消息
         ERR_FeatureNotAvailableInVersion1 = 501,
         #endregion

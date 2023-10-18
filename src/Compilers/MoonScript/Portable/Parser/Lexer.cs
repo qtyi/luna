@@ -77,7 +77,7 @@ partial class Lexer
             SyntaxKind.StringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.StringValue!, info.InnerIndent, trailingNode),
 
             // 多行原始字符串字面量标记
-            SyntaxKind.MultiLineRawStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.StringValue!, trailingNode),
+            SyntaxKind.MultiLineRawStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.Utf8StringValue!, trailingNode),
 
             // 插值字符串标记
             SyntaxKind.InterpolatedStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.SyntaxTokenArrayValue, info.InnerIndent, trailingNode),

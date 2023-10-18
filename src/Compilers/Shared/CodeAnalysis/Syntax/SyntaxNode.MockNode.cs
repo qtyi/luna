@@ -12,6 +12,8 @@ namespace Qtyi.CodeAnalysis.Lua;
 using Qtyi.CodeAnalysis.Lua.Syntax;
 using ThisSyntaxNode = LuaSyntaxNode;
 using ThisSyntaxTree = LuaSyntaxTree;
+using ThisSyntaxVisitor = LuaSyntaxVisitor;
+using ThisSyntaxVisitor<TResult> = LuaSyntaxVisitor<TResult>;
 using InternalSyntaxNode = Syntax.InternalSyntax.LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
@@ -19,6 +21,8 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 using Qtyi.CodeAnalysis.MoonScript.Syntax;
 using ThisSyntaxNode = MoonScriptSyntaxNode;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
+using ThisSyntaxVisitor = MoonScriptSyntaxVisitor;
+using ThisSyntaxVisitor<TResult> = MoonScriptSyntaxVisitor<TResult>;
 using InternalSyntaxNode = Syntax.InternalSyntax.MoonScriptSyntaxNode;
 #endif
 
@@ -34,9 +38,9 @@ partial class
         public MockNode(InternalSyntaxNode green) : this(green, null, 0) { }
         public MockNode(InternalSyntaxNode green, ThisSyntaxNode? parent, int position) : base(green, parent, position) { }
 
-        public override TResult? Accept<TResult>(LuaSyntaxVisitor<TResult> visitor) where TResult : default => default;
+        public override TResult? Accept<TResult>(ThisSyntaxVisitor<TResult> visitor) where TResult : default => default;
 
-        public override void Accept(LuaSyntaxVisitor visitor) { }
+        public override void Accept(ThisSyntaxVisitor visitor) { }
 
         internal override SyntaxNode? GetCachedSlot(int index) => null;
 

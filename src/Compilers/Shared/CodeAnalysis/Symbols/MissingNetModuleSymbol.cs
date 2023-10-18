@@ -10,8 +10,8 @@ namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
 #endif
 
 /// <summary>
-/// 一种特殊的<see cref="NetModuleSymbol"/>，表示缺失的.NET模块符号（与<see cref="NonMissingNetModuleSymbol"/>相对）。
+/// 一种特殊的<see cref="NetmoduleSymbol"/>，表示缺失的.NET模块符号（与<see cref="NonMissingNetmoduleSymbol"/>相对）。
 /// </summary>
-internal abstract partial class MissingNetModuleSymbol : NetModuleSymbol
+internal abstract partial class MissingNetmoduleSymbol : NetmoduleSymbol
 {
 }

@@ -4,82 +4,196 @@
 
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Symbols;
+using Qtyi.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
+#else
+#error Not implemented
 #endif
 
-partial class ModuleSymbol : INamespaceOrTypeSymbolInternal
+/// <summary>
+/// Represents a module (.NET namespace, type, field, etc.).
+/// </summary>
+partial class ModuleSymbol : Symbol, IModuleSymbolInternal
 {
-    /// <inheritdoc cref="Symbol()"/>
-    internal ModuleSymbol() { }
+    /// <inheritdoc/>
+    public ModuleKind ModuleKind => this.Kind switch
+    {
+        SymbolKind.Namespace => ModuleKind.Namespace,
+
+        SymbolKind.ArrayType or
+        SymbolKind.DynamicType or
+        SymbolKind.ErrorType or
+        SymbolKind.NamedType => ModuleKind.Type,
+
+        SymbolKind.Event or
+        SymbolKind.Field or
+        SymbolKind.Method or
+        SymbolKind.Property => ModuleKind.Field,
+
+        _ => ModuleKind.Unknown
+    };
 
     /// <summary>
-    /// 获取一个值，指示此模块符号是否为命名空间符号。
+    /// Returns whether this module is the unnamed, global .NET namespace that is 
+    /// at the root of all .NET namespaces.
+    /// </summary>
+    internal bool IsGlobalNamespace => this.IsGlobalModule && this.IsNamespace;
+
+    /// <inheritdoc/>
+    public abstract bool IsGlobalModule { get; }
+
+    /// <summary>
+    /// Gets a value indicate if this module is a .NET namespace.
     /// </summary>
     /// <value>
-    /// 若此模块符号为命名空间符号，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this module is a .NET namespace; otherwise, <see langword="false"/>.
     /// </value>
-    public bool IsNamespace => this.Kind == SymbolKind.Namespace;
+    internal bool IsNamespace => this.ModuleKind == ModuleKind.Namespace;
 
     /// <summary>
-    /// 获取一个值，指示此模块符号是否为类型符号。
+    /// Gets a value indicate if this module is a type.
     /// </summary>
     /// <value>
-    /// 若此模块符号为类型符号，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this module is a type; otherwise, <see langword="false"/>.
     /// </value>
-    public bool IsType => !this.IsNamespace;
-
-    /// <value>返回<see langword="false"/>。</value>
-    /// <inheritdoc/>
-    public sealed override bool IsExtern => false;
-
-    /// <value>返回<see langword="false"/>。</value>
-    /// <inheritdoc/>
-    public sealed override bool IsOverride => false;
-
-    /// <value>返回<see langword="false"/>。</value>
-    /// <inheritdoc/>
-    public sealed override bool IsVirtual => false;
-
-    #region 获取成员
-    /// <summary>
-    /// 获取此模块符号中的所有成员符号。
-    /// </summary>
-    /// <returns>含有此模块符号中的所有成员符号的不可变数组。若找不到成员符号，则返回空列表。</returns>
-    public abstract ImmutableArray<Symbol> GetMembers();
+    public bool IsType => this.ModuleKind == ModuleKind.Type;
 
     /// <summary>
-    /// 获取此模块符号中的所有指定名称的成员符号。
+    /// Gets a value indicate if this module is a field.
     /// </summary>
-    /// <param name="name">要查找的成员符号的名称。</param>
-    /// <returns>含有此模块符号中的所有指定名称的成员符号的不可变数组。若找不到符合条件的成员符号，则返回空列表。</returns>
-    public abstract ImmutableArray<Symbol> GetMembers(string name);
+    /// <value>
+    /// Returns <see langword="true"/> if this module is a field; otherwise, <see langword="false"/>.
+    /// </value>
+    public bool IsField => this.ModuleKind == ModuleKind.Field;
+
+    #region GetMembers
+    /// <summary>
+    /// Gets all the members of this symbol.
+    /// </summary>
+    /// <returns>
+    /// An ImmutableArray containing all the modules that are members of this symbol.
+    /// If this symbol has no members, returns an empty ImmutableArray. Never returns
+    /// null.
+    /// </returns>
+    public abstract ImmutableArray<ModuleSymbol> GetMembers();
 
     /// <summary>
-    /// 获取此模块符号中的所有名称类型成员符号。
+    /// Gets all the members of this symbol that have a particular name.
     /// </summary>
-    /// <returns>含有此模块符号中的所有名称类型成员符号的不可变数组。若找不到符合条件的成员符号，则返回空列表。</returns>
+    /// <param name="name">Name of member to match.</param>
+    /// <returns>
+    /// An ImmutableArray containing all the modules that are members of this symbol with
+    /// the given name.
+    /// If this symbol has no members with this name, returns an empty ImmutableArray.
+    /// Never returnsnull.
+    /// </returns>
+    public abstract ImmutableArray<ModuleSymbol> GetMembers(string name);
+
+    /// <summary>
+    /// Gets all the members of this symbol that are .NET namespaces.
+    /// </summary>
+    /// <returns>
+    /// An ImmutableArray containing all the .NET namespaces that are members of this
+    /// symbol.
+    /// If this symbol has no .NET namespace members, returns an empty ImmutableArray.
+    /// Never returns null.
+    /// </returns>
+    internal abstract ImmutableArray<ModuleSymbol> GetNamespaceMembers();
+
+    /// <summary>
+    /// Gets all the members of this symbol that are .NET namespaces that have a particular
+    /// name.
+    /// </summary>
+    /// <param name="name">Name of .NET namespace to match.</param>
+    /// <returns>
+    /// An ImmutableArray containing all the .NET namespaces that are members of this symbol with
+    /// the given name.
+    /// If this symbol has no .NET namespace members with this name, returns an empty
+    /// ImmutableArray. Never returns null.
+    /// </returns>
+    internal abstract ImmutableArray<ModuleSymbol> GetNamespaceMembers(string name);
+
+    /// <summary>
+    /// Gets all the members of this symbol that are types.
+    /// </summary>
+    /// <returns>
+    /// An ImmutableArray containing all the types that are members of this symbol.
+    /// If this symbol has no type members, returns an empty ImmutableArray. Never returns
+    /// null.
+    /// </returns>
     public abstract ImmutableArray<NamedTypeSymbol> GetTypeMembers();
 
     /// <summary>
-    /// 获取此模块符号中的所有指定名称的名称类型成员符号。
+    /// Gets all the members of this symbol that are types that have a particular name.
     /// </summary>
-    /// <param name="name">要查找的名称类型成员符号的名称。</param>
-    /// <returns>含有此模块符号中的所有指定名称的名称类型成员符号的不可变数组。若找不到符合条件的成员符号，则返回空列表。</returns>
-    public abstract ImmutableArray<Symbol> GetTypeMembers(string name);
+    /// <param name="name">Name of type to match.</param>
+    /// <returns>
+    /// An ImmutableArray containing all the types that are members of this symbol with
+    /// the given name.
+    /// If this symbol has no type members with this name, returns an empty ImmutableArray.
+    /// Never returns null.
+    /// </returns>
+    public abstract ImmutableArray<NamedTypeSymbol> GetTypeMembers(string name);
 
     /// <summary>
-    /// 获取此模块符号中的所有指定名称和类型参数个数的名称类型成员符号。
+    /// Gets all the members of this symbol that are types that have a particular name and
+    /// arity.
     /// </summary>
-    /// <param name="name">要查找的名称类型成员符号的名称。</param>
-    /// <param name="arity">要查找的名称类型成员符号的类型参数个数。</param>
-    /// <returns>含有此模块符号中的所有指定名称和类型参数个数的名称类型成员符号的不可变数组。若找不到符合条件的成员符号，则返回空列表。</returns>
-    public abstract ImmutableArray<Symbol> GetTypeMembers(string name, int arity);
+    /// <param name="name">Name of type to match.</param>
+    /// <param name="arity">Arity of type to match.</param>
+    /// <returns>
+    /// An ImmutableArray containing all the types that are members of this symbol with
+    /// the given name and arity.
+    /// If this symbol has no type members with this name and arity, returns an empty
+    /// ImmutableArray. Never returns null.
+    /// </returns>
+    public virtual ImmutableArray<NamedTypeSymbol> GetTypeMembers(string name, int arity)
+    {
+        // Default implementation does a post-filter. We can override this if its a performance burden, but experience is that it won't be.
+        return this.GetTypeMembers(name).WhereAsArray(static (t, a) => t.Arity == a, arity);
+    }
+
+    /// <summary>
+    /// Gets all the members of this symbol that are fields.
+    /// </summary>
+    /// <returns>
+    /// An ImmutableArray containing all the fields that are members of this symbol.
+    /// If this symbol has no field members, returns an empty ImmutableArray. Never returns
+    /// null.
+    /// </returns>
+    public abstract ImmutableArray<FieldSymbol> GetFieldMembers();
+
+    /// <summary>
+    /// Gets all the members of this symbol that are fields that have a particular name.
+    /// </summary>
+    /// <param name="name">Name of field to match.</param>
+    /// <returns>
+    /// An ImmutableArray containing all the fields that are members of this symbol with
+    /// the given name.
+    /// If this symbol has no field members with this name, returns an empty ImmutableArray.
+    /// Never returns null.
+    /// </returns>
+    public abstract ImmutableArray<FieldSymbol> GetFieldMembers(string name);
+
+    /// <summary>
+    /// Gets all the members of this symbol that are fields that have a particular name and
+    /// arity.
+    /// </summary>
+    /// <param name="name">Name of field to match.</param>
+    /// <param name="arity">Arity of field to match.</param>
+    /// <returns>
+    /// An ImmutableArray containing all the fields that are members of this symbol with
+    /// the given name and arity.
+    /// If this symbol has no field members with this name and arity, returns an empty
+    /// ImmutableArray. Never returns null.
+    /// </returns>
+    public abstract ImmutableArray<FieldSymbol> GetFieldMembers(string name, int arity);
     #endregion
 
-#warning 未完成
+    /// <inheritdoc cref="Symbol()"/>
+    internal ModuleSymbol() { }
 }

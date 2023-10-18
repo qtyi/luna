@@ -5,166 +5,205 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Microsoft.Cci;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
-using Microsoft.CodeAnalysis.Symbols;
+using Qtyi.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
 
-using ThisSyntaxNode = LuaSyntaxNode;
 using ThisCompilation = LuaCompilation;
+using ThisDiagnosticInfo = LuaDiagnosticInfo;
 using ThisSemanticModel = LuaSemanticModel;
+using ThisSymbolVisitor = LuaSymbolVisitor;
+using ThisSymbolVisitor<TResult> = LuaSymbolVisitor<TResult>;
+using ThisSymbolVisitor<TResult, TArgument> = LuaSymbolVisitor<TResult, TArgument>;
+using ThisSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
 
-using ThisSyntaxNode = MoonScriptSyntaxNode;
 using ThisCompilation = MoonScriptCompilation;
+using ThisDiagnosticInfo = MoonScriptDiagnosticInfo;
 using ThisSemanticModel = MoonScriptSemanticModel;
+using ThisSymbolVisitor = MoonScriptSymbolVisitor;
+using ThisSymbolVisitor<TResult> = MoonScriptSymbolVisitor<TResult>;
+using ThisSymbolVisitor<TResult, TArgument> = MoonScriptSymbolVisitor<TResult, TArgument>;
+using ThisSyntaxNode = MoonScriptSyntaxNode;
+#else
+#error Not implemented
 #endif
 
 using Symbols;
 
+/// <summary>
+/// The base class for all symbols (module, type, field, parameter, etc.) that are 
+/// exposed by the compiler.
+/// </summary>
 [DebuggerDisplay("{GetDebuggerDisplay(), nq}")]
 internal abstract partial class Symbol : ISymbolInternal, IFormattable
 {
     private ISymbol? _lazyISymbol;
 
-    #region 名称
     /// <summary>
-    /// 获取此符号的名称。
+    /// Gets the name of this symbol.
     /// </summary>
     /// <value>
-    /// 此符号的名称。
-    /// 若此符号没有名称，则返回空字符串，而非<see langword="null"/>。
+    /// Symbols without a name return the empty string; <see langword="null"/> is
+    /// never returned.
     /// </value>
     public virtual string Name => string.Empty;
 
     /// <summary>
-    /// 获取此符号在元数据中的名称。
-    /// </summary>
-    /// <remarks>
-    /// 通常情况下，此符号在元数据中的名称与<see cref="Name"/>相等。
-    /// </remarks>
-    public virtual string MetadataName => this.Name;
-    #endregion
-
-    /// <summary>
-    /// 获取此符号在元数据中表示的标记。
+    /// Gets the name of a symbol as it appears in metadata.
     /// </summary>
     /// <value>
-    /// 此符号在元数据中表示的标记。通常情况下符号并未从元数据中加载，这种情况下元数据标记为<c>0</c>。
+    /// Most of the time, this is the same as the Name property, with the following exceptions:
+    /// 1) The metadata name of generic types includes the "`1", "`2" etc. suffix that
+    /// indicates the number of type parameters (it does not include, however, names of
+    /// containing types or namespaces).
+    /// 2) The metadata name of explicit interface names have spaces removed, compared to
+    /// the name property.
+    /// </value>
+    public virtual string MetadataName => this.Name;
+
+    /// <summary>
+    /// Gets the token for this symbol as it appears in metadata.
+    /// </summary>
+    /// <value>
+    /// Most of the time this is 0, as it is when the symbol is not loaded from metadata.
     /// </value>
     public virtual int MetadataToken => 0;
 
     /// <summary>
-    /// 获取此符号的类型。
-    /// </summary>
-    public abstract SymbolKind Kind { get; }
-
-    #region 包含关系
-    /// <summary>
-    /// 获取逻辑上包含了此符号的符号。
+    /// Gets the kind of this symbol.
     /// </summary>
     /// <value>
-    /// 逻辑上包含了此符号的符号。
-    /// 若此符号不属于任何符号，则返回<see langword="null"/>。
+    /// A <see cref="SymbolKind"/> value represent the kind of this symbol.
+    /// </value>
+    public abstract SymbolKind Kind { get; }
+
+    #region Containing
+    /// <summary>
+    /// Get the symbol that logically contains this symbol. 
+    /// </summary>
+    /// <value>
+    /// Returns the symbol containing this symbol.  If this symbol doesn't belong to any
+    /// other symbol, returns <see langword="null"/>.
     /// </value>
     public abstract Symbol? ContainingSymbol { get; }
 
     /// <summary>
-    /// 获取逻辑上包含了此符号的名称类型符号。
+    /// Get the named type symbol that logically contains this symbol. 
     /// </summary>
     /// <value>
-    /// 逻辑上包含了此符号的名称类型符号。
-    /// 若此符号不属于任何名称类型符号，则返回<see langword="null"/>。
+    /// Returns the named type symbol containing this symbol.  If this symbol doesn't
+    /// belong to any named type symbol, returns <see langword="null"/>.
     /// </value>
     public virtual NamedTypeSymbol? ContainingType =>
-        // 注：此基类仅提供了基础的递归获取逻辑，子类应尽可能提供更高效率的实现以重写此逻辑。
+        // PERF: Derived class should provider more efficient implementation.
         this.GetContainingSymbolHelper<NamedTypeSymbol>();
 
     /// <summary>
-    /// 获取逻辑上包含了此符号的模块符号。
+    /// Get the module symbol that logically contains this symbol.
     /// </summary>
     /// <value>
-    /// 逻辑上包含了此符号的模块符号。
-    /// 若此符号不属于任何模块符号，则返回<see langword="null"/>。
+    /// Returns the module symbol containing this symbol.  If this symbol doesn't belong
+    /// to any module symbol, returns <see langword="null"/>.
     /// </value>
     public virtual ModuleSymbol? ContainingModule =>
-        // 注：此基类仅提供了基础的递归获取逻辑，子类应尽可能提供更高效率的实现以重写此逻辑。
+        // PERF: Derived class should provider more efficient implementation.
         this.GetContainingSymbolHelper<ModuleSymbol>();
 
     /// <summary>
-    /// 获取逻辑上包含了此符号的.NET模块符号。
+    /// Get the module symbol that represent the .NET namespace that logically contains
+    /// this symbol.
     /// </summary>
     /// <value>
-    /// 逻辑上包含了此符号的.NET模块符号。
-    /// 若此符号不属于任何.NET模块，或在多个.NET模块间共享，则返回<see langword="null"/>。
+    /// Returns the module symbol that represent the .NET namespace that containing this
+    /// symbol.  If this symbol doesn't belong to any .NET namespace, returns <see langword="null"/>.
     /// </value>
-    internal virtual NetModuleSymbol? ContainingNetModule =>
-        // 注：此基类仅提供了基础的递归获取逻辑，子类应尽可能提供更高效率的实现以重写此逻辑。
-        this.ContainingSymbol?.ContainingNetModule;
+    internal virtual ModuleSymbol? ContainingNamespace =>
+        // PERF: Derived class should provider more efficient implementation.
+        this.GetContainingSymbolHelper<ModuleSymbol>(static module => module.IsNamespace);
 
     /// <summary>
-    /// 获取逻辑上包含了此符号的程序集符号。
+    /// Get the module symbol that represent the .NET module that logically contains
+    /// this symbol.
     /// </summary>
     /// <value>
-    /// 逻辑上包含了此符号的程序集符号。
-    /// 若此符号不属于任何程序集，或在多个程序集间共享，则返回<see langword="null"/>。
+    /// Returns the .NET module symbol that containing this symbol.  If this symbol
+    /// doesn't belong to any .NET module, returns <see langword="null"/>.
+    /// </value>
+    internal virtual NetmoduleSymbol? ContainingNetmodule =>
+        // PERF: Derived class should provider more efficient implementation.
+        this.ContainingSymbol?.ContainingNetmodule;
+
+    /// <summary>
+    /// Get the assembly symbol that logically contains this symbol.
+    /// </summary>
+    /// <value>
+    /// Returns the assembly symbol containing this symbol.  If this symbol doesn't
+    /// belong to any assembly symbol, returns <see langword="null"/>.
     /// </value>
     public virtual AssemblySymbol? ContainingAssembly =>
-        // 注：此基类仅提供了基础的递归获取逻辑，子类应尽可能提供更高效率的实现以重写此逻辑。
+        // PERF: Derived class should provider more efficient implementation.
         this.ContainingSymbol?.ContainingAssembly;
 
     /// <summary>
-    /// 递归获取最近的指定符号。
+    /// Helper method to get the first symbol containing this symbol.
     /// </summary>
-    /// <typeparam name="TSymbol">符号的类型。</typeparam>
-    private TSymbol? GetContainingSymbolHelper<TSymbol>() where TSymbol : Symbol
+    /// <typeparam name="TSymbol">Type of symbol to get.</typeparam>
+    /// <param name="predicate">Check if symbol is match.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private TSymbol? GetContainingSymbolHelper<TSymbol>(Func<TSymbol, bool>? predicate = null) where TSymbol : Symbol
     {
         for (var container = this.ContainingSymbol; container is not null; container = container.ContainingSymbol)
         {
-            if (container is TSymbol symbol)
+            if (container is TSymbol symbol &&
+                (predicate is null || predicate(symbol)))
                 return symbol;
         }
         return null;
     }
     #endregion
 
-    #region 声明关系
+    #region Declaring
     /// <summary>
-    /// 获取声明此符号的可访问性。
+    /// Gets this accessibility that was declared on this symbol.
     /// </summary>
     /// <value>
-    /// 声明此符号的可访问性。若此符号不适用可访问性，则返回<see cref="Accessibility.NotApplicable"/>。
+    /// For symbols that do not have accessibility declared on them, returns <see cref="Accessibility.NotApplicable"/>.
     /// </value>
     public abstract Accessibility DeclaredAccessibility { get; }
 
     /// <summary>
-    /// 获取声明此符号的语法引用列表。
+    /// Gets the syntax node(s) where this symbol was declared in source.
     /// </summary>
     /// <value>
-    /// <para>声明此符号的语法引用列表。</para>
-    /// <para>
-    /// 某些符号可能有多个原始定义的位置，因此属性可能返回多个语法引用，前提是它们定义在源代码中，并且不是隐式定义（<see cref="IsImplicitlyDeclared"/>）。
-    /// </para>
-    /// <para>
-    /// 当符号定义在元数据中或隐式定义在源代码中，属性将返回空的只读数组。
-    /// </para>
+    /// The syntax node(s) that declared the symbol. If the symbol was declared in metadata or
+    /// was implicitly declared, returns an empty read-only array.
     /// </value>
     /// <remarks>
-    /// 反向获取符号（语法节点获取定义的符号）请见<see
+    /// <para>
+    /// Some symbols may be defined in more than one location. This property should return
+    /// one or more syntax nodes only if the symbol was declared in source code and also
+    /// was not implicitly declared (see the <see cref="IsImplicitlyDeclared"/> property). 
+    /// </para>
+    /// <para>
+    /// Note that for the global module, the declaring syntax will be the <see cref="Syntax.ChunkSyntax"/>.
+    /// </para>
+    /// <para>
+    /// To go the opposite direction (from syntax node to symbol), see <see
     /// cref="ThisSemanticModel.GetDeclaredSymbol(ThisSyntaxNode, CancellationToken)"/>.
+    /// </para>
     /// </remarks>
     public abstract ImmutableArray<SyntaxReference> DeclaringSyntaxReferences { get; }
 
     /// <summary>
-    /// 获取声明指定语法节点的语法位置列表。
+    /// Helper for implementing <see cref="DeclaringSyntaxReferences"/> for derived classes that store a location but not a 
+    /// <see cref="ThisSyntaxNode"/> or <see cref="SyntaxReference"/>.
     /// </summary>
-    /// <remarks>
-    /// 此方法是<see cref="DeclaringSyntaxReferences"/>的实现，由子类调用。
-    /// </remarks>
+    /// <param name="locations">A collection of locations where symbol declaring syntaxes at.</param>
     internal static ImmutableArray<SyntaxReference> GetDeclaringSyntaxReferenceHelper<TNode>(ImmutableArray<Location> locations)
         where TNode : ThisSyntaxNode
     {
@@ -188,6 +227,9 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
             }
             else
             {
+                // Since the location we're interested in can't contain a token, we'll inspect the whole tree,
+                // pruning away branches that don't contain that location. We'll pick the narrowest node of the type
+                // we're looking for.
                 var parent = location.SourceTree.GetRoot();
                 SyntaxNode? found = null;
                 foreach (var descendant in parent.DescendantNodesAndSelf(c => c.Location.SourceSpan.Contains(location.SourceSpan)))
@@ -205,11 +247,21 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     }
 
     /// <summary>
-    /// 获取声明此符号的编译内容。
+    /// Gets the compilation this symbol declaring in.
     /// </summary>
     /// <value>
-    /// 声明此符号的编译内容。
+    /// For a source assembly, the associated compilation.
+    /// For any other assembly, null.
+    /// For a source .NET module, the <see cref="SourceAssemblySymbol.DeclaringCompilation"/> of the associated source assembly.
+    /// For any other .NET module, null.
+    /// For any other symbol, the <see cref="SourceNetmoduleSymbol.DeclaringCompilation"/> of the associated .NET module.
     /// </value>
+    /// <remarks>
+    /// We're going through the containing .NET module, rather than the containing assembly,
+    /// because of /addmodule (symbols in such .NET modules should return null).
+    /// 
+    /// Remarks, not "ContainingCompilation" because it isn't transitive.
+    /// </remarks>
     public virtual ThisCompilation? DeclaringCompilation
     {
         get
@@ -222,62 +274,82 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
                 case SymbolKind.ErrorType:
                     return null;
                 case SymbolKind.Assembly:
-                    Debug.Assert(this is not SourceAssemblySymbol, "SourceAssemblySymbol must override DeclaringCompilation");
+                    Debug.Assert(this is not SourceAssemblySymbol, $"{nameof(SourceAssemblySymbol)} must override {nameof(DeclaringCompilation)}");
                     return null;
-                case SymbolKind.NetModule:
-                    Debug.Assert(this is not SourceNetModuleSymbol, "SourceModuleSymbol must override DeclaringCompilation");
+                case SymbolKind.Netmodule:
+                    Debug.Assert(this is not SourceNetmoduleSymbol, $"{nameof(SourceNetmoduleSymbol)} must override {nameof(DeclaringCompilation)}");
                     return null;
             }
 
-            switch (this.ContainingNetModule)
+            switch (this.ContainingNetmodule)
             {
-                case SourceNetModuleSymbol sourceModuleSymbol:
+                case SourceNetmoduleSymbol sourceModuleSymbol:
                     return sourceModuleSymbol.DeclaringCompilation;
             }
 
             return null;
         }
     }
-    #endregion
 
-    #region 定义
     /// <summary>
-    /// 获取此符号的原始定义。
+    /// Gets a value indicate if this symbol is implicitly declared.
     /// </summary>
     /// <value>
-    /// 此符号的原始定义。
-    /// 若此符号是由另一个符号通过类型置换创建的，则返回其最原始的在源代码或元数据中的定义。
+    /// Returns <see langword="true"/> if this symbol was automatically created by the
+    /// compiler, and does not have an explicit corresponding source code declaration;
+    /// otherwise, <see langword="false"/>.
+    /// </value>
+    /// <remarks>
+    /// This is intended for symbols that are ordinary symbols in the language sense,
+    /// and may be used by code, but that are simply declared implicitly rather than
+    /// with explicit language syntax.
+    /// </remarks>
+    public virtual bool IsImplicitlyDeclared => false;
+    #endregion
+
+    #region Definition
+    /// <summary>
+    /// Gets the original definition of this symbol.
+    /// </summary>
+    /// <value>
+    /// If this symbol is constructed from another symbol by type substitution then returns
+    /// the original symbol as it was defined in source or metadata.
     /// </value>
     public Symbol OriginalDefinition => this.OriginalSymbolDefinition;
 
     /// <summary>
-    /// 由子类重写，获取此符号的原始定义。
+    /// Gets the original definition of this symbol.
     /// </summary>
-    /// <value>
-    /// <see cref="OriginalDefinition"/>使用此返回值。
-    /// </value>
+    /// <remarks>
+    /// Backing property of <see cref="OriginalDefinition"/>.
+    /// </remarks>
     protected virtual Symbol OriginalSymbolDefinition => this;
 
     /// <summary>
-    /// 获取一个值，只是此符号是否为原始定义。
+    /// Gets a value that indicate if this symbol is the original definition of itself.
     /// </summary>
     /// <value>
-    /// 若此符号为原始定义，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this is the original definition of this symbol;
+    /// otherwise, <see langword="false"/>.
     /// </value>
     public bool IsDefinition => object.ReferenceEquals(this, this.OriginalDefinition);
     #endregion
 
     /// <summary>
-    /// 获取此符号的原始定义的位置。
+    /// Gets the locations where this symbol was originally defined.
     /// </summary>
     /// <value>
-    /// 此符号的原始定义的位置。可能在源代码或元数据中；某些符号也可能有多个原始定义的位置。
+    /// The locations where this symbol was originally defined, either in source or
+    /// metadata.
     /// </value>
     public abstract ImmutableArray<Location> Locations { get; }
 
     /// <summary>
+    /// Gets a source location key for sorting.
+    /// </summary>
+    /// <remarks>
     /// <para>
-    /// Get a source location key for sorting. For performance, it's important that this
+    /// For performance, it's important that this
     /// be able to be returned from a symbol without doing any additional allocations (even
     /// if nothing is cached yet.)
     /// </para>
@@ -285,7 +357,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// Only (original) source symbols and namespaces that can be merged
     /// need implement this function if they want to do so for efficiency.
     /// </para>
-    /// </summary>
+    /// </remarks>
     internal virtual LexicalSortKey GetLexicalSortKey()
     {
         var locations = this.Locations;
@@ -294,114 +366,159 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
         return (locations.Length > 0) ? new LexicalSortKey(locations[0], declaringCompilation) : LexicalSortKey.NotInSource;
     }
 
-    #region 符号完成
+    #region Completion
     /// <summary>
-    /// 获取一个值，指示此符号是否应当被完成。
+    /// Gets a value indicate if this symbol should be completed by calling <see cref="ForceComplete(SourceLocation?, CancellationToken)"/>.
     /// </summary>
     /// <value>
-    /// 当此符号应当被完成时，返回<see langword="true"/>；否则返回<see langword="false"/>。
-    /// 直观上来说，（任何编译中的）所有源代码项都返回<see langword="true"/>。
+    /// Returns <see langword="true"/> if this symbol should be completed; otherwise, <see langword="false"/>.
+    /// Intuitively, <see langword="true"/> for source entities (from any compilation).
     /// </value>
     internal virtual bool RequiresCompletion => false;
 
     /// <summary>
-    /// 调用以强制完成此符号。
+    /// Force complete this symbol.
     /// </summary>
-    /// <param name="location">此符号的位置。若传入<see langword="null"/>，则表示不指定位置。</param>
+    /// <param name="location">Location of this symbol. <see langword="null"/> if not specified.</param>
     /// <param name="cancellationToken">取消操作的标记。</param>
     internal virtual void ForceComplete(SourceLocation? location, CancellationToken cancellationToken)
     {
-        // 源代码符号必须重写此方法。
+        // must be overridden by source symbols, no-op for other symbols
         Debug.Assert(!this.RequiresCompletion);
     }
 
     /// <summary>
-    /// 此符号是否包含对应的符号完成。
+    /// Has this symbol finished part of completion.
     /// </summary>
-    /// <param name="part">要查找的符号完成的类型。</param>
-    /// <returns>若此符号是否包含对应的符号完成，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
+    /// <param name="part">Part of completion for searching.</param>
+    /// <returns>Returns <see langword="true"/> if the <paramref name="part"/> of completion
+    /// has finished; otherwise, <see langword="false"/>.</returns>
     internal virtual bool HasComplete(CompletionPart part)
     {
-        // 源代码符号必须重写此方法。
+        // must be overridden by source symbols, no-op for other symbols
         Debug.Assert(!this.RequiresCompletion);
         return true;
     }
     #endregion
 
     /// <summary>
-    /// 获取一个值，指示此符号是否为静态的。
+    /// Gets a value indicate if this symbol is static.
     /// </summary>
     /// <value>
-    /// 若此符号是静态的，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this symbol is static; otherwise, <see langword="false"/>.
     /// </value>
     public abstract bool IsStatic { get; }
 
     /// <summary>
-    /// 获取一个值，指示此符号是否为虚拟的。
+    /// Gets a value indicate if this symbol is virtual.
     /// </summary>
     /// <value>
-    /// 若此符号是虚拟的，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this symbol is virtual; otherwise, <see langword="false"/>.
     /// </value>
     public abstract bool IsVirtual { get; }
 
     /// <summary>
-    /// 获取一个值，指示此符号是否为重写的。
+    /// Gets a value indicate if this symbol is override.
     /// </summary>
     /// <value>
-    /// 若此符号是重写的，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this symbol is override; otherwise, <see langword="false"/>.
     /// </value>
     public abstract bool IsOverride { get; }
 
     /// <summary>
-    /// 获取一个值，指示此符号是否为抽象的。
+    /// Gets a value indicate if this symbol is abstract.
     /// </summary>
     /// <value>
-    /// 若此符号是抽象的，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this symbol is abstract; otherwise, <see langword="false"/>.
     /// </value>
     public abstract bool IsAbstract { get; }
 
     /// <summary>
-    /// 获取一个值，指示此符号是否为封闭的。
+    /// Gets a value indicate if this symbol is sealed.
     /// </summary>
     /// <value>
-    /// 若此符号是封闭的，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this symbol is sealed; otherwise, <see langword="false"/>.
     /// </value>
     public abstract bool IsSealed { get; }
 
     /// <summary>
-    /// 获取一个值，指示此符号是否为外部的。
+    /// Gets a value indicate if this symbol is extern.
     /// </summary>
     /// <value>
-    /// 若此符号是外部的，则返回<see langword="true"/>；否则返回<see langword="false"/>。
+    /// Returns <see langword="true"/> if this symbol is extern; otherwise, <see langword="false"/>.
     /// </value>
     public abstract bool IsExtern { get; }
 
+    #region Equality
     /// <summary>
-    /// 获取一个值，指示此符号是否为隐式声明的。
+    /// Compare two symbol objects to see if they refer to the same symbol. You should always
+    /// use <see cref="operator =="/> and <see cref="operator !="/>, or the <see cref="Equals(object)"/> method, to compare two symbols for equality.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// 若此符号是否为隐式声明的，则返回<see langword="true"/>；否则返回<see langword="false"/>。
-    /// </para>
-    /// <para>
-    /// 隐式声明指由编译器生成，且在源代码中没有对应的显式声明。
-    /// </para>
-    /// </remarks>
-    public virtual bool IsImplicitlyDeclared => false;
+    public static bool operator ==(Symbol? left, Symbol? right)
+    {
+        //PERF: this function is often called with
+        //      1) left referencing same object as the right 
+        //      2) right being null
+        //      The code attempts to check for these conditions before 
+        //      resorting to .Equals
 
-    #region 相等性
-    public static bool operator ==(Symbol? left, Symbol? right) => Symbol.Equals(left, right, SymbolEqualityComparer.Default.CompareKind);
+        // the condition is expected to be folded when inlining "someSymbol is null"
+        if (right is null)
+            return left is null;
 
-    public static bool operator !=(Symbol? left, Symbol? right) => !(left == right);
+        // this part is expected to disappear when inlining "someSymbol is null"
+        return object.ReferenceEquals(left, right) || right.Equals(left);
+    }
 
-    public sealed override bool Equals(object? obj) => this.Equals(obj as Symbol);
+    /// <summary>
+    /// Compare two symbol objects to see if they refer to the different symbol. You should always
+    /// use == and !=, or the Equals method, to compare two symbols for equality.
+    /// </summary>
+    public static bool operator !=(Symbol? left, Symbol? right)
+    {
+        //PERF: this function is often called with
+        //      1) left referencing different object as the right 
+        //      2) right being null
+        //      The code attempts to check for these conditions before 
+        //      resorting to .Equals
 
+        // the condition is expected to be folded when inlining "someSymbol is null"
+        if (right is null)
+            return left is not null;
+
+        // this part is expected to disappear when inlining "someSymbol is null"
+        return !object.ReferenceEquals(left, right) && !right.Equals(left);
+    }
+
+    /// <inheritdoc/>
+    public sealed override bool Equals(object? obj) => this.Equals(obj as Symbol, SymbolEqualityComparer.Default.CompareKind);
+
+    /// <summary>
+    /// Determines whether the specified symbol is equals to the current symbol.
+    /// </summary>
+    /// <param name="other">The symbol to compare with the current symbol.</param>
+    /// <returns>Returns <see langword="true"/> if the specified symbol is equals to the
+    /// current symbol; otherwise, <see langword="false"/>.</returns>
     public bool Equals(Symbol? other) => this.Equals(other, SymbolEqualityComparer.Default.CompareKind);
 
-    bool ISymbolInternal.Equals(ISymbolInternal? other, TypeCompareKind compareKind) => this.Equals(other as Symbol, compareKind);
+    /// <summary>
+    /// Determines whether the specified symbol is equals to the current symbol.  Use
+    /// specified kind of comparison to compare between types.
+    /// </summary>
+    /// <param name="compareKind">The kind of comparison between types.</param>
+    /// <inheritdoc cref="Equals(Symbol?)"/>
+    public virtual bool Equals(Symbol? other, TypeCompareKind compareKind) =>
+        // By default we don't consider the compareKind, and do reference equality. This can be overridden.
+        object.ReferenceEquals(this, other);
 
-    public virtual bool Equals(Symbol? other, TypeCompareKind compareKind) => object.ReferenceEquals(this, other);
-
+    /// <summary>
+    /// Determines whether two symbols are equals.
+    /// </summary>
+    /// <param name="first">The first symbol to compare.</param>
+    /// <param name="second">The second symbol to compare.</param>
+    /// <param name="compareKind">The kind of comparison between types.</param>
+    /// <returns>Returns <see langword="true"/> if two symbols are equals; otherwise,
+    /// <see langword="false"/>.</returns>
     public static bool Equals(Symbol? first, Symbol? second, TypeCompareKind compareKind)
     {
         if (first is null)
@@ -412,10 +529,17 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
             return first.Equals(second, compareKind);
     }
 
+    /// <inheritdoc/>
     public override int GetHashCode() => RuntimeHelpers.GetHashCode(this);
     #endregion
 
-    #region 公共符号
+    #region Public Symbol
+    /// <summary>
+    /// Gets a public symbol of this symbol.
+    /// </summary>
+    /// <value>
+    /// The public symbol of this symbol.  Return values should be reference equal on every call.
+    /// </value>
     internal ISymbol ISymbol
     {
         get
@@ -427,40 +551,56 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
         }
     }
 
+    /// <summary>
+    /// Backing method for <see cref="ISymbol"/>.
+    /// </summary>
     protected abstract ISymbol CreateISymbol();
     #endregion
 
-    #region 访问方法
-    public abstract void Accept(
-#if LANG_LUA
-        LuaSymbolVisitor
-#elif LANG_MOONSCRIPT
-        MoonScriptSymbolVisitor
-#endif
-        visitor);
+    #region Accept
+    /// <summary>
+    /// Entry point for <see cref="ThisSymbolVisitor"/> to visit this symbol.
+    /// </summary>
+    /// <param name="visitor">The symbol visitor.</param>
+    public abstract void Accept(ThisSymbolVisitor visitor);
 
-    public abstract TResult? Accept<TResult>(
-#if LANG_LUA
-        LuaSymbolVisitor
-#elif LANG_MOONSCRIPT
-        MoonScriptSymbolVisitor
-#endif
-        <TResult> visitor);
+    /// <summary>
+    /// Entry point for <see cref="ThisSymbolVisitor{TResult}"/> to visit this symbol.
+    /// </summary>
+    /// <param name="visitor">The symbol visitor.</param>
+    public abstract TResult? Accept<TResult>(ThisSymbolVisitor<TResult> visitor);
 
-    internal abstract TResult? Accept<TArgument, TResult>(
-#if LANG_LUA
-        LuaSymbolVisitor
-#elif LANG_MOONSCRIPT
-        MoonScriptSymbolVisitor
-#endif
-        <TArgument, TResult> visitor, TArgument argument);
+    /// <summary>
+    /// Entry point for <see cref="ThisSymbolVisitor{TResult, TArgument}"/> to visit this symbol.
+    /// </summary>
+    /// <param name="visitor">The symbol visitor.</param>
+    internal abstract TResult? Accept<TArgument, TResult>(ThisSymbolVisitor<TArgument, TResult> visitor, TArgument argument);
     #endregion
 
-    #region 使用点诊断
+    #region Use-Site Diagnostics
+    /// <summary>
+    /// Does the symbol has a use-site diagnostic with error severity.
+    /// </summary>
+    /// <value>
+    /// Returns <see langword="true"/> if the symbol has a use-site diagnostic with error severity; otherwise, <see langword="false"/>.
+    /// </value>
     internal bool HasUseSiteError => this.GetUseSiteInfo().DiagnosticInfo?.Severity == DiagnosticSeverity.Error;
 
+    /// <summary>
+    /// Returns diagnostic info that should be reported at the use site of the symbol.
+    /// </summary>
+    /// <value>
+    /// Diagnostic info that should be reported at the use site of the symbol, or default if there is none.
+    /// </value>
     internal virtual UseSiteInfo<AssemblySymbol> GetUseSiteInfo() => default;
 
+    /// <summary>
+    /// Returns the primary dependency of the symbol.
+    /// </summary>
+    /// <value>
+    /// When not-null, this is primary dependency of the use-site, usually the assembly
+    /// defining the used symbol. Never a core library.
+    /// </value>
     protected AssemblySymbol? PrimaryDependency
     {
         get
@@ -473,14 +613,27 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
         }
     }
 
-    protected virtual bool IsHighestPriorityUseSiteErrorCode(ErrorCode code) => true;
+    /// <summary>
+    /// Returns <see langword="true"/> if the error code is the highest priority while calculating use site error for this symbol. 
+    /// </summary>
+    /// <remarks>
+    /// Supposed to be <see cref="ErrorCode"/>, but it causes inconsistent accessibility error.
+    /// </remarks>
+    protected virtual bool IsHighestPriorityUseSiteErrorCode(int code) => true;
 
+    /// <summary>
+    /// Indicates that this symbol uses metadata that cannot be supported by the language.
+    /// </summary>
+    /// <remarks>
+    /// This is distinguished from, for example, references to metadata symbols defined in assemblies that weren't referenced.
+    /// Symbols where this returns true can never be used successfully, and thus should never appear in any IDE feature.
+    /// </remarks>
     public virtual bool HasUnsupportedMetadata => false;
 
     /// <summary>
     /// Merges given diagnostic to the existing result diagnostic.
     /// </summary>
-    internal bool MergeUseSiteDiagnostics(ref DiagnosticInfo result, DiagnosticInfo info)
+    internal bool MergeUseSiteDiagnostics(ref DiagnosticInfo? result, DiagnosticInfo? info)
     {
         if (info == null)
         {
@@ -541,16 +694,6 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// <returns>True if the diagnostic has error severity.</returns>
     internal static bool ReportUseSiteDiagnostic(DiagnosticInfo info, DiagnosticBag diagnostics, Location location)
     {
-        // Unlike VB the C# Dev11 compiler reports only a single unification error/warning.
-        // By dropping the location we effectively merge all unification use-site errors that have the same error code into a single error.
-        // The error message clearly explains how to fix the problem and reporting the error for each location wouldn't add much value. 
-        if (info.Code == (int)ErrorCode.WRN_UnifyReferenceBldRev ||
-            info.Code == (int)ErrorCode.WRN_UnifyReferenceMajMin ||
-            info.Code == (int)ErrorCode.ERR_AssemblyMatchBadVersion)
-        {
-            location = NoLocation.Singleton;
-        }
-
         diagnostics.Add(info, location);
         return info.Severity == DiagnosticSeverity.Error;
     }
@@ -566,219 +709,36 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     internal bool DeriveUseSiteInfoFromType(ref UseSiteInfo<AssemblySymbol> result, TypeSymbol type)
     {
         var info = type.GetUseSiteInfo();
-        if (info.DiagnosticInfo?.Code == (int)ErrorCode.ERR_BogusType)
-        {
-            GetSymbolSpecificUnsupportedMetadataUseSiteErrorInfo(ref info);
-        }
 
         return MergeUseSiteInfo(ref result, info);
     }
-
-    private void GetSymbolSpecificUnsupportedMetadataUseSiteErrorInfo(ref UseSiteInfo<AssemblySymbol> info)
-    {
-        switch (this.Kind)
-        {
-            case SymbolKind.Field:
-            case SymbolKind.Method:
-            case SymbolKind.Property:
-            case SymbolKind.Event:
-                info = info.AdjustDiagnosticInfo(new CSDiagnosticInfo(ErrorCode.ERR_BindToBogus, this));
-                break;
-        }
-    }
-
-    private UseSiteInfo<AssemblySymbol> GetSymbolSpecificUnsupportedMetadataUseSiteErrorInfo()
-    {
-        var useSiteInfo = new UseSiteInfo<AssemblySymbol>(new CSDiagnosticInfo(ErrorCode.ERR_BogusType, string.Empty));
-        GetSymbolSpecificUnsupportedMetadataUseSiteErrorInfo(ref useSiteInfo);
-        return useSiteInfo;
-    }
-
-    internal bool DeriveUseSiteInfoFromType(ref UseSiteInfo<AssemblySymbol> result, TypeWithAnnotations type, AllowedRequiredModifierType allowedRequiredModifierType)
-    {
-        return DeriveUseSiteInfoFromType(ref result, type.Type) ||
-               DeriveUseSiteInfoFromCustomModifiers(ref result, type.CustomModifiers, allowedRequiredModifierType);
-    }
-
-    internal bool DeriveUseSiteInfoFromParameter(ref UseSiteInfo<AssemblySymbol> result, ParameterSymbol param)
-    {
-        return DeriveUseSiteInfoFromType(ref result, param.TypeWithAnnotations, AllowedRequiredModifierType.None) ||
-               DeriveUseSiteInfoFromCustomModifiers(ref result, param.RefCustomModifiers,
-                                                          this is MethodSymbol method && method.MethodKind == MethodKind.FunctionPointerSignature ?
-                                                              AllowedRequiredModifierType.System_Runtime_InteropServices_InAttribute | AllowedRequiredModifierType.System_Runtime_CompilerServices_OutAttribute :
-                                                              AllowedRequiredModifierType.System_Runtime_InteropServices_InAttribute);
-    }
-
-    internal bool DeriveUseSiteInfoFromParameters(ref UseSiteInfo<AssemblySymbol> result, ImmutableArray<ParameterSymbol> parameters)
-    {
-        foreach (var param in parameters)
-        {
-            if (DeriveUseSiteInfoFromParameter(ref result, param))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    [Flags]
-    internal enum AllowedRequiredModifierType
-    {
-        None = 0,
-        System_Runtime_CompilerServices_Volatile = 1,
-        System_Runtime_InteropServices_InAttribute = 1 << 1,
-        System_Runtime_CompilerServices_IsExternalInit = 1 << 2,
-        System_Runtime_CompilerServices_OutAttribute = 1 << 3,
-    }
-
-    internal bool DeriveUseSiteInfoFromCustomModifiers(ref UseSiteInfo<AssemblySymbol> result, ImmutableArray<CustomModifier> customModifiers, AllowedRequiredModifierType allowedRequiredModifierType)
-    {
-        var requiredModifiersFound = AllowedRequiredModifierType.None;
-        var checkRequiredModifiers = true;
-
-        foreach (var modifier in customModifiers)
-        {
-            NamedTypeSymbol modifierType = ((CSharpCustomModifier)modifier).ModifierSymbol;
-
-            if (checkRequiredModifiers && !modifier.IsOptional)
-            {
-                var current = AllowedRequiredModifierType.None;
-
-                if ((allowedRequiredModifierType & AllowedRequiredModifierType.System_Runtime_InteropServices_InAttribute) != 0 &&
-                    modifierType.IsWellKnownTypeInAttribute())
-                {
-                    current = AllowedRequiredModifierType.System_Runtime_InteropServices_InAttribute;
-                }
-                else if ((allowedRequiredModifierType & AllowedRequiredModifierType.System_Runtime_CompilerServices_Volatile) != 0 &&
-                    modifierType.SpecialType == SpecialType.System_Runtime_CompilerServices_IsVolatile)
-                {
-                    current = AllowedRequiredModifierType.System_Runtime_CompilerServices_Volatile;
-                }
-                else if ((allowedRequiredModifierType & AllowedRequiredModifierType.System_Runtime_CompilerServices_IsExternalInit) != 0 &&
-                    modifierType.IsWellKnownTypeIsExternalInit())
-                {
-                    current = AllowedRequiredModifierType.System_Runtime_CompilerServices_IsExternalInit;
-                }
-                else if ((allowedRequiredModifierType & AllowedRequiredModifierType.System_Runtime_CompilerServices_OutAttribute) != 0 &&
-                    modifierType.IsWellKnownTypeOutAttribute())
-                {
-                    current = AllowedRequiredModifierType.System_Runtime_CompilerServices_OutAttribute;
-                }
-
-                if (current == AllowedRequiredModifierType.None ||
-                    (current != requiredModifiersFound && requiredModifiersFound != AllowedRequiredModifierType.None)) // At the moment we don't support applying different allowed modreqs to the same target.
-                {
-                    if (MergeUseSiteInfo(ref result, GetSymbolSpecificUnsupportedMetadataUseSiteErrorInfo()))
-                    {
-                        return true;
-                    }
-
-                    checkRequiredModifiers = false;
-                }
-
-                requiredModifiersFound |= current;
-            }
-
-            // Unbound generic type is valid as a modifier, let's not report any use site diagnostics because of that.
-            if (modifierType.IsUnboundGenericType)
-            {
-                modifierType = modifierType.OriginalDefinition;
-            }
-
-            if (DeriveUseSiteInfoFromType(ref result, modifierType))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    internal static bool GetUnificationUseSiteDiagnosticRecursive<T>(ref DiagnosticInfo result, ImmutableArray<T> types, Symbol owner, ref HashSet<TypeSymbol> checkedTypes) where T : TypeSymbol
-    {
-        foreach (var t in types)
-        {
-            if (t.GetUnificationUseSiteDiagnosticRecursive(ref result, owner, ref checkedTypes))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    internal static bool GetUnificationUseSiteDiagnosticRecursive(ref DiagnosticInfo result, ImmutableArray<TypeWithAnnotations> types, Symbol owner, ref HashSet<TypeSymbol> checkedTypes)
-    {
-        foreach (var t in types)
-        {
-            if (t.GetUnificationUseSiteDiagnosticRecursive(ref result, owner, ref checkedTypes))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    internal static bool GetUnificationUseSiteDiagnosticRecursive(ref DiagnosticInfo result, ImmutableArray<CustomModifier> modifiers, Symbol owner, ref HashSet<TypeSymbol> checkedTypes)
-    {
-        foreach (var modifier in modifiers)
-        {
-            if (((CSharpCustomModifier)modifier).ModifierSymbol.GetUnificationUseSiteDiagnosticRecursive(ref result, owner, ref checkedTypes))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    internal static bool GetUnificationUseSiteDiagnosticRecursive(ref DiagnosticInfo result, ImmutableArray<ParameterSymbol> parameters, Symbol owner, ref HashSet<TypeSymbol> checkedTypes)
-    {
-        foreach (var parameter in parameters)
-        {
-            if (parameter.TypeWithAnnotations.GetUnificationUseSiteDiagnosticRecursive(ref result, owner, ref checkedTypes) ||
-                GetUnificationUseSiteDiagnosticRecursive(ref result, parameter.RefCustomModifiers, owner, ref checkedTypes))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    internal static bool GetUnificationUseSiteDiagnosticRecursive(ref DiagnosticInfo result, ImmutableArray<TypeParameterSymbol> typeParameters, Symbol owner, ref HashSet<TypeSymbol> checkedTypes)
-    {
-        foreach (var typeParameter in typeParameters)
-        {
-            if (GetUnificationUseSiteDiagnosticRecursive(ref result, typeParameter.ConstraintTypesNoUseSiteDiagnostics, owner, ref checkedTypes))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
     #endregion
 
-    #region 未实现
-#warning 未实现。
-    public abstract IReference GetCciAdapter();
-    #endregion
-
-    /// <remarks>防止除编译器外创建实例。</remarks>
+    /// <remarks>Prevent anyone else from deriving from this class.</remarks>
     internal Symbol() { }
 
     #region ISymbolInternal
-#nullable disable
-    ISymbolInternal ISymbolInternal.ContainingSymbol => this.ContainingSymbol;
-    INamespaceSymbolInternal ISymbolInternal.ContainingNamespace => null;
-    INamedTypeSymbolInternal ISymbolInternal.ContainingType => this.ContainingType;
-    IModuleSymbolInternal ISymbolInternal.ContainingModule => this.ContainingNetModule;
-    IAssemblySymbolInternal ISymbolInternal.ContainingAssembly => this.ContainingAssembly;
-    Compilation ISymbolInternal.DeclaringCompilation => this.DeclaringCompilation;
+    ISymbolInternal? ISymbolInternal.ContainingSymbol => this.ContainingSymbol;
+    INamedTypeSymbolInternal? ISymbolInternal.ContainingType => this.ContainingType;
+    IModuleSymbolInternal? ISymbolInternal.ContainingModule => this.ContainingModule;
+    INetmoduleSymbolInternal? ISymbolInternal.ContainingNetmodule => this.ContainingNetmodule;
+    IAssemblySymbolInternal? ISymbolInternal.ContainingAssembly => this.ContainingAssembly;
     ISymbol ISymbolInternal.GetISymbol() => this.ISymbol;
+    bool ISymbolInternal.Equals(ISymbolInternal? other, TypeCompareKind compareKind) => this.Equals(other as Symbol, compareKind);
+    #endregion
+
+    #region Microsoft.CodeAnalysis.Symbols.ISymbolInternal
+#nullable disable
+    Microsoft.CodeAnalysis.SymbolKind Microsoft.CodeAnalysis.Symbols.ISymbolInternal.Kind => (Microsoft.CodeAnalysis.SymbolKind)this.Kind;
+
+    Microsoft.CodeAnalysis.Symbols.ISymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingSymbol => this.ContainingSymbol;
+    Microsoft.CodeAnalysis.Symbols.INamespaceSymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingNamespace => this.ContainingNamespace;
+    Microsoft.CodeAnalysis.Symbols.INamedTypeSymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingType => this.ContainingType;
+    Microsoft.CodeAnalysis.Symbols.IModuleSymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingModule => this.ContainingNetmodule;
+    Microsoft.CodeAnalysis.Symbols.IAssemblySymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingAssembly => this.ContainingAssembly;
+    Compilation Microsoft.CodeAnalysis.Symbols.ISymbolInternal.DeclaringCompilation => this.DeclaringCompilation;
+    Microsoft.CodeAnalysis.ISymbol Microsoft.CodeAnalysis.Symbols.ISymbolInternal.GetISymbol() => this.ISymbol;
+    bool Microsoft.CodeAnalysis.Symbols.ISymbolInternal.Equals(Microsoft.CodeAnalysis.Symbols.ISymbolInternal other, TypeCompareKind compareKind) => this.Equals(other as Symbol, compareKind);
 #nullable enable
     #endregion
 

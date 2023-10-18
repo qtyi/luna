@@ -25,16 +25,16 @@ using Syntax;
 internal sealed partial class DeclarationTreeBuilder : ThisSyntaxVisitor
 {
     private readonly SyntaxTree _syntaxTree;
-    private readonly string _scriptClassName;
+    private readonly string _scriptModuleName;
     private readonly bool _isSubmission;
 
     private DeclarationTreeBuilder(
         SyntaxTree syntaxTree,
-        string scriptClassName,
+        string scriptModuleName,
         bool isSubmission)
     {
         this._syntaxTree = syntaxTree;
-        this._scriptClassName = scriptClassName;
+        this._scriptModuleName = scriptModuleName;
         this._isSubmission = isSubmission;
     }
 
@@ -42,15 +42,15 @@ internal sealed partial class DeclarationTreeBuilder : ThisSyntaxVisitor
     /// Build a root declaration for a syntax tree.
     /// </summary>
     /// <param name="syntaxTree">The syntax tree which declaration is build for.</param>
-    /// <param name="scriptClassName">The name of the script class.</param>
+    /// <param name="scriptModuleName">The name of the script class.</param>
     /// <param name="isSubmission">Whether it is a script submission.</param>
     /// <returns>The root declaration.</returns>
     public static ModuleDeclaration ForTree(
         SyntaxTree syntaxTree,
-        string scriptClassName,
+        string scriptModuleName,
         bool isSubmission)
     {
-        var builder = new DeclarationTreeBuilder(syntaxTree, scriptClassName, isSubmission);
+        var builder = new DeclarationTreeBuilder(syntaxTree, scriptModuleName, isSubmission);
         return (ModuleDeclaration)builder.Visit(syntaxTree.GetRoot())!;
     }
 

@@ -19,8 +19,8 @@ partial class SourceAssemblySymbol
             switch (incompletePart)
             {
                 case CompletionPart.Module:
-                    this.SourceNetModule.ForceComplete(location, cancellationToken);
-                    if (this.SourceNetModule.HasComplete(CompletionPart.MembersCompleted))
+                    this.SourceNetmodule.ForceComplete(location, cancellationToken);
+                    if (this.SourceNetmodule.HasComplete(CompletionPart.MembersCompleted))
                     {
                         this._state.NotePartComplete(CompletionPart.Module);
                         break;
@@ -35,7 +35,7 @@ partial class SourceAssemblySymbol
                 case CompletionPart.FinishValidatingAddedModules:
                     if (this._state.NotePartComplete(CompletionPart.StartValidatingAddedModules))
                     {
-                        this.ReportDiagnosticsForAddedNetModules();
+                        this.ReportDiagnosticsForAddedNetmodules();
                         var thisThreadCompleted = this._state.NotePartComplete(CompletionPart.FinishValidatingAddedModules);
                         Debug.Assert(thisThreadCompleted);
                     }

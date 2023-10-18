@@ -88,5 +88,5 @@ internal partial class
     /// <remarks>在此类及子类中不应调用此方法。</remarks>
     /// <exception cref="ExceptionUtilities.Unreachable">当在此类及子类中调用此方法时。</exception>
     /// <inheritdoc/>
-    protected sealed override ThisInternalSyntaxNode? DefaultVisit(ThisInternalSyntaxNode node) => throw ExceptionUtilities.Unreachable;
+    protected sealed override ThisInternalSyntaxNode? DefaultVisit(ThisInternalSyntaxNode node) => throw ExceptionUtilities.Unreachable();
 }

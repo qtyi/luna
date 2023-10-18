@@ -25,7 +25,7 @@ partial class DeclarationTreeBuilder
         }
 
         return new(
-        name: this._scriptClassName,
+        name: this._scriptModuleName,
         syntaxReference: this._syntaxTree.GetReference(chunk),
         children: builder.ToImmutableAndFree(),
         diagnostics: ImmutableArray<Diagnostic>.Empty);

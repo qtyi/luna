@@ -13,12 +13,14 @@ using ThisDiagnosticFormatter = LuaDiagnosticFormatter;
 namespace Qtyi.CodeAnalysis.MoonScript;
 
 using ThisDiagnosticFormatter = MoonScriptDiagnosticFormatter;
+#else
+#error Not implemented
 #endif
 
 /// <summary>
 /// The formatter to format a diagnostic reported from command line.
 /// </summary>
-internal sealed partial class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
+internal sealed class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
 {
     /// <summary>The base directory path.</summary>
     private readonly string _baseDirectory;

@@ -173,6 +173,10 @@ internal partial class LanguageParser : SyntaxParser
             return this._pool.ToListAndFree(builder).Node;
     }
 
+    private partial bool IsPossibleExpression();
+
+    private partial ExpressionSyntax ParseExpressionCore();
+
     private GreenNode? SkipTokensAndStatements(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor_SyntaxNode? visitor = null)
     {
         var builder = this._pool.Allocate<ThisInternalSyntaxNode>();
@@ -199,6 +203,10 @@ internal partial class LanguageParser : SyntaxParser
         else
             return this._pool.ToListAndFree(builder).Node;
     }
+
+    private partial bool IsPossibleStatement();
+
+    private partial StatementSyntax ParseStatement();
     #endregion
 
     #region ParseSyntaxList & ParseSeparatedSyntaxList

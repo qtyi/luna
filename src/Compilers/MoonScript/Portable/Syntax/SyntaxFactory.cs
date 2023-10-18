@@ -113,6 +113,11 @@ public static partial class SyntaxFactory
     #endregion
     #endregion
 
+    internal static partial IEnumerable<SyntaxToken> ParseTokens(Syntax.InternalSyntax.SyntaxToken green, int position)
+    {
+        yield return new(parent: null, token: green, position: position, index: 0);
+    }
+
     public static ChunkSyntax ParseCompilationUnit(string text, int offset = 0, MoonScriptParseOptions? options = null)
     {
         using var lexer = SyntaxFactory.MakeLexer(text, offset, options);

@@ -76,9 +76,8 @@ internal abstract partial class SyntaxParser : IDisposable
     /// </summary>
     public bool IsScript => this.Options.Kind == SourceCodeKind.Script;
 
-#if TESTING
+    // Only for test.
     protected internal bool IsAtEndOfFile => this.CurrentTokenKind == SyntaxKind.EndOfFileToken;
-#endif
 
     /// <summary>
     /// 获取或设置词法器模式。

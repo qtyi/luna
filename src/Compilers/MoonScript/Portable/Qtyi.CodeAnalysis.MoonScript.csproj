@@ -1,64 +1,67 @@
-<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+﻿<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(CoreLibraryTargetFrameworks)</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
-
-    <!-- 将生成的文件在“Generated”文件夹中生成副本。 -->
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>
     <PackageDescription>
-      .NET编译器平台（“Luna”）的组件“Qtyi.CodeAnalysis.MoonScript.dll”，提供MoonScript语言支持。
+      .NET Compiler Platform ("Luna") support for MoonScript, Qtyi.CodeAnalysis.MoonScript.dll.
     </PackageDescription>
     <PackageTags>Luna MoonScript CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
+
+    <!-- Enable output of generated files back into our Generated directory -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\Lua\Portable\Parser\Lexer.EndOfLine.cs" Link="Parser\Lexer.EndOfLine.cs" />
-    <Compile Include="..\..\Lua\Portable\Parser\Lexer.Identifier.cs" Link="Parser\Lexer.Identifier.cs" />
-    <Compile Include="..\..\Lua\Portable\Parser\Lexer.NumericLiteral.cs" Link="Parser\Lexer.NumericLiteral.cs" />
-    <Compile Include="..\..\Lua\Portable\Parser\Lexer.TokenInfo.cs" Link="Parser\Lexer.TokenInfo.Basic.cs" />
-    <Compile Include="..\..\Lua\Portable\Parser\Lexer.WhiteSpace.cs" Link="Parser\Lexer.WhiteSpace.cs" />
-    <Compile Include="..\..\Lua\Portable\SymbolDisplay\ObjectDisplay.cs" Link="SymbolDisplay\ObjectDisplay.cs" />
-    <Compile Include="..\..\Lua\Portable\SymbolDisplay\SymbolDisplay.cs" Link="SymbolDisplay\SymbolDisplay.cs" />
-  </ItemGroup>
+  <ItemGroup Label="AdditionalFiels">
+    <AdditionalFiles Include="CompilationOptions.xml" />
 
-  <ItemGroup>
     <None Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\Shared\Syntax.xsd" Link="Syntax\Syntax.xsd" />
     <AdditionalFiles Include="Syntax\Syntax.xml" />
 
     <AdditionalFiles Include="Symbols\Symbols.xml" />
 
-    <!-- 不将上一个源代码生成器产生的输出结果包含进入后续的运行流程。 -->
+    <!-- Don't include the output from a previous source generator execution into future runs; the */** trick here ensures that there's
+         at least one subdirectory, which is our key that it's coming from a source generator as opposed to something that is coming from
+         some other tool. -->
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/*/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.EndOfLine.cs" Link="Parser\Lexer.EndOfLine.cs" />
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.Identifier.cs" Link="Parser\Lexer.Identifier.cs" />
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.NumericLiteral.cs" Link="Parser\Lexer.NumericLiteral.cs" />
+    <Compile Include="..\..\Lua\Portable\Parser\Lexer.WhiteSpace.cs" Link="Parser\Lexer.WhiteSpace.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Resources">
     <EmbeddedResource Update="MoonScriptResources.resx" GenerateSource="true" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="InternalsVisibles">
     <!-- InternalsVisibleTo -->
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript.Parser.UnitTests" />
     <InternalsVisibleTo Include="moonc" />
+    <InternalsVisibleTo Include="Luna.Compilers.Simulators.MoonScript" />
 
     <!-- InternalsVisibleFrom -->
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="References">
+    <!-- PackageReference -->
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-  </ItemGroup>
 
-  <ItemGroup>
+    <!-- ProjectReference -->
     <ProjectReference Include="..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
     <ProjectReference Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\MoonScriptCodeAnalysisSourceGenerators\MoonScriptCodeAnalysisSourceGenerators.csproj">
       <OutputItemType>Analyzer</OutputItemType>

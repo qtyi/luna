@@ -2,7 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CodeAnalysis;
 using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.Lua;
@@ -22,12 +21,11 @@ partial class Symbol
             switch (this.Kind)
             {
                 case SymbolKind.Local:
-                case SymbolKind.Label:
                     return true;
 
                 case SymbolKind.Assembly:
                 case SymbolKind.DynamicType:
-                case SymbolKind.NetModule:
+                case SymbolKind.Netmodule:
                     return false;
 
                 case SymbolKind.Namespace:

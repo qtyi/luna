@@ -3,20 +3,19 @@
   
   <AbstractSymbol Name="AssemblySymbol" Base="Symbol"/>
 
-  <Symbol Name="NetModuleSymbol" Base="Symbol" Implement="ModuleSymbol"/>
+  <Symbol Name="NetmoduleSymbol" Base="Symbol" Implement="ModuleSymbol"/>
 
   <AbstractSymbol Name="ModuleSymbol" Base="Symbol"/>
 
-  <Symbol Name="NamespaceSymbol" Base="ModuleSymbol"/>
-  
   <AbstractSymbol Name="TypeSymbol" Base="ModuleSymbol"/>
-  <AbstractSymbol Name="NamedTypeSymbol" Base="TypeSymbol"/>
-  <AbstractSymbol Name="ErrorTypeSymbol" Base="TypeSymbol"/>
+  <Symbol Name="DynamicTypeSymbol" Base="TypeSymbol" Implement="DynamicTypeSymbol" Sealed="True"/>
+  <AbstractSymbol Name="NamedTypeSymbol" Base="TypeSymbol" Implement="NamedTypeSymbol"/>
+  <Symbol Name="ErrorTypeSymbol" Base="NamedTypeSymbol" Implement="ErrorTypeSymbol"/>
 
-  <AbstractSymbol Name="MemberSymbol" Base="Symbol"/>
-  
-  <Symbol Name="LocalSymbol" Base="Symbol"/>
+  <Symbol Name="LocalSymbol" Base="Symbol" Implement="LocalSymbol"/>
 
-  <Symbol Name="ParameterSymbol" Base="Symbol"/>
-  
+  <Symbol Name="ParameterSymbol" Base="Symbol" Implement="ParameterSymbol"/>
+
+  <Symbol Name="FieldSymbol" Base="ModuleSymbol" Implement="FieldSymbol"/>
+
 </Tree>

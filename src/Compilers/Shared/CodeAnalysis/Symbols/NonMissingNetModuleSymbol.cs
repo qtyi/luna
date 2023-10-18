@@ -19,9 +19,9 @@ using ThisReferenceManager = MoonScriptCompilation.ReferenceManager;
 #endif
 
 /// <summary>
-/// 一种特殊的<see cref="NetModuleSymbol"/>，表示未缺失的.NET模块符号（与<see cref="MissingNetModuleSymbol"/>相对）。
+/// 一种特殊的<see cref="NetmoduleSymbol"/>，表示未缺失的.NET模块符号（与<see cref="MissingNetmoduleSymbol"/>相对）。
 /// </summary>
-internal abstract partial class NonMissingNetModuleSymbol : NetModuleSymbol
+internal abstract partial class NonMissingNetmoduleSymbol : NetmoduleSymbol
 {
     /// <summary>此模块直接引用的程序集符号集合。</summary>
     /// <remarks>

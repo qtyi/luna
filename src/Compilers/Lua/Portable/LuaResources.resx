@@ -120,6 +120,9 @@
   <data name="CompilationLua" xml:space="preserve">
     <value>Compilation (Lua):</value>
   </data>
+  <data name="ERR_AssemblyMatchBadVersion" xml:space="preserve">
+    <value>Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'.</value>
+  </data>
   <data name="ERR_AssgLvalueExpected" xml:space="preserve">
     <value>The left-hand side of an assignment must be a variable or member.</value>
   </data>
@@ -140,6 +143,12 @@
   </data>
   <data name="ERR_CommaExpected" xml:space="preserve">
     <value>',' expected.</value>
+  </data>
+  <data name="ERR_CycleInTypeForwarder" xml:space="preserve">
+    <value>The type forwarder for type '{0}' in assembly '{1}' causes a cycle.</value>
+  </data>
+  <data name="ERR_DuplicateTypeForwarder" xml:space="preserve">
+    <value>'{0}' duplicate TypeForwardedToAttribute.</value>
   </data>
   <data name="ERR_ElseIfCannotStartStatement" xml:space="preserve">
     <value>'elseif' cannot start a statement.</value>
@@ -210,6 +219,9 @@
   <data name="ERR_TooManyIdentifiers" xml:space="preserve">
     <value>Too many control variables.</value>
   </data>
+  <data name="ERR_TypeForwardedToMultipleAssemblies" xml:space="preserve">
+    <value>Module '{0}' in assembly '{1}' is forwarding the type '{2}' to multiple assemblies: '{3}' and '{4}'.</value>
+  </data>
   <data name="ERR_UnexpectedCharacter" xml:space="preserve">
     <value>Unexpected character '{0}'.</value>
   </data>
@@ -266,5 +278,23 @@
   </data>
   <data name="WRN_FileAlreadyIncluded" xml:space="preserve">
     <value>Source file '{0}' specified multiple times.</value>
+  </data>
+  <data name="WRN_UnifyReferenceBldRev_Description" xml:space="preserve">
+    <value>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</value>
+  </data>
+  <data name="WRN_UnifyReferenceBldRev_Title" xml:space="preserve">
+    <value>Assuming assembly reference matches identity</value>
+  </data>
+  <data name="WRN_UnifyReferenceMajMin" xml:space="preserve">
+    <value>Assuming assembly reference '{0}' used by '{1}' matches identity '{2}' of '{3}', you may need to supply runtime policy.</value>
+  </data>
+  <data name="WRN_UnifyReferenceMajMin_Description" xml:space="preserve">
+    <value>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</value>
+  </data>
+  <data name="WRN_UnifyReferenceMajMin_Title" xml:space="preserve">
+    <value>Assuming assembly reference matches identity</value>
+  </data>
+  <data name="WrongSemanticModelType" xml:space="preserve">
+    <value>Expected a {0} SemanticModel.</value>
   </data>
 </root>

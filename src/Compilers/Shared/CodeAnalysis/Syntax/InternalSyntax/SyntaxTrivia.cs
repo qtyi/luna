@@ -97,9 +97,9 @@ internal partial class SyntaxTrivia :
 
     internal static SyntaxTrivia Create(SyntaxKind kind, string text) => new(kind, text);
 
-    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => throw ExceptionUtilities.Unreachable;
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => throw ExceptionUtilities.Unreachable();
 
-    internal override GreenNode? GetSlot(int index) => throw ExceptionUtilities.Unreachable;
+    internal override GreenNode? GetSlot(int index) => throw ExceptionUtilities.Unreachable();
 
     public override bool IsEquivalentTo([NotNullWhen(true)] GreenNode? other) =>
         base.IsEquivalentTo(other) && this.Text == ((SyntaxTrivia)other).Text;

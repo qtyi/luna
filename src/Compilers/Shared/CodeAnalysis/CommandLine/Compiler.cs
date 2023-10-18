@@ -15,8 +15,8 @@ namespace Qtyi.CodeAnalysis.Lua;
 
 using ThisCommandLineArguments = LuaCommandLineArguments;
 using ThisCommandLineParser = LuaCommandLineParser;
-using ThisCompiler = LuaCompiler;
 using ThisCompilation = LuaCompilation;
+using ThisCompiler = LuaCompiler;
 using ThisGeneratorDriver = LuaGeneratorDriver;
 using ThisMessageProvider = MessageProvider;
 using ThisParseOptions = LuaParseOptions;
@@ -26,23 +26,19 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 
 using ThisCommandLineArguments = MoonScriptCommandLineArguments;
 using ThisCommandLineParser = MoonScriptCommandLineParser;
-using ThisCompiler = MoonScriptCompiler;
 using ThisCompilation = MoonScriptCompilation;
+using ThisCompiler = MoonScriptCompiler;
 using ThisGeneratorDriver = MoonScriptGeneratorDriver;
 using ThisMessageProvider = MessageProvider;
 using ThisParseOptions = MoonScriptParseOptions;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
+#else
+#error Not implemented
 #endif
 
-#if LANG_LUA
 /// <summary>
-/// Provide a base class for Lua compiler.
+/// Provide a base class for compiler.
 /// </summary>
-#elif LANG_MOONSCRIPT
-/// <summary>
-/// Provide a base class for MoonScript compiler.
-/// </summary>
-#endif
 internal abstract partial class
 #if LANG_LUA
     LuaCompiler
@@ -332,7 +328,7 @@ internal abstract partial class
 
         var comp = (ThisCompilation)compilation;
         // Check if implicit script class is defined in this compilation.
-        Symbol? entryPoint = comp.ScriptClass;
+        Symbol? entryPoint = comp.ScriptModule;
         if (entryPoint is null)
         {
             var method = comp.GetEntryPoint(cancellationToken);
@@ -340,7 +336,7 @@ internal abstract partial class
                 // no entrypoint found - an error will be reported and the compilation won't be emitted
                 return "error";
 
-            entryPoint = method.PartialImplementationPart ?? method;
+            entryPoint = method;
         }
 
         // Get source file name which contains entry point symbol.

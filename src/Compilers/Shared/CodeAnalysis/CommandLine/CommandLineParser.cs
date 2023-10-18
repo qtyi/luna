@@ -16,17 +16,13 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 using ThisCommandLineArguments = MoonScriptCommandLineArguments;
 using ThisCommandLineParser = MoonScriptCommandLineParser;
 using ThisMessageProvider = MessageProvider;
+#else
+#error Not implemented
 #endif
 
-#if LANG_LUA
 /// <summary>
-/// The Lua command line parser.
+/// The command line parser that produce <see cref="ThisCommandLineArguments"/>.
 /// </summary>
-#elif LANG_MOONSCRIPT
-/// <summary>
-/// The MoonScript command line parser.
-/// </summary>
-#endif
 public partial class
 #if LANG_LUA
     LuaCommandLineParser
@@ -82,6 +78,17 @@ public partial class
         string? sdkDirectory,
         string? additionalReferenceDirectories = null);
 
+    /// <summary>
+    /// Generate diagnostics for no files found in recurse.
+    /// </summary>
+    /// <param name="path">Path of the file to search.</param>
+    /// <param name="diagnostics">A list of diagnostics reported.</param>
+    internal override void GenerateErrorForNoFilesFoundInRecurse(string path, IList<Diagnostic> diagnostics)
+    {
+        //  no error in this exe.
+        return;
+    }
+
     #region AddDiagnostic
     /// <summary>
     /// Add diagnostic for the <paramref name="errorCode"/>.
@@ -118,25 +125,14 @@ public partial class
 
     #region CommandLineParser
     /// <remarks>
-    /// Use <see cref="Parse(IEnumerable{string}, string?, string?, string?)"/> instead.
+    /// Use <see cref="ThisCommandLineParser.Parse(IEnumerable{string}, string?, string?, string?)"/> instead.
     /// </remarks>
-    /// <inheritdoc cref="Parse(IEnumerable{string}, string?, string?, string?)"/>
+    /// <inheritdoc cref="ThisCommandLineParser.Parse(IEnumerable{string}, string?, string?, string?)"/>
     internal override CommandLineArguments CommonParse(
         IEnumerable<string> args,
         string baseDirectory,
         string? sdkDirectory,
         string? additionalReferenceDirectories) =>
         this.Parse(args, baseDirectory, sdkDirectory, additionalReferenceDirectories);
-
-    /// <summary>
-    /// 当递归查找与模式相匹配的文件，但未找到任何文件时，产生诊断错误。
-    /// </summary>
-    /// <param name="path">要查找的文件路径</param>
-    /// <param name="diagnostics">容纳诊断错误的列表。</param>
-    internal override void GenerateErrorForNoFilesFoundInRecurse(string path, IList<Diagnostic> diagnostics)
-    {
-        // 不产生诊断错误。
-        return;
-    }
     #endregion
 }

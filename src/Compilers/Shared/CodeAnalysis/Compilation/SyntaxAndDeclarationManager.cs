@@ -19,25 +19,27 @@ internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDecla
     /// <summary>
     /// State of syntax and declaration.
     /// </summary>
-    private State _lazyState;
+    private State? _lazyState;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SyntaxAndDeclarationManager"/> class with the specified <see cref="State"/>.
     /// </summary>
     /// <param name="externalSyntaxTrees">A collection of external syntax trees.</param>
-    /// <param name="scriptClassName">The name of script class.</param>
+    /// <param name="scriptModuleName">The name of script module.</param>
     /// <param name="resolver">An object that resolves references to source documents specified in the source.</param>
     /// <param name="messageProvider">An object that classify and load messages for error codes.</param>
     /// <param name="isSubmission">Whether it is submission.</param>
     /// <param name="state">An immutable state of syntax and declaration.</param>
     internal SyntaxAndDeclarationManager(
         ImmutableArray<SyntaxTree> externalSyntaxTrees,
-        string scriptClassName,
-        SourceReferenceResolver resolver,
+        string? scriptModuleName,
+        SourceReferenceResolver? resolver,
         CommonMessageProvider messageProvider,
         bool isSubmission,
-        State state)
-        : base(externalSyntaxTrees, scriptClassName, resolver, messageProvider, isSubmission)
+        State? state)
+#nullable disable
+        : base(externalSyntaxTrees, scriptModuleName, resolver, messageProvider, isSubmission)
+#nullable enable
     {
         this._lazyState = state;
     }
@@ -83,8 +85,8 @@ internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDecla
     /// </summary>
     private static partial State CreateState(
         ImmutableArray<SyntaxTree> externalSyntaxTrees,
-        string scriptClassName,
-        SourceReferenceResolver resolver,
+        string scriptModuleName,
+        SourceReferenceResolver? resolver,
         CommonMessageProvider messageProvider,
         bool isSubmission);
 

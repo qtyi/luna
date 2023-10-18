@@ -24,6 +24,8 @@ namespace Qtyi.CodeAnalysis.MoonScript
         ERR_BadSourceCodeKind,
         ERR_BadDocumentationMode,
         ERR_BadLanguageVersion,
+        /// <summary>迭代过深，执行栈空间不足。</summary>
+        ERR_InsufficientStack,
         /// <summary>意外的字符</summary>
         ERR_UnexpectedCharacter,
         /// <summary>语法错误。</summary>
@@ -47,12 +49,25 @@ namespace Qtyi.CodeAnalysis.MoonScript
         ERR_IdentifierExpectedKW,
         #endregion
 
+        WRN_UnifyReferenceMajMin,
+        WRN_UnifyReferenceBldRev,
+        ERR_AssemblyMatchBadVersion,
+
+        #region Forwarded Types
+        /// <summary>The type forwarder for a type causes a cycle.</summary>
+        ERR_CycleInTypeForwarder,
+        /// <summary>There are duplicate <see cref="System.Runtime.CompilerServices.TypeForwardedToAttribute"/>s.</summary>
+        ERR_DuplicateTypeForwarder,
+        /// <summary>A type is forwarded to multiple assemblies.</summary>
+        ERR_TypeForwardedToMultipleAssemblies,
+        #endregion
+
         #region MoonScript 0.5的消息
         [Obsolete("未正式发行版本")]
         ERR_FeatureNotAvailableInVersion0_5,
         #endregion
 
-        #region Lua实验性版本的消息
+        #region MoonScript实验性版本的消息
         ERR_FeatureIsExperimental = 8501,
         ERR_FeatureInPreview,
         #endregion

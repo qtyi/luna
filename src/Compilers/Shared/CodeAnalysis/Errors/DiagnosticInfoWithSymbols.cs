@@ -73,6 +73,6 @@ internal class DiagnosticInfoWithSymbols : DiagnosticInfo
     /// </summary>
     /// <param name="severity">New diagnostic severity.</param>
     /// <returns>A new diagnostic info.</returns>
-    internal override DiagnosticInfo GetInstanceWithSeverity(DiagnosticSeverity severity) => new DiagnosticInfoWithSymbols(this, severity);
+    protected override DiagnosticInfo GetInstanceWithSeverityCore(DiagnosticSeverity severity) => new DiagnosticInfoWithSymbols(this, severity);
     #endregion
 }

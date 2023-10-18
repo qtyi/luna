@@ -16,12 +16,20 @@ namespace Qtyi.CodeAnalysis.Lua.Symbols;
 
 using ThisCompilation = LuaCompilation;
 using ThisDiagnosticInfo = LuaDiagnosticInfo;
+using ThisSymbolVisitor = LuaSymbolVisitor;
+using ThisSymbolVisitor<TResult> = LuaSymbolVisitor<TResult>;
+using ThisSymbolVisitor<TArgument, TResult> = LuaSymbolVisitor<TArgument, TResult>;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
 
 using ThisCompilation = MoonScriptCompilation;
 using ThisDiagnosticInfo = MoonScriptDiagnosticInfo;
+using ThisSymbolVisitor = MoonScriptSymbolVisitor;
+using ThisSymbolVisitor<TResult> = MoonScriptSymbolVisitor<TResult>;
+using ThisSymbolVisitor<TArgument, TResult> = MoonScriptSymbolVisitor<TArgument, TResult>;
 #endif
+
+using Metadata.PE;
 
 internal sealed partial class SourceAssemblySymbol : AssemblySymbol
 {
@@ -36,9 +44,9 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
 
     /// <summary>
     /// 组成此程序集的模块列表。
-    /// 其第一项为一个私有的<see cref="SourceNetModuleSymbol"/>，其他的均为.NET模块。
+    /// 其第一项为一个私有的<see cref="SourceNetmoduleSymbol"/>，其他的均为.NET模块。
     /// </summary>
-    private readonly ImmutableArray<NetModuleSymbol> _modules;
+    private readonly ImmutableArray<NetmoduleSymbol> _modules;
 
     /// <summary>许可此程序集操作内部元数据的程序集符号集。其中的程序集符号应符合特定的名称以及公钥。</summary>
     private ConcurrentSet<AssemblySymbol> _optimisticallyGrantedInternalsAccess;
@@ -53,7 +61,7 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
 
     public override bool IsInteractive => this._compilation.IsSubmission;
 
-    public override ImmutableArray<NetModuleSymbol> NetModules => this._modules;
+    public override ImmutableArray<NetmoduleSymbol> Netmodules => this._modules;
 
     public override ImmutableArray<Location> Locations => this._modules.SelectMany(m => m.Locations).AsImmutable();
 
@@ -72,13 +80,7 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
 
     internal override ImmutableArray<byte> PublicKey => this.StrongNameKeys.PublicKey;
 
-    private Version AssemblyVersion
-    {
-        get
-        {
-
-        }
-    }
+    private Version AssemblyVersion => throw new NotImplementedException();
 
     public override Version? AssemblyVersionPattern
     {
@@ -89,39 +91,39 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
         }
     }
 
-    internal string FileVersion { get { } }
+    internal string FileVersion => throw new NotImplementedException();
 
-    internal string InformationVersion { get { } }
+    internal string InformationVersion => throw new NotImplementedException();
 
-    internal string Title { get { } }
+    internal string Title => throw new NotImplementedException();
 
-    internal string Description { get { } }
+    internal string Description => throw new NotImplementedException();
 
-    internal string Company { get { } }
+    internal string Company => throw new NotImplementedException();
 
-    internal string Product { get { } }
+    internal string Product => throw new NotImplementedException();
 
-    internal string Copyright { get { } }
+    internal string Copyright => throw new NotImplementedException();
 
-    internal string Trademark { get { } }
+    internal string Trademark => throw new NotImplementedException();
 
-    private ThreeState AssemblyDelaySign { get { } }
+    private ThreeState AssemblyDelaySign => throw new NotImplementedException();
 
-    private string AssemblyKeyContainer { get { } }
+    private string AssemblyKeyContainer => throw new NotImplementedException();
 
-    private string AssemblyKeyFile { get { } }
+    private string AssemblyKeyFile => throw new NotImplementedException();
 
-    private string AssemblyCulture { get { } }
+    private string AssemblyCulture => throw new NotImplementedException();
 
-    public string SignatureKey { get { } }
+    public string SignatureKey => throw new NotImplementedException();
 
-    internal AssemblyHashAlgorithm? AssemblyAlgorithmId { get { } }
+    internal AssemblyHashAlgorithm? AssemblyAlgorithmId => throw new NotImplementedException();
 
     public AssemblyHashAlgorithm HashAlgorithm => this.AssemblyAlgorithmId ?? AssemblyHashAlgorithm.Sha1;
 
-    public AssemblyFlags AssemblyFlags { get { } }
+    public AssemblyFlags AssemblyFlags => throw new NotImplementedException();
 
-    public bool InternalsAreVisible { get { } }
+    public bool InternalsAreVisible => throw new NotImplementedException();
 
     internal bool IsDelaySigned
     {
@@ -134,28 +136,28 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
         }
     }
 
-    internal SourceNetModuleSymbol SourceNetModule => (SourceNetModuleSymbol)this._modules[0];
+    internal SourceNetmoduleSymbol SourceNetmodule => (SourceNetmoduleSymbol)this._modules[0];
 
     internal SourceAssemblySymbol(
         ThisCompilation compilation,
         string assemblySimpleName,
         string moduleName,
-        ImmutableArray<PEModule> netModules)
+        ImmutableArray<PEModule> netmodules)
     {
         Debug.Assert(!string.IsNullOrWhiteSpace(moduleName));
-        Debug.Assert(!netModules.IsDefault);
+        Debug.Assert(!netmodules.IsDefault);
 
         this._compilation = compilation;
         this._assemblySimpleName = assemblySimpleName;
 
-        var moduleBuilder = new ArrayBuilder<NetModuleSymbol>(netModules.Length + 1);
-        moduleBuilder.Add(new SourceNetModuleSymbol(this, compilation.Declarations, moduleName));
+        var moduleBuilder = new ArrayBuilder<NetmoduleSymbol>(netmodules.Length + 1);
+        moduleBuilder.Add(new SourceNetmoduleSymbol(this, compilation.Declarations, moduleName));
 
         var importOptions = (compilation.Options.MetadataImportOptions == MetadataImportOptions.All) ?
             MetadataImportOptions.All : MetadataImportOptions.Internal;
 
-        foreach (var netModule in netModules)
-            moduleBuilder.Add(new PEModuleSymbol(this, netModule, importOptions, moduleBuilder.Count));
+        foreach (var netmodule in netmodules)
+            moduleBuilder.Add(new PENetmoduleSymbol(this, netmodule, importOptions, moduleBuilder.Count));
 
         this._modules = moduleBuilder.ToImmutableAndFree();
 
@@ -201,9 +203,9 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
 
     internal bool MightContainNoPiaLocalTypes()
     {
-        foreach (Metadata.PE.PEModuleSymbol peModuleSymbol in this._modules)
+        foreach (PENetmoduleSymbol peNetmoduleSymbol in this._modules)
         {
-            if (peModuleSymbol.Module.ContainsNoPiaLocalTypes())
+            if (peNetmoduleSymbol.Module.ContainsNoPiaLocalTypes())
                 return true;
         }
 
@@ -222,123 +224,14 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
     internal override partial void ForceComplete(SourceLocation? location, CancellationToken cancellationToken);
     #endregion
 
-    private void ReportDiagnosticsForAddedNetModules()
+    private void ReportDiagnosticsForAddedNetmodules()
     {
-        var diagnostics = BindingDiagnosticBag.GetInstance();
-
-        foreach (var (reference, index) in this._compilation.GetBoundReferenceManager().ReferencedModuleIndexMap as IDictionary<MetadataReference, int>)
-        {
-            if (reference is PortableExecutableReference fileRef && fileRef.FilePath is not null)
-            {
-                var fileName = FileNameUtilities.GetFileName(fileRef.FilePath);
-                var moduleName = this._modules[index].Name;
-
-                if (!string.Equals(fileName, moduleName, StringComparison.OrdinalIgnoreCase))
-                    diagnostics.Add(ErrorCode.ERR_NetModuleNameMismatch, NoLocation.Singleton, moduleName, fileName);
-            }
-        }
-
-        // 仅在发射程序集时检查。
-        if (this._modules.Length > 1 && !this._compilation.Options.OutputKind.IsNetModule())
-        {
-            var assemblyMachine = this.Machine;
-            var isPlatformAgnostic = (assemblyMachine == Machine.I386 && !this.Bit32Required);
-            var knownModuleNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var m in this._modules)
-            {
-                if (!knownModuleNames.Add(m.Name))
-                    diagnostics.Add(ErrorCode.ERR_NetModuleNameMustBeUnique, NoLocation.Singleton, m.Name);
-
-                if (!((PEModuleSymbol)m).Module.IsCOFFOnly)
-                {
-                    var moduleMachine = m.Machine;
-
-                    if (moduleMachine == Machine.I386 && !m.Bit32Required)
-                    {
-                        // 这种情况是合理的，其他情况不合理。
-                        ;
-                    }
-                    else if (isPlatformAgnostic)
-                        diagnostics.Add(ErrorCode.ERR_AgnosticToMachineModule, NoLocation.Singleton, m);
-                    else if (assemblyMachine != moduleMachine)
-                        diagnostics.Add(ErrorCode.ERR_ConflictingMachineModule, NoLocation.Singleton, m);
-                }
-            }
-
-            // 程序集的主模块必须显式地引用被其他程序集模块引用的所有模块，例如传递闭包中的所有模块都必须在此显式地引用。
-            foreach (PEModuleSymbol m in this._modules)
-            {
-                try
-                {
-                    foreach (var referencedModuleName in m.Module.GetReferencedManagedModulesOrThrow())
-                    {
-                        if (knownModuleNames.Add(referencedModuleName))
-                            diagnostics.Add(ErrorCode.ERR_MissingNetModuleReference, NoLocation.Singleton, referencedModuleName);
-                    }
-                }
-                catch (BadImageFormatException)
-                {
-                    diagnostics.Add(new ThisDiagnosticInfo(ErrorCode.ERR_BindToBogus, m), NoLocation.Singleton);
-                }
-            }
-        }
-
-        this.ReportNameCollisionDiagnosticsForAddedModules(this.GlobalNamespace, diagnostics);
-        this.AddDeclarationDiagnostics(diagnostics);
-        diagnostics.Free();
+        throw new NotImplementedException();
     }
-    private void ReportNameCollisionDiagnosticsForAddedModules(NamespaceSymbol ns, BindingDiagnosticBag diagnostics)
+
+    private void ReportNameCollisionDiagnosticsForAddedModules(ModuleSymbol module, BindingDiagnosticBag diagnostics)
     {
-        if (ns is not MergedNamespaceSymbol mergedNs) return;
-
-        ImmutableArray<NamespaceSymbol> constituent = mergedNs.ConstituentNamespaces;
-
-        if (constituent.Length > 2 || (constituent.Length == 2 && constituent[0].ContainingModule.Ordinal != 0 && constituent[1].ContainingModule.Ordinal != 0))
-        {
-            var topLevelTypesFromModules = ArrayBuilder<NamedTypeSymbol>.GetInstance();
-
-            foreach (var moduleNs in constituent)
-            {
-                Debug.Assert(moduleNs.Extent.Kind == NamespaceKind.Module);
-
-                if (moduleNs.ContainingModule.Ordinal != 0)
-                    topLevelTypesFromModules.AddRange(moduleNs.GetTypeMembers());
-            }
-
-            topLevelTypesFromModules.Sort(NameCollisionForAddedModulesTypeComparer.Singleton);
-
-            var reportedAnError = false;
-            for (var i = 0; i < topLevelTypesFromModules.Count - 1; i++)
-            {
-                var x = topLevelTypesFromModules[i];
-                var y = topLevelTypesFromModules[i + 1];
-
-                if (x.Arity == y.Arity && x.Name == y.Name)
-                {
-                    if (!reportedAnError)
-                    {
-                        // Skip synthetic <Module> type which every .NET module has.
-                        if (x.Arity != 0 || !x.ContainingNamespace.IsGlobalNamespace || x.Name != "<Module>")
-                            diagnostics.Add(ErrorCode.ERR_DuplicateNameInNS, y.Locations.FirstOrNone(),
-                                            y.ToDisplayString(SymbolDisplayFormat.ShortFormat),
-                                            y.ContainingNamespace);
-
-                        reportedAnError = true;
-                    }
-                }
-                else reportedAnError = false;
-            }
-
-            topLevelTypesFromModules.Free();
-
-            // 递归处理子命名空间。
-            foreach (Symbol member in mergedNs.GetMembers())
-            {
-                if (member.Kind == SymbolKind.Namespace)
-                    this.ReportNameCollisionDiagnosticsForAddedModules((NamespaceSymbol)member, diagnostics);
-            }
-        }
+        throw new NotImplementedException();
     }
 
     private class NameCollisionForAddedModulesTypeComparer : IComparer<NamedTypeSymbol>
@@ -359,11 +252,129 @@ internal sealed partial class SourceAssemblySymbol : AssemblySymbol
                 result = x.Arity - y.Arity;
 
                 if (result == 0)
-                    result = x.ContainingModule.Ordinal - y.ContainingModule.Ordinal;
+                    result = x.ContainingNetmodule.Ordinal - y.ContainingNetmodule.Ordinal;
             }
 
             return result;
         }
     }
+}
 
+partial class SourceAssemblySymbol
+{
+#warning 未完成
+    public override string MetadataName => base.MetadataName;
+
+    public override int MetadataToken => base.MetadataToken;
+
+    public override bool IsImplicitlyDeclared => base.IsImplicitlyDeclared;
+
+    public override bool HasUnsupportedMetadata => base.HasUnsupportedMetadata;
+
+    internal override ModuleSymbol GlobalNamespace => throw new NotImplementedException();
+
+    public override ModuleSymbol GlobalModule => throw new NotImplementedException();
+
+    public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => base.DeclaringSyntaxReferences;
+
+    public override ICollection<string> TypeNames => throw new NotImplementedException();
+
+    public override ICollection<string> ModuleNames => throw new NotImplementedException();
+
+    public override bool MightContainExtensionMethods => throw new NotImplementedException();
+
+    public override AssemblyMetadata GetMetadata()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override Symbol OriginalSymbolDefinition => base.OriginalSymbolDefinition;
+
+    internal override ModuleSymbol? ContainingNamespace => base.ContainingNamespace;
+
+    internal override bool IsMissing => throw new NotImplementedException();
+
+    internal override bool KeepLookingForDeclaredSpecialTypes => base.KeepLookingForDeclaredSpecialTypes;
+
+    internal override ICollection<string> NamespaceNames => throw new NotImplementedException();
+
+    public override void Accept(ThisSymbolVisitor visitor)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override TResult? Accept<TResult>(ThisSymbolVisitor<TResult> visitor) where TResult : default
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool Equals(Symbol? other, TypeCompareKind compareKind)
+    {
+        return base.Equals(other, compareKind);
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
+    protected override ISymbol CreateISymbol()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override SymbolAdapter GetCciAdapterImpl()
+    {
+        return base.GetCciAdapterImpl();
+    }
+
+    protected override bool IsHighestPriorityUseSiteErrorCode(int code)
+    {
+        return base.IsHighestPriorityUseSiteErrorCode(code);
+    }
+
+    internal override TResult? Accept<TArgument, TResult>(ThisSymbolVisitor<TArgument, TResult> visitor, TArgument argument) where TResult : default
+    {
+        throw new NotImplementedException();
+    }
+
+    internal override IEnumerable<NamedTypeSymbol> GetAllTopLevelForwardedTypes()
+    {
+        throw new NotImplementedException();
+    }
+
+    internal override NamedTypeSymbol GetDeclaredSpecialType(SpecialType type)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal override LexicalSortKey GetLexicalSortKey()
+    {
+        return base.GetLexicalSortKey();
+    }
+
+    internal override UseSiteInfo<AssemblySymbol> GetUseSiteInfo()
+    {
+        return base.GetUseSiteInfo();
+    }
+
+    internal override NamedTypeSymbol LookupDeclaredOrForwardedTopLevelMetadataType(ref MetadataTypeName emittedName, ConsList<AssemblySymbol>? visitedAssemblies)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal override NamedTypeSymbol? LookupDeclaredTopLevelMetadataType(ref MetadataTypeName emittedName)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal override void RegisterDeclaredSpecialType(NamedTypeSymbol corType)
+    {
+        base.RegisterDeclaredSpecialType(corType);
+    }
+
+    internal override NamedTypeSymbol? TryLookupForwardedMetadataTypeWithCycleDetection(ref MetadataTypeName emittedName, ConsList<AssemblySymbol>? visitedAssemblies)
+    {
+        return base.TryLookupForwardedMetadataTypeWithCycleDetection(ref emittedName, visitedAssemblies);
+    }
 }

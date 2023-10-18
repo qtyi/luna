@@ -180,7 +180,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
         this.FullWidth < Lexer.MaxCachedTokenSize;
 
     /// <exception cref="InvalidOperationException">此方法永远不会被调用。</exception>
-    internal sealed override GreenNode? GetSlot(int index) => throw ExceptionUtilities.Unreachable;
+    internal sealed override GreenNode? GetSlot(int index) => throw ExceptionUtilities.Unreachable();
 
     #region 常见标记
     private static readonly ArrayElement<SyntaxToken>[] s_tokensWithNoTrivia = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];
@@ -315,7 +315,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     }
 
     /// <exception cref="InvalidOperationException">此方法永远不会被调用。</exception>
-    internal sealed override SyntaxNode CreateRed(SyntaxNode? parent, int position) => throw ExceptionUtilities.Unreachable;
+    internal sealed override SyntaxNode CreateRed(SyntaxNode? parent, int position) => throw ExceptionUtilities.Unreachable();
 
     public override string ToString() => this.Text;
 }

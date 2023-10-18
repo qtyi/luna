@@ -34,10 +34,11 @@ using ThisMessageProvider = MessageProvider;
 using ThisScriptCompilationInfo = MoonScriptScriptCompilationInfo;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
 using ThisResources = MoonScriptResources;
+#else
+#error Not implemented
 #endif
 
 using Symbols;
-using System;
 
 #warning 未实现。
 /// <summary>
@@ -57,6 +58,7 @@ public sealed partial class
     : Compilation
 {
     private readonly ThisCompilationOptions _options;
+    private readonly Lazy<ModuleSymbol> _scriptModule;
 
     /// <summary>
     /// Gets the options the compilation was created with.
@@ -85,11 +87,6 @@ public sealed partial class
 
     private readonly SyntaxAndDeclarationManager _syntaxAndDeclarations;
 
-    /// <summary>
-    /// Contains the main method of this assembly, if there is one.
-    /// </summary>
-    private EntryPoint? _lazyEntryPoint;
-
     #region Language Version and Features
     /// <summary>
     /// Gets the language version that was used to parse the syntax trees of this compilation.
@@ -105,7 +102,7 @@ public sealed partial class
     /// earlier versions of the compiler failed to enforce the full language specification.
     /// </summary>
     /// <value>
-    /// <see langword="true"/> when the compiler is run in "strict" mode; otherwise, <see langword="false"/>.
+    /// Returns <see langword="true"/> when the compiler is run in "strict" mode; otherwise, <see langword="false"/>.
     /// </value>
     internal bool FeatureStrictEnabled => this.Feature("strict") is not null;
     #endregion
@@ -273,7 +270,7 @@ public sealed partial class
             reuseReferenceManager: false,
             syntaxAndDeclarations: new SyntaxAndDeclarationManager(
                 ImmutableArray<SyntaxTree>.Empty,
-                options.ScriptClassName,
+                options.ScriptModuleName,
                 options.SourceReferenceResolver,
                 ThisMessageProvider.Instance,
                 isSubmission,
@@ -369,7 +366,7 @@ public sealed partial class
     /// </value>
     public new bool ContainsSyntaxTree(SyntaxTree? syntaxTree)
     {
-        return syntaxTree != null && _syntaxAndDeclarations.GetLazyState().Modules.ContainsKey(syntaxTree);
+        return syntaxTree is not null && _syntaxAndDeclarations.GetLazyState().Modules.ContainsKey(syntaxTree);
     }
 
     /// <inheritdoc cref="Compilation.AddSyntaxTrees(SyntaxTree[])"/>
@@ -549,34 +546,200 @@ public sealed partial class
     }
     #endregion
 
+    #region References
+    /// <summary>
+    /// Get a <see cref="ReferenceManager"/> after the source assembly symbol for this compilation initialized.
+    /// </summary>
+    /// <returns>A bound <see cref="ReferenceManager"/>.</returns>
+    internal new ReferenceManager GetBoundReferenceManager()
+    {
+        if (this._lazyAssemblySymbol is null)
+        {
+            this._referenceManager.CreateSourceAssemblyForCompilation(this);
+            Debug.Assert(this._lazyAssemblySymbol is not null);
+        }
+
+        // referenceManager can only be accessed after we initialized the lazyAssemblySymbol.
+        // In fact, initialization of the assembly symbol might change the reference manager.
+        return _referenceManager;
+    }
+
+    /// <inheritdoc/>
+    /// <returns>Assembly identities of all assemblies directly referenced by this compilation.</returns>
+    public override IEnumerable<AssemblyIdentity> ReferencedAssemblyNames => Assembly.Netmodules.SelectMany(module => module.ReferencedAssemblies);
+
+    /// <inheritdoc cref="Compilation.AddReferences(MetadataReference[])"/>
+    public new ThisCompilation AddReferences(params MetadataReference[] references) =>
+        (ThisCompilation)base.AddReferences(references);
+
+    /// <inheritdoc cref="Compilation.AddReferences(IEnumerable{MetadataReference})"/>
+    public new ThisCompilation AddReferences(IEnumerable<MetadataReference> references) =>
+        (ThisCompilation)base.AddReferences(references);
+
+    /// <inheritdoc cref="Compilation.RemoveReferences(MetadataReference[])"/>
+    public new ThisCompilation RemoveReferences(params MetadataReference[] references) =>
+        (ThisCompilation)base.RemoveReferences(references);
+
+    /// <inheritdoc cref="Compilation.RemoveReferences(IEnumerable{MetadataReference})"/>
+    public new ThisCompilation RemoveReferences(IEnumerable<MetadataReference> references) =>
+        (ThisCompilation)base.RemoveReferences(references);
+
+    /// <inheritdoc cref="Compilation.RemoveAllReferences"/>
+    /// <returns>A new compilation.</returns>
+    public new ThisCompilation RemoveAllReferences() =>
+        (ThisCompilation)base.RemoveAllReferences();
+
+    /// <inheritdoc cref="Compilation.ReplaceReference(MetadataReference, MetadataReference?)"/>
+    public new ThisCompilation ReplaceReference(MetadataReference oldReference, MetadataReference newReference) =>
+        (ThisCompilation)base.ReplaceReference(oldReference, newReference);
+
+    /// <inheritdoc/>
+    /// <returns>A metadata reference for this compilation.</returns>
+    public override CompilationReference ToMetadataReference(ImmutableArray<string> aliases = default, bool embedInteropTypes = false) =>
+        new ThisCompilationReference(this, aliases, embedInteropTypes);
+
+    /// <remarks>
+    /// Use <see cref="ThisCompilation.GetMetadataReference(AssemblySymbol?)"/> instead.
+    /// </remarks>
+    /// <inheritdoc/>
+    private protected override MetadataReference? CommonGetMetadataReference(Microsoft.CodeAnalysis.IAssemblySymbol assemblySymbol)
+    {
+        if (assemblySymbol is Symbols.PublicModel.AssemblySymbol { UnderlyingAssemblySymbol: AssemblySymbol underlyingSymbol })
+            return this.GetMetadataReference(underlyingSymbol);
+
+        return null;
+    }
+
+    /// <inheritdoc cref="Compilation.GetMetadataReference(Microsoft.CodeAnalysis.IAssemblySymbol)"/>
+    /// <returns>A metadata reference.</returns>
+    internal MetadataReference? GetMetadataReference(AssemblySymbol? assemblySymbol) =>
+        this.GetBoundReferenceManager().GetMetadataReference(assemblySymbol);
+    #endregion
+
+    #region Symbols
+    /// <summary>
+    /// Gets the <see cref="SourceAssemblySymbol"/> that represents the assembly being created.
+    /// </summary>
+    /// <value>
+    /// An <see cref="SourceAssemblySymbol"/> that represents the assembly being created.
+    /// </value>
+    internal SourceAssemblySymbol SourceAssembly
+    {
+        get
+        {
+            this.GetBoundReferenceManager();
+            RoslynDebug.Assert(this._lazyAssemblySymbol is not null);
+            return this._lazyAssemblySymbol;
+        }
+    }
+
+    /// <summary>
+    /// Gets the <see cref="AssemblySymbol"/> that represents the assembly being created.
+    /// </summary>
+    /// <value>
+    /// An <see cref="AssemblySymbol"/> that represents the assembly being created.
+    /// </value>
+    internal new AssemblySymbol Assembly => this.SourceAssembly;
+
+    /// <summary>
+    /// Gets the <see cref="NetmoduleSymbol"/> that refers to the module being created by compiling all of the code.
+    /// All of the namespaces and types defined in source code can be obtained.
+    /// </summary>
+    /// <value>
+    /// A <see cref="NetmoduleSymbol"/> that refers to the module being created by compiling all of the code.
+    /// </value>
+    internal new NetmoduleSymbol SourceModule => this.Assembly.Netmodules[0];
+
+    internal ModuleSymbol GlobalModule
+    {
+        get
+        {
+#warning 未完成。
+            throw null;
+        }
+    }
+
+    internal ModuleSymbol? GetCompilationModule(ModuleSymbol moduleSymbol)
+    {
+#warning 未完成。
+        throw null;
+    }
+
+    /// <summary>
+    /// Gets a symbol that represents script container.
+    /// </summary>
+    /// <value>
+    /// The symbol that represents script container.
+    /// </value>
+    internal ModuleSymbol ScriptModule => this._scriptModule.Value;
+
+    /// <summary>
+    /// Resolves a symbol that represents script container (Script module). Uses the
+    /// full name of the container module stored in <see cref="ThisCompilationOptions.ScriptModuleName"/> to find the symbol.
+    /// </summary>
+    /// <returns>The Script class symbol or null if it is not defined.</returns>
+    private ModuleSymbol? BindScriptModule() =>
+        ((IModuleSymbol?)this.CommonBindScriptClass()).GetSymbol();
+
+    /// <summary>
+    /// Whether a syntax tree is submission syntax tree.
+    /// </summary>
+    /// <param name="tree">The syntax tree to be asked.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="tree"/> is submission syntax tree; otherwise <see langword="false"/>.</returns>
+    internal bool IsSubmissionSyntaxTree(SyntaxTree tree)
+    {
+        Debug.Assert(tree is not null);
+        Debug.Assert(!this.IsSubmission || this._syntaxAndDeclarations.ExternalSyntaxTrees.Length <= 1);
+        return this.IsSubmission && tree == this._syntaxAndDeclarations.ExternalSyntaxTrees.SingleOrDefault();
+    }
+
+    internal new ModuleSymbol GetSpecialType(SpecialType specialType)
+    {
+#warning 未完成。
+        throw null;
+    }
+
+    /// <summary>
+    /// Gets the symbol for the predefined type member from the COR Library referenced by this compilation.
+    /// </summary>
+    internal Symbol GetSpecialTypeMember(SpecialMember specialMember)
+    {
+#warning 未完成。
+        throw null;
+    }
+
+    #endregion
+
     #region Compilation
+    /// <remarks>
+    /// Use <see cref="ThisCompilation.Options"/> instead.
+    /// </remarks>
+    /// <inheritdoc/>
     protected override CompilationOptions CommonOptions => this._options;
+
+    /// <remarks>
+    /// Use <see cref="ThisCompilation.GetBoundReferenceManager"/> instead.
+    /// </remarks>
+    /// <inheritdoc/>
+    internal override CommonReferenceManager CommonGetBoundReferenceManager() => this.GetBoundReferenceManager();
 
     public new SemanticModel GetSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility) => throw new NotImplementedException();
 
-    public override ImmutableArray<MetadataReference> DirectiveReferences => throw new NotImplementedException();
+    protected internal override ImmutableArray<SyntaxTree> CommonSyntaxTrees => this.SyntaxTrees;
 
-    public override IEnumerable<AssemblyIdentity> ReferencedAssemblyNames => throw new NotImplementedException();
+    protected override Microsoft.CodeAnalysis.IAssemblySymbol CommonAssembly => this.Assembly.GetPublicSymbol();
 
-    protected internal override ImmutableArray<SyntaxTree> CommonSyntaxTrees => throw new NotImplementedException();
+    protected override Microsoft.CodeAnalysis.IModuleSymbol CommonSourceModule => this.SourceModule.GetPublicSymbol();
 
-    protected override IAssemblySymbol CommonAssembly => throw new NotImplementedException();
+    protected override Microsoft.CodeAnalysis.INamespaceSymbol CommonGlobalNamespace => this.GlobalModule.GetPublicSymbol();
 
-    protected override IModuleSymbol CommonSourceModule => throw new NotImplementedException();
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol CommonObjectType => throw new NotImplementedException();
 
-    protected override INamespaceSymbol CommonGlobalNamespace => throw new NotImplementedException();
+    protected override Microsoft.CodeAnalysis.ITypeSymbol CommonDynamicType => throw new NotImplementedException();
 
-    protected override INamedTypeSymbol CommonObjectType => throw new NotImplementedException();
+    protected override Microsoft.CodeAnalysis.ITypeSymbol? CommonScriptGlobalsType => throw new NotImplementedException();
 
-    protected override ITypeSymbol CommonDynamicType => throw new NotImplementedException();
-
-    protected override ITypeSymbol? CommonScriptGlobalsType => throw new NotImplementedException();
-
-    protected override INamedTypeSymbol? CommonScriptClass => throw new NotImplementedException();
-
-    internal override IEnumerable<ReferenceDirective> ReferenceDirectives => throw new NotImplementedException();
-
-    internal override IDictionary<(string path, string content), MetadataReference> ReferenceDirectiveMap => throw new NotImplementedException();
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol? CommonScriptClass => (Microsoft.CodeAnalysis.INamedTypeSymbol)this.ScriptModule.GetPublicSymbol();
 
     internal override CommonAnonymousTypeManager CommonAnonymousTypeManager => throw new NotImplementedException();
 
@@ -590,7 +753,7 @@ public sealed partial class
 
     internal override Guid DebugSourceDocumentLanguageId => throw new NotImplementedException();
 
-    public override CommonConversion ClassifyCommonConversion(ITypeSymbol source, ITypeSymbol destination)
+    public override CommonConversion ClassifyCommonConversion(Microsoft.CodeAnalysis.ITypeSymbol source, Microsoft.CodeAnalysis.ITypeSymbol destination)
     {
         throw new NotImplementedException();
     }
@@ -625,22 +788,17 @@ public sealed partial class
         throw new NotImplementedException();
     }
 
-    public override IEnumerable<ISymbol> GetSymbolsWithName(Func<string, bool> predicate, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
+    public override IEnumerable<Microsoft.CodeAnalysis.ISymbol> GetSymbolsWithName(Func<string, bool> predicate, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override IEnumerable<ISymbol> GetSymbolsWithName(string name, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
+    public override IEnumerable<Microsoft.CodeAnalysis.ISymbol> GetSymbolsWithName(string name, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
     public override ImmutableArray<MetadataReference> GetUsedAssemblyReferences(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override CompilationReference ToMetadataReference(ImmutableArray<string> aliases = default, bool embedInteropTypes = false)
     {
         throw new NotImplementedException();
     }
@@ -665,72 +823,72 @@ public sealed partial class
         throw new NotImplementedException();
     }
 
-    protected override INamedTypeSymbol CommonCreateAnonymousTypeSymbol(ImmutableArray<ITypeSymbol> memberTypes, ImmutableArray<string> memberNames, ImmutableArray<Location> memberLocations, ImmutableArray<bool> memberIsReadOnly, ImmutableArray<NullableAnnotation> memberNullableAnnotations)
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol CommonCreateAnonymousTypeSymbol(ImmutableArray<Microsoft.CodeAnalysis.ITypeSymbol> memberTypes, ImmutableArray<string> memberNames, ImmutableArray<Location> memberLocations, ImmutableArray<bool> memberIsReadOnly, ImmutableArray<NullableAnnotation> memberNullableAnnotations)
     {
         throw new NotImplementedException();
     }
 
-    protected override IArrayTypeSymbol CommonCreateArrayTypeSymbol(ITypeSymbol elementType, int rank, NullableAnnotation elementNullableAnnotation)
+    protected override Microsoft.CodeAnalysis.IArrayTypeSymbol CommonCreateArrayTypeSymbol(Microsoft.CodeAnalysis.ITypeSymbol elementType, int rank, NullableAnnotation elementNullableAnnotation)
     {
         throw new NotImplementedException();
     }
 
-    protected override INamespaceSymbol CommonCreateErrorNamespaceSymbol(INamespaceSymbol container, string name)
+    protected override Microsoft.CodeAnalysis.INamespaceSymbol CommonCreateErrorNamespaceSymbol(Microsoft.CodeAnalysis.INamespaceSymbol container, string name)
     {
         throw new NotImplementedException();
     }
 
-    protected override INamedTypeSymbol CommonCreateErrorTypeSymbol(INamespaceOrTypeSymbol? container, string name, int arity)
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol CommonCreateErrorTypeSymbol(Microsoft.CodeAnalysis.INamespaceOrTypeSymbol? container, string name, int arity)
     {
         throw new NotImplementedException();
     }
 
-    protected override IFunctionPointerTypeSymbol CommonCreateFunctionPointerTypeSymbol(ITypeSymbol returnType, RefKind returnRefKind, ImmutableArray<ITypeSymbol> parameterTypes, ImmutableArray<RefKind> parameterRefKinds, SignatureCallingConvention callingConvention, ImmutableArray<INamedTypeSymbol> callingConventionTypes)
+    protected override Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol CommonCreateFunctionPointerTypeSymbol(Microsoft.CodeAnalysis.ITypeSymbol returnType, RefKind returnRefKind, ImmutableArray<Microsoft.CodeAnalysis.ITypeSymbol> parameterTypes, ImmutableArray<RefKind> parameterRefKinds, SignatureCallingConvention callingConvention, ImmutableArray<Microsoft.CodeAnalysis.INamedTypeSymbol> callingConventionTypes)
     {
         throw new NotImplementedException();
     }
 
-    protected override INamedTypeSymbol CommonCreateNativeIntegerTypeSymbol(bool signed)
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol CommonCreateNativeIntegerTypeSymbol(bool signed)
     {
         throw new NotImplementedException();
     }
 
-    protected override IPointerTypeSymbol CommonCreatePointerTypeSymbol(ITypeSymbol elementType)
+    protected override Microsoft.CodeAnalysis.IPointerTypeSymbol CommonCreatePointerTypeSymbol(Microsoft.CodeAnalysis.ITypeSymbol elementType)
     {
         throw new NotImplementedException();
     }
 
-    protected override INamedTypeSymbol CommonCreateTupleTypeSymbol(ImmutableArray<ITypeSymbol> elementTypes, ImmutableArray<string?> elementNames, ImmutableArray<Location?> elementLocations, ImmutableArray<NullableAnnotation> elementNullableAnnotations)
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol CommonCreateTupleTypeSymbol(ImmutableArray<Microsoft.CodeAnalysis.ITypeSymbol> elementTypes, ImmutableArray<string?> elementNames, ImmutableArray<Location?> elementLocations, ImmutableArray<NullableAnnotation> elementNullableAnnotations)
     {
         throw new NotImplementedException();
     }
 
-    protected override INamedTypeSymbol CommonCreateTupleTypeSymbol(INamedTypeSymbol underlyingType, ImmutableArray<string?> elementNames, ImmutableArray<Location?> elementLocations, ImmutableArray<NullableAnnotation> elementNullableAnnotations)
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol CommonCreateTupleTypeSymbol(Microsoft.CodeAnalysis.INamedTypeSymbol underlyingType, ImmutableArray<string?> elementNames, ImmutableArray<Location?> elementLocations, ImmutableArray<NullableAnnotation> elementNullableAnnotations)
     {
         throw new NotImplementedException();
     }
 
-    protected override ISymbol? CommonGetAssemblyOrModuleSymbol(MetadataReference reference)
+    protected override Microsoft.CodeAnalysis.ISymbol? CommonGetAssemblyOrModuleSymbol(MetadataReference reference)
     {
         throw new NotImplementedException();
     }
 
-    protected override INamespaceSymbol? CommonGetCompilationNamespace(INamespaceSymbol namespaceSymbol)
+    protected override Microsoft.CodeAnalysis.INamespaceSymbol? CommonGetCompilationNamespace(Microsoft.CodeAnalysis.INamespaceSymbol namespaceSymbol)
     {
         throw new NotImplementedException();
     }
 
-    protected override IMethodSymbol? CommonGetEntryPoint(CancellationToken cancellationToken)
+    protected override Microsoft.CodeAnalysis.IMethodSymbol? CommonGetEntryPoint(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    protected override SemanticModel CommonGetSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility)
+    protected override Microsoft.CodeAnalysis.SemanticModel CommonGetSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility)
     {
         throw new NotImplementedException();
     }
 
-    protected override INamedTypeSymbol? CommonGetTypeByMetadataName(string metadataName)
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol? CommonGetTypeByMetadataName(string metadataName)
     {
         throw new NotImplementedException();
     }
@@ -775,12 +933,7 @@ public sealed partial class
         throw new NotImplementedException();
     }
 
-    internal override IConvertibleConversion ClassifyConvertibleConversion(IOperation source, ITypeSymbol destination, out ConstantValue? constantValue)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal override CommonReferenceManager CommonGetBoundReferenceManager()
+    internal override IConvertibleConversion ClassifyConvertibleConversion(Microsoft.CodeAnalysis.IOperation source, Microsoft.CodeAnalysis.ITypeSymbol destination, out ConstantValue? constantValue)
     {
         throw new NotImplementedException();
     }
@@ -815,11 +968,6 @@ public sealed partial class
         throw new NotImplementedException();
     }
 
-    internal override bool CompileMethods(CommonPEModuleBuilder moduleBuilder, bool emittingPdb, bool emitMetadataOnly, bool emitTestCoverageData, DiagnosticBag diagnostics, Predicate<ISymbolInternal>? filterOpt, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
     internal override void CompleteTrees(SyntaxTree? filterTree)
     {
         throw new NotImplementedException();
@@ -830,17 +978,22 @@ public sealed partial class
         throw new NotImplementedException();
     }
 
-    internal override CommonPEModuleBuilder? CreateModuleBuilder(EmitOptions emitOptions, IMethodSymbol? debugEntryPoint, Stream? sourceLinkStream, IEnumerable<EmbeddedText>? embeddedTexts, IEnumerable<ResourceDescription>? manifestResources, CompilationTestData? testData, DiagnosticBag diagnostics, CancellationToken cancellationToken)
+    internal override CommonPEModuleBuilder? CreateModuleBuilder(EmitOptions emitOptions, Microsoft.CodeAnalysis.IMethodSymbol? debugEntryPoint, Stream? sourceLinkStream, IEnumerable<EmbeddedText>? embeddedTexts, IEnumerable<ResourceDescription>? manifestResources, CompilationTestData? testData, DiagnosticBag diagnostics, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    internal override SemanticModel CreateSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility)
+    internal override bool CompileMethods(CommonPEModuleBuilder moduleBuilder, bool emittingPdb, DiagnosticBag diagnostics, Predicate<ISymbolInternal>? filterOpt, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    internal override EmitDifferenceResult EmitDifference(EmitBaseline baseline, IEnumerable<SemanticEdit> edits, Func<ISymbol, bool> isAddedSymbol, Stream metadataStream, Stream ilStream, Stream pdbStream, CompilationTestData? testData, CancellationToken cancellationToken)
+    internal override Microsoft.CodeAnalysis.SemanticModel CreateSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal override EmitDifferenceResult EmitDifference(EmitBaseline baseline, IEnumerable<SemanticEdit> edits, Func<Microsoft.CodeAnalysis.ISymbol, bool> isAddedSymbol, Stream metadataStream, Stream ilStream, Stream pdbStream, CompilationTestData? testData, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -870,12 +1023,12 @@ public sealed partial class
         throw new NotImplementedException();
     }
 
-    internal override bool IsAttributeType(ITypeSymbol type)
+    internal override bool IsAttributeType(Microsoft.CodeAnalysis.ITypeSymbol type)
     {
         throw new NotImplementedException();
     }
 
-    internal override bool IsSystemTypeReference(ITypeSymbolInternal type)
+    internal override bool IsSystemTypeReference(Microsoft.CodeAnalysis.Symbols.ITypeSymbolInternal type)
     {
         throw new NotImplementedException();
     }
@@ -910,29 +1063,33 @@ public sealed partial class
         throw new NotImplementedException();
     }
 
-    private protected override MetadataReference? CommonGetMetadataReference(IAssemblySymbol assemblySymbol)
-    {
-        throw new NotImplementedException();
-    }
-
     private protected override INamedTypeSymbolInternal CommonGetSpecialType(SpecialType specialType)
     {
         throw new NotImplementedException();
     }
 
-    private protected override bool IsSymbolAccessibleWithinCore(ISymbol symbol, ISymbol within, ITypeSymbol? throughType)
+    private protected override bool IsSymbolAccessibleWithinCore(Microsoft.CodeAnalysis.ISymbol symbol, Microsoft.CodeAnalysis.ISymbol within, Microsoft.CodeAnalysis.ITypeSymbol? throughType)
     {
         throw new NotImplementedException();
     }
 
-    protected override IMethodSymbol CommonCreateBuiltinOperator(string name, ITypeSymbol returnType, ITypeSymbol leftType, ITypeSymbol rightType)
+    protected override IMethodSymbol CommonCreateBuiltinOperator(string name, Microsoft.CodeAnalysis.ITypeSymbol returnType, Microsoft.CodeAnalysis.ITypeSymbol leftType, Microsoft.CodeAnalysis.ITypeSymbol rightType)
     {
         throw new NotImplementedException();
     }
 
-    protected override IMethodSymbol CommonCreateBuiltinOperator(string name, ITypeSymbol returnType, ITypeSymbol operandType)
+    protected override IMethodSymbol CommonCreateBuiltinOperator(string name, Microsoft.CodeAnalysis.ITypeSymbol returnType, Microsoft.CodeAnalysis.ITypeSymbol operandType)
     {
         throw new NotImplementedException();
     }
+
+    private protected override bool SupportsRuntimeCapabilityCore(RuntimeCapability capability)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
+
+    #region Diagnostics
+    internal DeclarationTable Declarations => throw new NotImplementedException();
     #endregion
 }

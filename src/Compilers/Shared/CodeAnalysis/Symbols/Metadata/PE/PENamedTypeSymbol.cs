@@ -2,6 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
@@ -28,11 +29,11 @@ internal abstract partial class PENamedTypeSymbol : NamedTypeSymbol
     /// 逻辑上包含了此符号的PE文件的.NET模块符号。
     /// 若此符号不属于任何.NET模块，或在多个.NET模块间共享，则返回<see langword="null"/>。
     /// </value>
-    internal PEModuleSymbol ContainingPEModule
+    internal PENetmoduleSymbol ContainingPEModule
     {
         get
         {
-            var s = this._container;
+            Symbol s = this._container;
 
             while (s.Kind != SymbolKind.Namespace)
                 s = s.ContainingSymbol;
@@ -42,9 +43,7 @@ internal abstract partial class PENamedTypeSymbol : NamedTypeSymbol
     }
 
     /// <inheritdoc/>
-    internal override NetModuleSymbol? ContainingNetModule => this.ContainingPEModule;
-
-    public override SpecialType SpecialType => this._corTypeId;
+    internal override NetmoduleSymbol? ContainingNetmodule => this.ContainingPEModule;
 
     public abstract override int Arity { get; }
 
@@ -53,5 +52,7 @@ internal abstract partial class PENamedTypeSymbol : NamedTypeSymbol
     internal TypeDefinitionHandle Handle => this._handle;
 
     public override int MetadataToken => MetadataTokens.GetToken(_handle);
+
+    public abstract ImmutableArray<PETypeParameterSymbol> TypeParameters { get; }
 
 }

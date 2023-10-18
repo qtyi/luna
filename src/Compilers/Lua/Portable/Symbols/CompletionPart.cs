@@ -2,32 +2,54 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Qtyi.CodeAnalysis.Lua.Symbols.Metadata.PE;
+
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
 
 /// <summary>
-/// 此枚举描述了所有能提供诊断的组件的类型。
-/// 在读取诊断列表前我们需要完成这些类型的组件。
+/// This enum describes the types of components that could give us diagnostics.
+/// We shouldn't read the list of diagnostics until all of these types are
+/// accounted for.
 /// </summary>
+/// <remarks>
+/// <see cref="PEParameterSymbol"/> reserves all completion part bits and uses
+/// them to track the completion state and presence of well known attributes.
+/// </remarks>
 [Flags]
 internal enum CompletionPart
 {
+    // For all symbols
     None = 0,
 
-    /// <summary>函数参数。</summary>
+    // For function symbols
+    /// <summary>Function parameters.</summary>
     Parameters = 1 << 0,
 
-    /// <summary>符号的类型。</summary>
+    // For field symbols
+    /// <summary>Type of field symbols.</summary>
     Type = 1 << 1,
 
-    All = (1 << 18) - 1,
+    // For module symbols
+    Members = 1 << 2,
+    StartMemberChecks = 1 << 3,
+    FinishMemberChecks = 1 << 4,
+    MembersCompletedChecksStarted = 1 << 5,
+    MembersCompleted = 1 << 6,
 
-    // 对程序集符号重写：
+    // For field symbols
+    ConstantValue = 1 << 7,
+    StartFuncionChecks = 1 << 8,
+    FinishFunctionChecks = 1 << 9,
+
+    All = (1 << 10) - 1,
+
+    // For assembly symbols
     Module = 1 << 2,
     StartValidatingAddedModules = 1 << 3,
     FinishValidatingAddedModules = 1 << 4,
     AssemblySymbolAll = Module | StartValidatingAddedModules | FinishValidatingAddedModules,
 
-    // 对.NET模块符号重写：
+    // For .NET module symbol
     StartValidatingReferencedAssemblies = 1 << 2,
     FinishValidatingReferencedAssemblies = 1 << 3,
 }

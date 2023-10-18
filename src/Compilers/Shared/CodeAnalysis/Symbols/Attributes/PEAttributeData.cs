@@ -26,9 +26,28 @@ internal sealed partial class PEAttributeData : ThisAttributeData
     private ImmutableArray<KeyValuePair<string, TypedConstant>> _lazyNamedArguments;
     private ThreeState _lazyHasErrors = ThreeState.Unknown;
 
-    internal PEAttributeData(PEModuleSymbol moduleSymbol, CustomAttributeHandle handle)
+    internal PEAttributeData(PENetmoduleSymbol moduleSymbol, CustomAttributeHandle handle)
     {
         this._decoder = new(moduleSymbol);
         this._handle = handle;
     }
+
+    #region 未实现
+#warning 未实现
+    public override NamedTypeSymbol? AttributeClass => throw new NotImplementedException();
+
+    public override ModuleSymbol? AttributeConstructor => throw new NotImplementedException();
+
+    public override SyntaxReference? ApplicationSyntaxReference => throw new NotImplementedException();
+
+    protected override Microsoft.CodeAnalysis.INamedTypeSymbol? CommonAttributeClass => throw new NotImplementedException();
+
+    protected override IMethodSymbol? CommonAttributeConstructor => throw new NotImplementedException();
+
+    protected override SyntaxReference? CommonApplicationSyntaxReference => throw new NotImplementedException();
+
+    protected internal override ImmutableArray<TypedConstant> CommonConstructorArguments => throw new NotImplementedException();
+
+    protected internal override ImmutableArray<KeyValuePair<string, TypedConstant>> CommonNamedArguments => throw new NotImplementedException();
+    #endregion
 }

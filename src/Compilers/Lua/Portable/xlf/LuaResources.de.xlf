@@ -7,6 +7,11 @@
         <target state="new">Compilation (Lua):</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_AssemblyMatchBadVersion">
+        <source>Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'.</source>
+        <target state="new">Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_AssgLvalueExpected">
         <source>The left-hand side of an assignment must be a variable or member.</source>
         <target state="new">The left-hand side of an assignment must be a variable or member.</target>
@@ -40,6 +45,16 @@
       <trans-unit id="ERR_CommaExpected">
         <source>',' expected.</source>
         <target state="new">',' expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_CycleInTypeForwarder">
+        <source>The type forwarder for type '{0}' in assembly '{1}' causes a cycle.</source>
+        <target state="new">The type forwarder for type '{0}' in assembly '{1}' causes a cycle.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_DuplicateTypeForwarder">
+        <source>'{0}' duplicate TypeForwardedToAttribute.</source>
+        <target state="new">'{0}' duplicate TypeForwardedToAttribute.</target>
         <note />
       </trans-unit>
       <trans-unit id="ERR_ElseIfCannotStartStatement">
@@ -157,6 +172,11 @@
         <target state="new">Too many control variables.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_TypeForwardedToMultipleAssemblies">
+        <source>Module '{0}' in assembly '{1}' is forwarding the type '{2}' to multiple assemblies: '{3}' and '{4}'.</source>
+        <target state="new">Module '{0}' in assembly '{1}' is forwarding the type '{2}' to multiple assemblies: '{3}' and '{4}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_UnexpectedCharacter">
         <source>Unexpected character '{0}'.</source>
         <target state="new">Unexpected character '{0}'.</target>
@@ -250,6 +270,36 @@
       <trans-unit id="WRN_FileAlreadyIncluded">
         <source>Source file '{0}' specified multiple times.</source>
         <target state="new">Source file '{0}' specified multiple times.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WRN_UnifyReferenceBldRev_Description">
+        <source>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</source>
+        <target state="new">The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WRN_UnifyReferenceBldRev_Title">
+        <source>Assuming assembly reference matches identity</source>
+        <target state="new">Assuming assembly reference matches identity</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WRN_UnifyReferenceMajMin">
+        <source>Assuming assembly reference '{0}' used by '{1}' matches identity '{2}' of '{3}', you may need to supply runtime policy.</source>
+        <target state="new">Assuming assembly reference '{0}' used by '{1}' matches identity '{2}' of '{3}', you may need to supply runtime policy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WRN_UnifyReferenceMajMin_Description">
+        <source>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</source>
+        <target state="new">The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WRN_UnifyReferenceMajMin_Title">
+        <source>Assuming assembly reference matches identity</source>
+        <target state="new">Assuming assembly reference matches identity</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WrongSemanticModelType">
+        <source>Expected a {0} SemanticModel.</source>
+        <target state="new">Expected a {0} SemanticModel.</target>
         <note />
       </trans-unit>
     </body>

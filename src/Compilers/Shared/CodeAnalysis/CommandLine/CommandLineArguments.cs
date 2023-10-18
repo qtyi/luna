@@ -11,6 +11,7 @@ using ThisCompilationOptions = LuaCompilationOptions;
 using ThisParseOptions = LuaParseOptions;
 using ThisCompilation = LuaCompilation;
 using ThisCompiler = LuaCompiler;
+using ThisCommandLineArguments = LuaCommandLineArguments;
 using ThisCommandLineParser = LuaCommandLineParser;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
@@ -19,13 +20,16 @@ using ThisCompilationOptions = MoonScriptCompilationOptions;
 using ThisParseOptions = MoonScriptParseOptions;
 using ThisCompilation = MoonScriptCompilation;
 using ThisCompiler = MoonScriptCompiler;
+using ThisCommandLineArguments = MoonScriptCommandLineArguments;
 using ThisCommandLineParser = MoonScriptCommandLineParser;
+#else
+#error Not implemented
 #endif
 
 /// <summary>
 /// The command line arguments to a(n) <see cref="ThisCompiler"/>.
 /// </summary>
-public sealed partial class
+public sealed class
 #if LANG_LUA
     LuaCommandLineArguments
 #elif LANG_MOONSCRIPT
@@ -55,7 +59,7 @@ public sealed partial class
     /// the end of the offending text.
     /// </summary>
     /// <value>
-    /// <see langword="True"/> if the line and column of the end of the
+    /// Returns <see langword="true"/> if the line and column of the end of the
     /// offending text should be included; otherwise, <see langword="false"/>.
     /// </value>
     internal bool ShouldIncludeErrorEndLocation { get; set; }
@@ -75,7 +79,15 @@ public sealed partial class
 #pragma warning restore CS8618
 
     #region CommandLineArguments
+    /// <remarks>
+    /// Use <see cref="ThisCommandLineArguments.CompilationOptions"/> instead.
+    /// </remarks>
+    /// <inheritdoc/>
     protected override CompilationOptions CompilationOptionsCore => this.CompilationOptions;
+    /// <remarks>
+    /// Use <see cref="ThisCommandLineArguments.ParseOptions"/> instead.
+    /// </remarks>
+    /// <inheritdoc/>
     protected override ParseOptions ParseOptionsCore => this.ParseOptions;
     #endregion
 }

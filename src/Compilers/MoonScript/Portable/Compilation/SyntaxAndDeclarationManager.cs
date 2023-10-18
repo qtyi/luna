@@ -14,8 +14,8 @@ partial class SyntaxAndDeclarationManager
 {
     private static partial State CreateState(
         ImmutableArray<SyntaxTree> externalSyntaxTrees,
-        string scriptClassName,
-        SourceReferenceResolver resolver,
+        string scriptModuleName,
+        SourceReferenceResolver? resolver,
         CommonMessageProvider messageProvider,
         bool isSubmission)
     {
@@ -30,7 +30,7 @@ partial class SyntaxAndDeclarationManager
             SyntaxAndDeclarationManager.AppendAllSyntaxTrees(
                 treesBuilder,
                 tree,
-                scriptClassName,
+                scriptModuleName,
                 isSubmission,
                 ordinalMapBuilder,
                 declMapBuilder,
@@ -47,7 +47,7 @@ partial class SyntaxAndDeclarationManager
 
     public partial SyntaxAndDeclarationManager AddSyntaxTrees(IEnumerable<SyntaxTree> trees)
     {
-        var scriptClassName = this.ScriptClassName;
+        var scriptModuleName = this.ScriptClassName;
         var resolver = this.Resolver;
         var messageProvider = this.MessageProvider;
         var isSubmission = this.IsSubmission;
@@ -70,7 +70,7 @@ partial class SyntaxAndDeclarationManager
             SyntaxAndDeclarationManager.AppendAllSyntaxTrees(
                     treesBuilder,
                     tree,
-                    scriptClassName,
+                    scriptModuleName,
                     isSubmission,
                     ordinalMapBuilder,
                     declMapBuilder,
@@ -86,7 +86,7 @@ partial class SyntaxAndDeclarationManager
 
         return new(
             newExternalSyntaxTrees,
-            scriptClassName,
+            scriptModuleName,
             resolver,
             messageProvider,
             isSubmission,
@@ -102,13 +102,13 @@ partial class SyntaxAndDeclarationManager
     private static void AppendAllSyntaxTrees(
         ArrayBuilder<SyntaxTree> treesBuilder,
         SyntaxTree tree,
-        string scriptClassName,
+        string scriptModuleName,
         bool isSubmission,
         IDictionary<SyntaxTree, int> ordinalMapBuilder,
         IDictionary<SyntaxTree, Lazy<ModuleDeclaration>> declMapBuilder,
         ref DeclarationTable declTable)
     {
-        SyntaxAndDeclarationManager.AddSyntaxTreeToDeclarationMapAndTable(tree, scriptClassName, isSubmission, declMapBuilder, ref declTable);
+        SyntaxAndDeclarationManager.AddSyntaxTreeToDeclarationMapAndTable(tree, scriptModuleName, isSubmission, declMapBuilder, ref declTable);
 
         treesBuilder.Add(tree);
 
@@ -120,12 +120,12 @@ partial class SyntaxAndDeclarationManager
     /// </summary>
     private static void AddSyntaxTreeToDeclarationMapAndTable(
         SyntaxTree tree,
-        string scriptClassName,
+        string scriptModuleName,
         bool isSubmission,
         IDictionary<SyntaxTree, Lazy<ModuleDeclaration>> declMapBuilder,
         ref DeclarationTable declTable)
     {
-        var lazyRoot = new Lazy<ModuleDeclaration>(() => DeclarationTreeBuilder.ForTree(tree, scriptClassName, isSubmission));
+        var lazyRoot = new Lazy<ModuleDeclaration>(() => DeclarationTreeBuilder.ForTree(tree, scriptModuleName, isSubmission));
         declMapBuilder.Add(tree, lazyRoot); // Callers are responsible for checking for existing entries.
         declTable = declTable.AddRootDeclaration(lazyRoot);
     }

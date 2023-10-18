@@ -13,6 +13,8 @@ namespace Qtyi.CodeAnalysis.Lua;
 using Qtyi.CodeAnalysis.Lua.Syntax;
 using ThisSyntaxNode = LuaSyntaxNode;
 using ThisSyntaxTree = LuaSyntaxTree;
+using ThisSyntaxVisitor = LuaSyntaxVisitor;
+using ThisSyntaxVisitor<TResult> = LuaSyntaxVisitor<TResult>;
 using InternalSyntaxNode = Syntax.InternalSyntax.LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
@@ -20,6 +22,8 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 using Qtyi.CodeAnalysis.MoonScript.Syntax;
 using ThisSyntaxNode = MoonScriptSyntaxNode;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
+using ThisSyntaxVisitor = MoonScriptSyntaxVisitor;
+using ThisSyntaxVisitor<TResult> = MoonScriptSyntaxVisitor<TResult>;
 using InternalSyntaxNode = Syntax.InternalSyntax.MoonScriptSyntaxNode;
 #endif
 
@@ -79,7 +83,7 @@ public abstract partial class
 #elif LANG_MOONSCRIPT
         MoonScriptSyntaxNode
 #endif
-          (InternalSyntaxNode green, ThisSyntaxNode? parent, int position) : base(green, parent, position) { }
+          (GreenNode green, SyntaxNode? parent, int position) : base(green, parent, position) { }
 
     /// <summary>
     /// 实例化一个语法节点，仅用于语法琐碎内容，因为它们不会作为节点的子级，即父节点为<see langword="null"/>，因此实例化时需要明确指明所在的语法树。
@@ -94,7 +98,7 @@ public abstract partial class
         MoonScriptSyntaxNode
 #endif
 #pragma warning disable CS8604
-          (InternalSyntaxNode green, int position, ThisSyntaxTree? syntaxTree) : base(green, position, syntaxTree) { }
+          (GreenNode green, int position, SyntaxTree? syntaxTree) : base(green, position, syntaxTree) { }
 #pragma warning restore CS8604
 
     /// <summary>
@@ -173,21 +177,9 @@ public abstract partial class
     /// <returns>此节点在源代码中的位置。</returns>
     public new Location GetLocation() => new SourceLocation(this);
 
-    public abstract TResult? Accept<TResult>(
-#if LANG_LUA
-        LuaSyntaxVisitor<TResult>
-#elif LANG_MOONSCRIPT
-        MoonScriptSyntaxVisitor<TResult>
-#endif
-        visitor);
+    public abstract TResult? Accept<TResult>(ThisSyntaxVisitor<TResult> visitor);
 
-    public abstract void Accept(
-#if LANG_LUA
-        LuaSyntaxVisitor
-#elif LANG_MOONSCRIPT
-        MoonScriptSyntaxVisitor
-#endif
-         visitor);
+    public abstract void Accept(ThisSyntaxVisitor visitor);
 
     #region 序列化
     /// <summary>
@@ -248,7 +240,7 @@ public abstract partial class
     /// <param name="other">相比较的另一个节点。</param>
     /// <returns>若两个节点在结构上相等，则返回<see langword="true"/>，否则返回<see langword="false"/>。</returns>
     /// <exception cref="ExceptionUtilities.Unreachable">默认抛出的异常。</exception>
-    protected override bool EquivalentToCore(SyntaxNode other) => throw ExceptionUtilities.Unreachable;
+    protected override bool EquivalentToCore(SyntaxNode other) => throw ExceptionUtilities.Unreachable();
 
     protected internal override SyntaxNode ReplaceCore<TNode>(
         IEnumerable<TNode>? nodes = null,

@@ -5,11 +5,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-#if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-#elif LANG_MOONSCRIPT
-namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-#endif
 
 internal partial class Lexer
 {

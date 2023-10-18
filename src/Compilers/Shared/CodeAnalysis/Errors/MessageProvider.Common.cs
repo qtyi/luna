@@ -18,8 +18,6 @@ partial class MessageProvider : CommonMessageProvider
 
     public override Type ErrorCodeType => typeof(ErrorCode);
 
-    public override int WRN_DuplicateAnalyzerReference => throw new NotImplementedException();
-
     public override int ERR_FailedToCreateTempFile => throw new NotImplementedException();
 
     public override int ERR_MultipleAnalyzerConfigsInSameDir => throw new NotImplementedException();
@@ -53,6 +51,10 @@ partial class MessageProvider : CommonMessageProvider
     public override int WRN_NoAnalyzerInAssembly => throw new NotImplementedException();
 
     public override int WRN_AnalyzerReferencesFramework => throw new NotImplementedException();
+
+    public override int WRN_AnalyzerReferencesNewerCompiler => throw new NotImplementedException();
+
+    public override int WRN_DuplicateAnalyzerReference => throw new NotImplementedException();
 
     public override int ERR_CantReadRulesetFile => throw new NotImplementedException();
 
@@ -144,13 +146,13 @@ partial class MessageProvider : CommonMessageProvider
 
     public override int ERR_InvalidDebugInfo => throw new NotImplementedException();
 
+    public override int ERR_FunctionPointerTypesInAttributeNotSupported => throw new NotImplementedException();
+
     public override int WRN_GeneratorFailedDuringInitialization => throw new NotImplementedException();
 
     public override int WRN_GeneratorFailedDuringGeneration => throw new NotImplementedException();
 
     public override int ERR_BadAssemblyName => throw new NotImplementedException();
-
-    public override int WRN_AnalyzerReferencesNewerCompiler => throw new NotImplementedException();
 
     public override Diagnostic CreateDiagnostic(DiagnosticInfo info)
     {
@@ -177,7 +179,7 @@ partial class MessageProvider : CommonMessageProvider
         throw new NotImplementedException();
     }
 
-    public override string GetErrorDisplayString(ISymbol symbol)
+    public override string GetErrorDisplayString(Microsoft.CodeAnalysis.ISymbol symbol)
     {
         throw new NotImplementedException();
     }
@@ -202,7 +204,10 @@ partial class MessageProvider : CommonMessageProvider
         throw new NotImplementedException();
     }
 
-    public override DiagnosticSeverity GetSeverity(int code) => ErrorFacts.GetSeverity((ErrorCode)code);
+    public override DiagnosticSeverity GetSeverity(int code)
+    {
+        throw new NotImplementedException();
+    }
 
     public override LocalizableString GetTitle(int code)
     {
@@ -214,7 +219,10 @@ partial class MessageProvider : CommonMessageProvider
         throw new NotImplementedException();
     }
 
-    public override string LoadMessage(int code, CultureInfo? language) => ErrorFacts.GetMessage((ErrorCode)code, language);
+    public override string LoadMessage(int code, CultureInfo? language)
+    {
+        throw new NotImplementedException();
+    }
 
     public override void ReportDuplicateMetadataReferenceStrong(DiagnosticBag diagnostics, Location location, MetadataReference reference, AssemblyIdentity identity, MetadataReference equivalentReference, AssemblyIdentity equivalentIdentity)
     {
@@ -241,7 +249,7 @@ partial class MessageProvider : CommonMessageProvider
         throw new NotImplementedException();
     }
 
-    protected override void ReportInvalidNamedArgument(DiagnosticBag diagnostics, SyntaxNode attributeSyntax, int namedArgumentIndex, ITypeSymbol attributeClass, string parameterName)
+    protected override void ReportInvalidNamedArgument(DiagnosticBag diagnostics, SyntaxNode attributeSyntax, int namedArgumentIndex, Microsoft.CodeAnalysis.ITypeSymbol attributeClass, string parameterName)
     {
         throw new NotImplementedException();
     }

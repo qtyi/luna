@@ -12,12 +12,16 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 using ThisSyntaxNode = Qtyi.CodeAnalysis.Lua.LuaSyntaxNode;
 using ThisMockNode = Qtyi.CodeAnalysis.Lua.LuaSyntaxNode.MockNode;
 using ThisInternalSyntaxNode = LuaSyntaxNode;
+using ThisSyntaxVisitor = LuaSyntaxVisitor;
+using ThisSyntaxVisitor<TResult> = LuaSyntaxVisitor<TResult>;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 using ThisSyntaxNode = Qtyi.CodeAnalysis.MoonScript.MoonScriptSyntaxNode;
 using ThisMockNode = Qtyi.CodeAnalysis.MoonScript.MoonScriptSyntaxNode.MockNode;
 using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
+using ThisSyntaxVisitor = MoonScriptSyntaxVisitor;
+using ThisSyntaxVisitor<TResult> = MoonScriptSyntaxVisitor<TResult>;
 #endif
 
 partial class
@@ -36,9 +40,9 @@ partial class
         internal MockNode(DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations) : base(SyntaxKind.None, diagnostics, annotations) { }
         internal MockNode(DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations, int fullWidth) : base(SyntaxKind.None, diagnostics, annotations, fullWidth) { }
 
-        public override TResult? Accept<TResult>(LuaSyntaxVisitor<TResult> visitor) where TResult : default => default;
+        public override TResult? Accept<TResult>(ThisSyntaxVisitor<TResult> visitor) where TResult : default => default;
 
-        public override void Accept(LuaSyntaxVisitor visitor) { }
+        public override void Accept(ThisSyntaxVisitor visitor) { }
 
         internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new ThisMockNode(this, parent as ThisSyntaxNode, position);
 

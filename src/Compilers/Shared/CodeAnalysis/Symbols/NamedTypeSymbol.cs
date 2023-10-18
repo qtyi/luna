@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Symbols;
+using Qtyi.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
@@ -21,6 +21,8 @@ partial class NamedTypeSymbol : INamedTypeSymbolInternal
 
     #endregion
 
+    public abstract int Arity { get; }
+
     public virtual NamedTypeSymbol? EnumUnderlyingType => null;
 
     #region 公共符号
@@ -37,8 +39,12 @@ partial class NamedTypeSymbol : INamedTypeSymbolInternal
     #endregion
 
     #region INamedTypeSymbolInternal
+    INamedTypeSymbolInternal? INamedTypeSymbolInternal.EnumUnderlyingType => this.EnumUnderlyingType;
+    #endregion
+
+    #region Microsoft.CodeAnalysis.INamedTypeSymbolInternal
 #nullable disable
-    INamedTypeSymbolInternal INamedTypeSymbolInternal.EnumUnderlyingType => this.EnumUnderlyingType;
+    Microsoft.CodeAnalysis.Symbols.INamedTypeSymbolInternal Microsoft.CodeAnalysis.Symbols.INamedTypeSymbolInternal.EnumUnderlyingType => this.EnumUnderlyingType;
 #nullable enable
     #endregion
 }

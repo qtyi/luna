@@ -112,7 +112,7 @@ internal partial struct Blender
                 if (child == node) return i;
             }
 
-            throw ExceptionUtilities.Unreachable;
+            throw ExceptionUtilities.Unreachable();
         }
 
         /// <summary>
