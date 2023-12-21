@@ -27,7 +27,7 @@ partial class SyntaxAndDeclarationManager
 
         foreach (var tree in externalSyntaxTrees)
         {
-            SyntaxAndDeclarationManager.AppendAllSyntaxTrees(
+            AppendAllSyntaxTrees(
                 treesBuilder,
                 tree,
                 scriptModuleName,
@@ -67,7 +67,7 @@ partial class SyntaxAndDeclarationManager
 
         foreach (var tree in trees)
         {
-            SyntaxAndDeclarationManager.AppendAllSyntaxTrees(
+            AppendAllSyntaxTrees(
                     treesBuilder,
                     tree,
                     scriptModuleName,
@@ -108,7 +108,7 @@ partial class SyntaxAndDeclarationManager
         IDictionary<SyntaxTree, Lazy<ModuleDeclaration>> declMapBuilder,
         ref DeclarationTable declTable)
     {
-        SyntaxAndDeclarationManager.AddSyntaxTreeToDeclarationMapAndTable(tree, scriptModuleName, isSubmission, declMapBuilder, ref declTable);
+        AddSyntaxTreeToDeclarationMapAndTable(tree, scriptModuleName, isSubmission, declMapBuilder, ref declTable);
 
         treesBuilder.Add(tree);
 
@@ -142,7 +142,7 @@ partial class SyntaxAndDeclarationManager
         var removeSet = PooledHashSet<SyntaxTree>.GetInstance();
         foreach (var tree in trees)
         {
-            SyntaxAndDeclarationManager.GetRemoveSet(
+            GetRemoveSet(
                 tree,
                 removeSet,
                 out var _);
@@ -157,11 +157,11 @@ partial class SyntaxAndDeclarationManager
             if (removeSet.Contains(tree))
             {
                 loadedSyntaxTreeMap.Remove(tree.FilePath);
-                SyntaxAndDeclarationManager.RemoveSyntaxTreeFromDeclarationMapAndTable(tree, declMapBuilder, ref declTable);
+                RemoveSyntaxTreeFromDeclarationMapAndTable(tree, declMapBuilder, ref declTable);
             }
-            else if (!SyntaxAndDeclarationManager.IsLoadedSyntaxTree(tree, loadedSyntaxTreeMap))
+            else if (!IsLoadedSyntaxTree(tree, loadedSyntaxTreeMap))
             {
-                SyntaxAndDeclarationManager.UpdateSyntaxTreesAndOrdinalMapOnly(
+                UpdateSyntaxTreesAndOrdinalMapOnly(
                     treesBuilder,
                     tree,
                     ordinalMapBuilder,
@@ -226,7 +226,7 @@ partial class SyntaxAndDeclarationManager
         var ordinalMap = state.OrdinalMap;
         var loadedSyntaxTreeMap = state.LoadedSyntaxTreeMap;
         var removeSet = PooledHashSet<SyntaxTree>.GetInstance();
-        SyntaxAndDeclarationManager.GetRemoveSet(
+        GetRemoveSet(
             oldTree,
             removeSet,
             out var _);
@@ -237,13 +237,13 @@ partial class SyntaxAndDeclarationManager
         foreach (var tree in removeSet)
         {
             loadedSyntaxTreeMapBuilder.Remove(tree.FilePath);
-            SyntaxAndDeclarationManager.RemoveSyntaxTreeFromDeclarationMapAndTable(tree, declMapBuilder, ref declTable);
+            RemoveSyntaxTreeFromDeclarationMapAndTable(tree, declMapBuilder, ref declTable);
         }
         removeSet.Free();
 
         var oldOrdinal = ordinalMap[oldTree];
         ImmutableArray<SyntaxTree> newTrees;
-        SyntaxAndDeclarationManager.AddSyntaxTreeToDeclarationMapAndTable(newTree, this.ScriptClassName, this.IsSubmission, declMapBuilder, ref declTable);
+        AddSyntaxTreeToDeclarationMapAndTable(newTree, this.ScriptClassName, this.IsSubmission, declMapBuilder, ref declTable);
 
         Debug.Assert(ordinalMap.ContainsKey(oldTree)); // Checked by RemoveSyntaxTreeFromDeclarationMapAndTable
 

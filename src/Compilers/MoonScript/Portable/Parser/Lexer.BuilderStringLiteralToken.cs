@@ -146,7 +146,7 @@ partial class Lexer
                 return;
             }
 
-            Lexer.TrimIndent(this._builder, this._innerIndent);
+            TrimIndent(this._builder, this._innerIndent);
 
             this._value = string.Concat(this._builder.ToImmutableOrEmptyAndFree());
         }

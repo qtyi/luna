@@ -14,9 +14,6 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\..\..\Compilers\Core\Portable\Symbols\LanguageNames.cs" Link="LanguageNames.cs" />
-    <Compile Include="..\..\..\..\..\Compilers\MoonScript\Portable\Errors\ErrorCode.cs" Link="ErrorCode.cs" />
-    <Compile Include="..\..\..\..\..\Compilers\MoonScript\Portable\Syntax\SyntaxKind.cs" Link="SyntaxKind.cs" />
-    <Compile Include="..\..\..\..\..\Compilers\MoonScript\Portable\Syntax\SyntaxKindFacts.cs" Link="SyntaxKindFacts.cs" />
   </ItemGroup>
 
   <Import Project="..\Shared\CodeAnalysisGenerators.Shared.projitems" Label="Shared" />

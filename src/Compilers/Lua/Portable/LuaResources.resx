@@ -129,6 +129,9 @@
   <data name="ERR_AttributeExpected" xml:space="preserve">
     <value>Attribute expected.</value>
   </data>
+  <data name="ERR_BadDirectivePlacement" xml:space="preserve">
+    <value>Preprocessor directives must appear as the first non-whitespace character on a line.</value>
+  </data>
   <data name="ERR_BadDocumentationMode" xml:space="preserve">
     <value>Provided documentation mode is unsupported or invalid: '{0}'.</value>
   </data>

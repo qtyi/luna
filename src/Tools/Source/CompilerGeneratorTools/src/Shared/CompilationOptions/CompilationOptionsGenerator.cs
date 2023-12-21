@@ -27,7 +27,7 @@ public sealed class CompilationOptionsGenerator : TreeWithAdditionalInputSourceG
 
     /// <inheritdoc/>
     protected override bool TryGetRelevantInputs(
-        in IncrementalGeneratorInitializationContext context,
+        IncrementalGeneratorInitializationContext context,
         out IncrementalValueProvider<ImmutableArray<AdditionalText>> inputs)
     {
         inputs = context.AdditionalTextsProvider.Where(text => Path.GetFileName(text.Path).Equals(CompilationOptionsXml, StringComparison.OrdinalIgnoreCase)).Collect();
@@ -36,7 +36,7 @@ public sealed class CompilationOptionsGenerator : TreeWithAdditionalInputSourceG
 
     /// <inheritdoc/>
     protected override bool TryGetAdditionalInputs(
-        in IncrementalGeneratorInitializationContext context,
+        IncrementalGeneratorInitializationContext context,
         out IncrementalValueProvider<Compilation> additionalInputs)
     {
         additionalInputs = context.CompilationProvider;
@@ -45,12 +45,11 @@ public sealed class CompilationOptionsGenerator : TreeWithAdditionalInputSourceG
 
     /// <inheritdoc/>
     protected override void GenerateOutputs(
-        in SourceProductionContext context,
+        SourceProductionContext context,
         OptionList tree,
-        Compilation compilation,
-        CancellationToken cancellationToken)
+        Compilation compilation)
     {
-        WriteAndAddSource(in context, writer => OptionsSourceWriter.WriteMain(writer, tree, compilation, cancellationToken), CompilationOptionsXml + ".Main.Generated.cs");
+        WriteAndAddSource(context, CompilationOptionsSourceWriter.WriteMain, tree, compilation, CompilationOptionsXml + ".Main.Generated.cs");
     }
 
     #region DiagnosticDescriptors

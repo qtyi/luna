@@ -3,161 +3,64 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
-using System.Text;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
-
-#if LANG_LUA
-using Qtyi.CodeAnalysis.Lua;
-#elif LANG_MOONSCRIPT
-using Qtyi.CodeAnalysis.MoonScript;
-#endif
+using Microsoft.CodeAnalysis.PooledObjects;
+using Roslyn.Utilities;
+using Luna.Compilers.Generators.ErrorFacts;
+using LanguageNames = Qtyi.CodeAnalysis.LanguageNames;
 
 namespace Luna.Compilers.Generators;
 
-using Qtyi.CodeAnalysis;
-
 [Generator]
-public sealed class ErrorFactsGenerator : ISourceGenerator
+public sealed class ErrorFactsGenerator : AbstractSourceGenerator
 {
-    public void Initialize(GeneratorInitializationContext context) { }
+    protected override void InitializeCore(IncrementalGeneratorInitializationContext context)
+    {
+        var input = context.CompilationProvider.Select(static (compilation, cancellationToken) =>
+        {
+            var errorCodeType = compilation.GetTypeByMetadataName($"Qtyi.CodeAnalysis.{LanguageNames.This}.ErrorCode");
+            if (errorCodeType is null)
+                return ImmutableArray<string>.Empty;
 
-    internal static bool TryGetCodeNames(
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return errorCodeType.GetMembers()
+                .WhereAsArray(static (member, fieldType) => member is IFieldSymbol field && field.Type.Equals(fieldType), errorCodeType)
+                .SelectAsArray(static field => field.Name);
+        });
+        context.RegisterSourceOutput(input, GenerateOutputs);
+    }
+
+    private static void GenerateOutputs(SourceProductionContext context, ImmutableArray<string> codeNames)
+    {
+        WriteAndAddSource(context, ErrorFactsSourceWriter.WriteMain, codeNames, "ErrorFacts.Generated.cs");
+    }
+
+    internal static void GetCodeNames(IEnumerable<string> codeNames,
         out ImmutableArray<string> warningCodeNames,
         out ImmutableArray<string> fatalCodeNames,
         out ImmutableArray<string> infoCodeNames,
         out ImmutableArray<string> hiddenCodeNames)
     {
-        var wrn = new List<string>();
-        var ftl = new List<string>();
-        var inf = new List<string>();
-        var hdn = new List<string>();
-        foreach (var codeName in Enum.GetNames(typeof(ErrorCode)))
+        var wrn = ArrayBuilder<string>.GetInstance();
+        var ftl = ArrayBuilder<string>.GetInstance();
+        var inf = ArrayBuilder<string>.GetInstance();
+        var hdn = ArrayBuilder<string>.GetInstance();
+        foreach (var codeName in codeNames)
         {
             if (codeName.StartsWith("WRN_", StringComparison.OrdinalIgnoreCase))
-            {
                 wrn.Add(codeName);
-            }
             else if (codeName.StartsWith("FTL_", StringComparison.OrdinalIgnoreCase))
-            {
                 ftl.Add(codeName);
-            }
             else if (codeName.StartsWith("INF_", StringComparison.OrdinalIgnoreCase))
-            {
                 inf.Add(codeName);
-            }
             else if (codeName.StartsWith("HDN_", StringComparison.OrdinalIgnoreCase))
-            {
                 hdn.Add(codeName);
-            }
         }
 
-        warningCodeNames = wrn.ToImmutableArray();
-        fatalCodeNames = ftl.ToImmutableArray();
-        infoCodeNames = inf.ToImmutableArray();
-        hiddenCodeNames = hdn.ToImmutableArray();
-        return true;
-    }
-
-    public void Execute(GeneratorExecutionContext context)
-    {
-        var outputText = new StringBuilder();
-        #region 生成源代码
-        if (!TryGetCodeNames(out var warningCodeNames, out var fatalCodeNames, out var infoCodeNames, out var hiddenCodeNames)) return;
-
-        outputText.AppendLine($"namespace Qtyi.CodeAnalysis.{LanguageNames.This}");
-        outputText.AppendLine("{");
-        outputText.AppendLine("    internal static partial class ErrorFacts");
-        outputText.AppendLine("    {");
-
-        outputText.AppendLine("        public static bool IsWarning(ErrorCode code)");
-        outputText.AppendLine("        {");
-        outputText.AppendLine("            switch (code)");
-        outputText.AppendLine("            {");
-        if (warningCodeNames.Length != 0)
-        {
-            foreach (var name in warningCodeNames)
-            {
-                outputText.Append("                case ErrorCode.");
-                outputText.Append(name);
-                outputText.AppendLine(":");
-            }
-            outputText.AppendLine("                    return true;");
-        }
-        outputText.AppendLine("                default:");
-        outputText.AppendLine("                    return false;");
-        outputText.AppendLine("            }");
-        outputText.AppendLine("        }");
-
-        outputText.AppendLine();
-
-        outputText.AppendLine("        public static bool IsFatal(ErrorCode code)");
-        outputText.AppendLine("        {");
-        outputText.AppendLine("            switch (code)");
-        outputText.AppendLine("            {");
-        if (fatalCodeNames.Length != 0)
-        {
-            foreach (var name in fatalCodeNames)
-            {
-                outputText.Append("                case ErrorCode.");
-                outputText.Append(name);
-                outputText.AppendLine(":");
-            }
-            outputText.AppendLine("                    return true;");
-        }
-        outputText.AppendLine("                default:");
-        outputText.AppendLine("                    return false;");
-        outputText.AppendLine("            }");
-        outputText.AppendLine("        }");
-
-        outputText.AppendLine();
-
-        outputText.AppendLine("        public static bool IsInfo(ErrorCode code)");
-        outputText.AppendLine("        {");
-        outputText.AppendLine("            switch (code)");
-        outputText.AppendLine("            {");
-        if (infoCodeNames.Length != 0)
-        {
-            foreach (var name in infoCodeNames)
-            {
-                outputText.Append("                case ErrorCode.");
-                outputText.Append(name);
-                outputText.AppendLine(":");
-            }
-            outputText.AppendLine("                    return true;");
-        }
-        outputText.AppendLine("                default:");
-        outputText.AppendLine("                    return false;");
-        outputText.AppendLine("            }");
-        outputText.AppendLine("        }");
-
-        outputText.AppendLine();
-
-        outputText.AppendLine("        public static bool IsHidden(ErrorCode code)");
-        outputText.AppendLine("        {");
-        outputText.AppendLine("            switch (code)");
-        outputText.AppendLine("            {");
-        if (hiddenCodeNames.Length != 0)
-        {
-            foreach (var name in hiddenCodeNames)
-            {
-                outputText.Append("                case ErrorCode.");
-                outputText.Append(name);
-                outputText.AppendLine(":");
-            }
-            outputText.AppendLine("                    return true;");
-        }
-        outputText.AppendLine("                default:");
-        outputText.AppendLine("                    return false;");
-        outputText.AppendLine("            }");
-        outputText.AppendLine("        }");
-
-        outputText.AppendLine("    }");
-        outputText.AppendLine("}");
-        #endregion
-
-        // 从StringBuilder创建一个SourceText，再次避免申请一个庞大字符串的空间。
-        var sourceText = SourceText.From(new StringBuilderReader(outputText), outputText.Length, encoding: Encoding.UTF8);
-        context.AddSource("ErrorFacts.Generated.cs", sourceText);
+        warningCodeNames = wrn.AsImmutableOrEmpty();
+        fatalCodeNames = ftl.AsImmutableOrEmpty();
+        infoCodeNames = inf.AsImmutableOrEmpty();
+        hiddenCodeNames = hdn.AsImmutableOrEmpty();
     }
 }

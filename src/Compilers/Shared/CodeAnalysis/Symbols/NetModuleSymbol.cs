@@ -175,7 +175,7 @@ partial class NetmoduleSymbol : Symbol, INetmoduleSymbolInternal
         // This .NET module must be a corlib where the original metadata contains assembly
         // references (see https://github.com/dotnet/roslyn/issues/13275).
         var assembly = this.ContainingAssembly;
-        if (object.ReferenceEquals(assembly, assembly.CorLibrary))
+        if (ReferenceEquals(assembly, assembly.CorLibrary))
             return null;
 
         throw new ArgumentOutOfRangeException(nameof(index));

@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -26,37 +27,37 @@ internal static partial class SyntaxFactory
     /// <summary>表示回车符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia CarriageReturn = SyntaxTrivia.Create(SyntaxKind.EndOfLineTrivia, "\r");
     /// <summary>表示可变的回车符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticCarriageReturn = SyntaxFactory.CarriageReturn.AsElastic();
+    internal static readonly SyntaxTrivia ElasticCarriageReturn = CarriageReturn.AsElastic();
 
     /// <summary>表示换行符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia LineFeed = SyntaxTrivia.Create(SyntaxKind.EndOfLineTrivia, "\n");
     /// <summary>表示可变的换行符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticLineFeed = SyntaxFactory.LineFeed.AsElastic();
+    internal static readonly SyntaxTrivia ElasticLineFeed = LineFeed.AsElastic();
 
     /// <summary>表示回车换行符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia CarriageReturnLineFeed = SyntaxTrivia.Create(SyntaxKind.EndOfLineTrivia, "\r\n");
     /// <summary>表示可变的回车换行符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticCarriageReturnLineFeed = SyntaxFactory.CarriageReturnLineFeed.AsElastic();
+    internal static readonly SyntaxTrivia ElasticCarriageReturnLineFeed = CarriageReturnLineFeed.AsElastic();
 
     /// <summary>表示垂直制表符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia VerticalTab = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, "\v");
     /// <summary>表示可变的垂直制表符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticVerticalTab = SyntaxFactory.VerticalTab.AsElastic();
+    internal static readonly SyntaxTrivia ElasticVerticalTab = VerticalTab.AsElastic();
 
     /// <summary>表示换页符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia FormFeed = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, "\f");
     /// <summary>表示可变的换页符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticFormFeed = SyntaxFactory.FormFeed.AsElastic();
+    internal static readonly SyntaxTrivia ElasticFormFeed = FormFeed.AsElastic();
 
     /// <summary>表示空格符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia Space = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, " ");
     /// <summary>表示可变的空格符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticSpace = SyntaxFactory.Space.AsElastic();
+    internal static readonly SyntaxTrivia ElasticSpace = Space.AsElastic();
 
     /// <summary>表示制表符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia Tab = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, "\t");
     /// <summary>表示可变的制表符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticTab = SyntaxFactory.Tab.AsElastic();
+    internal static readonly SyntaxTrivia ElasticTab = Tab.AsElastic();
 
     /// <summary>表示可变的零空格符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia ElasticZeroSpace = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, string.Empty).AsElastic();
@@ -77,9 +78,9 @@ internal static partial class SyntaxFactory
     internal static SyntaxTrivia EndOfLine(string text, bool elastic = false) =>
         text switch
         {
-            "\r" => elastic ? SyntaxFactory.ElasticCarriageReturn : SyntaxFactory.CarriageReturn,
-            "\n" => elastic ? SyntaxFactory.ElasticLineFeed : SyntaxFactory.LineFeed,
-            "\r\n" => elastic ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.CarriageReturnLineFeed,
+            "\r" => elastic ? ElasticCarriageReturn : CarriageReturn,
+            "\n" => elastic ? ElasticLineFeed : LineFeed,
+            "\r\n" => elastic ? ElasticCarriageReturnLineFeed : CarriageReturnLineFeed,
             _ => elastic switch
             {
                 false => SyntaxTrivia.Create(SyntaxKind.EndOfLineTrivia, text),
@@ -96,11 +97,11 @@ internal static partial class SyntaxFactory
     internal static SyntaxTrivia WhiteSpace(string text, bool elastic = false) =>
         text switch
         {
-            " " => elastic ? SyntaxFactory.ElasticSpace : SyntaxFactory.Space,
-            "\t" => elastic ? SyntaxFactory.ElasticTab : SyntaxFactory.Tab,
-            "\v" => elastic ? SyntaxFactory.ElasticVerticalTab : SyntaxFactory.Tab,
-            "\f" => elastic ? SyntaxFactory.ElasticFormFeed : SyntaxFactory.FormFeed,
-            "" => elastic ? SyntaxFactory.ElasticZeroSpace : SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, text),
+            " " => elastic ? ElasticSpace : Space,
+            "\t" => elastic ? ElasticTab : Tab,
+            "\v" => elastic ? ElasticVerticalTab : Tab,
+            "\f" => elastic ? ElasticFormFeed : FormFeed,
+            "" => elastic ? ElasticZeroSpace : SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, text),
             _ => elastic switch
             {
                 false => SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, text),
@@ -133,6 +134,8 @@ internal static partial class SyntaxFactory
         return SyntaxTrivia.Create(SyntaxKind.SingleLineCommentTrivia, text);
     }
 
+    internal static SyntaxTrivia PreprocessingMessage(string text) => SyntaxTrivia.Create(SyntaxKind.PreprocessingMessageTrivia, text);
+
 #if DEBUG
     internal static ThisInternalSyntaxNode Mock() => new ThisInternalSyntaxNode.MockNode();
 #endif
@@ -143,11 +146,11 @@ internal static partial class SyntaxFactory
 
     internal static SyntaxToken Token(GreenNode? leading, SyntaxKind kind, string text, string valueText, GreenNode? trailing)
     {
-        SyntaxFactory.ValidateTokenKind(kind); // 检查不接受的语法分类。
+        ValidateTokenKind(kind); // 检查不接受的语法分类。
 
         var defaultText = SyntaxFacts.GetText(kind);
         return kind >= SyntaxToken.FirstTokenWithWellKnownText && kind <= SyntaxToken.LastTokenWithWellKnownText && text == defaultText && valueText == defaultText
-            ? SyntaxFactory.Token(leading, kind, trailing)
+            ? Token(leading, kind, trailing)
             : SyntaxToken.WithValue(kind, leading, text, valueText, trailing);
     }
 
@@ -158,9 +161,9 @@ internal static partial class SyntaxFactory
 
     internal static SyntaxToken MissingToken(GreenNode? leading, SyntaxKind kind, GreenNode? trailing) => SyntaxToken.CreateMissing(kind, leading, trailing);
 
-    internal static SyntaxToken Identifier(string text) => SyntaxFactory.Identifier(SyntaxKind.IdentifierToken, null, text, text, null);
+    internal static SyntaxToken Identifier(string text) => Identifier(SyntaxKind.IdentifierToken, null, text, text, null);
 
-    internal static SyntaxToken Identifier(GreenNode? leading, string text, GreenNode? trailing) => SyntaxFactory.Identifier(SyntaxKind.IdentifierToken, leading, text, text, trailing);
+    internal static SyntaxToken Identifier(GreenNode? leading, string text, GreenNode? trailing) => Identifier(SyntaxKind.IdentifierToken, leading, text, text, trailing);
 
     internal static SyntaxToken Identifier(SyntaxKind contextualKind, GreenNode? leading, string text, string valueText, GreenNode? trailing) => SyntaxToken.Identifier(contextualKind, leading, text, valueText, trailing);
 

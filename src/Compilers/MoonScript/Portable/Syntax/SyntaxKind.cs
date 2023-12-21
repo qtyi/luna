@@ -2,126 +2,136 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.CodeAnalysis;
+
 namespace Qtyi.CodeAnalysis.MoonScript;
 
+/// <summary>
+/// Represents different parts of MoonScript syntax.
+/// </summary>
 public enum SyntaxKind : ushort
 {
+    /// <summary>Represents unknown part of syntax.</summary>
     None = 0,
-    List = Microsoft.CodeAnalysis.GreenNode.ListKind,
+    /// <summary>Represents node list.</summary>
+    List = GreenNode.ListKind,
 
-    #region 标点
-    /// <summary>表示<c>+</c>标记。</summary>
+    #region Punctuation
+    /// <summary>Represents <c>+</c> token.</summary>
     PlusToken = 8193,
-    /// <summary>表示<c>-</c>标记。</summary>
+    /// <summary>Represents <c>-</c> token.</summary>
     MinusToken,
-    /// <summary>表示<c>*</c>标记。</summary>
+    /// <summary>Represents <c>*</c> token.</summary>
     AsteriskToken,
-    /// <summary>表示<c>/</c>标记。</summary>
+    /// <summary>Represents <c>/</c> token.</summary>
     SlashToken,
-    /// <summary>表示<c>\</c>标记。</summary>
+    /// <summary>Represents <c>\</c> token.</summary>
     BackSlashToken,
-    /// <summary>表示<c>^</c>标记。</summary>
+    /// <summary>Represents <c>^</c> token.</summary>
     CaretToken,
-    /// <summary>表示<c>%</c>标记。</summary>
+    /// <summary>Represents <c>%</c> token.</summary>
     PersentToken,
-    /// <summary>表示<c>#</c>标记。</summary>
+    /// <summary>Represents <c>#</c> token.</summary>
     HashToken,
-    /// <summary>表示<c>&amp;</c>标记。</summary>
+    /// <summary>Represents <c>&amp;</c> token.</summary>
     AmpersandToken,
-    /// <summary>表示<c>~</c>标记。</summary>
+    /// <summary>Represents <c>~</c> token.</summary>
     TildeToken,
-    /// <summary>表示<c>|</c>标记。</summary>
+    /// <summary>Represents <c>|</c> token.</summary>
     BarToken,
-    /// <summary>表示<c>&lt;</c>标记。</summary>
+    /// <summary>Represents <c>&lt;</c> token.</summary>
     LessThanToken,
-    /// <summary>表示<c>&gt;</c>标记。</summary>
+    /// <summary>Represents <c>&gt;</c> token.</summary>
     GreaterThanToken,
-    /// <summary>表示<c>=</c>标记。</summary>
+    /// <summary>Represents <c>=</c> token.</summary>
     EqualsToken,
-    /// <summary>表示<c>!</c>标记。</summary>
+    /// <summary>Represents <c>!</c> token.</summary>
     ExclamationToken,
-    /// <summary>表示<c>(</c>标记。</summary>
+    /// <summary>Represents <c>(</c> token.</summary>
     OpenParenToken,
-    /// <summary>表示<c>)</c>标记。</summary>
+    /// <summary>Represents <c>)</c> token.</summary>
     CloseParenToken,
-    /// <summary>表示<c>{</c>标记。</summary>
+    /// <summary>Represents <c>{</c> token.</summary>
     OpenBraceToken,
-    /// <summary>表示<c>}</c>标记。</summary>
+    /// <summary>Represents <c>}</c> token.</summary>
     CloseBraceToken,
-    /// <summary>表示<c>[</c>标记。</summary>
+    /// <summary>Represents <c>[</c> token.</summary>
     OpenBracketToken,
-    /// <summary>表示<c>]</c>标记。</summary>
+    /// <summary>Represents <c>]</c> token.</summary>
     CloseBracketToken,
-    /// <summary>表示<c>:</c>标记。</summary>
+    /// <summary>Represents <c>:</c> token.</summary>
     ColonToken,
-    /// <summary>表示<c>,</c>标记。</summary>
+    /// <summary>Represents <c>,</c> token.</summary>
     CommaToken,
-    /// <summary>表示<c>.</c>标记。</summary>
+    /// <summary>Represents <c>.</c> token.</summary>
     DotToken,
-    /// <summary>表示<c>@</c>标记。</summary>
+    /// <summary>Represents <c>@</c> token.</summary>
     CommercialAtToken,
 
-    /// <summary>表示<c>+=</c>标记。</summary>
+    /// <summary>Represents <c>+=</c> token.</summary>
     PlusEqualsToken = 8241,
-    /// <summary>表示<c>-&gt;</c>标记。</summary>
+    /// <summary>Represents <c>-&gt;</c> token.</summary>
     MinusGreaterThanToken,
-    /// <summary>表示<c>-=</c>标记。</summary>
+    /// <summary>Represents <c>-=</c> token.</summary>
     MinusEqualsToken,
-    /// <summary>表示<c>*=</c>标记。</summary>
+    /// <summary>Represents <c>*=</c> token.</summary>
     AsteriskEqualsToken,
-    /// <summary>表示<c>/=</c>标记。</summary>
+    /// <summary>Represents <c>/=</c> token.</summary>
     SlashEqualsToken,
-    /// <summary>表示<c>^=</c>标记。</summary>
+    /// <summary>Represents <c>^=</c> token.</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     CaretEqualsToken,
-    /// <summary>表示<c>%=</c>标记。</summary>
+    /// <summary>Represents <c>%=</c> token.</summary>
     PersentEqualsToken,
-    /// <summary>表示<c>&amp;=</c>标记。</summary>
+    /// <summary>Represents <c>&amp;=</c> token.</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     AmpersandEqualsToken,
-    /// <summary>表示<c>~=</c>标记。</summary>
+    /// <summary>Represents <c>~=</c> token.</summary>
     TildeEqualsToken,
-    /// <summary>表示<c>|=</c>标记。</summary>
+    /// <summary>Represents <c>|=</c> token.</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     BarEqualsToken,
-    /// <summary>表示<c>&lt;&lt;</c>标记。</summary>
+    /// <summary>Represents <c>&lt;&lt;</c> token.</summary>
     LessThanLessThanToken,
-    /// <summary>表示<c>&lt;&lt;=</c>标记。</summary>
+    /// <summary>Represents <c>&lt;&lt;=</c> token.</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     LessThanLessThanEqualsToken,
-    /// <summary>表示<c>&lt;=</c>标记。</summary>
+    /// <summary>Represents <c>&lt;=</c> token.</summary>
     LessThanEqualsToken,
-    /// <summary>表示<c>&gt;&gt;</c>标记。</summary>
+    /// <summary>Represents <c>&gt;&gt;</c> token.</summary>
     GreaterThanGreaterThanToken,
-    /// <summary>表示<c>&gt;&gt;=</c>标记。</summary>
+    /// <summary>Represents <c>&gt;&gt;=</c> token.</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     GreaterThanGreaterThanEqualsToken,
-    /// <summary>表示<c>&gt;=</c>标记。</summary>
+    /// <summary>Represents <c>&gt;=</c> token.</summary>
     GreaterThanEqualsToken,
-    /// <summary>表示<c>//</c>标记。</summary>
+    /// <summary>Represents <c>//</c> token.</summary>
     SlashSlashToken,
-    /// <summary>表示<c>//=</c>标记。</summary>
+    /// <summary>Represents <c>//=</c> token.</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     SlashSlashEqualsToken,
-    /// <summary>表示<c>=&gt;</c>标记。</summary>
+    /// <summary>Represents <c>=&gt;</c> token.</summary>
     EqualsGreaterThanToken,
-    /// <summary>表示<c>==</c>标记。</summary>
+    /// <summary>Represents <c>==</c> token.</summary>
     EqualsEqualsToken,
-    /// <summary>表示<c>!=</c>标记。</summary>
+    /// <summary>Represents <c>!=</c> token.</summary>
     ExclamationEqualsToken,
-    /// <summary>表示<c>..</c>标记。</summary>
+    /// <summary>Represents <c>..</c> token.</summary>
     DotDotToken,
-    /// <summary>表示<c>..=</c>标记。</summary>
+    /// <summary>Represents <c>..=</c> token.</summary>
     DotDotEqualsToken,
-    /// <summary>表示<c>...</c>标记。</summary>
+    /// <summary>Represents <c>...</c> token.</summary>
     DotDotDotToken,
-    /// <summary>表示<c>@@</c>标记。</summary>
+    /// <summary>Represents <c>@@</c> token.</summary>
     CommercialAtCommercialAtToken,
 
-    /// <summary>表示<c>and=</c>标记。</summary>
+    /// <summary>Represents <c>and=</c> token.</summary>
     AndEqualsToken,
-    /// <summary>表示<c>or=</c>标记。</summary>
+    /// <summary>Represents <c>or=</c> token.</summary>
     OrEqualsToken,
+
+    /// <summary>Represents <c>#!</c> token.</summary>
+    HashExclamationToken,
     #endregion
 
     #region 关键词
@@ -263,12 +273,13 @@ public enum SyntaxKind : ushort
     WeakModeMetafield,
     #endregion
 
+    EndOfDirectiveToken = 9216,
     /// <summary>表示文件的结尾。</summary>
-    EndOfFileToken = 9216, // 假定此类型为最后一个无文本标记。
+    EndOfFileToken = 9217, // 假定此类型为最后一个无文本标记。
 
     #region 文本标记
     /// <summary>表示不应出现在此位置的错误标记。</summary>
-    BadToken = 9217,
+    BadToken = 9218,
     /// <summary>表示标识符标记。</summary>
     IdentifierToken,
     /// <summary>表示数字字面量标记。</summary>
@@ -303,6 +314,11 @@ public enum SyntaxKind : ushort
     /// <summary>表示多行注释。</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     MultiLineCommentTrivia,
+    PreprocessingMessageTrivia,
+    BadDirectiveTrivia,
+    /// <summary>Represents <c>#!</c> interpreter directive.</summary>
+    ShebangDirectiveTrivia,
+    CommentDirectiveTrivia,
     /// <summary>表示被跳过的多个语法标记。</summary>
     SkippedTokensTrivia,
     #endregion

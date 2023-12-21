@@ -2,52 +2,42 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Luna.Compilers.Generators.CSharp;
+using Luna.Compilers.Generators.Syntax;
 using Luna.Compilers.Generators.Syntax.Model;
+using LanguageNames = Qtyi.CodeAnalysis.LanguageNames;
 
 namespace Luna.Compilers.Generators;
 
-internal class SignatureWriter
+internal sealed class SignatureWriter : SyntaxFileWriter
 {
-    private readonly TextWriter _writer;
-    private readonly SyntaxTree _tree;
-    private readonly Dictionary<string, string?> _typeMap;
+    private SignatureWriter(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken) : base(writer, 2, tree, cancellationToken) { }
 
-    private SignatureWriter(TextWriter writer, SyntaxTree tree)
-    {
-        _writer = writer;
-        _tree = tree;
-        _typeMap = tree.Types.ToDictionary(n => n.Name, n => n.Base);
-        _typeMap.Add(tree.Root, null);
-    }
-
-    public static void Write(TextWriter writer, SyntaxTree tree)
-    {
-        new SignatureWriter(writer, tree).WriteFile();
-    }
+    public static void WriteFile(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken) => new SignatureWriter(writer, tree, cancellationToken).WriteFile();
 
     private void WriteFile()
     {
-        _writer.WriteLine("using System;");
-        _writer.WriteLine("using System.Collections;");
-        _writer.WriteLine("using System.Collections.Generic;");
-        _writer.WriteLine("using System.Linq;");
-        _writer.WriteLine("using System.Threading;");
-        _writer.WriteLine();
-        _writer.WriteLine("namespace Microsoft.CodeAnalysis.CSharp");
-        _writer.WriteLine("{");
+        this.WriteLine("using System;");
+        this.WriteLine("using System.Collections;");
+        this.WriteLine("using System.Collections.Generic;");
+        this.WriteLine("using System.Linq;");
+        this.WriteLine("using System.Threading;");
+        this.WriteLine();
+        this.WriteLine($"namespace Qtyi.CodeAnalysis.{LanguageNames.This}");
+        this.OpenBlock();
 
         this.WriteTypes();
 
-        _writer.WriteLine("}");
+        this.CloseBlock();
     }
 
     private void WriteTypes()
     {
-        var nodes = _tree.Types.Where(n => n is not PredefinedNode).ToList();
+        var nodes = this.Tree.Types.Where(n => n is not PredefinedNode).ToList();
         for (int i = 0, n = nodes.Count; i < n; i++)
         {
             var node = nodes[i];
-            _writer.WriteLine();
+            this.WriteLine();
             this.WriteType(node);
         }
     }
@@ -56,24 +46,22 @@ internal class SignatureWriter
     {
         if (node is AbstractNode)
         {
-            AbstractNode nd = (AbstractNode)node;
-            _writer.WriteLine("  public abstract partial class {0} : {1}", node.Name, node.Base);
-            _writer.WriteLine("  {");
+            var nd = (AbstractNode)node;
+            this.WriteLine($"public abstract partial class {node.Name} : {node.Base}");
+            this.OpenBlock();
             for (int i = 0, n = nd.Fields.Count; i < n; i++)
             {
                 var field = nd.Fields[i];
                 if (IsNodeOrNodeList(field.Type))
-                {
-                    _writer.WriteLine("    public abstract {0}{1} {2} {{ get; }}", "", field.Type, field.Name);
-                }
+                    this.WriteLine($"public abstract {field.Type} {field.Name} {{ get; }}");
             }
-            _writer.WriteLine("  }");
+            this.CloseBlock();
         }
         else if (node is Node)
         {
-            Node nd = (Node)node;
-            _writer.WriteLine("  public partial class {0} : {1}", node.Name, node.Base);
-            _writer.WriteLine("  {");
+            var nd = (Node)node;
+            this.WriteLine("public partial class {0} : {1}", node.Name, node.Base);
+            this.OpenBlock();
 
             WriteKinds(nd.Kinds);
 
@@ -83,16 +71,16 @@ internal class SignatureWriter
             for (int i = 0, n = nodeFields.Count; i < n; i++)
             {
                 var field = nodeFields[i];
-                _writer.WriteLine("    public {0}{1}{2} {3} {{ get; }}", "", "", field.Type, field.Name);
+                this.WriteLine($"public {field.Type} {field.Name} {{ get; }}");
             }
 
             for (int i = 0, n = valueFields.Count; i < n; i++)
             {
                 var field = valueFields[i];
-                _writer.WriteLine("    public {0}{1}{2} {3} {{ get; }}", "", "", field.Type, field.Name);
+                this.WriteLine("public {field.Type} {field.Name} {{ get; }}");
             }
 
-            _writer.WriteLine("  }");
+            this.CloseBlock();
         }
     }
 
@@ -101,29 +89,7 @@ internal class SignatureWriter
         if (kinds.Count > 1)
         {
             foreach (var kind in kinds)
-            {
-                _writer.WriteLine("    // {0}", kind.Name);
-            }
+                this.WriteLine("// {0}", kind.Name);
         }
-    }
-
-    private bool IsSeparatedNodeList(string typeName)
-    {
-        return typeName.StartsWith("SeparatedSyntaxList<", StringComparison.Ordinal);
-    }
-
-    private bool IsNodeList(string typeName)
-    {
-        return typeName.StartsWith("SyntaxList<", StringComparison.Ordinal);
-    }
-
-    public bool IsNodeOrNodeList(string typeName)
-    {
-        return IsNode(typeName) || IsNodeList(typeName) || IsSeparatedNodeList(typeName);
-    }
-
-    private bool IsNode(string typeName)
-    {
-        return _typeMap.ContainsKey(typeName);
     }
 }

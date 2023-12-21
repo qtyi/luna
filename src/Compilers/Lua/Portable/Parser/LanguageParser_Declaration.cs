@@ -62,7 +62,7 @@ partial class LanguageParser
             SyntaxKind.IdentifierToken or
             SyntaxKind.DotDotDotToken => this.EatToken(),
 
-            _ => LanguageParser.CreateMissingIdentifierToken(),
+            _ => CreateMissingIdentifierToken(),
         };
         if (identifier.IsMissing)
             identifier = this.AddError(identifier, ErrorCode.ERR_IdentifierExpected);
@@ -94,7 +94,7 @@ partial class LanguageParser
 #else
     private
 #endif
-        bool IsPossibleFieldListSeparator() => LanguageParser.IsPossibleFieldListSeparator(this.CurrentTokenKind);
+        bool IsPossibleFieldListSeparator() => IsPossibleFieldListSeparator(this.CurrentTokenKind);
 
     private static bool IsPossibleFieldListSeparator(SyntaxKind kind) => kind is SyntaxKind.CommaToken or SyntaxKind.SemicolonToken;
 
@@ -225,7 +225,7 @@ partial class LanguageParser
             expr = this.ParseExpressionCore();
 
         // 跳过后方的标记和表达式直到字段结束。
-        var skippedSyntax = this.SkipTokensAndExpressions(token => !LanguageParser.IsPossibleFieldListSeparator(token.Kind) && token.Kind is not (SyntaxKind.CloseBraceToken or SyntaxKind.EndOfFileToken));
+        var skippedSyntax = this.SkipTokensAndExpressions(token => !IsPossibleFieldListSeparator(token.Kind) && token.Kind is not (SyntaxKind.CloseBraceToken or SyntaxKind.EndOfFileToken));
         if (skippedSyntax is null) // 后方没有需要跳过的标记和表达式。
             expr ??= this.ReportMissingExpression(this.CreateMissingIdentifierName());
         else

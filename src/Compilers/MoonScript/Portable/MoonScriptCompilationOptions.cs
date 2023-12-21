@@ -39,15 +39,15 @@ partial class MoonScriptCompilationOptions
 
     public partial bool Equals(MoonScriptCompilationOptions? other)
     {
-        if (object.ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(this, other)) return true;
 
-        if (!base.EqualsHelper(other)) return false;
+        if (!EqualsHelper(other)) return false;
 
         return true;
     }
 
     protected override partial int ComputeHashCode()
     {
-        return base.GetHashCodeHelper();
+        return GetHashCodeHelper();
     }
 }

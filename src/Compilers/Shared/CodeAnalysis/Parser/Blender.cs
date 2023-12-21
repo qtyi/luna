@@ -38,7 +38,7 @@ internal readonly partial struct Blender
         {
             var collapsed = TextChangeRange.Collapse(changes);
 
-            var affectedRange = Blender.ExtendToAffectedRange(oldTree, collapsed);
+            var affectedRange = ExtendToAffectedRange(oldTree, collapsed);
             this._changes = this._changes.Push(affectedRange);
         }
 

@@ -58,7 +58,7 @@ internal sealed class BuildClient
 
     internal static int Run(IEnumerable<string> arguments, RequestLanguage language, CompileFunc compileFunc, CompileOnServerFunc compileOnServerFunc)
     {
-        var sdkDir = BuildClient.GetSystemSdkDirectory();
+        var sdkDir = GetSystemSdkDirectory();
         if (RuntimeHostInfo.IsCoreClrRuntime)
         {
             // 给控制台注册编码。
@@ -67,7 +67,7 @@ internal sealed class BuildClient
         }
 
         var client = new BuildClient(language, compileFunc, compileOnServerFunc);
-        var clientDir = BuildClient.GetClientDirectory();
+        var clientDir = GetClientDirectory();
         var workingDir = Directory.GetCurrentDirectory();
         var tempDir = BuildServerConnection.GetTempPath(workingDir);
         var buildPaths = new BuildPaths(clientDir: clientDir, workingDir: workingDir, sdkDir: sdkDir, tempDir: tempDir);
@@ -163,7 +163,7 @@ internal sealed class BuildClient
     /// </summary>
     private RunCompilationResult? RunServerCompilation(TextWriter textWriter, List<string> arguments, BuildPaths buildPaths, string? libDirectory, string pipeName, string? keepAlive)
     {
-        if (!BuildClient.AreNamedPipesSupported()) return null;
+        if (!AreNamedPipesSupported()) return null;
 
         BuildResponse buildResponse;
         try
@@ -226,8 +226,8 @@ internal sealed class BuildClient
 
     private static IEnumerable<string> GetCommandLineArgs(IEnumerable<string> args)
     {
-        if (BuildClient.UseNativeArguments())
-            return BuildClient.GetCommandLineWindows(args);
+        if (UseNativeArguments())
+            return GetCommandLineWindows(args);
 
         return args;
     }

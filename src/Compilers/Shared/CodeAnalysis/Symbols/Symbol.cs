@@ -332,7 +332,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// Returns <see langword="true"/> if this is the original definition of this symbol;
     /// otherwise, <see langword="false"/>.
     /// </value>
-    public bool IsDefinition => object.ReferenceEquals(this, this.OriginalDefinition);
+    public bool IsDefinition => ReferenceEquals(this, this.OriginalDefinition);
     #endregion
 
     /// <summary>
@@ -467,7 +467,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
             return left is null;
 
         // this part is expected to disappear when inlining "someSymbol is null"
-        return object.ReferenceEquals(left, right) || right.Equals(left);
+        return ReferenceEquals(left, right) || right.Equals(left);
     }
 
     /// <summary>
@@ -487,7 +487,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
             return left is not null;
 
         // this part is expected to disappear when inlining "someSymbol is null"
-        return !object.ReferenceEquals(left, right) && !right.Equals(left);
+        return !ReferenceEquals(left, right) && !right.Equals(left);
     }
 
     /// <inheritdoc/>
@@ -509,7 +509,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// <inheritdoc cref="Equals(Symbol?)"/>
     public virtual bool Equals(Symbol? other, TypeCompareKind compareKind) =>
         // By default we don't consider the compareKind, and do reference equality. This can be overridden.
-        object.ReferenceEquals(this, other);
+        ReferenceEquals(this, other);
 
     /// <summary>
     /// Determines whether two symbols are equals.
@@ -523,7 +523,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     {
         if (first is null)
             return second is null;
-        else if (object.ReferenceEquals(first, second))
+        else if (ReferenceEquals(first, second))
             return true;
         else
             return first.Equals(second, compareKind);
@@ -606,7 +606,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
         get
         {
             var dependency = this.ContainingAssembly;
-            if (dependency is not null && object.ReferenceEquals(dependency.CorLibrary, dependency))
+            if (dependency is not null && ReferenceEquals(dependency.CorLibrary, dependency))
                 return null;
 
             return dependency;

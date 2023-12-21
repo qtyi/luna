@@ -63,11 +63,11 @@ internal abstract partial class NonMissingNetmoduleSymbol : NetmoduleSymbol
         var ownerModule = this;
         var ownerAssembly = ownerModule.ContainingAssembly;
         var dependentAssembly = dependentType.ContainingAssembly;
-        if (object.ReferenceEquals(ownerAssembly, dependentAssembly)) return false;
+        if (ReferenceEquals(ownerAssembly, dependentAssembly)) return false;
 
         foreach (var unifiedAssembly in this.GetUnifiedAssemblies())
         {
-            if (!object.ReferenceEquals(unifiedAssembly.TargetAssembly, dependentAssembly)) continue;
+            if (!ReferenceEquals(unifiedAssembly.TargetAssembly, dependentAssembly)) continue;
 
             var referenceId = unifiedAssembly.OriginalReference;
             var definitionId = dependentAssembly.Identity;

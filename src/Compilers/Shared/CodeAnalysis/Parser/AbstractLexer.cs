@@ -27,7 +27,7 @@ internal abstract partial class AbstractLexer : IDisposable
     /// <value>
     /// 若为<see langword="true"/>时，表示收集到错误；若为<see langword="false"/>时，表示未收集到错误。
     /// </value>
-    [MemberNotNullWhen(true, nameof(AbstractLexer._errors))]
+    [MemberNotNullWhen(true, nameof(_errors))]
     protected bool HasErrors => this._errors is not null;
 
     /// <summary>
@@ -75,9 +75,9 @@ internal abstract partial class AbstractLexer : IDisposable
 
     protected void AddError(int position, int width, ErrorCode code, params object[] args) => this.AddError(this.MakeError(position, width, code, args));
 
-    protected void AddError(ErrorCode code) => this.AddError(AbstractLexer.MakeError(code));
+    protected void AddError(ErrorCode code) => this.AddError(MakeError(code));
 
-    protected void AddError(ErrorCode code, params object[] args) => this.AddError(AbstractLexer.MakeError(code, args));
+    protected void AddError(ErrorCode code, params object[] args) => this.AddError(MakeError(code, args));
 
     protected void AddError(SyntaxDiagnosticInfo? error)
     {

@@ -98,6 +98,12 @@ public class Field : SyntaxTreeTypeChild
     [XmlElement]
     public Comment? PropertyComment;
 
-    public bool IsToken => this.Type == "SyntaxToken";
+    internal bool IsToken => this.Type.IsToken();
+
+    internal bool IsNode => this.Type.IsNode();
+
+    internal bool IsNodeList => this.Type.IsNodeList();
+
+    internal bool IsSeparatedNodeList => this.Type.IsSeparatedNodeList();
 }
 #pragma warning restore CS8618

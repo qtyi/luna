@@ -225,6 +225,12 @@ function Restore-ExternalRepos() {
   # We get its source link from NuGet with version exactly the same as Luna.
   $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" (Get-LunaVersion)
   Archive-Codebase $dotnetRoslynRepo.Owner $dotnetRoslynRepo.Name $dotnetRoslynRepo.Branch $dotnetRoslynRepo.CommitId
+
+  # Archive lua/lua repository from Github for testing our Lua code analysis component.
+  Archive-Codebase "lua" "lua"
+
+  # Archive leafo/moonscript repository from Github for testing our MoonScript code analysis component.
+  Archive-Codebase "leafo" "moonscript"
 }
 
 function BuildSolution() {

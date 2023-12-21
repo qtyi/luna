@@ -32,7 +32,7 @@ internal static partial class MessageIDExtensions
 
     internal static partial LanguageVersion RequiredVersion(this MessageID feature)
     {
-        Debug.Assert(MessageIDExtensions.RequiredFeature(feature) is null);
+        Debug.Assert(RequiredFeature(feature) is null);
 
         // 在语言分析器中检查特性的支持版本。
         return feature switch

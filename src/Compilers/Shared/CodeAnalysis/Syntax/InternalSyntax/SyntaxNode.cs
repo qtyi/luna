@@ -138,7 +138,7 @@ internal abstract partial class
     /// 此方法仅应在构造语法节点时调用。
     /// </remarks>
     protected void SetFactoryContext(SyntaxFactoryContext context) =>
-        this.flags = ThisInternalSyntaxNode.SetFactoryContext(this.flags, context);
+        this.flags = SetFactoryContext(this.flags, context);
 
     /// <summary>
     /// 给指定的节点标示设置语法工厂上下文。

@@ -35,14 +35,14 @@ internal sealed class BindingDiagnosticBag : BindingDiagnosticBag<AssemblySymbol
     internal static BindingDiagnosticBag GetInstance(bool withDiagnostics, bool withDependencies) =>
         (withDiagnostics, withDependencies) switch
         {
-            (true, true) => BindingDiagnosticBag.GetInstance(),
+            (true, true) => GetInstance(),
             (true, false) => new(DiagnosticBag.GetInstance()),
             (false, true) => new(diagnosticBag: null, PooledHashSet<AssemblySymbol>.GetInstance()),
-            _ => BindingDiagnosticBag.Discarded
+            _ => Discarded
         };
 
     internal static BindingDiagnosticBag GetInstance(BindingDiagnosticBag template) =>
-        BindingDiagnosticBag.GetInstance(template.AccumulatesDiagnostics, template.AccumulatesDependencies);
+        GetInstance(template.AccumulatesDiagnostics, template.AccumulatesDependencies);
 
     internal static BindingDiagnosticBag Create(BindingDiagnosticBag template) =>
         (template.AccumulatesDiagnostics, template.AccumulatesDiagnostics) switch
@@ -50,7 +50,7 @@ internal sealed class BindingDiagnosticBag : BindingDiagnosticBag<AssemblySymbol
             (true, true) => new(),
             (true, false) => new(new DiagnosticBag()),
             (false, true) => new(diagnosticBag: null, new HashSet<AssemblySymbol>()),
-            _ => BindingDiagnosticBag.Discarded
+            _ => Discarded
         };
 
     internal void AddDependencies(Symbol? symbol)

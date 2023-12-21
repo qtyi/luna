@@ -146,11 +146,11 @@ internal partial struct Blender
                 (nodeOrToken.IsToken && ((ThisInternalSyntaxNode)nodeOrToken.AsToken().Node).ContainsSkippedText && nodeOrToken.Parent.ContainsDiagnostics)
             ) return false;
 
-            if (Reader.IsFabricatedToken(nodeOrToken.Kind())) return false;
+            if (IsFabricatedToken(nodeOrToken.Kind())) return false;
 
             if (
                 (nodeOrToken.IsToken && nodeOrToken.AsToken().IsMissing) ||
-                (nodeOrToken.IsNode && Reader.IsIncomplete((ThisSyntaxNode)nodeOrToken.AsNode()))
+                (nodeOrToken.IsNode && IsIncomplete((ThisSyntaxNode)nodeOrToken.AsNode()))
             ) return false;
 
             return true;

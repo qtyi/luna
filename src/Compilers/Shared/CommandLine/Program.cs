@@ -35,7 +35,28 @@ public partial class Program
 
     private static int MainCore(string[] args)
     {
+
+/* 项目“moonc (net6.0)”的未合并的更改
+在此之前:
         using var logger = new CompilerServerLogger($"{Thisc.ExecutableName} {Process.GetCurrentProcess().Id}");
+在此之后:
+        using var logger = new CompilerServerLogger($"{MoonScriptCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
+*/
+
+/* 项目“moonc (net472)”的未合并的更改
+在此之前:
+        using var logger = new CompilerServerLogger($"{Thisc.ExecutableName} {Process.GetCurrentProcess().Id}");
+在此之后:
+        using var logger = new CompilerServerLogger($"{MoonScriptCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
+*/
+
+/* 项目“moonc-arm64”的未合并的更改
+在此之前:
+        using var logger = new CompilerServerLogger($"{Thisc.ExecutableName} {Process.GetCurrentProcess().Id}");
+在此之后:
+        using var logger = new CompilerServerLogger($"{MoonScriptCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
+*/
+        using var logger = new CompilerServerLogger($"{LuaCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
 
 #if BOOTSTRAP
         ExitingTraceListener.Install(logger);

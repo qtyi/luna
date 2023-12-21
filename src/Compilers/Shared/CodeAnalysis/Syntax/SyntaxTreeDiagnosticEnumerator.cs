@@ -19,7 +19,7 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 /// <summary>
 /// 语法树的消息的枚举器。
 /// </summary>
-internal struct SyntaxTreeDiagnosticEnumerator : IEnumerator<ThisDiagnostic>
+internal struct SyntaxTreeDiagnosticEnumerator
 {
     private readonly SyntaxTree? _syntaxTree;
     private NodeIterationStack _stack;
@@ -52,8 +52,6 @@ internal struct SyntaxTreeDiagnosticEnumerator : IEnumerator<ThisDiagnostic>
             return this._current;
         }
     }
-
-    object? IEnumerator.Current => this.Current;
 
     public bool MoveNext()
     {
@@ -112,10 +110,6 @@ tryAgain:
         return false;
     }
 
-    void IEnumerator.Reset() => throw new NotSupportedException();
-
-    void IDisposable.Dispose() { }
-
     private struct NodeIteration
     {
         internal readonly GreenNode Node;
@@ -142,12 +136,13 @@ tryAgain:
             this._count = 0;
         }
 
-        internal ref NodeIteration Top
+        internal NodeIteration Top
         {
             get
             {
+                Debug.Assert(this._stack is not null);
                 Debug.Assert(this._count > 0);
-                return ref this._stack[this._count - 1];
+                return this._stack[this._count - 1];
             }
         }
 
@@ -155,6 +150,7 @@ tryAgain:
         {
             get
             {
+                Debug.Assert(this._stack is not null);
                 Debug.Assert(index >= 0 && index < this._count);
                 return this._stack[index];
             }
@@ -192,6 +188,7 @@ tryAgain:
         /// <param name="node">要压入的绿树节点。</param>
         private void Push(GreenNode node)
         {
+            Debug.Assert(this._stack is not null);
             if (this._count >= this._stack.Length) // 需要扩容。
             {
                 var temp = new NodeIteration[this._stack.Length + Math.Min(this._stack.Length, 1024)];
@@ -206,19 +203,11 @@ tryAgain:
         /// <summary>
         /// 弹出一个绿树节点。
         /// </summary>
-        internal NodeIteration Pop()
+        internal void Pop()
         {
             Debug.Assert(this._count > 0);
-            var iteration = this.Top;
             this._count--;
-            return iteration;
         }
-
-        /// <summary>
-        /// 查看栈中最顶层的元素。
-        /// </summary>
-        /// <returns>栈中最顶层的元素。</returns>
-        internal NodeIteration Peek() => this.Top;
 
         /// <summary>
         /// 此节点迭代栈中是否含有元素。
@@ -232,8 +221,9 @@ tryAgain:
         /// <param name="slotIndex">新的插入索引。</param>
         internal void UpdateSlotIndexForStackTop(int slotIndex)
         {
+            Debug.Assert(this._stack is not null);
             Debug.Assert(this._count > 0);
-            this.Top.SlotIndex = slotIndex;
+            this._stack[this._count - 1].SlotIndex = slotIndex;
         }
 
         /// <summary>
@@ -242,8 +232,9 @@ tryAgain:
         /// <param name="diagnosticIndex">新的消息索引。</param>
         internal void UpdateDiagnosticIndexForStackTop(int diagnosticIndex)
         {
+            Debug.Assert(this._stack is not null);
             Debug.Assert(this._count > 0);
-            this.Top.DiagnosticIndex = diagnosticIndex;
+            this._stack[this._count - 1].DiagnosticIndex = diagnosticIndex;
         }
     }
 }

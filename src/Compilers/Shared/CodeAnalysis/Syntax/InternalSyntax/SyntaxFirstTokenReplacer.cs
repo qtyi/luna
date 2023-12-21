@@ -39,7 +39,7 @@ internal class SyntaxFirstTokenReplacer :
     {
         var oldToken = root as SyntaxToken ?? root.GetLastToken();
         Debug.Assert(oldToken is not null);
-        return SyntaxFirstTokenReplacer.Replace(root, oldToken, newToken, diagnosticOffsetDelta);
+        return Replace(root, oldToken, newToken, diagnosticOffsetDelta);
     }
 
     internal static TRoot Replace<TRoot>(TRoot root, SyntaxToken oldToken, SyntaxToken newToken, int diagnosticOffsetDelta)
@@ -62,7 +62,7 @@ internal class SyntaxFirstTokenReplacer :
                 return _newToken;
             }
             else
-                return SyntaxFirstTokenReplacer.UpdateDiagnosticOffset(base.Visit(node)!, this._diagnosticOffsetDelta);
+                return UpdateDiagnosticOffset(base.Visit(node)!, this._diagnosticOffsetDelta);
         }
 
         return node;

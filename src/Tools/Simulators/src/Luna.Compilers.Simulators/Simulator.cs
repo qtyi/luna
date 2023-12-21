@@ -4,110 +4,49 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using Luna.Compilers.Tools;
+using Roslyn.Utilities;
 
 namespace Luna.Compilers.Simulators;
 
 public static class Simulator
 {
-    private static readonly Dictionary<(Type type, string languageName), ISimulator> s_simulators = new();
     private static readonly Dictionary<string, HashSet<Type>> s_languageNameMap = new();
-    private static readonly Dictionary<string, HashSet<string>> s_fileExtensionMap = new();
+    internal static readonly Dictionary<string, HashSet<string>> s_fileExtensionMap = new(StringComparer.OrdinalIgnoreCase);
 
-    public static bool TryGetLexerSimulatorByLanguageName(string languageName, [NotNullWhen(true)] out ILexerSimulator[]? lexerSimulators) =>
-        Simulator.TryGetSimulatorByLanguageName(languageName, out lexerSimulators);
+    public static IReadOnlyCollection<Type> GetExportedComponents(string fileExtension) => GetExportedComponents(fileExtension, predicate: null);
 
-    public static bool TryGetLanguageParserSimulatorByLanguageName(string languageName, [NotNullWhen(true)] out ILanguageParserSimulator[]? languageParserSimulators) =>
-        Simulator.TryGetSimulatorByLanguageName(languageName, out languageParserSimulators);
+    public static IReadOnlyCollection<Type> GetExportedComponents<T>(string fileExtension) => GetExportedComponents(fileExtension, predicate: static type => typeof(T).IsAssignableFrom(type));
 
-    internal static bool TryGetSimulatorByLanguageName<TSimulator>(string languageName, [NotNullWhen(true)] out TSimulator[]? simulators)
-        where TSimulator : ISimulator
+    private static IReadOnlyCollection<Type> GetExportedComponents(string fileExtension, Func<Type, bool>? predicate = null)
     {
-        simulators = null;
-
-        if (!s_languageNameMap.TryGetValue(languageName, out var types) || types.Count == 0) return false;
-
-        simulators = types.Select(type =>
+        var result = new HashSet<Type>();
+        if (s_fileExtensionMap.TryGetValue(fileExtension, out var languageNames))
         {
-            if (!s_simulators.TryGetValue((type, languageName), out var simulator))
+            foreach (var languageName in languageNames)
             {
-                try
-                {
-                    simulator = Activator.CreateInstance(type) as ISimulator;
-                    Debug.Assert(simulator is not null);
-                    simulator!.Initialize(new(languageName));
-                    s_simulators.Add((type, languageName), simulator);
-                }
-                catch
-                {
-                    return null;
-                }
+                if (s_languageNameMap.TryGetValue(languageName, out var types))
+                    result.UnionWith(predicate is null ? types : types.Where(predicate));
             }
-            return simulator;
-        })
-            .OfType<TSimulator>()
-            .ToArray();
-
-        if (simulators.Length == 0)
-        {
-            simulators = null;
-            return false;
         }
-        else return true;
-    }
-
-    public static bool TryGetLexerSimulatorByFileExtension(string fileExtension, [NotNullWhen(true)] out ILexerSimulator[]? lexerSimulators) =>
-        Simulator.TryGetSimulatorByFileExtension(fileExtension, out lexerSimulators);
-
-    public static bool TryGetLanguageParserSimulatorByFileExtension(string fileExtension, [NotNullWhen(true)] out ILanguageParserSimulator[]? languageParserSimulators) =>
-        Simulator.TryGetSimulatorByFileExtension(fileExtension, out languageParserSimulators);
-
-    internal static bool TryGetSimulatorByFileExtension<TSimulator>(string fileExtension, [NotNullWhen(true)] out TSimulator[]? simulators)
-        where TSimulator : ISimulator
-    {
-        simulators = null;
-
-        if (!s_fileExtensionMap.TryGetValue(fileExtension, out var languageNames) || languageNames.Count == 0) return false;
-
-        simulators = languageNames.SelectMany(languageName =>
-        {
-            if (Simulator.TryGetSimulatorByLanguageName<TSimulator>(languageName, out var result))
-                return result;
-            else return Enumerable.Empty<TSimulator>();
-        })
-            .ToArray();
-
-        if (simulators.Length == 0)
-        {
-            simulators = null;
-            return false;
-        }
-        else return true;
-    }
-
-    public static void RegisterSimulator(string fileExtension, string languageName, Type simulatorType)
-    {
-        var interfaceType = typeof(ISimulator);
-        if (!interfaceType.IsAssignableFrom(simulatorType)) throw new ArgumentException($"“{nameof(simulatorType)}” 必须是从 “{simulatorType.FullName}” 派生的类型。", nameof(simulatorType));
-
-        var attributes = simulatorType.GetCustomAttributes().OfType<SimulatorAttribute>();
-        if (!attributes.Any()) return; // 未包含指定的特性，不注册。
-
-        Simulator.AddMapItem(s_fileExtensionMap, fileExtension, languageName);
-        Simulator.AddMapItem(s_languageNameMap, languageName, simulatorType);
+        return result;
     }
 
     public static void RegisterSimulatorFrom(Assembly assembly, Func<string, IEnumerable<string>?>? languageNameToFileExtensionsProvider = null)
     {
         if (assembly is null) throw new ArgumentNullException(nameof(assembly));
-        languageNameToFileExtensionsProvider ??= Simulator.GetFileExtensionsFromLanguageName;
+        RegisterSimulatorFromCore(assembly, languageNameToFileExtensionsProvider);
+    }
 
-        var interfaceType = typeof(ISimulator);
-        foreach (var type in assembly.DefinedTypes)
+    internal static void RegisterSimulatorFromCore(Assembly assembly, Func<string, IEnumerable<string>?>? languageNameToFileExtensionsProvider = null)
+    {
+        languageNameToFileExtensionsProvider ??= GetFileExtensionsFromLanguageName;
+
+        foreach (var type in assembly.ExportedTypes)
         {
             if (type.IsAbstract || type.IsInterface || type.IsEnum) continue;
-            if (!interfaceType.IsAssignableFrom(type)) continue;
+            if (!type.IsClass && !type.IsValueType) continue;
 
-            var attributes = type.GetCustomAttributes().OfType<SimulatorAttribute>();
+            var attributes = type.GetCustomAttributes().OfType<ExportAttribute>();
             foreach (var attribute in attributes)
             {
                 if (attribute.Languages.Length == 0) continue;
@@ -118,7 +57,10 @@ public static class Simulator
                     if (extensions is null) continue;
 
                     foreach (var extension in extensions)
-                        Simulator.RegisterSimulator(extension, languageName, type);
+                    {
+                        AddMapItem(s_fileExtensionMap, extension, languageName);
+                        AddMapItem(s_languageNameMap, languageName, type);
+                    }
                 }
             }
         }
@@ -129,7 +71,7 @@ public static class Simulator
     {
         Debug.Assert(config is not null);
 
-        Simulator.RegisterSimulatorFromConfigurationCore(config);
+        RegisterSimulatorFromConfigurationCore(config);
     }
 
     public static void RegisterSimulatorFromConfiguration(string configFilePath)
@@ -142,7 +84,7 @@ public static class Simulator
             using var fs = File.OpenRead(configFilePath);
             config = SimulatorConfiguration.Deserialize(fs);
         }
-        Simulator.RegisterSimulatorFromConfigurationCore(config);
+        RegisterSimulatorFromConfigurationCore(config);
     }
 
     internal static void RegisterSimulatorFromConfigurationCore(SimulatorConfiguration? config)
@@ -157,12 +99,12 @@ public static class Simulator
                 foreach (var languageName in pair.Value)
                 {
                     languageNameToFileExtensionMap ??= new();
-                    Simulator.AddMapItem(languageNameToFileExtensionMap, languageName, pair.Key);
+                    AddMapItem(languageNameToFileExtensionMap, languageName, pair.Key);
                 }
             }
         }
 
-        searchPaths ??= new[] { "Simulators/" };
+        searchPaths ??= new[] { "Simulators" + Path.DirectorySeparatorChar };
         var fileExtensionsProvider = languageNameToFileExtensionMap is null ? null :
             new Func<string, IEnumerable<string>?>(languageName =>
                 languageNameToFileExtensionMap.TryGetValue(languageName, out var fileExtensions) ? fileExtensions : null);
@@ -183,18 +125,24 @@ public static class Simulator
                     continue;
                 }
 
-                Simulator.RegisterSimulatorFrom(assembly, fileExtensionsProvider);
+                RegisterSimulatorFromCore(assembly, fileExtensionsProvider);
             }
         }
     }
 
-    private static bool AddMapItem<TKey, TValue>(IDictionary<TKey, HashSet<TValue>> map, TKey key, TValue value) where TKey : notnull
+    private static void ClearAll()
+    {
+        s_languageNameMap.Clear();
+        s_fileExtensionMap.Clear();
+    }
+
+    private static bool AddMapItem<TKey, TValue>(IDictionary<TKey, HashSet<TValue>> map, TKey key, TValue value, IEqualityComparer<TValue>? comparer = null) where TKey : notnull
     {
         if (map.TryGetValue(key, out var items))
             return items.Add(value);
         else
         {
-            map.Add(key, new() { value });
+            map.Add(key, new(comparer) { value });
             return true;
         }
     }
@@ -202,8 +150,10 @@ public static class Simulator
     private static IEnumerable<string>? GetFileExtensionsFromLanguageName(string languageName) =>
         languageName switch
         {
-            "Lua" => new[] { ".lua" },
-            "MoonScript" => new[] { ".moon" },
+            Microsoft.CodeAnalysis.LanguageNames.CSharp => new[] { ".cs" },
+            Microsoft.CodeAnalysis.LanguageNames.VisualBasic => new[] { ".vb" },
+            Qtyi.CodeAnalysis.LanguageNames.Lua => new[] { ".lua" },
+            Qtyi.CodeAnalysis.LanguageNames.MoonScript => new[] { ".moon" },
 
             _ => null
         };

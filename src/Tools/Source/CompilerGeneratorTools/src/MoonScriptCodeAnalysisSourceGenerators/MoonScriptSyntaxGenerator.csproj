@@ -10,6 +10,9 @@
 
   <ItemGroup>
     <Compile Remove="*" />
+
+    <Compile Include="..\..\..\..\..\Compilers\MoonScript\Portable\Syntax\SyntaxKind.cs" Link="SyntaxKind.cs" />
+    <Compile Include="..\..\..\..\..\Compilers\MoonScript\Portable\Syntax\SyntaxKindFacts.cs" Link="SyntaxKindFacts.cs" />
   </ItemGroup>
 
   <ItemGroup>

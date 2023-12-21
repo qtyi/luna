@@ -214,7 +214,7 @@ public abstract partial class
         ThisParseOptions? options = null,
         string path = "",
         Encoding? encoding = null,
-        CancellationToken cancellationToken = default) => ThisSyntaxTree.ParseText(
+        CancellationToken cancellationToken = default) => ParseText(
             text: SourceText.From(text, encoding),
             options: options,
             path: path,
@@ -360,8 +360,12 @@ public abstract partial class
             return SpecializedCollections.EmptyEnumerable<Diagnostic>();
     }
 
-    private IEnumerable<Diagnostic> EnumerateDiagnostics(GreenNode node, int position) =>
-        new SyntaxTreeDiagnosticEnumerator(this, node, position).GetEnumerable();
+    private IEnumerable<Diagnostic> EnumerateDiagnostics(GreenNode node, int position)
+    {
+        var enumerator = new SyntaxTreeDiagnosticEnumerator(this, node, position);
+        while (enumerator.MoveNext())
+            yield return enumerator.Current;
+    }
 
     public override IEnumerable<Diagnostic> GetDiagnostics(SyntaxToken token)
     {

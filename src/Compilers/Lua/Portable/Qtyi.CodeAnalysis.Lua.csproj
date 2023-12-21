@@ -22,7 +22,7 @@
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
   
-  <ItemGroup Label="AdditionalFiels">
+  <ItemGroup Label="AdditionalFiles">
     <AdditionalFiles Include="CompilationOptions.xml" />
     
     <None Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\Shared\Syntax.xsd" Link="Syntax\Syntax.xsd" />
@@ -42,9 +42,10 @@
 
   <ItemGroup Label="InternalsVisibles">
     <!-- InternalsVisibleTo -->
-    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.Parser.UnitTests" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Test.Utilities" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.Test.Utilities" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.Syntax.UnitTests" />
     <InternalsVisibleTo Include="luac" />
-    <InternalsVisibleTo Include="Luna.Compilers.Simulators.Lua" />
 
     <!-- InternalsVisibleFrom -->
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />

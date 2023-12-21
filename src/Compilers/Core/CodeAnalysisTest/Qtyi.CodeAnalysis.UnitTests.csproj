@@ -3,41 +3,34 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="LinkedFiles">
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\GlobalAssemblyCacheHelpers\FusionAssemblyIdentity.cs" Link="FusionAssemblyIdentity" />
   </ItemGroup>
 
-  <ItemGroup>
-
-
+  <ItemGroup Label="InternalsVisibles">
     <!-- InternalsVisibleFrom -->
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
   
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
-    <PackageReference Include="coverlet.collector" Version="3.1.2" />
-    <PackageReference Update="XunitXml.TestLogger" Version="3.0.62" />
+  <ItemGroup Label="References">
+    <!-- PackageReference -->
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-  </ItemGroup>
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Portable\Qtyi.CodeAnalysis.csproj" />
-    
+    <!-- ProjectReference -->
     <ProjectReference Include="..\..\..\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj" Aliases="PDB" />
+    <ProjectReference Include="..\..\Test\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\Test\Resources\Core\Qtyi.CodeAnalysis.Compiler.Test.Resources.csproj" />
-
-    <!-- Lua -->
+    <ProjectReference Include="..\Portable\Qtyi.CodeAnalysis.csproj" />
+    <ProjectReference Include="..\..\Test\Utilities\Lua\Qtyi.CodeAnalysis.Lua.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
-    
-    <!-- MoonScript -->
+    <ProjectReference Include="..\..\Test\Utilities\MoonScript\Qtyi.CodeAnalysis.MoonScript.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
   </ItemGroup>
 

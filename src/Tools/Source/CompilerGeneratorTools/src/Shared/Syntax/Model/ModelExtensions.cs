@@ -2,6 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using LanguageNames = Qtyi.CodeAnalysis.LanguageNames;
+
+using Luna.Compilers.Generators.Model;
+
 namespace Luna.Compilers.Generators.Syntax.Model;
 
 internal static class ModelExtensions
@@ -14,4 +18,25 @@ internal static class ModelExtensions
 
     public static bool IsNew(this Field f)
         => f.New.IsTrue();
+
+    public static bool IsToken(this string typeName)
+        => typeName == "SyntaxToken";
+
+    public static bool IsNode(this string typeName)
+        => typeName == LanguageNames.This + "SyntaxNode";
+
+    public static bool IsSeparatedNodeList(this string typeName)
+        => typeName.StartsWith("SeparatedSyntaxList", StringComparison.Ordinal);
+
+    public static bool IsNodeList(this string typeName)
+        => typeName.StartsWith("SyntaxList", StringComparison.Ordinal);
+
+    public static bool IsAnyNodeList(this string typeName)
+        => typeName.IsNodeList() || typeName.IsSeparatedNodeList();
+
+    public static bool IsNodeOrTokenList(this string typeName)
+        => typeName == "SyntaxNodeOrTokenList";
+
+    public static bool IsAnyList(this string typeName)
+        => typeName.IsAnyNodeList() || typeName.IsNodeOrTokenList();
 }

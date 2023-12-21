@@ -49,8 +49,8 @@ public readonly struct TypeInfo : IEquatable<TypeInfo>
     }
 
     public bool Equals(TypeInfo other) =>
-        object.Equals(this.Type, other.Type) &&
-        object.Equals(this.ConvertedType, other.ConvertedType) &&
+        Equals(this.Type, other.Type) &&
+        Equals(this.ConvertedType, other.ConvertedType) &&
         this.Nullability.Equals(other.Nullability) &&
         this.ConvertedNullability.Equals(other.ConvertedNullability);
 

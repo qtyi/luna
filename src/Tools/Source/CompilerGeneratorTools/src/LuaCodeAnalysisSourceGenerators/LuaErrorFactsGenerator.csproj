@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <Compile Remove="*" />
+
+    <Compile Include="..\..\..\..\..\Compilers\Lua\Portable\Errors\ErrorCode.cs" Link="ErrorCode.cs" />
   </ItemGroup>
 
   <ItemGroup>

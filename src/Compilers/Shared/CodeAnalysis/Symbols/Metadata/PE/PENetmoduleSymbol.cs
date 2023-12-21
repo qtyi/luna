@@ -114,7 +114,7 @@ internal sealed partial class PENetmoduleSymbol : NonMissingNetmoduleSymbol
     public ImmutableArray<ThisAttributeData> GetAttributes()
     {
         if (this._lazyCustomAttributes.IsDefault)
-            this.LoadCustomAttributes(PENetmoduleSymbol.Token, ref this._lazyCustomAttributes);
+            this.LoadCustomAttributes(Token, ref this._lazyCustomAttributes);
 
         return this._lazyCustomAttributes;
     }

@@ -7,4 +7,6 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 partial class MessageProvider
 {
     internal const string ErrorCodePrefix = "MOON";
+
+    private partial bool GetIsEnabledByDefault(ErrorCode code) => true;
 }

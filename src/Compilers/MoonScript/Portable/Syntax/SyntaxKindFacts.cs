@@ -67,6 +67,7 @@ public static partial class SyntaxFacts
             SyntaxKind.CommercialAtCommercialAtToken => "@@",
             SyntaxKind.AndEqualsToken => "and=",
             SyntaxKind.OrEqualsToken => "or=",
+            SyntaxKind.HashExclamationToken => "#!",
 
             // 关键字
             SyntaxKind.AndKeyword => "and",
@@ -145,14 +146,14 @@ public static partial class SyntaxFacts
     /// <param name="kind">要查询的语法种类。</param>
     /// <returns>若<paramref name="kind"/>表示关键字，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
     public static bool IsKeywordKind(SyntaxKind kind) =>
-        SyntaxFacts.IsReservedKeyword(kind) || SyntaxFacts.IsContextualKeyword(kind);
+        IsReservedKeyword(kind) || IsContextualKeyword(kind);
 
     /// <summary>
     /// 获取所有关键字语法种类。
     /// </summary>
     /// <returns>所有关键字语法种类。</returns>
     public static IEnumerable<SyntaxKind> GetKeywordKinds() =>
-        SyntaxFacts.GetReservedKeywordKinds().Concat(SyntaxFacts.GetContextualKeywordKinds());
+        GetReservedKeywordKinds().Concat(GetContextualKeywordKinds());
 
     #region 保留关键字
     /// <summary>
@@ -238,7 +239,7 @@ public static partial class SyntaxFacts
     /// <returns>若<paramref name="kind"/>表示上下文关键字，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
     public static bool IsContextualKeyword(SyntaxKind kind) =>
         // 元字段和元方法
-        SyntaxFacts.IsMetafield(kind) ||
+        IsMetafield(kind) ||
 
         // 上下文关键词
         kind switch
@@ -272,7 +273,7 @@ public static partial class SyntaxFacts
             "super" => SyntaxKind.SuperKeyword,
 
             // 元字段和元方法
-            _ => SyntaxFacts.GetMetafieldKind(text)
+            _ => GetMetafieldKind(text)
         };
     #endregion
 
@@ -283,7 +284,7 @@ public static partial class SyntaxFacts
     /// <returns>所有标点语法种类。</returns>
     public static IEnumerable<SyntaxKind> GetPunctuationKinds()
     {
-        for (var i = (int)SyntaxKind.PlusToken; i <= (int)SyntaxKind.OrEqualsToken; i++)
+        for (var i = (int)SyntaxKind.PlusToken; i <= (int)SyntaxKind.HashExclamationToken; i++)
             yield return (SyntaxKind)i;
     }
 
@@ -295,7 +296,7 @@ public static partial class SyntaxFacts
     public static bool IsPunctuation(SyntaxKind kind) =>
         kind switch
         {
-            >= SyntaxKind.PlusToken and <= SyntaxKind.OrEqualsToken => true,
+            >= SyntaxKind.PlusToken and <= SyntaxKind.HashExclamationToken => true,
 
             _ => false
         };
@@ -308,8 +309,8 @@ public static partial class SyntaxFacts
     /// <returns>若<paramref name="kind"/>表示标点或关键字，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
     public static bool IsPunctuationOrKeyword(SyntaxKind kind) =>
         kind == SyntaxKind.EndOfFileToken ||
-        SyntaxFacts.IsPunctuation(kind) ||
-        SyntaxFacts.IsKeywordKind(kind);
+        IsPunctuation(kind) ||
+        IsKeywordKind(kind);
 
     /// <summary>
     /// 指定语法种类是否表示字面量。
@@ -366,6 +367,14 @@ public static partial class SyntaxFacts
             _ => false
         };
 
+    public static bool IsPreprocessorDirective(SyntaxKind kind) =>
+        kind switch
+        {
+            >= SyntaxKind.PreprocessingMessageTrivia and <= SyntaxKind.CommentDirectiveTrivia => true,
+
+            _ => false
+        };
+
     /// <summary>
     /// 指定语法种类是否表示名称。
     /// </summary>
@@ -380,7 +389,7 @@ public static partial class SyntaxFacts
         };
 
     public static bool IsUnaryExpression(SyntaxKind token) =>
-        SyntaxFacts.GetUnaryExpression(token) != SyntaxKind.None;
+        GetUnaryExpression(token) != SyntaxKind.None;
 
     public static bool IsUnaryExpressionOperatorToken(SyntaxKind token) => GetUnaryExpression(token) != SyntaxKind.None;
 
@@ -396,7 +405,7 @@ public static partial class SyntaxFacts
         };
 
     public static bool IsLiteralExpression(SyntaxKind token) =>
-        SyntaxFacts.GetLiteralExpression(token) != SyntaxKind.None;
+        GetLiteralExpression(token) != SyntaxKind.None;
 
     public static SyntaxKind GetLiteralExpression(SyntaxKind token) =>
         token switch
@@ -413,7 +422,7 @@ public static partial class SyntaxFacts
         };
 
     public static bool IsInstanceExpression(SyntaxKind token) =>
-        SyntaxFacts.GetInstanceExpression(token) != SyntaxKind.None;
+        GetInstanceExpression(token) != SyntaxKind.None;
 
     public static SyntaxKind GetInstanceExpression(SyntaxKind token) =>
         token switch
@@ -425,7 +434,7 @@ public static partial class SyntaxFacts
         };
 
     public static bool IsBinaryExpression(SyntaxKind token) =>
-        SyntaxFacts.GetBinaryExpression(token) != SyntaxKind.None;
+        GetBinaryExpression(token) != SyntaxKind.None;
 
     public static SyntaxKind GetBinaryExpression(SyntaxKind token) =>
         token switch
@@ -482,7 +491,7 @@ public static partial class SyntaxFacts
         };
 
     public static bool IsAssignmentExpressionOperatorToken(SyntaxKind token) =>
-        SyntaxFacts.GetAssignmentExpression(token) != SyntaxKind.None;
+        GetAssignmentExpression(token) != SyntaxKind.None;
 
     public static SyntaxKind GetAssignmentExpression(SyntaxKind token) =>
         token switch

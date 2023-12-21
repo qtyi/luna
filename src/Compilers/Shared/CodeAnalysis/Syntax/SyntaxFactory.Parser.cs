@@ -27,7 +27,7 @@ static partial class SyntaxFactory
 {
     private static SourceText MakeSourceText(string text, int offset) => SourceText.From(text).GetSubText(offset);
 
-    private static Lexer MakeLexer(string text, int offset, ThisParseOptions? options = null) => new(SyntaxFactory.MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
+    private static Lexer MakeLexer(string text, int offset, ThisParseOptions? options = null) => new(MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
 
     private static LanguageParser MakeParser(Lexer lexer) => new(lexer, oldTree: null, changes: null);
 
@@ -37,7 +37,7 @@ static partial class SyntaxFactory
         string path = "",
         Encoding? encoding = null,
         CancellationToken cancellationToken = default) =>
-        SyntaxFactory.ParseSyntaxTree(text, (ThisParseOptions?)options, path, encoding, cancellationToken);
+        ParseSyntaxTree(text, (ThisParseOptions?)options, path, encoding, cancellationToken);
 
     public static ThisSyntaxTree ParseSyntaxTree(
         string text,
@@ -45,7 +45,7 @@ static partial class SyntaxFactory
         string path = "",
         Encoding? encoding = null,
         CancellationToken cancellationToken = default) =>
-        SyntaxFactory.ParseSyntaxTree(
+        ParseSyntaxTree(
             SourceText.From(text, encoding, SourceHashAlgorithm.Sha1),
             options,
             path,
@@ -56,7 +56,7 @@ static partial class SyntaxFactory
         ParseOptions? options,
         string path,
         CancellationToken cancellationToken = default) =>
-        SyntaxFactory.ParseSyntaxTree(text, (ThisParseOptions?)options, path, cancellationToken);
+        ParseSyntaxTree(text, (ThisParseOptions?)options, path, cancellationToken);
 
     public static ThisSyntaxTree ParseSyntaxTree(
         SourceText text,
@@ -67,31 +67,31 @@ static partial class SyntaxFactory
 
     public static SyntaxTriviaList ParseLeadingTrivia(string text, ThisParseOptions? options = null, int offset = 0)
     {
-        using var lexer = new Lexer(SyntaxFactory.MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
+        using var lexer = new Lexer(MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
         return lexer.LexSyntaxLeadingTrivia();
     }
 
     public static SyntaxTriviaList ParseTrailingTrivia(string text, ThisParseOptions? options = null, int offset = 0)
     {
-        using var lexer = new Lexer(SyntaxFactory.MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
+        using var lexer = new Lexer(MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
         return lexer.LexSyntaxTrailingTrivia();
     }
 
     public static SyntaxToken ParseToken(string text, ThisParseOptions? options = null, int offset = 0)
     {
-        using var lexer = new Lexer(SyntaxFactory.MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
+        using var lexer = new Lexer(MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
         return new SyntaxToken(lexer.Lex(LexerMode.Syntax));
     }
 
     public static IEnumerable<SyntaxToken> ParseTokens(string text, ThisParseOptions? options = null, int offset = 0, int initialTokenPosition = 0)
     {
-        using var lexer = new Lexer(SyntaxFactory.MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
+        using var lexer = new Lexer(MakeSourceText(text, offset), options ?? ThisParseOptions.Default);
         var position = initialTokenPosition;
         while (true)
         {
             var green = lexer.Lex(LexerMode.Syntax);
             // 创建红树标记并枚举。
-            foreach (var token in SyntaxFactory.ParseTokens(green, position))
+            foreach (var token in ParseTokens(green, position))
             {
                 yield return token;
                 position += token.FullWidth;

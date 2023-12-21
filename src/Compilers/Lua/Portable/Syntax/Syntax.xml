@@ -394,6 +394,43 @@
 
 
 
+  <!-- Trivia -->
+  <AbstractNode Name="DirectiveTriviaSyntax" Base="StructuredTriviaSyntax">
+    <Field Name="PromptToken" Type="SyntaxToken"/>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken"/>
+  </AbstractNode>
+  <Node Name="BadDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Kind Name="BadDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true"/>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+  </Node>
+  <Node Name="ShebangDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Kind Name="ShebangDirectiveTrivia"/>
+    <Field Name="HashExclamationToken" Type="SyntaxToken" Override="PromptToken">
+      <Kind Name="HashExclamationToken"/>
+    </Field>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+  </Node>
+  <Node Name="CommentDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Kind Name="CommentDirectiveTrivia"/>
+    <Field Name="HashToken" Type="SyntaxToken" Override="PromptToken">
+      <Kind Name="HashToken"/>
+    </Field>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+  </Node>
+  <Node Name="SkippedTokensTriviaSyntax" Base="StructuredTriviaSyntax">
+    <Kind Name="SkippedTokensTrivia"/>
+    <Field Name="Tokens" Type="SyntaxList&lt;SyntaxToken&gt;"/>
+  </Node>
+
+
+
   <!-- 声明 -->
   <Node Name="ChunkSyntax" Base="LuaSyntaxNode">
     <Kind Name="Chunk"/>
@@ -406,10 +443,6 @@
     <Kind Name="Block"/>
     <Field Name="Statements" Type="SyntaxList&lt;StatementSyntax&gt;"/>
     <Field Name="Return" Type="ReturnStatementSyntax" Optional="true"/>
-  </Node>
-  <Node Name="SkippedTokensTriviaSyntax" Base="StructuredTriviaSyntax">
-    <Kind Name="SkippedTokensTrivia"/>
-    <Field Name="Tokens" Type="SyntaxList&lt;SyntaxToken&gt;"/>
   </Node>
   <Node Name="ParameterListSyntax" Base="LuaSyntaxNode">
     <Kind Name="ParameterList"/>

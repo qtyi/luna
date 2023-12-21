@@ -7,136 +7,141 @@ using Microsoft.CodeAnalysis;
 namespace Qtyi.CodeAnalysis.Lua;
 
 /// <summary>
-/// 定义Lua语言各语法部分的不同的种类。
+/// Represents different parts of Lua syntax.
 /// </summary>
 public enum SyntaxKind : ushort
 {
+    /// <summary>Represents unknown part of syntax.</summary>
     None = 0,
+    /// <summary>Represents node list.</summary>
     List = GreenNode.ListKind,
 
-    #region 标点
-    /// <summary>表示<c>+</c>标记。</summary>
+    #region Punctuations
+    /// <summary>Represents <c>+</c> token.</summary>
     PlusToken = 8193,
-    /// <summary>表示<c>-</c>标记。</summary>
+    /// <summary>Represents <c>-</c> token.</summary>
     MinusToken,
-    /// <summary>表示<c>*</c>标记。</summary>
+    /// <summary>Represents <c>*</c> token.</summary>
     AsteriskToken,
-    /// <summary>表示<c>/</c>标记。</summary>
+    /// <summary>Represents <c>/</c> token.</summary>
     SlashToken,
-    /// <summary>表示<c>^</c>标记。</summary>
+    /// <summary>Represents <c>^</c> token.</summary>
     CaretToken,
-    /// <summary>表示<c>%</c>标记。</summary>
+    /// <summary>Represents <c>%</c> token.</summary>
     PersentToken,
-    /// <summary>表示<c>#</c>标记。</summary>
+    /// <summary>Represents <c>#</c> token.</summary>
     HashToken,
-    /// <summary>表示<c>&amp;</c>标记。</summary>
+    /// <summary>Represents <c>&amp;</c> token.</summary>
     AmpersandToken,
-    /// <summary>表示<c>~</c>标记。</summary>
+    /// <summary>Represents <c>~</c> token.</summary>
     TildeToken,
-    /// <summary>表示<c>|</c>标记。</summary>
+    /// <summary>Represents <c>|</c> token.</summary>
     BarToken,
-    /// <summary>表示<c>&lt;</c>标记。</summary>
+    /// <summary>Represents <c>&lt;</c> token.</summary>
     LessThanToken,
-    /// <summary>表示<c>&gt;</c>标记。</summary>
+    /// <summary>Represents <c>&gt;</c> token.</summary>
     GreaterThanToken,
-    /// <summary>表示<c>=</c>标记。</summary>
+    /// <summary>Represents <c>=</c> token.</summary>
     EqualsToken,
-    /// <summary>表示<c>(</c>标记。</summary>
+    /// <summary>Represents <c>(</c> token.</summary>
     OpenParenToken,
-    /// <summary>表示<c>)</c>标记。</summary>
+    /// <summary>Represents <c>)</c> token.</summary>
     CloseParenToken,
-    /// <summary>表示<c>{</c>标记。</summary>
+    /// <summary>Represents <c>{</c> token.</summary>
     OpenBraceToken,
-    /// <summary>表示<c>}</c>标记。</summary>
+    /// <summary>Represents <c>}</c> token.</summary>
     CloseBraceToken,
-    /// <summary>表示<c>[</c>标记。</summary>
+    /// <summary>Represents <c>[</c> token.</summary>
     OpenBracketToken,
-    /// <summary>表示<c>]</c>标记。</summary>
+    /// <summary>Represents <c>]</c> token.</summary>
     CloseBracketToken,
-    /// <summary>表示<c>:</c>标记。</summary>
+    /// <summary>Represents <c>:</c> token.</summary>
     ColonToken,
-    /// <summary>表示<c>;</c>标记。</summary>
+    /// <summary>Represents <c>;</c> token.</summary>
     SemicolonToken,
-    /// <summary>表示<c>,</c>标记。</summary>
+    /// <summary>Represents <c>,</c> token.</summary>
     CommaToken,
-    /// <summary>表示<c>.</c>标记。</summary>
+    /// <summary>Represents <c>.</c> token.</summary>
     DotToken,
 
-    /// <summary>表示<c>&lt;&lt;</c>标记。</summary>
+    /// <summary>Represents <c>&lt;&lt;</c> token.</summary>
     LessThanLessThanToken = 8257,
-    /// <summary>表示<c>&lt;=</c>标记。</summary>
+    /// <summary>Represents <c>&lt;=</c> token.</summary>
     LessThanEqualsToken,
-    /// <summary>表示<c>&gt;&gt;</c>标记。</summary>
+    /// <summary>Represents <c>&gt;&gt;</c> token.</summary>
     GreaterThanGreaterThanToken,
-    /// <summary>表示<c>&gt;=</c>标记。</summary>
+    /// <summary>Represents <c>&gt;=</c> token.</summary>
     GreaterThanEqualsToken,
-    /// <summary>表示<c>//</c>标记。</summary>
+    /// <summary>Represents <c>//</c> token.</summary>
     SlashSlashToken,
-    /// <summary>表示<c>==</c>标记。</summary>
+    /// <summary>Represents <c>==</c> token.</summary>
     EqualsEqualsToken,
-    /// <summary>表示<c>~=</c>标记。</summary>
+    /// <summary>Represents <c>~=</c> token.</summary>
     TildeEqualsToken,
-    /// <summary>表示<c>::</c>标记。</summary>
+    /// <summary>Represents <c>::</c> token.</summary>
     ColonColonToken,
-    /// <summary>表示<c>..</c>标记。</summary>
+    /// <summary>Represents <c>..</c> token.</summary>
     DotDotToken,
-    /// <summary>表示<c>...</c>标记。</summary>
+    /// <summary>Represents <c>...</c> token.</summary>
     DotDotDotToken,
+
+    /// <summary>Represents <c>#!</c> token.</summary>
+    HashExclamationToken,
     #endregion
 
-    #region 关键词
-    /// <summary>表示<see langword="and"/>关键词。</summary>
+    #region Keywords
+    /// <summary>Represents <c>and</c> keyword.</summary>
     AndKeyword = 8321,
-    /// <summary>表示<see langword="break"/>关键词。</summary>
+    /// <summary>Represents <c>break</c> keyword.</summary>
     BreakKeyword,
-    /// <summary>表示<see langword="do"/>关键词。</summary>
+    /// <summary>Represents <c>do</c> keyword.</summary>
     DoKeyword,
-    /// <summary>表示<see langword="else"/>关键词。</summary>
+    /// <summary>Represents <c>else</c> keyword.</summary>
     ElseKeyword,
-    /// <summary>表示<see langword="elseif"/>关键词。</summary>
+    /// <summary>Represents <c>elseif</c> keyword.</summary>
     ElseIfKeyword,
-    /// <summary>表示<see langword="end"/>关键词。</summary>
+    /// <summary>Represents <c>end</c> keyword.</summary>
     EndKeyword,
-    /// <summary>表示<see langword="false"/>关键词。</summary>
+    /// <summary>Represents <c>false</c> keyword.</summary>
     FalseKeyword,
-    /// <summary>表示<see langword="for"/>关键词。</summary>
+    /// <summary>Represents <c>for</c> keyword.</summary>
     ForKeyword,
-    /// <summary>表示<see langword="function"/>关键词。</summary>
+    /// <summary>Represents <c>function</c> keyword.</summary>
     FunctionKeyword,
-    /// <summary>表示<see langword="goto"/>关键词。</summary>
+    /// <summary>Represents <c>goto</c> keyword.</summary>
     GotoKeyword,
-    /// <summary>表示<see langword="if"/>关键词。</summary>
+    /// <summary>Represents <c>if</c> keyword.</summary>
     IfKeyword,
-    /// <summary>表示<see langword="in"/>关键词。</summary>
+    /// <summary>Represents <c>in</c> keyword.</summary>
     InKeyword,
-    /// <summary>表示<see langword="local"/>关键词。</summary>
+    /// <summary>Represents <c>local</c> keyword.</summary>
     LocalKeyword,
-    /// <summary>表示<see langword="nil"/>关键词。</summary>
+    /// <summary>Represents <c>nil</c> keyword.</summary>
     NilKeyword,
-    /// <summary>表示<see langword="not"/>关键词。</summary>
+    /// <summary>Represents <c>not</c> keyword.</summary>
     NotKeyword,
-    /// <summary>表示<see langword="or"/>关键词。</summary>
+    /// <summary>Represents <c>or</c> keyword.</summary>
     OrKeyword,
-    /// <summary>表示<see langword="repeat"/>关键词。</summary>
+    /// <summary>Represents <c>repeat</c> keyword.</summary>
     RepeatKeyword,
-    /// <summary>表示<see langword="return"/>关键词。</summary>
+    /// <summary>Represents <c>return</c> keyword.</summary>
     ReturnKeyword,
-    /// <summary>表示<see langword="then"/>关键词。</summary>
+    /// <summary>Represents <c>then</c> keyword.</summary>
     ThenKeyword,
-    /// <summary>表示<see langword="true"/>关键词。</summary>
+    /// <summary>Represents <c>true</c> keyword.</summary>
     TrueKeyword,
-    /// <summary>表示<see langword="until"/>关键词。</summary>
+    /// <summary>Represents <c>until</c> keyword.</summary>
     UntilKeyword,
-    /// <summary>表示<see langword="while"/>关键词。</summary>
+    /// <summary>Represents <c>while</c> keyword.</summary>
     WhileKeyword,
 
-    // 上下文关键词
-    /// <summary>表示<c>_G</c>关键词。</summary>
+    // EnviromentKeywords
+    /// <summary>Represents <c>_G</c> keyword.</summary>
     GlobalEnvironmentKeyword = 8385,
-    /// <summary>表示<c>_ENV</c>关键词。编译器在编译期间将这个关键词作为所有游离的变量的作用环境，它的值不是固定的。（自Lua 5.2版本添加。）</summary>
+    /// <summary>Represents <c>_ENV</c> keyword.编译器在编译期间将这个关键词作为所有游离的变量的作用环境，它的值不是固定的。（自Lua 5.2版本添加。）</summary>
     EnvironmentKeyword,
 
-    // 元字段和元方法
+    // Metafields and Metamethods
     /// <summary>表示元表（<c>()</c>）元字段<c>__metatable</c>。</summary>
     MetatableMetafield = 8449,
     /// <summary>表示加法（<c>+</c>）元方法<c>__add</c>。</summary>
@@ -194,19 +199,20 @@ public enum SyntaxKind : ushort
     /// <summary>表示名称（<c>+</c>）元字段<c>__name</c>。</summary>
     NameMetafield,
 
-    // 特性
-    /// <summary>表示<see langword="close"/>关键词。</summary>
+    // Attributes
+    /// <summary>Represents <c>close</c> keyword.</summary>
     CloseKeyword,
-    /// <summary>表示<see langword="const"/>关键词。</summary>
+    /// <summary>Represents <c>const</c> keyword.</summary>
     ConstKeyword,
     #endregion
 
+    EndOfDirectiveToken = 9216,
     /// <summary>表示文件的结尾。</summary>
-    EndOfFileToken = 9216, // 假定此类型为最后一个无文本标记。
+    EndOfFileToken = 9217, // 假定此类型为最后一个无文本标记。
 
     #region 文本标记
     /// <summary>表示不应出现在此位置的错误标记。</summary>
-    BadToken = 9217,
+    BadToken = 9218,
     /// <summary>表示标识符标记。</summary>
     IdentifierToken,
     /// <summary>表示数字字面量标记。</summary>
@@ -217,7 +223,7 @@ public enum SyntaxKind : ushort
     MultiLineRawStringLiteralToken,
     #endregion
 
-    #region 琐碎内容
+    #region Trivia
     /// <summary>表示换行。</summary>
     EndOfLineTrivia = 9249,
     /// <summary>表示空白字符。</summary>
@@ -226,6 +232,11 @@ public enum SyntaxKind : ushort
     SingleLineCommentTrivia,
     /// <summary>表示多行注释。</summary>
     MultiLineCommentTrivia,
+    PreprocessingMessageTrivia,
+    BadDirectiveTrivia,
+    /// <summary>Represents <c>#!</c> interpreter directive.</summary>
+    ShebangDirectiveTrivia,
+    CommentDirectiveTrivia,
     /// <summary>表示被跳过的多个语法标记。</summary>
     SkippedTokensTrivia,
     #endregion

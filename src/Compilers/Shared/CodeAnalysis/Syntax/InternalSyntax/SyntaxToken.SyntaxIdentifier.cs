@@ -42,10 +42,10 @@ partial class SyntaxToken
         }
 
         public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia) =>
-            new SyntaxIdentifierWithTrivia(this.Kind, this._text, this._text, trivia, null, this.GetDiagnostics(), this.GetAnnotations());
+            new SyntaxIdentifierWithTrivia(this.Kind, this._text, this._text, trivia, this.GetTrailingTrivia(), this.GetDiagnostics(), this.GetAnnotations());
 
         public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia) =>
-            new SyntaxIdentifierWithTrivia(this.Kind, this._text, this._text, null, trivia, this.GetDiagnostics(), this.GetAnnotations());
+            new SyntaxIdentifierWithTrivia(this.Kind, this._text, this._text, this.GetLeadingTrivia(), trivia, this.GetDiagnostics(), this.GetAnnotations());
 
         internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics) =>
             new SyntaxIdentifier(this.Text, diagnostics, this.GetAnnotations());

@@ -43,7 +43,7 @@ partial class SyntaxToken
             this._contextualKind = contextualKind;
             this._valueText = valueText;
 
-            SyntaxToken.InitializeWithTrivia(this, ref this._leading, ref this._trailing,
+            InitializeWithTrivia(this, ref this._leading, ref this._trailing,
                 leading, trailing
             );
         }
@@ -61,7 +61,7 @@ partial class SyntaxToken
             this._contextualKind = contextualKind;
             this._valueText = valueText;
 
-            SyntaxToken.InitializeWithTrivia(this, ref this._leading, ref this._trailing,
+            InitializeWithTrivia(this, ref this._leading, ref this._trailing,
                 leading, trailing
             );
         }
@@ -71,7 +71,7 @@ partial class SyntaxToken
             this._contextualKind = (SyntaxKind)reader.ReadInt16();
             this._valueText = reader.ReadString();
 
-            SyntaxToken.InitializeWithTrivia(this, ref this._leading, ref this._trailing,
+            InitializeWithTrivia(this, ref this._leading, ref this._trailing,
                 (GreenNode?)reader.ReadValue(),
                 (GreenNode?)reader.ReadValue()
             );

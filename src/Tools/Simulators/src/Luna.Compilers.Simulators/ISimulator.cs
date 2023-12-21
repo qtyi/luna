@@ -2,5 +2,7 @@
 
 public interface ISimulator
 {
+    ISyntaxInfoProvider SyntaxInfoProvider { get; }
+
     void Initialize(SimulatorContext context);
 }

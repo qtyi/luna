@@ -68,7 +68,7 @@ internal static partial class MessageIDExtensions
         SyntaxNode syntax,
         Location? location = null)
     {
-        var diagnostic = MessageIDExtensions.GetFeatureAvailabilityDiagnosticInfo(feature, (ThisParseOptions)syntax.SyntaxTree.Options);
+        var diagnostic = GetFeatureAvailabilityDiagnosticInfo(feature, (ThisParseOptions)syntax.SyntaxTree.Options);
         if (diagnostic is null) return true;
 
         diagnostics.Add(diagnostic, location ?? syntax.GetLocation());
@@ -81,7 +81,7 @@ internal static partial class MessageIDExtensions
         Compilation compilation,
         Location location)
     {
-        var diagnostic = MessageIDExtensions.GetFeatureAvailabilityDiagnosticInfo(feature, (ThisCompilation)compilation);
+        var diagnostic = GetFeatureAvailabilityDiagnosticInfo(feature, (ThisCompilation)compilation);
         if (diagnostic is null) return true;
 
         diagnostics.Add(diagnostic, location);
@@ -90,11 +90,11 @@ internal static partial class MessageIDExtensions
 
     internal static ThisDiagnosticInfo? GetFeatureAvailabilityDiagnosticInfo(this MessageID feature, ThisParseOptions options) =>
         options.IsFeatureEnabled(feature) ? null :
-            MessageIDExtensions.GetDisabledFeatureDiagnosticInfo(feature, options.LanguageVersion);
+            GetDisabledFeatureDiagnosticInfo(feature, options.LanguageVersion);
 
     internal static ThisDiagnosticInfo? GetFeatureAvailabilityDiagnosticInfo(this MessageID feature, ThisCompilation compilation) =>
         compilation.IsFeatureEnabled(feature) ? null :
-            MessageIDExtensions.GetDisabledFeatureDiagnosticInfo(feature, compilation.LanguageVersion);
+            GetDisabledFeatureDiagnosticInfo(feature, compilation.LanguageVersion);
 
     internal static ThisDiagnosticInfo GetDisabledFeatureDiagnosticInfo(MessageID feature, LanguageVersion availableVersion)
     {

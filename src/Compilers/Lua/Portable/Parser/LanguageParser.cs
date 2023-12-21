@@ -30,7 +30,7 @@ partial class LanguageParser
         this.ParseStatements(statementBuilder);
 
         SyntaxList<StatementSyntax> statements;
-        if (LanguageParser.IsLargeEnoughNonEmptyStatementList(statementBuilder))
+        if (IsLargeEnoughNonEmptyStatementList(statementBuilder))
             statements = new SyntaxList<StatementSyntax>(SyntaxList.List(((SyntaxListBuilder)statementBuilder).ToArray()));
         else
             statements = statementBuilder;

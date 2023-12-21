@@ -48,7 +48,7 @@ internal abstract partial class
     : CommonCompiler
 {
     /// <summary>Compiler response file name.</summary>
-    internal const string ResponseFileName = ThisCompiler.ExecutableName + ".rsp";
+    internal const string ResponseFileName = ExecutableName + ".rsp";
 
     /// <summary>A command line diagnostic formatter.</summary>
     private readonly CommandLineDiagnosticFormatter _diagnosticFormatter;
@@ -410,7 +410,7 @@ internal abstract partial class
     /// <returns><see langword="true"/> if the diagnostic ID be found; otherwise, <see langword="false"/>.</returns>
     protected override bool TryGetCompilerDiagnosticCode(string diagnosticId, out uint code)
     {
-        return CommonCompiler.TryGetCompilerDiagnosticCode(diagnosticId, ThisMessageProvider.ErrorCodePrefix, out code);
+        return TryGetCompilerDiagnosticCode(diagnosticId, ThisMessageProvider.ErrorCodePrefix, out code);
     }
 
     /// <summary>

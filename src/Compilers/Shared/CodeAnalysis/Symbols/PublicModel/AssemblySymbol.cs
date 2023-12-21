@@ -22,7 +22,7 @@ partial class AssemblySymbol : IAssemblySymbol
 
     private bool GivesAccessTo(IAssemblySymbol assemblyWantingAccess)
     {
-        if (object.Equals(this, assemblyWantingAccess))
+        if (Equals(this, assemblyWantingAccess))
             return true;
 
         return false;
@@ -31,7 +31,7 @@ partial class AssemblySymbol : IAssemblySymbol
     private ImmutableArray<INamedTypeSymbol> GetForwardedTypes() =>
         this.UnderlyingAssemblySymbol.GetAllTopLevelForwardedTypes()
             .Select(SymbolExtensions.GetPublicSymbol)
-            .OrderBy(static t => t!.ToDisplayString(Microsoft.CodeAnalysis.SymbolDisplayFormat.QualifiedNameArityFormat))
+            .OrderBy(static t => t!.ToDisplayString(SymbolDisplayFormat.QualifiedNameArityFormat))
             .AsImmutable()!;
 
     #region Symbol

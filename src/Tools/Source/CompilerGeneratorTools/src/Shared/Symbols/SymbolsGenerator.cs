@@ -27,7 +27,7 @@ public sealed class SymbolsGenerator : TreeSourceGenerator<SymbolTree, SymbolTre
 
     /// <inheritdoc/>
     protected override bool TryGetRelevantInputs(
-        in IncrementalGeneratorInitializationContext context,
+        IncrementalGeneratorInitializationContext context,
         out IncrementalValueProvider<ImmutableArray<AdditionalText>> inputs)
     {
         inputs = context.AdditionalTextsProvider.Where(text => Path.GetFileName(text.Path).Equals(SymbolsXml, StringComparison.OrdinalIgnoreCase)).Collect();
@@ -36,12 +36,11 @@ public sealed class SymbolsGenerator : TreeSourceGenerator<SymbolTree, SymbolTre
 
     /// <inheritdoc/>
     protected override void GenerateOutputs(
-        in SourceProductionContext context,
-        SymbolTree tree,
-        CancellationToken cancellationToken)
+        SourceProductionContext context,
+        SymbolTree tree)
     {
-        WriteAndAddSource(in context, writer => SymbolsSourceWriter.WriteInternal(writer, tree, cancellationToken), SymbolsXml + ".Internal.Generated.cs");
-        WriteAndAddSource(in context, writer => SymbolsSourceWriter.WritePublic(writer, tree, cancellationToken), SymbolsXml + ".Public.Generated.cs");
+        WriteAndAddSource(context, SymbolsSourceWriter.WriteInternal, tree, SymbolsXml + ".Internal.Generated.cs");
+        WriteAndAddSource(context, SymbolsSourceWriter.WritePublic, tree, SymbolsXml + ".Public.Generated.cs");
     }
 
     #region DiagnosticDescriptors

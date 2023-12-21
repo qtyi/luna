@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Numerics;
+using Xunit;
 
 namespace Qtyi.CodeAnalysis.UnitTests;
 
-[TestClass]
 public class IntegerParserTests
 {
     private static readonly Random s_random = new();
@@ -14,7 +14,7 @@ public class IntegerParserTests
     protected internal static BigInteger NextRandomBigInteger()
     {
         var sign = s_random.Next(2) * 2 - 1;
-        var bits = s_random.Next(2, 310); // 稍微比double.MaxValue大一些。
+        var bits = s_random.Next(2, 310); // A bit bigger than double.MaxValue.
         var chars = new char[bits];
         for (var i = 0; i < chars.Length; i++)
             chars[i] = (char)(s_random.Next(10) + '0');
@@ -28,23 +28,23 @@ public class IntegerParserTests
 
     protected internal static long NextRandomInt64()
     {
-#if NET6_0
+#if NET6_0_OR_GREATER
         return s_random.NextInt64();
 #else
         return (s_random.Next() << sizeof(uint)) + unchecked((uint)s_random.Next());
 #endif
     }
 
-    private protected virtual BigInteger GetRandomUnsignedBigInteger() => BigInteger.Abs(IntegerParserTests.NextRandomBigInteger());
+    private protected virtual BigInteger GetRandomUnsignedBigInteger() => BigInteger.Abs(NextRandomBigInteger());
 
     protected internal static ulong NextRandomUInt64() =>
-        Math.Min(unchecked((ulong)IntegerParserTests.NextRandomInt64()), 0x8000000000000000);
+        Math.Min(unchecked((ulong)NextRandomInt64()), 0x8000000000000000);
 
-    private protected virtual long GetRandomInt64() => IntegerParserTests.NextRandomInt64();
+    private protected virtual long GetRandomInt64() => NextRandomInt64();
 
-    private protected virtual ulong GetRandomUInt64() => IntegerParserTests.NextRandomUInt64();
+    private protected virtual ulong GetRandomUInt64() => NextRandomUInt64();
 
-    [TestMethod]
+    [Fact]
     public void TryParseDecimalInt64Tests()
     {
         const int SampleCount = 31000;
@@ -56,16 +56,16 @@ public class IntegerParserTests
             var success = IntegerParser.TryParseDecimalInt64(decimalStr, out var result);
 
             if (success)
-                Assert.AreEqual(source, (BigInteger)result, "十进制数字解析错误！");
+                Assert.Equal(source, (BigInteger)result);
 
             if (source > 0x8000000000000000)
-                Assert.IsFalse(success, "大数字超出范围，应当数字溢出导致失败！");
+                Assert.False(success, "BigInteger overflow, should failed.");
             else
-                Assert.IsTrue(success, "大数字在范围内，应当返回解析结果！");
+                Assert.True(success, "BigInteger in range, should success.");
         });
     }
 
-    [TestMethod]
+    [Fact]
     public void TryParseHexadecimalInt64Tests()
     {
         const int SampleCount = 31000;
@@ -76,7 +76,8 @@ public class IntegerParserTests
 
             var success = IntegerParser.TryParseHexadecimalInt64(hexadecimalStr, out var result);
 
-            Assert.AreEqual(source, result, "十六进制数字解析错误！");
+            Assert.True(success, "Failed parse hexadecimal double.");
+            Assert.Equal(source, result);
         });
     }
 }

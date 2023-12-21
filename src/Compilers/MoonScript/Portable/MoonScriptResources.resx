@@ -123,6 +123,9 @@
   <data name="ERR_AssemblyMatchBadVersion" xml:space="preserve">
     <value>Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'</value>
   </data>
+  <data name="ERR_BadDirectivePlacement" xml:space="preserve">
+    <value>Preprocessor directives must appear as the first non-whitespace character on a line.</value>
+  </data>
   <data name="ERR_CantReadConfigFile" xml:space="preserve">
     <value>Cannot read config file '{0}' -- '{1}'</value>
   </data>

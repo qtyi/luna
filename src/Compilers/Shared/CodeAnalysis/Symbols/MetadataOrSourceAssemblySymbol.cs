@@ -65,16 +65,16 @@ internal abstract partial class MetadataOrSourceAssemblySymbol : AssemblySymbol
     {
         var typeId = corType.SpecialType;
         Debug.Assert(typeId != SpecialType.None);
-        Debug.Assert(object.ReferenceEquals(corType.ContainingAssembly, this));
+        Debug.Assert(ReferenceEquals(corType.ContainingAssembly, this));
         Debug.Assert(corType.ContainingNetmodule.Ordinal == 0);
-        Debug.Assert(object.ReferenceEquals(this.CorLibrary, this));
+        Debug.Assert(ReferenceEquals(this.CorLibrary, this));
 
         if (_lazySpecialTypes == null)
             Interlocked.CompareExchange(ref _lazySpecialTypes, new NamedTypeSymbol[(int)SpecialType.Count + 1], null);
 
         if (Interlocked.CompareExchange(ref _lazySpecialTypes[(int)typeId], corType, null) is not null)
             Debug.Assert(
-                object.ReferenceEquals(corType, _lazySpecialTypes[(int)typeId]) ||
+                ReferenceEquals(corType, _lazySpecialTypes[(int)typeId]) ||
                 (corType.Kind == SymbolKind.ErrorType &&
                 _lazySpecialTypes[(int)typeId].Kind == SymbolKind.ErrorType));
         else
@@ -89,6 +89,6 @@ internal abstract partial class MetadataOrSourceAssemblySymbol : AssemblySymbol
     /// while symbols for new type declarations are constructed.
     /// </summary>
     internal override bool KeepLookingForDeclaredSpecialTypes =>
-        object.ReferenceEquals(this.CorLibrary, this) && _cachedSpecialTypes < (int)SpecialType.Count;
+        ReferenceEquals(this.CorLibrary, this) && _cachedSpecialTypes < (int)SpecialType.Count;
 
 }

@@ -2,9 +2,11 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Luna.Compilers.Generators.CSharp;
+using Luna.Compilers.Generators.Model;
+
 namespace Luna.Compilers.Generators.Symbols;
 
-using Luna.Compilers.Generators.Model;
 using Model;
 
 internal abstract class SymbolsFileWriter : TreeFileWriter<SymbolTree, SymbolTreeType>
@@ -24,5 +26,10 @@ internal abstract class SymbolsFileWriter : TreeFileWriter<SymbolTree, SymbolTre
 
     protected IEnumerable<string> GetImplement(Symbol symbol) =>
         symbol.Implement is null ? Enumerable.Empty<string>() : symbol.Implement.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+    /// <inheritdoc cref="IndentWriter.CamelCase(string)"/>
+    /// <remarks>Results name is escaped and is not conflict with C# keywords.</remarks>
+    protected static new string CamelCase(string name)
+        => IndentWriter.CamelCase(name).FixKeyword();
     #endregion
 }

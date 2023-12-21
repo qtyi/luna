@@ -89,7 +89,7 @@ partial class
             this._hasCompilationUnitRoot = root.Kind() == SyntaxKind.Chunk; // 基于Lua的语言的编译单元是Chunk。
         }
 
-        [MemberNotNull(nameof(ParsedSyntaxTree._lazyText))]
+        [MemberNotNull(nameof(_lazyText))]
         public override SourceText GetText(CancellationToken cancellationToken = default)
         {
             if (this._lazyText is null)
@@ -118,7 +118,7 @@ partial class
 
         public override SyntaxTree WithRootAndOptions(SyntaxNode root, ParseOptions options)
         {
-            if (object.ReferenceEquals(this._root, root) && object.ReferenceEquals(this._options, options))
+            if (ReferenceEquals(this._root, root) && ReferenceEquals(this._options, options))
                 return this;
             else
                 return new ParsedSyntaxTree(

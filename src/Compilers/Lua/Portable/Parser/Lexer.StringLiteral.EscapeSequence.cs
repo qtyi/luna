@@ -81,11 +81,9 @@ partial class Lexer
             // 十六进制数字表示的Unicode字符
             case 'u':
                 this.TextWindow.Reset(start);
-                c = this.TextWindow.NextUnicodeEscape(out error, out var surrogate);
-                if (c != SlidingTextWindow.InvalidCharacter)
-                    this._builder.Append(c);
-                if (surrogate != SlidingTextWindow.InvalidCharacter)
-                    this._builder.Append(surrogate);
+                var bs = this.TextWindow.NextUnicodeEscape(out error);
+                if (error is null)
+                    this.FlushToUtf8Builder(bs);
                 this.AddError(error);
                 break;
 

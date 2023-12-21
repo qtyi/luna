@@ -143,7 +143,7 @@ public sealed partial class
             referenceManager,
             reuseReferenceManager,
             syntaxAndDeclarations,
-            ThisCompilation.SyntaxTreeCommonFeatures(syntaxAndDeclarations.ExternalSyntaxTrees),
+            SyntaxTreeCommonFeatures(syntaxAndDeclarations.ExternalSyntaxTrees),
             semanticModelProvider,
             eventQueue)
     { }
@@ -187,9 +187,9 @@ public sealed partial class
         IEnumerable<SyntaxTree>? syntaxTrees = null,
         IEnumerable<MetadataReference>? references = null,
         ThisCompilationOptions? options = null) =>
-        ThisCompilation.Create(
+        Create(
             assemblyName,
-            options ?? ThisCompilation.s_defaultOptions,
+            options ?? s_defaultOptions,
             syntaxTrees,
             references,
             previousSubmission: null,
@@ -218,12 +218,12 @@ public sealed partial class
         Type? returnType = null,
         Type? globalsType = null)
     {
-        Compilation.CheckSubmissionOptions(options);
-        Compilation.ValidateScriptCompilationParameters(previousScriptCompilation, returnType, ref globalsType);
+        CheckSubmissionOptions(options);
+        ValidateScriptCompilationParameters(previousScriptCompilation, returnType, ref globalsType);
 
-        return ThisCompilation.Create(
+        return Create(
             assemblyName,
-            options?.WithReferencesSupersedeLowerVersions(true) ?? ThisCompilation.s_defaultSubmissionOptions,
+            options?.WithReferencesSupersedeLowerVersions(true) ?? s_defaultSubmissionOptions,
             syntaxTree is not null ? new[] { syntaxTree } : SpecializedCollections.EmptyEnumerable<SyntaxTree>(),
             references,
             previousScriptCompilation,
@@ -247,7 +247,7 @@ public sealed partial class
     {
         Debug.Assert(!isSubmission || options.ReferencesSupersedeLowerVersions);
 
-        var validatedReferences = Compilation.ValidateReferences<ThisCompilationReference>(references);
+        var validatedReferences = ValidateReferences<ThisCompilationReference>(references);
 
         // We can't reuse the whole Reference Manager entirely (reuseReferenceManager = false)
         // because the set of references of this submission differs from the previous one.

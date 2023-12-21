@@ -13,37 +13,49 @@ using System.Diagnostics;
 
 namespace Luna.Compilers.Generators;
 
-public abstract class AbstractTreeSourceGenerator<TTree, TTreeType> : IIncrementalGenerator
+/// <summary>
+/// Represents an incremental source generator that driven by a tree deserialized from XML.  This class is abstract.
+/// </summary>
+/// <typeparam name="TTree">Type of tree.</typeparam>
+/// <typeparam name="TTreeType">Type of tree type.</typeparam>
+public abstract class AbstractTreeSourceGenerator<TTree, TTreeType> : AbstractSourceGenerator
     where TTree : ITree<TTreeType>
     where TTreeType : ITreeType
 {
     #region DiagnosticDescriptors
+    /// <summary>
+    /// Gets a description about missing-input-XML-file diagnostic.
+    /// </summary>
     protected abstract DiagnosticDescriptor MissingInputDiagnosticDescriptor { get; }
 
+    /// <summary>
+    /// Gets a description about unable-to-read-input-XML-file diagnostic.
+    /// </summary>
     protected abstract DiagnosticDescriptor UnableToReadInputDiagnosticDescriptor { get; }
 
+    /// <summary>
+    /// Gets a description about input-XML-file-has-syntax-error diagnostic.
+    /// </summary>
     protected abstract DiagnosticDescriptor InputSyntaxErrorDiagnosticDescriptor { get; }
     #endregion
 
-    public void Initialize(IncrementalGeneratorInitializationContext context)
-    {
-#if DEBUG
-        if (this.ShouldAttachDebugger && !Debugger.IsAttached)
-        {
-            Debugger.Launch();
-        }
-#endif
+    /// <summary>
+    /// Try to get relevant XML files from <see cref="IncrementalGeneratorInitializationContext.AdditionalTextsProvider"/>.
+    /// </summary>
+    /// <param name="context">Incremental source generator context during initialization.</param>
+    /// <param name="inputs">Relevant XML files found.</param>
+    /// <returns>Returns <see langword="true"/> if we find relevant XML files; otherwise, <see langword="false"/>.</returns>
+    protected abstract bool TryGetRelevantInputs(
+        IncrementalGeneratorInitializationContext context,
+        out IncrementalValueProvider<ImmutableArray<AdditionalText>> inputs);
 
-        this.InitializeCore(in context);
-    }
-
-    protected abstract void InitializeCore(in IncrementalGeneratorInitializationContext context);
-
-#if DEBUG
-    protected virtual bool ShouldAttachDebugger => false;
-#endif
-
-    protected IEnumerable<TTree> SerializeOutputs(SourceProductionContext context, ImmutableArray<AdditionalText> inputs)
+    /// <summary>
+    /// Serialize trees in all input XML files, flatten them and report diagnostics.
+    /// </summary>
+    /// <param name="context">Incremental source generator context during source production.</param>
+    /// <param name="inputs">A collection of input XML files.</param>
+    /// <returns>All trees serialized from <paramref name="inputs"/>.</returns>
+    protected IEnumerable<TTree> SerializeInputs(SourceProductionContext context, ImmutableArray<AdditionalText> inputs)
     {
         if (inputs.Length == 0)
         {
@@ -87,20 +99,10 @@ public abstract class AbstractTreeSourceGenerator<TTree, TTreeType> : IIncrement
         }
     }
 
+    /// <summary>
+    /// Flatten a tree.
+    /// </summary>
+    /// <param name="tree">The tree to flatten.</param>
+    /// <param name="cancellationToken">Token that propagates notifications that this operation should be cancelled.</param>
     protected virtual void FlattenTree(TTree tree, CancellationToken cancellationToken) { }
-
-    protected static void WriteAndAddSource(in SourceProductionContext context, Action<TextWriter> writeAction, string hintName)
-    {
-        // Write out the contents to a StringBuilder to avoid creating a single large string
-        // in memory
-        var stringBuilder = new StringBuilder();
-        using (var textWriter = new StringWriter(stringBuilder))
-        {
-            writeAction(textWriter);
-        }
-
-        // And create a SourceText from the StringBuilder, once again avoiding allocating a single massive string
-        var sourceText = SourceText.From(new StringBuilderReader(stringBuilder), stringBuilder.Length, encoding: Encoding.UTF8);
-        context.AddSource(hintName, sourceText);
-    }
 }

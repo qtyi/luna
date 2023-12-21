@@ -9,5 +9,5 @@ partial class LanguageNames
     /// <summary>
     /// The common name used for this language.
     /// </summary>
-    internal const string This = LanguageNames.Lua;
+    internal const string This = Lua;
 }

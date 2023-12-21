@@ -4,6 +4,9 @@
 
 namespace Luna.Compilers.Generators.Model;
 
+/// <summary>
+/// Defines members to represent a tree type child.
+/// </summary>
 public interface ITreeTypeChild
 {
 }

@@ -6,8 +6,17 @@ using Microsoft.CodeAnalysis;
 
 namespace Luna.Compilers.Generators;
 
+/// <summary>
+/// Helper class to create <see cref="DiagnosticDescriptor"/>s.
+/// </summary>
 internal static class DiagnosticDescriptors
 {
+    /// <summary>
+    /// Create a description about missing-file diagnostic.
+    /// </summary>
+    /// <typeparam name="TSourceGenerator">Type of source generator.</typeparam>
+    /// <param name="fileName">Name of the missing file.</param>
+    /// <returns>A description about missing-file diagnostic.</returns>
     public static DiagnosticDescriptor CreateMissingFile<TSourceGenerator>(string fileName)
         => new(
             "CASG1001",
@@ -17,6 +26,12 @@ internal static class DiagnosticDescriptors
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true);
 
+    /// <summary>
+    /// Create a description about unable-to-read-file diagnostic.
+    /// </summary>
+    /// <typeparam name="TSourceGenerator">Type of source generator.</typeparam>
+    /// <param name="fileName">Name of the unable-to-read file.</param>
+    /// <returns>A description about unable-to-read file diagnostic.</returns>
     public static DiagnosticDescriptor CreateUnableToReadFile<TSourceGenerator>(string fileName)
         => new(
             "CASG1002",
@@ -26,6 +41,12 @@ internal static class DiagnosticDescriptors
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
+    /// <summary>
+    /// Create a description about file-has-syntax-error diagnostic.
+    /// </summary>
+    /// <typeparam name="TSourceGenerator">Type of source generator.</typeparam>
+    /// <param name="fileName">Name of the syntax-error file.</param>
+    /// <returns>A description about syntax-error file diagnostic.</returns>
     public static DiagnosticDescriptor CreateFileSyntaxError<TSourceGenerator>(string fileName)
         => new(
             "CASG1003",

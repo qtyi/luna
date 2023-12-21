@@ -5,36 +5,42 @@
 namespace Luna.Compilers.Generators.Syntax;
 
 using System.Runtime.CompilerServices;
+using Luna.Compilers.Generators.CSharp;
 using Model;
 
-internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTreeType, SyntaxTreeTypeChild>
+/// <summary>
+/// Represents a writer that is the base class of all syntax tree file writer.
+/// </summary>
+internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTreeType>
 {
-    private readonly IDictionary<string, Node> _nodeMap;
+    private readonly Dictionary<string, Node> _nodeMap;
 
-    protected SyntaxFileWriter(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken) : base(writer, tree, cancellationToken)
+    protected SyntaxFileWriter(TextWriter writer, SyntaxTree tree, CancellationToken cancellationToken) : this(writer, 4, tree, cancellationToken) { }
+
+    protected SyntaxFileWriter(TextWriter writer, int indentSize, SyntaxTree tree, CancellationToken cancellationToken) : base(writer, indentSize, tree, cancellationToken)
     {
-        _nodeMap = tree.Types.OfType<Node>().ToDictionary(n => n.Name);
+        this._nodeMap = tree.Types.OfType<Node>().ToDictionary(static n => n.Name);
     }
 
     #region 帮助方法
     protected static string OverrideOrNewModifier(Field field)
     {
-        return IsOverride(field) ? "override " : IsNew(field) ? "new " : "";
+        return field.IsOverride() ? "override " : field.IsNew() ? "new " : "";
     }
 
     protected static bool CanBeField(Field field)
     {
-        return field.Type != "SyntaxToken" && !IsAnyList(field.Type) && !IsOverride(field) && !IsNew(field);
+        return field.Type != "SyntaxToken" && !field.Type.IsAnyList() && !field.IsOverride() && !field.IsNew();
     }
 
     protected static string GetFieldType(Field field, bool green)
     {
         // Fields in red trees are lazily initialized, with null as the uninitialized value
-        return getNullableAwareType(field.Type, optionalOrLazy: IsOptional(field) || !green, green);
+        return getNullableAwareType(field.Type, optionalOrLazy: field.IsOptional() || !green, green);
 
         static string getNullableAwareType(string fieldType, bool optionalOrLazy, bool green)
         {
-            if (IsAnyList(fieldType))
+            if (fieldType.IsAnyList())
             {
                 if (optionalOrLazy)
                     return green ? "GreenNode?" : "SyntaxNode?";
@@ -60,28 +66,13 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTree
     protected bool IsDerivedOrListOfDerived(string baseType, string derivedType)
     {
         return IsDerivedType(baseType, derivedType)
-            || ((IsNodeList(derivedType) || IsSeparatedNodeList(derivedType))
-                && IsDerivedType(baseType, GetElementType(derivedType)));
-    }
-
-    protected static bool IsSeparatedNodeList(string typeName)
-    {
-        return typeName.StartsWith("SeparatedSyntaxList<", StringComparison.Ordinal);
-    }
-
-    protected static bool IsNodeList(string typeName)
-    {
-        return typeName.StartsWith("SyntaxList<", StringComparison.Ordinal);
-    }
-
-    public static bool IsAnyNodeList(string typeName)
-    {
-        return IsNodeList(typeName) || IsSeparatedNodeList(typeName);
+            || derivedType.IsAnyNodeList()
+                && IsDerivedType(baseType, GetElementType(derivedType));
     }
 
     protected bool IsNodeOrNodeList(string typeName)
     {
-        return IsNode(typeName) || IsNodeList(typeName) || IsSeparatedNodeList(typeName) || typeName == "SyntaxNodeOrTokenList";
+        return IsNode(typeName) || typeName.IsAnyList();
     }
 
     protected static string GetElementType(string typeName)
@@ -96,11 +87,6 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTree
         return sub;
     }
 
-    protected static bool IsAnyList(string typeName)
-    {
-        return IsNodeList(typeName) || IsSeparatedNodeList(typeName) || typeName == "SyntaxNodeOrTokenList";
-    }
-
     protected bool IsNode(string typeName)
     {
         return this.ParentMap.ContainsKey(typeName);
@@ -109,18 +95,6 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTree
     protected Node? GetNode(string? typeName)
         => typeName is not null && _nodeMap.TryGetValue(typeName, out var node) ? node : null;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static bool IsOptional(Field f)
-        => f.IsOptional();
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static bool IsOverride(Field f)
-        => f.IsOverride();
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static bool IsNew(Field f)
-        => f.IsNew();
-
     protected static bool HasErrors(Node n)
     {
         return n.Errors is null || string.Compare(n.Errors, "true", true) == 0;
@@ -128,7 +102,7 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTree
 
     protected List<Kind> GetKindsOfFieldOrNearestParent(SyntaxTreeType type, Field field)
     {
-        while ((field.Kinds is null || field.Kinds.Count == 0) && IsOverride(field))
+        while ((field.Kinds is null || field.Kinds.Count == 0) && field.IsOverride())
         {
             var t = GetTreeType(type.Base);
             field = (t switch
@@ -142,5 +116,10 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTree
 
         return field.Kinds.Distinct().ToList();
     }
+
+    /// <inheritdoc cref="IndentWriter.CamelCase(string)"/>
+    /// <remarks>Results name is escaped and is not conflict with C# keywords.</remarks>
+    protected static new string CamelCase(string name)
+        => IndentWriter.CamelCase(name).FixKeyword();
     #endregion
 }

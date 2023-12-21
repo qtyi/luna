@@ -2,34 +2,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
-    <NoStdLib>true</NoStdLib>
+    <TargetFrameworks>$(TestUtilitiesTargetFrameworks)</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
   </PropertyGroup>
 
   <ItemGroup>
-    
-    <!-- InternalsVisibleFrom -->
-    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.Syntax.UnitTests" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj" />
-    <ProjectReference Include="..\..\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
-    <ProjectReference Include="..\..\..\Core\Portable\Qtyi.CodeAnalysis.csproj" />
-    <ProjectReference Include="..\..\..\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
-    <ProjectReference Include="..\..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
-  </ItemGroup>
-
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties project_1json__JSONSchema="http://json.schemastore.org/launchsettings" />
-    </VisualStudio>
-  </ProjectExtensions>
+  <Import Project="..\Shared\Qtyi.CodeAnalysis.Test.Utilities.Shared.projitems" Label="Shared" />
 
 </Project>

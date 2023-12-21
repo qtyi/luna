@@ -22,6 +22,11 @@
         <target state="new">Attribute expected.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_BadDirectivePlacement">
+        <source>Preprocessor directives must appear as the first non-whitespace character on a line.</source>
+        <target state="new">Preprocessor directives must appear as the first non-whitespace character on a line.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_BadDocumentationMode">
         <source>Provided documentation mode is unsupported or invalid: '{0}'.</source>
         <target state="new">Provided documentation mode is unsupported or invalid: '{0}'.</target>

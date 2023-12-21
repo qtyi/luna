@@ -19,7 +19,7 @@ namespace Luna.Compilers.Tools;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private ILexerSimulator _lexerSimulator;
+    private ISyntaxSimulator _SyntaxSimulator;
     private ILanguageParserSimulator _languageParserSimulator;
 
     public MainWindow()
@@ -44,11 +44,11 @@ public partial class MainWindow : Window
         {
             var extension = Path.GetExtension(dialog.FileName);
             if (
-                Simulator.TryGetLexerSimulatorByFileExtension(extension, out var lexerSimulators) &&
+                Simulator.TryGetSyntaxSimulatorByFileExtension(extension, out var SyntaxSimulators) &&
                 Simulator.TryGetLanguageParserSimulatorByFileExtension(extension, out var languageParserSimulators)
             )
             {
-                this._lexerSimulator = lexerSimulators[0];
+                this._SyntaxSimulator = SyntaxSimulators[0];
                 this._languageParserSimulator = languageParserSimulators[0];
                 var sourceText = SourceText.From(dialog.OpenFile());
                 var tree = this._languageParserSimulator.ParseSyntaxTree(sourceText);
@@ -110,17 +110,17 @@ public partial class MainWindow : Window
             FontFamily = new("Fira Code")
         };
 
-        foreach (var token in this._lexerSimulator.LexToEnd(sourceText))
+        foreach (var token in this._SyntaxSimulator.LexToEnd(sourceText))
         {
             processTriviaList(token.LeadingTrivia);
-            append(makeRun(this._lexerSimulator.GetTokenKind(token.RawKind), token.GetDiagnostics(), token.Text));
+            append(makeRun(this._SyntaxSimulator.GetTokenKind(token.RawKind), token.GetDiagnostics(), token.Text));
             processTriviaList(token.TrailingTrivia);
 
             void processTriviaList(SyntaxTriviaList triviaList)
             {
                 foreach (var trivia in triviaList)
                 {
-                    var run = makeRun(this._lexerSimulator.GetTokenKind(trivia.RawKind), Enumerable.Empty<Diagnostic>(), trivia.ToString());
+                    var run = makeRun(this._SyntaxSimulator.GetTokenKind(trivia.RawKind), Enumerable.Empty<Diagnostic>(), trivia.ToString());
                     append(run);
                 }
             }

@@ -9,10 +9,13 @@
     <Import_RootNamespace>Luna.Compilers.Tools</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)GrammarGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GrammarWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SignatureWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SyntaxGeneratorMain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net462'))" />

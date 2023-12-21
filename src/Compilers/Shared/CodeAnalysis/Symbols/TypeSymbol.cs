@@ -74,7 +74,7 @@ partial class TypeSymbol : ITypeSymbolInternal
     #endregion
 
     #region 相等性
-    internal virtual bool Equals(TypeSymbol? other, TypeCompareKind compareKind) => object.ReferenceEquals(this, other);
+    internal virtual bool Equals(TypeSymbol? other, TypeCompareKind compareKind) => ReferenceEquals(this, other);
 
     public sealed override bool Equals(Symbol? other, TypeCompareKind compareKind) => other is TypeSymbol symbol && this.Equals(symbol, compareKind);
 
@@ -82,7 +82,7 @@ partial class TypeSymbol : ITypeSymbolInternal
     {
         if (first is null)
             return second is null;
-        else if (object.ReferenceEquals(first, second))
+        else if (ReferenceEquals(first, second))
             return true;
         else
             return first.Equals(second, compareKind);

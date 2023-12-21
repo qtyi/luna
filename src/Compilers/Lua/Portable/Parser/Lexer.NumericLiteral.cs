@@ -125,7 +125,7 @@ partial class Lexer
             {
                 // 整数和小数部分同时缺失。
                 if (isHex) // 存在十六进制前缀，则推断数字字面量格式错误。
-                    this.AddError(Lexer.MakeError(ErrorCode.ERR_InvalidNumber));
+                    this.AddError(MakeError(ErrorCode.ERR_InvalidNumber));
                 else // 除了一个“.”以外没有任何其他字符，推断不是数字字面量标记。
                     return false;
 
@@ -237,8 +237,8 @@ partial class Lexer
             {
                 info.ValueKind = SpecialType.System_Double;
                 info.DoubleValue = doubleValue;
+                return;
             }
-            else throw ExceptionUtilities.UnexpectedValue(text);
         }
         else
         {
@@ -260,11 +260,13 @@ partial class Lexer
             {
                 info.ValueKind = SpecialType.System_Double;
                 info.DoubleValue = doubleValue;
+                return;
             }
-            else throw ExceptionUtilities.UnexpectedValue(text);
         }
 
-        this.AddError(Lexer.MakeError(ErrorCode.ERR_NumberOverflow));
+        info.ValueKind = SpecialType.System_Double;
+        info.DoubleValue = double.PositiveInfinity;
+        this.AddError(0, text.Length, ErrorCode.ERR_NumberOverflow);
     }
 
     /// <summary>
@@ -291,6 +293,8 @@ partial class Lexer
             }
         }
 
-        this.AddError(Lexer.MakeError(ErrorCode.ERR_NumberOverflow));
+        info.ValueKind = SpecialType.System_Double;
+        info.DoubleValue = double.PositiveInfinity;
+        this.AddError(0, text.Length, ErrorCode.ERR_NumberOverflow);
     }
 }

@@ -68,7 +68,7 @@ partial class DeclarationTreeBuilder
     /// </summary>
     private ImmutableSegmentedDictionary<string, VoidResult> GetMemberNames(SyntaxList<StatementSyntax> statements)
     {
-        var memberNamesBuilder = DeclarationTreeBuilder.s_memberNameBuilderPool.Allocate();
+        var memberNamesBuilder = s_memberNameBuilderPool.Allocate();
 
         foreach (var statement in statements)
         {
@@ -77,6 +77,6 @@ partial class DeclarationTreeBuilder
             memberNamesBuilder.TryAdd(memberStatement.NameColon.Name.Identifier.ValueText);
         }
 
-        return DeclarationTreeBuilder.ToImmutableAndFree(memberNamesBuilder);
+        return ToImmutableAndFree(memberNamesBuilder);
     }
 }

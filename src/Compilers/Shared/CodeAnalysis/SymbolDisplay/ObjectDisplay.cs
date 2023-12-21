@@ -31,11 +31,11 @@ internal static class ObjectDisplay
     internal static string? FormatPrimitive(object? obj, ObjectDisplayOptions options) =>
         obj switch
         {
-            null => ObjectDisplay.NilLiteral,
-            bool => ObjectDisplay.FormatLiteral((bool)obj),
-            sbyte or byte or short or ushort or int or uint or long or ulong => ObjectDisplay.FormatLiteral((long)Convert.ChangeType(obj, typeof(long)), options),
-            float or double or decimal => ObjectDisplay.FormatLiteral((double)Convert.ChangeType(obj, typeof(double)), options),
-            string => ObjectDisplay.FormatLiteral((string)obj, options),
+            null => NilLiteral,
+            bool => FormatLiteral((bool)obj),
+            sbyte or byte or short or ushort or int or uint or long or ulong => FormatLiteral((long)Convert.ChangeType(obj, typeof(long)), options),
+            float or double or decimal => FormatLiteral((double)Convert.ChangeType(obj, typeof(double)), options),
+            string => FormatLiteral((string)obj, options),
             _ => null
         };
 
@@ -67,7 +67,7 @@ internal static class ObjectDisplay
         }
         else
         {
-            sb.Append(value.ToString(ObjectDisplay.GetFormatCulture(cultureInfo)));
+            sb.Append(value.ToString(GetFormatCulture(cultureInfo)));
         }
 
         return pooledBuilder.ToStringAndFree();
@@ -93,7 +93,7 @@ internal static class ObjectDisplay
         }
         else
         {
-            sb.Append(value.ToString(ObjectDisplay.GetFormatCulture(cultureInfo)));
+            sb.Append(value.ToString(GetFormatCulture(cultureInfo)));
         }
 
         return pooledBuilder.ToStringAndFree();
@@ -119,7 +119,7 @@ internal static class ObjectDisplay
         }
         else
         {
-            sb.Append(value.ToString(ObjectDisplay.GetFormatCulture(cultureInfo)));
+            sb.Append(value.ToString(GetFormatCulture(cultureInfo)));
         }
 
         return pooledBuilder.ToStringAndFree();
@@ -205,7 +205,7 @@ internal static class ObjectDisplay
 
         var useQuote = options.IncludesOption(ObjectDisplayOptions.UseQuotes);
         var escapeNonPrintable = options.IncludesOption(ObjectDisplayOptions.EscapeNonPrintableCharacters);
-        var isVerbatim = useQuote && !escapeNonPrintable && ObjectDisplay.ContainsNewLine(value);
+        var isVerbatim = useQuote && !escapeNonPrintable && ContainsNewLine(value);
 
         var longBracketLevel = -1; // 逐字字符串两端的长方括号级数。
         var disabledLevels = PooledHashSet<int>.GetInstance(); // 不能使用的长方括号级数。
@@ -245,7 +245,7 @@ internal static class ObjectDisplay
                     sb.Append(((int)c).ToString("X"));
                     sb.Append('}');
                 }
-                else if (ObjectDisplay.NeedsEscaping(category))
+                else if (NeedsEscaping(category))
                 { // 要被转义的已配对的代理对。
                     var unicode = char.ConvertToUtf32(value, i);
                     sb.Append("\\u{");
@@ -259,7 +259,7 @@ internal static class ObjectDisplay
                     sb.Append(value[++i]);
                 }
             }
-            else if (escapeNonPrintable && ObjectDisplay.TryReplaceChar(c, out var replaceWith))
+            else if (escapeNonPrintable && TryReplaceChar(c, out var replaceWith))
             {
                 sb.Append(replaceWith);
             }
@@ -359,7 +359,7 @@ internal static class ObjectDisplay
 
         if (replaceWith is not null) return true;
 
-        if (ObjectDisplay.NeedsEscaping(CharUnicodeInfo.GetUnicodeCategory(c)))
+        if (NeedsEscaping(CharUnicodeInfo.GetUnicodeCategory(c)))
         {
             replaceWith = $"\\u{{{(int)c:X}}}";
             return true;

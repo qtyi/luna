@@ -25,18 +25,18 @@ internal static partial class SyntaxFactory
 
     internal static partial IEnumerable<SyntaxTrivia> GetWellKnownTrivia()
     {
-        yield return SyntaxFactory.CarriageReturnLineFeed;
-        yield return SyntaxFactory.LineFeed;
-        yield return SyntaxFactory.CarriageReturn;
-        yield return SyntaxFactory.Space;
-        yield return SyntaxFactory.Tab;
+        yield return CarriageReturnLineFeed;
+        yield return LineFeed;
+        yield return CarriageReturn;
+        yield return Space;
+        yield return Tab;
 
-        yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
-        yield return SyntaxFactory.ElasticLineFeed;
-        yield return SyntaxFactory.ElasticCarriageReturn;
-        yield return SyntaxFactory.ElasticSpace;
-        yield return SyntaxFactory.ElasticTab;
+        yield return ElasticCarriageReturnLineFeed;
+        yield return ElasticLineFeed;
+        yield return ElasticCarriageReturn;
+        yield return ElasticSpace;
+        yield return ElasticTab;
 
-        yield return SyntaxFactory.ElasticZeroSpace;
+        yield return ElasticZeroSpace;
     }
 }

@@ -13,34 +13,56 @@ using System.Diagnostics;
 
 namespace Luna.Compilers.Generators;
 
+/// <summary>
+/// Represents an incremental source generator that driven by not only a tree deserialized from XML, but also additional input.
+/// </summary>
+/// <inheritdoc/>
 public abstract class TreeWithAdditionalInputSourceGenerator<TTree, TTreeType, TAdditionalInput> : AbstractTreeSourceGenerator<TTree, TTreeType>
     where TTree : ITree<TTreeType>
     where TTreeType : ITreeType
 {
-    protected sealed override void InitializeCore(in IncrementalGeneratorInitializationContext context)
+    /// <inheritdoc/>
+    protected sealed override void InitializeCore(IncrementalGeneratorInitializationContext context)
     {
-        if (this.TryGetRelevantInputs(in context, out var inputs) &&
-            this.TryGetAdditionalInputs(in context, out var additionalInputs))
+        if (this.TryGetRelevantInputs(context, out var inputs) &&
+            this.TryGetAdditionalInputs(context, out var additionalInputs))
             context.RegisterSourceOutput(inputs.Combine(additionalInputs), this.GenerateOutputs);
     }
 
-    protected abstract bool TryGetRelevantInputs(
-        in IncrementalGeneratorInitializationContext context,
-        out IncrementalValueProvider<ImmutableArray<AdditionalText>> inputs);
-
+    /// <summary>
+    /// Try to get additional inputs from <see cref="IncrementalGeneratorInitializationContext"/>.
+    /// </summary>
+    /// <param name="context">Incremental source generator context during initialization.</param>
+    /// <param name="additionalInputs">Additional inputs found.</param>
+    /// <returns>Returns <see langword="true"/> if we find additional inputs; otherwise, <see langword="false"/>.</returns>
     protected abstract bool TryGetAdditionalInputs(
-        in IncrementalGeneratorInitializationContext context,
+        IncrementalGeneratorInitializationContext context,
         out IncrementalValueProvider<TAdditionalInput> additionalInputs);
 
+    /// <summary>
+    /// Generate source outputs from all input XML files.
+    /// </summary>
+    /// <param name="context">Incremental source generator context during source production.</param>
+    /// <param name="combinedInputs">A tuple of a collection of input XML files and additional inputs.</param>
     private void GenerateOutputs(SourceProductionContext context, (ImmutableArray<AdditionalText> Inputs, TAdditionalInput AdditionalInputs) combinedInputs)
     {
-        foreach (var tree in this.SerializeOutputs(context, combinedInputs.Inputs))
-            this.GenerateOutputs(in context, tree, combinedInputs.AdditionalInputs, context.CancellationToken);
+        foreach (var tree in this.SerializeInputs(context, combinedInputs.Inputs))
+            this.GenerateOutputs(context, tree, combinedInputs.AdditionalInputs);
     }
 
+    /// <summary>
+    /// Generate source output from single tree.
+    /// </summary>
+    /// <param name="context">Incremental source generator context during source production.</param>
+    /// <param name="tree">Tree to generate source output.</param>
+    /// <param name="additionalInput">Additional inputs to generate source output.</param>
     protected abstract void GenerateOutputs(
-        in SourceProductionContext context,
+        SourceProductionContext context,
         TTree tree,
-        TAdditionalInput additionalInput,
-        CancellationToken cancellationToken);
+        TAdditionalInput additionalInput);
+
+    /// <inheritdoc cref="AbstractSourceGenerator.WriteAndAddSource{T}(SourceProductionContext, Action{TextWriter, T, CancellationToken}, T, string)"/>
+    /// <param name="tree">The first parameter of the method that <paramref name="writeAction"/> encapsulates.</param>
+    /// <param name="additionalInput">The second parameter of the method that <paramref name="writeAction"/> encapsulates.</param>
+    protected static void WriteAndAddSource(SourceProductionContext context, Action<TextWriter, TTree, TAdditionalInput, CancellationToken> writeAction, TTree tree, TAdditionalInput additionalInput, string hintName) => AbstractSourceGenerator.WriteAndAddSource(context, writeAction, tree, additionalInput, hintName);
 }

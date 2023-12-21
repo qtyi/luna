@@ -77,7 +77,7 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
             compilation)
     { }
 
-    int IComparable<LexicalSortKey>.CompareTo(LexicalSortKey other) => LexicalSortKey.Compare(this, other);
+    int IComparable<LexicalSortKey>.CompareTo(LexicalSortKey other) => Compare(this, other);
 
     public static int Compare(LexicalSortKey x, LexicalSortKey y)
     {
@@ -100,13 +100,13 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
 
     public override bool Equals(object? obj) => obj is LexicalSortKey sortKey && this.Equals(sortKey);
 
-    bool IEquatable<LexicalSortKey>.Equals(LexicalSortKey other) => LexicalSortKey.Compare(this, other) == 0;
+    bool IEquatable<LexicalSortKey>.Equals(LexicalSortKey other) => Compare(this, other) == 0;
 
     public override int GetHashCode() => this._treeOrdinal.GetHashCode() ^ this._position.GetHashCode();
 
     public static LexicalSortKey First(LexicalSortKey xSortKey, LexicalSortKey ySortKey)
     {
-        var comparison = LexicalSortKey.Compare(xSortKey, ySortKey);
+        var comparison = Compare(xSortKey, ySortKey);
         return comparison > 0 ? ySortKey : xSortKey;
     }
 

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Luna.Compilers.Simulators.Lua</AssemblyName>
+    <TargetFrameworks>$(TestResourcesTargetFrameworks)</TargetFrameworks>
+    <Configurations>Debug;Release</Configurations>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Luna.Compilers.Simulators</RootNamespace>
+    <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\AbstractSyntaxClassifier.cs" Link="AbstractSyntaxClassifier.cs" />
+    <Compile Include="..\Shared\AbstractSyntaxParser.cs" Link="AbstractSyntaxParser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Luna.Compilers.Simulators\Luna.Compilers.Simulators.csproj" />
+    <ProjectReference Include="..\..\..\..\Compilers\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
+    <ProjectReference Include="..\..\..\..\Compilers\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
+  </ItemGroup>
+
+</Project>

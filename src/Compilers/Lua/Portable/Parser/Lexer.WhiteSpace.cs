@@ -22,7 +22,7 @@ partial class Lexer
     private SyntaxTrivia CreateWhiteSpaceTrivia() =>
         SyntaxFactory.WhiteSpace(this.TextWindow.GetText(intern: true));
 
-    [MemberNotNull(nameof(Lexer._createWhiteSpaceTriviaFunction))]
+    [MemberNotNull(nameof(_createWhiteSpaceTriviaFunction))]
     private SyntaxTrivia ScanWhiteSpace()
     {
         this._createWhiteSpaceTriviaFunction ??= this.CreateWhiteSpaceTrivia;
@@ -59,7 +59,7 @@ NextChar:
         else
         {
             var width = this.TextWindow.Width;
-            if (width < Lexer.MaxCachedTokenSize)
+            if (width < MaxCachedTokenSize)
                 return this._cache.LookupTrivia(
                     this.TextWindow.CharacterWindow,
                     this.TextWindow.LexemeRelativeStart,

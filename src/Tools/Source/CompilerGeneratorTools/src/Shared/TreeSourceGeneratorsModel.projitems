@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>21846924-b458-41c5-8203-c8b849be0690</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Luna.Compilers.Generators</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\IsExternalInit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\IndentWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\StringBuilderReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\CSharp\IndentWriterExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\Shared\VisualBasic\IndentWriterExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AbstractSourceGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AbstractTreeSourceGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DiagnosticDescriptors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ITree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\TreeFlattener`2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ITreeType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ITreeTypeChild.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ModelExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\TreeFlattener`3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SourceTextReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TreeFileWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TreeSourceGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TreeWithAdditionalInputSourceGenerator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Make sure to reference the same version of Microsoft.CodeAnalysis.Analyzers as the rest of the build -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="$(MicrosoftCodeAnalysisAnalyzersVersion)" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(MicrosoftCodeAnalysisVersion)" />
+  </ItemGroup>
+</Project>

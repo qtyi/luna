@@ -48,7 +48,7 @@ public abstract partial class
     /// 获取此语法节点所在的语法树。
     /// </summary>
     internal new ThisSyntaxTree SyntaxTree =>
-        (this._syntaxTree as ThisSyntaxTree) ?? ThisSyntaxNode.ComputeSyntaxTree(this);
+        (this._syntaxTree as ThisSyntaxTree) ?? ComputeSyntaxTree(this);
 
     /// <summary>
     /// 获取此语法节点的父节点。若父节点不存在，则返回<see langword="null"/>。

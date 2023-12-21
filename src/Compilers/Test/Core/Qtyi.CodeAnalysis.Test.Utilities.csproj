@@ -3,72 +3,45 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TestUtilitiesTargetFrameworks)</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Core\**\*.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\Extensions\ControlFlowRegionExtensions.cs" Link="Compilation\FlowAnalysis\ControlFlowRegionExtensions.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\FlowAnalysis\CustomDataFlowAnalysis.cs" Link="Compilation\FlowAnalysis\CustomDataFlowAnalysis.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Workspaces\SharedUtilitiesAndExtensions\Compiler\Core\FlowAnalysis\DataFlowAnalyzer.cs" Link="Compilation\FlowAnalysis\DataFlowAnalyzer.cs" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <EmbeddedResource Update="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Core\TestResource.resx" GenerateSource="true" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\Portable\InternalUtilities\IsExternalInit.cs" />
   </ItemGroup>
   
   <ItemGroup>
     <!-- InternalsVisibleTo -->
     <InternalsVisibleTo Include="Luna.Test.PdbUtilities" />
-    
-    <!-- InternalsVisibleFrom -->
-    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
-    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis.CSharp" />
-    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis.VisualBasic" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.Lua.Test.Utilities" />
+    <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript.Test.Utilities" />
   </ItemGroup>
   
-  <ItemGroup>
-    <PackageReference Include="DiffPlex" Version="$(DiffPlexVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(MicrosoftCodeAnalysisVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Test.Resources.Proprietary" Version="$(MicrosoftCodeAnalysisTestResourcesProprietaryVersion)" />
-    <PackageReference Include="Microsoft.DiaSymReader.Converter.Xml" Version="$(MicrosoftDiaSymReaderConverterXmlVersion)" />
-    <PackageReference Include="Microsoft.Metadata.Visualizer" Version="$(MicrosoftMetadataVisualizerVersion)" />
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="$(MicrosoftNETCorePlatformsVersion)" />
-    <PackageReference Include="Moq" Version="$(MoqVersion)" />
-    <PackageReference Include="xunit.assert" Version="$(xunitassertVersion)" />
-    <PackageReference Include="xunit.extensibility.core" Version="$(xunitextensibilitycoreVersion)" />
-    <PackageReference Include="Xunit.Combinatorial" Version="$(XunitCombinatorialVersion)" />
-    <PackageReference Include="ICSharpCode.Decompiler" Version="$(ICSharpCodeDecompilerVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.AnalyzerUtilities" Version="$(MicrosoftCodeAnalysisAnalyzerUtilitiesVersion)" />
-
-    <!-- Needed to find the Unsafe.dll binary to lay out at runtime for the compiler when testing analyzers. -->
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net451" Version="$(MicrosoftNETFrameworkReferenceAssembliesnet451Version)" IncludeAssets="none" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net40" Version="$(MicrosoftNETFrameworkReferenceAssembliesnet40Version)" IncludeAssets="none" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net20" Version="$(MicrosoftNETFrameworkReferenceAssembliesnet20Version)" IncludeAssets="none" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.NET.Build.Extensions" Version="$(MicrosoftNETBuildExtensionsVersion)" IncludeAssets="none" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="jnm2.ReferenceAssemblies.net35" Version="$(jnm2ReferenceAssembliesnet35Version)" IncludeAssets="none" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsVersion)" IncludeAssets="none" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.VisualBasic" Version="$(MicrosoftVisualBasicVersion)" IncludeAssets="none" PrivateAssets="all" GeneratePathProperty="true" />
-
-    <PackageReference Include="Basic.Reference.Assemblies.NetStandard20" Version="$(BasicReferenceAssembliesNetStandard20Version)" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net70" Version="$(BasicReferenceAssembliesNet70Version)" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net461" Version="$(BasicReferenceAssembliesNet461Version)" />
-    <PackageReference Include="Microsoft.ILVerification" Version="$(MicrosoftILVerificationVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\Compilers\Test\Resources\Core\Qtyi.CodeAnalysis.Compiler.Test.Resources.csproj" />
     <ProjectReference Include="..\..\..\Compilers\Core\Portable\Qtyi.CodeAnalysis.csproj" />
     <ProjectReference Include="..\..\..\Compilers\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
     <ProjectReference Include="..\..\..\Compilers\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
+
+    <ProjectReference Include="..\..\..\Tools\Source\CompilerGeneratorTools\src\CodeAnalysisTestUtilitiesSourceGenerators\CodeAnalysisTestUtilitiesSourceGenerators.csproj">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
   
-  <Import Project="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Core\Generated.targets" />
+  <Import Project="Microsoft.CodeAnalysis.Test.Utilities.targets" />
+  
+  <ItemGroup Label="CompilerVisibleItemMetadatas">
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="GeneratorName" />
+  </ItemGroup>
+
+  <ItemGroup Label="DiagnosticDescriptionGenerator">
+    <Compile Remove="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Core\Diagnostics\DiagnosticDescription.cs" />
+    <AdditionalFiles Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Core\Diagnostics\DiagnosticDescription.cs" Link="Diagnostics\DiagnosticDescription.cs" GeneratorName="DiagnosticDescriptionGenerator" />
+  </ItemGroup>
   
 </Project>

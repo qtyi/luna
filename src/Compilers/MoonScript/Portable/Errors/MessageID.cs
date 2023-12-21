@@ -42,7 +42,7 @@ internal static partial class MessageIDExtensions
 
     internal static partial LanguageVersion RequiredVersion(this MessageID feature)
     {
-        Debug.Assert(MessageIDExtensions.RequiredFeature(feature) is null);
+        Debug.Assert(RequiredFeature(feature) is null);
 
         return feature switch
         {

@@ -27,7 +27,7 @@ public sealed class SyntaxGenerator : TreeSourceGenerator<SyntaxTree, SyntaxTree
 
     /// <inheritdoc/>
     protected override bool TryGetRelevantInputs(
-        in IncrementalGeneratorInitializationContext context,
+        IncrementalGeneratorInitializationContext context,
         out IncrementalValueProvider<ImmutableArray<AdditionalText>> inputs)
     {
         inputs = context.AdditionalTextsProvider.Where(text => Path.GetFileName(text.Path).Equals(SyntaxXml, StringComparison.OrdinalIgnoreCase)).Collect();
@@ -39,13 +39,12 @@ public sealed class SyntaxGenerator : TreeSourceGenerator<SyntaxTree, SyntaxTree
 
     /// <inheritdoc/>
     protected override void GenerateOutputs(
-        in SourceProductionContext context,
-        SyntaxTree tree,
-        CancellationToken cancellationToken)
+        SourceProductionContext context,
+        SyntaxTree tree)
     {
-        WriteAndAddSource(in context, writer => SyntaxSourceWriter.WriteMain(writer, tree, cancellationToken), SyntaxXml + ".Main.Generated.cs");
-        WriteAndAddSource(in context, writer => SyntaxSourceWriter.WriteInternal(writer, tree, cancellationToken), SyntaxXml + ".Internal.Generated.cs");
-        WriteAndAddSource(in context, writer => SyntaxSourceWriter.WriteSyntax(writer, tree, cancellationToken), SyntaxXml + ".Syntax.Generated.cs");
+        WriteAndAddSource(context, SyntaxSourceWriter.WriteMain, tree, SyntaxXml + ".Main.Generated.cs");
+        WriteAndAddSource(context, SyntaxSourceWriter.WriteInternal, tree, SyntaxXml + ".Internal.Generated.cs");
+        WriteAndAddSource(context, SyntaxSourceWriter.WriteSyntax, tree, SyntaxXml + ".Syntax.Generated.cs");
     }
 
     #region DiagnosticDescriptors

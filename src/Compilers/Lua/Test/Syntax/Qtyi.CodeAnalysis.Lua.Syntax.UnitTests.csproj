@@ -1,0 +1,37 @@
+﻿<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Qtyi.CodeAnalysis.Lua.UnitTests</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Parsing\LanguageParserTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Parsing\LanguageParserTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="InternalsVisibles">
+    <!-- InternalsVisibleFrom -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+
+  <ItemGroup Label="References">
+    <!-- PackageReference -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+
+    <!-- ProjectReference -->
+    <ProjectReference Include="..\..\..\Core\CodeAnalysisTest\Qtyi.CodeAnalysis.UnitTests.csproj" />
+    <ProjectReference Include="..\..\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\Test\Shared\Qtyi.CodeAnalysis.Syntax.UnitTests.targets" />
+
+</Project>

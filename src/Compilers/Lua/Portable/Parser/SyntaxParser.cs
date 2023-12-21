@@ -10,7 +10,7 @@ partial class SyntaxParser
 {
     protected virtual partial SyntaxDiagnosticInfo GetExpectedTokenError(SyntaxKind expected, SyntaxKind actual, int offset, int width)
     {
-        var code = SyntaxParser.GetExpectedTokenErrorCode(expected, actual);
+        var code = GetExpectedTokenErrorCode(expected, actual);
         return code switch
         {
             ErrorCode.ERR_IdentifierExpectedKW =>

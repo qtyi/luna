@@ -9,18 +9,19 @@ using Microsoft.CodeAnalysis.Syntax;
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
 
+using ThisParseOptions = LuaParseOptions;
 using ThisSyntaxNode = LuaSyntaxNode;
 using ThisSyntaxTree = LuaSyntaxTree;
-using ThisParseOptions = LuaParseOptions;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
 
+using ThisParseOptions = MoonScriptParseOptions;
 using ThisSyntaxNode = MoonScriptSyntaxNode;
 using ThisSyntaxTree = MoonScriptSyntaxTree;
-using ThisParseOptions = MoonScriptParseOptions;
 #endif
 
-using InternalSyntax = Syntax.InternalSyntax;
+using InternalSyntaxFactory = Syntax.InternalSyntax.SyntaxFactory;
+using InternalSyntaxToken = Syntax.InternalSyntax.SyntaxToken;
 
 /// <summary>
 /// 此类型提供构造各种语法节点、标记和琐碎内容的工厂方法。
@@ -33,7 +34,7 @@ public static partial class SyntaxFactory
     /// <value>
     /// 一个语法类型为<see cref="SyntaxKind.EndOfLineTrivia"/>的语法琐碎内容，其包含回车符和换行符。
     /// </value>
-    public static SyntaxTrivia CarriageReturnLineFeed { get; } = InternalSyntax.SyntaxFactory.CarriageReturnLineFeed;
+    public static SyntaxTrivia CarriageReturnLineFeed { get; } = InternalSyntaxFactory.CarriageReturnLineFeed;
     /// <summary>
     /// 获取包含回车符和换行符的可变的语法琐碎内容。
     /// </summary>
@@ -43,7 +44,7 @@ public static partial class SyntaxFactory
     /// <remarks>
     /// 可变的语法琐碎内容用于表示那些不是从解析代码文本过程中产生的琐碎内容，它们一般在格式化时不会被保留。
     /// </remarks>
-    public static SyntaxTrivia ElasticCarriageReturnLineFeed { get; } = InternalSyntax.SyntaxFactory.ElasticCarriageReturnLineFeed;
+    public static SyntaxTrivia ElasticCarriageReturnLineFeed { get; } = InternalSyntaxFactory.ElasticCarriageReturnLineFeed;
 
     /// <summary>
     /// 获取包含换行符的语法琐碎内容。
@@ -51,7 +52,7 @@ public static partial class SyntaxFactory
     /// <value>
     /// 一个语法类型为<see cref="SyntaxKind.EndOfLineTrivia"/>的语法琐碎内容，其包含单个换行符。
     /// </value>
-    public static SyntaxTrivia LineFeed { get; } = InternalSyntax.SyntaxFactory.LineFeed;
+    public static SyntaxTrivia LineFeed { get; } = InternalSyntaxFactory.LineFeed;
     /// <summary>
     /// 获取包含换行符的可变的语法琐碎内容。
     /// </summary>
@@ -61,7 +62,7 @@ public static partial class SyntaxFactory
     /// <remarks>
     /// 可变的语法琐碎内容用于表示那些不是从解析代码文本过程中产生的琐碎内容，它们一般在格式化时不会被保留。
     /// </remarks>
-    public static SyntaxTrivia ElasticLineFeed { get; } = InternalSyntax.SyntaxFactory.ElasticLineFeed;
+    public static SyntaxTrivia ElasticLineFeed { get; } = InternalSyntaxFactory.ElasticLineFeed;
 
     /// <summary>
     /// 获取包含回车符的语法琐碎内容。
@@ -69,7 +70,7 @@ public static partial class SyntaxFactory
     /// <value>
     /// 一个语法类型为<see cref="SyntaxKind.EndOfLineTrivia"/>的语法琐碎内容，其包含单个回车符。
     /// </value>
-    public static SyntaxTrivia CarriageReturn { get; } = InternalSyntax.SyntaxFactory.CarriageReturn;
+    public static SyntaxTrivia CarriageReturn { get; } = InternalSyntaxFactory.CarriageReturn;
     /// <summary>
     /// 获取包含回车符的可变的语法琐碎内容。
     /// </summary>
@@ -79,7 +80,7 @@ public static partial class SyntaxFactory
     /// <remarks>
     /// 可变的语法琐碎内容用于表示那些不是从解析代码文本过程中产生的琐碎内容，它们一般在格式化时不会被保留。
     /// </remarks>
-    public static SyntaxTrivia ElasticCarriageReturn { get; } = InternalSyntax.SyntaxFactory.ElasticCarriageReturn;
+    public static SyntaxTrivia ElasticCarriageReturn { get; } = InternalSyntaxFactory.ElasticCarriageReturn;
 
     /// <summary>
     /// 获取包含空格符的语法琐碎内容。
@@ -87,7 +88,7 @@ public static partial class SyntaxFactory
     /// <value>
     /// 一个语法类型为<see cref="SyntaxKind.WhiteSpaceTrivia"/>的语法琐碎内容，其包含单个空格符。
     /// </value>
-    public static SyntaxTrivia Space { get; } = InternalSyntax.SyntaxFactory.Space;
+    public static SyntaxTrivia Space { get; } = InternalSyntaxFactory.Space;
     /// <summary>
     /// 获取包含空格符的可变的语法琐碎内容。
     /// </summary>
@@ -97,7 +98,7 @@ public static partial class SyntaxFactory
     /// <remarks>
     /// 可变的语法琐碎内容用于表示那些不是从解析代码文本过程中产生的琐碎内容，它们一般在格式化时不会被保留。
     /// </remarks>
-    public static SyntaxTrivia ElasticSpace { get; } = InternalSyntax.SyntaxFactory.ElasticSpace;
+    public static SyntaxTrivia ElasticSpace { get; } = InternalSyntaxFactory.ElasticSpace;
 
     /// <summary>
     /// 获取包含制表符的语法琐碎内容。
@@ -105,7 +106,7 @@ public static partial class SyntaxFactory
     /// <value>
     /// 一个语法类型为<see cref="SyntaxKind.WhiteSpaceTrivia"/>的语法琐碎内容，其包含单个制表符。
     /// </value>
-    public static SyntaxTrivia Tab { get; } = InternalSyntax.SyntaxFactory.Tab;
+    public static SyntaxTrivia Tab { get; } = InternalSyntaxFactory.Tab;
     /// <summary>
     /// 获取包含制表符的可变的语法琐碎内容。
     /// </summary>
@@ -115,7 +116,7 @@ public static partial class SyntaxFactory
     /// <remarks>
     /// 可变的语法琐碎内容用于表示那些不是从解析代码文本过程中产生的琐碎内容，它们一般在格式化时不会被保留。
     /// </remarks>
-    public static SyntaxTrivia ElasticTab { get; } = InternalSyntax.SyntaxFactory.ElasticTab;
+    public static SyntaxTrivia ElasticTab { get; } = InternalSyntaxFactory.ElasticTab;
 
     /// <summary>
     /// 获取表示可变记号的语法琐碎内容。
@@ -126,49 +127,36 @@ public static partial class SyntaxFactory
     /// <remarks>
     /// 当语法琐碎内容没有明确时，工厂方法将自动置入可变记号。在语法格式化阶段，可变记号将会被替换为合适的语法琐碎内容。
     /// </remarks>
-    public static SyntaxTrivia ElasticMarker { get; } = InternalSyntax.SyntaxFactory.ElasticZeroSpace;
+    public static SyntaxTrivia ElasticMarker { get; } = InternalSyntaxFactory.ElasticZeroSpace;
 
     #region 琐碎内容
-    public static SyntaxTrivia EndOfLine(string text) => InternalSyntax.SyntaxFactory.EndOfLine(text, elastic: false);
+    public static SyntaxTrivia EndOfLine(string text) => InternalSyntaxFactory.EndOfLine(text, elastic: false);
 
-    public static SyntaxTrivia ElasticEndOfLine(string text) => InternalSyntax.SyntaxFactory.EndOfLine(text, elastic: true);
+    public static SyntaxTrivia ElasticEndOfLine(string text) => InternalSyntaxFactory.EndOfLine(text, elastic: true);
 
-    public static SyntaxTrivia WhiteSpace(string text) => InternalSyntax.SyntaxFactory.WhiteSpace(text, elastic: false);
+    public static SyntaxTrivia WhiteSpace(string text) => InternalSyntaxFactory.WhiteSpace(text, elastic: false);
 
-    public static SyntaxTrivia ElasticWhiteSpace(string text) => InternalSyntax.SyntaxFactory.WhiteSpace(text, elastic: true);
+    public static SyntaxTrivia ElasticWhiteSpace(string text) => InternalSyntaxFactory.WhiteSpace(text, elastic: true);
 
-    public static SyntaxTrivia Comment(string text) => InternalSyntax.SyntaxFactory.Comment(text);
+    public static SyntaxTrivia Comment(string text) => InternalSyntaxFactory.Comment(text);
 
-    public static SyntaxTrivia Trivia(SyntaxKind kind, string text)
-    {
-        if (text is null) throw new ArgumentNullException(nameof(text));
-
-        return kind switch
-        {
-            SyntaxKind.EndOfLineTrivia or
-            SyntaxKind.WhiteSpaceTrivia or
-            SyntaxKind.SingleLineCommentTrivia or
-            SyntaxKind.MultiLineCommentTrivia =>
-                new(default, new InternalSyntax.SyntaxTrivia(kind, text), 0, 0),
-            _ => throw new ArgumentException(null, nameof(kind))
-        };
-    }
+    public static SyntaxTrivia PreprocessingMessage(string text) => InternalSyntaxFactory.PreprocessingMessage(text);
 
     public static SyntaxTrivia Trivia(Syntax.StructuredTriviaSyntax node) => new(default, node.Green, position: 0, index: 0);
     #endregion
 
     #region 标记
     public static SyntaxToken Token(SyntaxKind kind) =>
-        new(InternalSyntax.SyntaxFactory.Token(
-            SyntaxFactory.ElasticMarker.UnderlyingNode,
+        new(InternalSyntaxFactory.Token(
+            ElasticMarker.UnderlyingNode,
             kind,
-            SyntaxFactory.ElasticMarker.UnderlyingNode));
+            ElasticMarker.UnderlyingNode));
 
     public static SyntaxToken Token(
         SyntaxTriviaList leading,
         SyntaxKind kind,
         SyntaxTriviaList trailing) =>
-        new(InternalSyntax.SyntaxFactory.Token(
+        new(InternalSyntaxFactory.Token(
             leading.Node,
             kind,
             trailing.Node));
@@ -180,9 +168,9 @@ public static partial class SyntaxFactory
         string valueText,
         SyntaxTriviaList trailing)
     {
-        SyntaxFactory.ValidateTokenKind(kind);
+        ValidateTokenKind(kind);
 
-        return new(InternalSyntax.SyntaxFactory.Token(
+        return new(InternalSyntaxFactory.Token(
             leading.Node,
             kind,
             text,
@@ -193,24 +181,24 @@ public static partial class SyntaxFactory
     private static partial void ValidateTokenKind(SyntaxKind kind);
 
 #if DEBUG
-    internal static ThisSyntaxNode Mock() => new ThisSyntaxNode.MockNode(InternalSyntax.SyntaxFactory.Mock());
+    internal static ThisSyntaxNode Mock() => new ThisSyntaxNode.MockNode(InternalSyntaxFactory.Mock());
 
-    internal static SyntaxToken Token(SyntaxNode parent, InternalSyntax.SyntaxToken token, int position, int index) => SyntaxFactory.Token((ThisSyntaxNode)parent, token, position, index);
+    internal static SyntaxToken Token(SyntaxNode parent, InternalSyntaxToken token, int position, int index) => Token((ThisSyntaxNode)parent, token, position, index);
 
-    internal static SyntaxToken Token(ThisSyntaxNode parent, InternalSyntax.SyntaxToken token, int position, int index) => new(parent, token, position, index);
+    internal static SyntaxToken Token(ThisSyntaxNode parent, InternalSyntaxToken token, int position, int index) => new(parent, token, position, index);
 #endif
 
     public static SyntaxToken MissingToken(SyntaxKind kind) =>
-        new(InternalSyntax.SyntaxFactory.MissingToken(
-            SyntaxFactory.ElasticMarker.UnderlyingNode,
+        new(InternalSyntaxFactory.MissingToken(
+            ElasticMarker.UnderlyingNode,
             kind,
-            SyntaxFactory.ElasticMarker.UnderlyingNode));
+            ElasticMarker.UnderlyingNode));
 
     public static SyntaxToken MissingToken(
         SyntaxTriviaList leading,
         SyntaxKind kind,
         SyntaxTriviaList trailing) =>
-        new(InternalSyntax.SyntaxFactory.MissingToken(
+        new(InternalSyntaxFactory.MissingToken(
             leading.Node,
             kind,
             trailing.Node));
@@ -219,23 +207,23 @@ public static partial class SyntaxFactory
         SyntaxTriviaList leading,
         string text,
         SyntaxTriviaList trailing) =>
-        new(InternalSyntax.SyntaxFactory.BadToken(
+        new(InternalSyntaxFactory.BadToken(
             leading.Node,
             text,
             trailing.Node));
 
     #region 标识符
     public static SyntaxToken Identifier(string text) =>
-        new(InternalSyntax.SyntaxFactory.Identifier(
-            SyntaxFactory.ElasticMarker.UnderlyingNode,
+        new(InternalSyntaxFactory.Identifier(
+            ElasticMarker.UnderlyingNode,
             text,
-            SyntaxFactory.ElasticMarker.UnderlyingNode));
+            ElasticMarker.UnderlyingNode));
 
     public static SyntaxToken Identifier(
         SyntaxTriviaList leading,
         string text,
         SyntaxTriviaList trailing) =>
-        new(InternalSyntax.SyntaxFactory.Identifier(
+        new(InternalSyntaxFactory.Identifier(
             leading.Node,
             text,
             trailing.Node));
@@ -246,7 +234,7 @@ public static partial class SyntaxFactory
         string text,
         string valueText,
         SyntaxTriviaList trailing) =>
-        new(InternalSyntax.SyntaxFactory.Identifier(
+        new(InternalSyntaxFactory.Identifier(
             contextualKind,
             leading.Node,
             text,
@@ -408,7 +396,7 @@ public static partial class SyntaxFactory
 
     public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(IEnumerable<TNode>? nodes) where TNode : ThisSyntaxNode
     {
-        if (nodes is null) return SyntaxFactory.SeparatedList<TNode>();
+        if (nodes is null) return SeparatedList<TNode>();
 
         var collection = nodes as ICollection<TNode>;
         if (collection is not null && collection.Count == 0) return default;
@@ -422,7 +410,7 @@ public static partial class SyntaxFactory
 
         var builder = new SeparatedSyntaxListBuilder<TNode>(collection?.Count ?? 3);
         builder.Add(firstNode);
-        var commaToken = SyntaxFactory.Token(SyntaxKind.CommaToken);
+        var commaToken = Token(SyntaxKind.CommaToken);
         do
         {
             builder.AddSeparator(commaToken);
@@ -438,7 +426,7 @@ public static partial class SyntaxFactory
         if (nodes is null)
         {
             if (separators is null)
-                return SyntaxFactory.SeparatedList<TNode>();
+                return SeparatedList<TNode>();
             else
                 throw new ArgumentException(string.Format(LunaResources.ArgMustBeNullWhenArgIsNull, nameof(nodes), nameof(separators)), nameof(separators));
         }
@@ -468,7 +456,7 @@ public static partial class SyntaxFactory
     }
 
     public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(IEnumerable<SyntaxNodeOrToken> nodesAndTokens) where TNode : ThisSyntaxNode =>
-        SeparatedList<TNode>(SyntaxFactory.NodeOrTokenList(nodesAndTokens));
+        SeparatedList<TNode>(NodeOrTokenList(nodesAndTokens));
 
     public static SeparatedSyntaxList<TNode> SeparatedList<TNode>(SyntaxNodeOrTokenList nodesAndTokens) where TNode : ThisSyntaxNode
     {
@@ -520,7 +508,7 @@ public static partial class SyntaxFactory
         ParseOptions? options = null,
         string path = "",
         Encoding? encoding = null) =>
-        SyntaxFactory.SyntaxTree((ThisSyntaxNode)root, (ThisParseOptions?)options, path, encoding);
+        SyntaxTree((ThisSyntaxNode)root, (ThisParseOptions?)options, path, encoding);
 
     public static SyntaxTree SyntaxTree(
         ThisSyntaxNode root,
@@ -536,21 +524,21 @@ public static partial class SyntaxFactory
 
     #region 相等判断
     /// <inheritdoc cref="SyntaxFactory.AreEquivalent(ThisSyntaxTree?, ThisSyntaxTree?, bool)"/>
-    public static bool AreEquivalent(SyntaxTree? oldTree, SyntaxTree? newTree, bool topLevel) => SyntaxFactory.AreEquivalent((ThisSyntaxTree?)oldTree, (ThisSyntaxTree?)newTree, topLevel);
+    public static bool AreEquivalent(SyntaxTree? oldTree, SyntaxTree? newTree, bool topLevel) => AreEquivalent((ThisSyntaxTree?)oldTree, (ThisSyntaxTree?)newTree, topLevel);
 
     /// <inheritdoc cref="SyntaxEquivalence.AreEquivalent(ThisSyntaxTree?, ThisSyntaxTree?, Func{SyntaxKind, bool}?, bool)"/>
     public static bool AreEquivalent(ThisSyntaxTree? oldTree, ThisSyntaxTree? newTree, bool topLevel) =>
         SyntaxEquivalence.AreEquivalent(oldTree, newTree, ignoreChildNode: null, topLevel: topLevel);
 
     /// <inheritdoc cref="SyntaxFactory.AreEquivalent(ThisSyntaxNode?, ThisSyntaxNode?, bool)"/>
-    public static bool AreEquivalent(SyntaxNode? oldNode, SyntaxNode? newNode, bool topLevel) => SyntaxFactory.AreEquivalent((ThisSyntaxNode?)oldNode, (ThisSyntaxNode?)newNode, topLevel);
+    public static bool AreEquivalent(SyntaxNode? oldNode, SyntaxNode? newNode, bool topLevel) => AreEquivalent((ThisSyntaxNode?)oldNode, (ThisSyntaxNode?)newNode, topLevel);
 
     /// <inheritdoc cref="SyntaxEquivalence.AreEquivalent(ThisSyntaxNode?, ThisSyntaxNode?, Func{SyntaxKind, bool}?, bool)"/>
     public static bool AreEquivalent(ThisSyntaxNode? oldNode, ThisSyntaxNode? newNode, bool topLevel) =>
         SyntaxEquivalence.AreEquivalent(oldNode, newNode, ignoreChildNode: null, topLevel: topLevel);
 
     /// <inheritdoc cref="SyntaxFactory.AreEquivalent(ThisSyntaxNode?, ThisSyntaxNode?, Func{SyntaxKind, bool}?)"/>
-    public static bool AreEquivalent(SyntaxNode? oldNode, SyntaxNode? newNode, Func<SyntaxKind, bool>? ignoreChildNode = null) => SyntaxFactory.AreEquivalent((ThisSyntaxNode?)oldNode, (ThisSyntaxNode?)newNode, ignoreChildNode);
+    public static bool AreEquivalent(SyntaxNode? oldNode, SyntaxNode? newNode, Func<SyntaxKind, bool>? ignoreChildNode = null) => AreEquivalent((ThisSyntaxNode?)oldNode, (ThisSyntaxNode?)newNode, ignoreChildNode);
 
     /// <inheritdoc cref="SyntaxEquivalence.AreEquivalent(ThisSyntaxNode?, ThisSyntaxNode?, Func{SyntaxKind, bool}?, bool)"/>
     public static bool AreEquivalent(ThisSyntaxNode? oldNode, ThisSyntaxNode? newNode, Func<SyntaxKind, bool>? ignoreChildNode = null) =>

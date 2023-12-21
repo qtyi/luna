@@ -40,7 +40,7 @@ internal partial class LexerCache
     {
         this._triviaMap = TextKeyedCache<SyntaxTrivia>.GetInstance();
         this._tokenMap = TextKeyedCache<SyntaxToken>.GetInstance();
-        this._keywordKindMap = LexerCache.s_keywordKindPool.Allocate();
+        this._keywordKindMap = s_keywordKindPool.Allocate();
     }
 
     internal void Free()

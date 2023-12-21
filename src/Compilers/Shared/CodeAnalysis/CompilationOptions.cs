@@ -126,5 +126,13 @@ public sealed partial class
     /// <inheritdoc/>
     [Obsolete]
     protected override CompilationOptions CommonWithFeatures(ImmutableArray<string> features) => throw new NotImplementedException();
+
+    internal ThisCompilationOptions WithDebugPlusMode(bool value)
+    {
+        if (value == this.DebugPlusMode)
+            return this;
+
+        return new(this) { DebugPlusMode = value };
+    }
     #endregion
 }

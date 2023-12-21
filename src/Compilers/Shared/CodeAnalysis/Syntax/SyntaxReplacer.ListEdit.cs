@@ -159,7 +159,7 @@ static partial class SyntaxReplacer
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             if (node == this._originalNode)
-                throw SyntaxReplacer.GetItemNotListElementException();
+                throw GetItemNotListElementException();
 
             return base.Visit(node);
         }
@@ -236,7 +236,7 @@ static partial class SyntaxReplacer
         public override SyntaxToken VisitToken(SyntaxToken token)
         {
             if (token == this._originalToken)
-                throw SyntaxReplacer.GetItemNotListElementException();
+                throw GetItemNotListElementException();
 
             return base.VisitToken(token);
         }

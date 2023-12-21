@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)Simulators.props" />
+
+  <UsingTask TaskName="Luna.Compilers.Simulators.Tasks.ResolveSimulatorsOutputPath" AssemblyFile="$(OutputPath)Luna.Compilers.Simulators.Tasks.dll" Condition="'$(ReferenceSimulatorsProjects)' == 'true'" />
+  <UsingTask TaskName="Luna.Compilers.Simulators.Tasks.CopySimulatorsProjectsOutput" AssemblyFile="$(OutputPath)Luna.Compilers.Simulators.Tasks.dll" Condition="'$(ReferenceSimulatorsProjects)' == 'true'" />
+
+  <Target Name="InstallSimulators" AfterTargets="PostBuildEvent" Condition="'$(ReferenceSimulatorsProjects)' == 'true'">
+
+    <PropertyGroup>
+      <!-- 默认的配置文件名称为“config.json” -->
+      <ConfigFile Condition="'$(ConfigFile)' == ''">config.json</ConfigFile>
+      <!-- 配置文件必须位于输出路径下 -->
+      <ConfigFile>$(OutputPath)$(ConfigFile)</ConfigFile>
+    </PropertyGroup>
+
+    <ResolveSimulatorsOutputPath ConfigFile="$(ConfigFile)">
+      <Output TaskParameter="OutputPath" PropertyName="SimulatorsOutputPath" />
+    </ResolveSimulatorsOutputPath>
+    <PropertyGroup>
+      <SimulatorsOutputPath>$(OutputPath)$(SimulatorsOutputPath)</SimulatorsOutputPath>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(SimulatorsOutputPath)" Condition="Exists('$(SimulatorsOutputPath)')" ContinueOnError="true" />
+    <MakeDir Directories="$(SimulatorsOutputPath)" Condition="!Exists('$(SimulatorsOutputPath)')" ContinueOnError="true" />
+
+    <CopySimulatorsProjectsOutput Configuration="$(Configuration)" TargetFramework="netstandard2.0" DestinationDir="$(SimulatorsOutputPath)" Projects="@(ProjectReference)">
+      <Output TaskParameter="ProjectOutputPaths" ItemName="ProjectOutputPaths" />
+    </CopySimulatorsProjectsOutput>
+    <Message Importance="High" Text="成功将“@(ProjectOutputPaths)”中的文件复制到“$(SimulatorsOutputPath)”。" />
+
+  </Target>
+
+</Project>

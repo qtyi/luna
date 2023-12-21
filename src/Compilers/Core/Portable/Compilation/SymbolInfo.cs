@@ -51,7 +51,7 @@ public readonly struct SymbolInfo : IEquatable<SymbolInfo>
 
     public bool Equals(SymbolInfo other) =>
         this.CandidateReason == other.CandidateReason &&
-        object.Equals(this.Symbol, other.Symbol) &&
+        Equals(this.Symbol, other.Symbol) &&
         this.CandidateSymbols.SequenceEqual(other.CandidateSymbols);
 
     public override int GetHashCode() =>

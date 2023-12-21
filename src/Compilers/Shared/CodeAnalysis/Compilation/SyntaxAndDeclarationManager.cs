@@ -54,7 +54,7 @@ internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDecla
         {
             Interlocked.CompareExchange(
                 ref this._lazyState,
-                SyntaxAndDeclarationManager.CreateState(
+                CreateState(
                     this.ExternalSyntaxTrees,
                     this.ScriptClassName,
                     this.Resolver,

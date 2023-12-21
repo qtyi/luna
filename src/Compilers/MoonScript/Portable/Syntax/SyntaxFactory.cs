@@ -28,14 +28,14 @@ public static partial class SyntaxFactory
 
     #region 字面量
     public static partial SyntaxToken Literal(long value) =>
-        SyntaxFactory.Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
+        Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, long value) =>
         new(Syntax.InternalSyntax.SyntaxFactory.Literal(
-            SyntaxFactory.ElasticMarker.UnderlyingNode,
+            ElasticMarker.UnderlyingNode,
             text,
             value,
-            SyntaxFactory.ElasticMarker.UnderlyingNode));
+            ElasticMarker.UnderlyingNode));
 
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
@@ -49,14 +49,14 @@ public static partial class SyntaxFactory
             trailing.Node));
 
     public static partial SyntaxToken Literal(ulong value) =>
-        SyntaxFactory.Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
+        Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, ulong value) =>
         new(Syntax.InternalSyntax.SyntaxFactory.Literal(
-            SyntaxFactory.ElasticMarker.UnderlyingNode,
+            ElasticMarker.UnderlyingNode,
             text,
             value,
-            SyntaxFactory.ElasticMarker.UnderlyingNode));
+            ElasticMarker.UnderlyingNode));
 
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
@@ -70,14 +70,14 @@ public static partial class SyntaxFactory
             trailing.Node));
 
     public static partial SyntaxToken Literal(double value) =>
-        SyntaxFactory.Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
+        Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, double value) =>
         new(Syntax.InternalSyntax.SyntaxFactory.Literal(
-            SyntaxFactory.ElasticMarker.UnderlyingNode,
+            ElasticMarker.UnderlyingNode,
             text,
             value,
-            SyntaxFactory.ElasticMarker.UnderlyingNode));
+            ElasticMarker.UnderlyingNode));
 
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
@@ -91,14 +91,14 @@ public static partial class SyntaxFactory
             trailing.Node));
 
     public static partial SyntaxToken Literal(string value) =>
-        SyntaxFactory.Literal(SymbolDisplay.FormatLiteral(value, quoteStrings: true), value);
+        Literal(SymbolDisplay.FormatLiteral(value, quoteStrings: true), value);
 
     public static partial SyntaxToken Literal(string text, string value) =>
         new(Syntax.InternalSyntax.SyntaxFactory.Literal(
-            SyntaxFactory.ElasticMarker.UnderlyingNode,
+            ElasticMarker.UnderlyingNode,
             text,
             value,
-            SyntaxFactory.ElasticMarker.UnderlyingNode));
+            ElasticMarker.UnderlyingNode));
 
     public static partial SyntaxToken Literal(
         SyntaxTriviaList leading,
@@ -120,8 +120,8 @@ public static partial class SyntaxFactory
 
     public static ChunkSyntax ParseCompilationUnit(string text, int offset = 0, MoonScriptParseOptions? options = null)
     {
-        using var lexer = SyntaxFactory.MakeLexer(text, offset, options);
-        using var parser = SyntaxFactory.MakeParser(lexer);
+        using var lexer = MakeLexer(text, offset, options);
+        using var parser = MakeParser(lexer);
         var node = parser.ParseCompilationUnit();
         return (ChunkSyntax)node.CreateRed();
     }

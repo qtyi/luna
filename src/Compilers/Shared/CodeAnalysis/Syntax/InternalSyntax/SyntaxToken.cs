@@ -27,7 +27,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     {
         ObjectBinder.RegisterTypeReader(typeof(SyntaxToken), r => new SyntaxToken(r));
 
-        SyntaxToken.InitializeTokensWithWellKnownText();
+        InitializeTokensWithWellKnownText();
     }
 
     public virtual SyntaxKind ContextualKind => this.Kind;
@@ -112,38 +112,38 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
 
     internal static SyntaxToken Create(SyntaxKind kind)
     {
-        if (kind > SyntaxToken.LastTokenWithWellKnownText)
+        if (kind > LastTokenWithWellKnownText)
         {
             if (!SyntaxFacts.IsAnyToken(kind))
                 throw new ArgumentException(string.Format(LunaResources.ThisMethodCanOnlyBeUsedToCreateTokens, kind), nameof(kind));
             else
-                return SyntaxToken.CreateMissing(kind, null, null);
+                return CreateMissing(kind, null, null);
         }
 
-        return SyntaxToken.s_tokensWithNoTrivia[(int)kind].Value;
+        return s_tokensWithNoTrivia[(int)kind].Value;
     }
 
     internal static SyntaxToken Create(SyntaxKind kind, GreenNode? leading, GreenNode? trailing)
     {
-        if (kind > SyntaxToken.LastTokenWithWellKnownText)
+        if (kind > LastTokenWithWellKnownText)
         {
             if (!SyntaxFacts.IsAnyToken(kind))
                 throw new ArgumentException(string.Format(LunaResources.ThisMethodCanOnlyBeUsedToCreateTokens, kind), nameof(kind));
             else
-                return SyntaxToken.CreateMissing(kind, null, null);
+                return CreateMissing(kind, null, null);
         }
 
         if (leading is null)
         {
             if (trailing is null)
-                return SyntaxToken.s_tokensWithNoTrivia[(int)kind].Value;
+                return s_tokensWithNoTrivia[(int)kind].Value;
             else if (trailing == SyntaxFactory.Space)
-                return SyntaxToken.s_tokensWithSingleTrailingSpace[(int)kind].Value;
+                return s_tokensWithSingleTrailingSpace[(int)kind].Value;
             else if (trailing == SyntaxFactory.CarriageReturnLineFeed)
-                return SyntaxToken.s_tokensWithSingleTrailingCRLF[(int)kind].Value;
+                return s_tokensWithSingleTrailingCRLF[(int)kind].Value;
         }
         else if (leading == SyntaxFactory.ElasticZeroSpace && trailing == SyntaxFactory.ElasticZeroSpace)
-            return SyntaxToken.s_tokensWithElasticTrivia[(int)kind].Value;
+            return s_tokensWithElasticTrivia[(int)kind].Value;
 
         return new SyntaxTokenWithTrivia(kind, leading, trailing);
     }
@@ -155,7 +155,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     internal static SyntaxToken Identifier(GreenNode? leading, string text, GreenNode? trailing)
     {
         if (leading is null && trailing is null)
-            return SyntaxToken.Identifier(text);
+            return Identifier(text);
         else
             return new SyntaxIdentifierWithTrivia(SyntaxKind.IdentifierToken, text, text, leading, trailing);
     }
@@ -163,7 +163,7 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     internal static SyntaxToken Identifier(SyntaxKind contextualKind, GreenNode? leading, string text, string valueText, GreenNode? trailing)
     {
         if (contextualKind == SyntaxKind.IdentifierName && valueText == text)
-            return SyntaxToken.Identifier(leading, text, trailing);
+            return Identifier(leading, text, trailing);
         else
             return new SyntaxIdentifierWithTrivia(contextualKind, text, valueText, leading, trailing);
     }
@@ -183,40 +183,40 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
     internal sealed override GreenNode? GetSlot(int index) => throw ExceptionUtilities.Unreachable();
 
     #region 常见标记
-    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithNoTrivia = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];
-    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithElasticTrivia = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];
-    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithSingleTrailingSpace = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];
-    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithSingleTrailingCRLF = new ArrayElement<SyntaxToken>[(int)SyntaxToken.LastTokenWithWellKnownText + 1];
+    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithNoTrivia = new ArrayElement<SyntaxToken>[(int)LastTokenWithWellKnownText + 1];
+    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithElasticTrivia = new ArrayElement<SyntaxToken>[(int)LastTokenWithWellKnownText + 1];
+    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithSingleTrailingSpace = new ArrayElement<SyntaxToken>[(int)LastTokenWithWellKnownText + 1];
+    private static readonly ArrayElement<SyntaxToken>[] s_tokensWithSingleTrailingCRLF = new ArrayElement<SyntaxToken>[(int)LastTokenWithWellKnownText + 1];
 
     protected static partial void InitializeTokensWithWellKnownText()
     {
-        for (var kind = SyntaxToken.FirstTokenWithWellKnownText; kind <= SyntaxToken.LastTokenWithWellKnownText; kind++)
+        for (var kind = FirstTokenWithWellKnownText; kind <= LastTokenWithWellKnownText; kind++)
         {
-            SyntaxToken.s_tokensWithNoTrivia[(int)kind].Value = new SyntaxToken(kind);
-            SyntaxToken.s_tokensWithElasticTrivia[(int)kind].Value = new SyntaxTokenWithTrivia(kind, SyntaxFactory.ElasticZeroSpace, SyntaxFactory.ElasticZeroSpace);
-            SyntaxToken.s_tokensWithSingleTrailingSpace[(int)kind].Value = new SyntaxTokenWithTrivia(kind, null, SyntaxFactory.Space);
-            SyntaxToken.s_tokensWithSingleTrailingCRLF[(int)kind].Value = new SyntaxTokenWithTrivia(kind, null, SyntaxFactory.CarriageReturnLineFeed);
+            s_tokensWithNoTrivia[(int)kind].Value = new SyntaxToken(kind);
+            s_tokensWithElasticTrivia[(int)kind].Value = new SyntaxTokenWithTrivia(kind, SyntaxFactory.ElasticZeroSpace, SyntaxFactory.ElasticZeroSpace);
+            s_tokensWithSingleTrailingSpace[(int)kind].Value = new SyntaxTokenWithTrivia(kind, null, SyntaxFactory.Space);
+            s_tokensWithSingleTrailingCRLF[(int)kind].Value = new SyntaxTokenWithTrivia(kind, null, SyntaxFactory.CarriageReturnLineFeed);
         }
     }
 
     internal static IEnumerable<SyntaxToken> GetWellKnownTokens()
     {
-        foreach (var token in SyntaxToken.s_tokensWithNoTrivia)
+        foreach (var token in s_tokensWithNoTrivia)
         {
             if (token.Value is not null) yield return token.Value;
         }
 
-        foreach (var token in SyntaxToken.s_tokensWithElasticTrivia)
+        foreach (var token in s_tokensWithElasticTrivia)
         {
             if (token.Value is not null) yield return token.Value;
         }
 
-        foreach (var token in SyntaxToken.s_tokensWithSingleTrailingSpace)
+        foreach (var token in s_tokensWithSingleTrailingSpace)
         {
             if (token.Value is not null) yield return token.Value;
         }
 
-        foreach (var token in SyntaxToken.s_tokensWithSingleTrailingCRLF)
+        foreach (var token in s_tokensWithSingleTrailingCRLF)
         {
             if (token.Value is not null) yield return token.Value;
         }
@@ -239,15 +239,15 @@ internal partial class SyntaxToken : ThisInternalSyntaxNode
         return trailing is null ? 0 : trailing.FullWidth;
     }
 
-    public override GreenNode WithLeadingTrivia(GreenNode? trivia) => this.TokenWithLeadingTrivia(trivia);
+    public sealed override GreenNode WithLeadingTrivia(GreenNode? trivia) => this.TokenWithLeadingTrivia(trivia);
 
     public virtual SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia) =>
-        new SyntaxTokenWithTrivia(this.Kind, trivia, null, this.GetDiagnostics(), this.GetAnnotations());
+        new SyntaxTokenWithTrivia(this.Kind, trivia, this.GetTrailingTrivia(), this.GetDiagnostics(), this.GetAnnotations());
 
-    public override GreenNode WithTrailingTrivia(GreenNode? trivia) => this.TokenWithTrailingTrivia(trivia);
+    public sealed override GreenNode WithTrailingTrivia(GreenNode? trivia) => this.TokenWithTrailingTrivia(trivia);
 
     public virtual SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia) =>
-        new SyntaxTokenWithTrivia(this.Kind, null, trivia, this.GetDiagnostics(), this.GetAnnotations());
+        new SyntaxTokenWithTrivia(this.Kind, this.GetLeadingTrivia(), trivia, this.GetDiagnostics(), this.GetAnnotations());
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
     {

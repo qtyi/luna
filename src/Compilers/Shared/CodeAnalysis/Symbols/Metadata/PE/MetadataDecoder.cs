@@ -24,7 +24,7 @@ internal partial class MetadataDecoder : Microsoft.CodeAnalysis.MetadataDecoder<
     /// <summary>用于决定泛型类型参数的方法上下文。</summary>
     private readonly PEMethodSymbol? _methodContext;
 
-    internal PENetmoduleSymbol ModuleSymbol => base.moduleSymbol;
+    internal PENetmoduleSymbol ModuleSymbol => moduleSymbol;
 
     /// <summary>
     /// 使用类型上下文创建<see cref="MetadataDecoder"/>的新实例。

@@ -37,7 +37,7 @@ internal class SyntaxLastTokenReplacer :
     {
         var oldToken = root as SyntaxToken ?? root.GetLastToken();
         Debug.Assert(oldToken is not null);
-        return SyntaxLastTokenReplacer.Replace(root, oldToken, newToken);
+        return Replace(root, oldToken, newToken);
     }
 
     internal static TRoot Replace<TRoot>(TRoot root, SyntaxToken oldToken, SyntaxToken newToken)
@@ -65,7 +65,7 @@ internal class SyntaxLastTokenReplacer :
                     return this._newToken;
                 }
 
-                this._count += SyntaxLastTokenReplacer.CountNonNullSlots(node);
+                this._count += CountNonNullSlots(node);
                 return base.Visit(node);
             }
         }

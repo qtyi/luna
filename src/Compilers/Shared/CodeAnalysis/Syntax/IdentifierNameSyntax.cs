@@ -26,7 +26,7 @@ namespace Qtyi.CodeAnalysis.MoonScript
         /// <param name="name">标识符名称。</param>
         public static IdentifierNameSyntax IdentifierName(string name)
         {
-            return SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(name));
+            return IdentifierName(Identifier(name));
         }
     }
 }

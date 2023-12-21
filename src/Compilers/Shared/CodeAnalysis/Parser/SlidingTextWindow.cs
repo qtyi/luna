@@ -65,7 +65,7 @@ internal sealed class SlidingTextWindow : IDisposable
     /// <summary>
     /// 循环利用的对象池。
     /// </summary>
-    private static readonly ObjectPool<char[]> s_windowPool = new(() => new char[SlidingTextWindow.DefaultWindowLength]);
+    private static readonly ObjectPool<char[]> s_windowPool = new(() => new char[DefaultWindowLength]);
 
     /// <summary>
     /// 获取词法器解析的代码文本。
@@ -118,7 +118,7 @@ internal sealed class SlidingTextWindow : IDisposable
         this._offset = 0;
         this._textEnd = text.Length;
         this._strings = StringTable.GetInstance();
-        this._characterWindow = SlidingTextWindow.s_windowPool.Allocate();
+        this._characterWindow = s_windowPool.Allocate();
         this._lexemeStart = 0;
     }
 
@@ -127,7 +127,7 @@ internal sealed class SlidingTextWindow : IDisposable
     {
         if (this._characterWindow is not null)
         {
-            SlidingTextWindow.s_windowPool.Free(this._characterWindow);
+            s_windowPool.Free(this._characterWindow);
             this._characterWindow = null;
             this._strings.Free();
         }
@@ -202,7 +202,7 @@ internal sealed class SlidingTextWindow : IDisposable
                 var oldWindow = this._characterWindow;
                 var newWindow = new char[this._characterWindow.Length * 2]; // 扩大两倍。
                 Array.Copy(oldWindow, 0, newWindow, 0, this._characterWindow.Length);
-                SlidingTextWindow.s_windowPool.ForgetTrackedObject(oldWindow, newWindow);
+                s_windowPool.ForgetTrackedObject(oldWindow, newWindow);
                 this._characterWindow = newWindow;
             }
 
@@ -232,7 +232,7 @@ internal sealed class SlidingTextWindow : IDisposable
     [DebuggerStepThrough]
     public void AdvanceChar(int n = 1)
     {
-        Debug.Assert(n >= 1);
+        Debug.Assert(n >= 0);
         this._offset += n;
     }
 
@@ -250,7 +250,7 @@ internal sealed class SlidingTextWindow : IDisposable
     public char NextChar()
     {
         var c = this.PeekChar();
-        if (c != SlidingTextWindow.InvalidCharacter)
+        if (c != InvalidCharacter)
             this.AdvanceChar();
         return c;
     }
@@ -268,7 +268,7 @@ internal sealed class SlidingTextWindow : IDisposable
 
         char c;
         if (this._offset >= this._characterWindowCount && !this.MoreChars())
-            c = SlidingTextWindow.InvalidCharacter;
+            c = InvalidCharacter;
         else
             c = this._characterWindow[this._offset];
 
@@ -389,7 +389,7 @@ internal sealed class SlidingTextWindow : IDisposable
     }
 
     [DebuggerStepThrough]
-    public int GetNewLineWidth() => SlidingTextWindow.GetNewLineWidth(this.PeekChar(0), this.PeekChar(1));
+    public int GetNewLineWidth() => GetNewLineWidth(this.PeekChar(0), this.PeekChar(1));
 
     /// <summary>
     /// 获取换行字符序列的宽度。
@@ -461,82 +461,13 @@ internal sealed class SlidingTextWindow : IDisposable
         return byteValue;
     }
 
-    private bool NextByteEscapeCore(out byte byteValue, out SyntaxDiagnosticInfo? info)
-    {
-        byteValue = 0;
-        info = null;
-
-        var start = this.Position;
-
-        this.AdvanceChar();
-        if (this.PeekChar() == 'x')
-        {
-            this.AdvanceChar();
-
-            // 识别2位十六进制数字。
-            if (SyntaxFacts.IsHexDigit(this.PeekChar()))
-            {
-                byteValue = (byte)SyntaxFacts.HexValue(this.NextChar());
-
-                if (SyntaxFacts.IsHexDigit(this.PeekChar()))
-                {
-                    byteValue = (byte)((byteValue << 4) + SyntaxFacts.HexValue(this.NextChar()));
-                }
-                else info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
-            }
-            else info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
-
-            return true;
-        }
-        // 识别3位十进制数字。
-        else if (SyntaxFacts.IsDecDigit(this.PeekChar()))
-        {
-            var uintValue = (uint)SyntaxFacts.HexValue(this.NextChar());
-
-            if (SyntaxFacts.IsDecDigit(this.PeekChar()))
-            {
-                uintValue = (uint)(uintValue * 10 + SyntaxFacts.HexValue(this.NextChar()));
-
-                if (SyntaxFacts.IsDecDigit(this.PeekChar()))
-                {
-                    uintValue = (uint)(uintValue * 10 + SyntaxFacts.HexValue(this.NextChar()));
-                }
-            }
-
-            if (uintValue > byte.MaxValue)
-                info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
-            else
-                byteValue = (byte)uintValue;
-
-            return true;
-        }
-        else
-            return false;
-    }
-
-    private static bool IsUtf8ByteSequenceValidAt(int index, byte byteValue)
-    {
-        if (index == 0)
-            return byteValue switch
-            {
-                <= 0b01111111 => true,
-                >= 0b11000000 and <= 0b11011111 => true,
-                >= 0b11100000 and <= 0b11101111 => true,
-                >= 0b11110000 and <= 0b11110111 => true,
-                _ => false
-            };
-        else
-            return byteValue is >= 0b10000000 and <= 0b10111111;
-    }
-
-    public char NextUnicodeEscape(out SyntaxDiagnosticInfo? info, out char surrogate)
+    public byte[] NextUnicodeEscape(out SyntaxDiagnosticInfo? info)
     {
         info = null;
 
         var start = this.Position;
 
         var c = this.NextChar();
-        surrogate = SlidingTextWindow.InvalidCharacter;
         Debug.Assert(c == '\\');
 
         c = this.NextChar();
@@ -545,7 +476,7 @@ internal sealed class SlidingTextWindow : IDisposable
         if (this.PeekChar() != '{') // 强制要求的左花括号。
         {
             info = this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
-            return SlidingTextWindow.InvalidCharacter;
+            return Array.Empty<byte>();
         }
         else
             this.AdvanceChar();
@@ -553,7 +484,7 @@ internal sealed class SlidingTextWindow : IDisposable
         if (!SyntaxFacts.IsHexDigit(this.PeekChar())) // 至少要有1位十六进制数字。
         {
             info = this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
-            return SlidingTextWindow.InvalidCharacter;
+            return Array.Empty<byte>();
         }
         else
             c = this.NextChar();
@@ -576,7 +507,7 @@ internal sealed class SlidingTextWindow : IDisposable
         if (this.PeekChar() != '}') // 强制要求的右花括号。
         {
             info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
-            return SlidingTextWindow.InvalidCharacter;
+            return Array.Empty<byte>();
         }
         else
             this.AdvanceChar();
@@ -584,30 +515,22 @@ internal sealed class SlidingTextWindow : IDisposable
         if (codepoint == uint.MaxValue)
         {
             info ??= this.CreateIllegalEscapeDiagnostic(start, ErrorCode.ERR_IllegalEscape);
-            return SlidingTextWindow.InvalidCharacter;
+            return Array.Empty<byte>();
         }
 
-        return SlidingTextWindow.GetCharsFromUtf32(codepoint, out surrogate);
+        return GetUtf8BytesFromUnicode((int)codepoint);
     }
 
-    internal static char GetCharsFromUtf32(uint codepoint, out char lowSurrogate)
-    {
-        if (codepoint < 0x00010000)
+    internal static byte[] GetUtf8BytesFromUnicode(int codepoint) =>
+        codepoint switch
         {
-            lowSurrogate = SlidingTextWindow.InvalidCharacter;
-            return (char)codepoint;
-        }
-        else if (codepoint > 0x0010FFFF)
-        {
-            lowSurrogate = SlidingTextWindow.InvalidCharacter;
-            return SlidingTextWindow.InvalidCharacter;
-        }
-        else
-        {
-            lowSurrogate = (char)((codepoint - 0x00010000) % 0x0400 + 0xDC00);
-            return (char)((codepoint - 0x00010000) / 0x0400 + 0xD800);
-        }
-    }
+            <= 0x7F => new byte[] { (byte)codepoint },
+            <= 0x7FF => new byte[] { (byte)(0xC0 | (0x1F & codepoint >> 6)), (byte)(0x80 | (0x3F & codepoint)) },
+            <= 0xFFFF => new byte[] { (byte)(0xE0 | (0xF & codepoint >> 12)), (byte)(0x80 | (0x3F & codepoint >> 6)), (byte)(0x80 | (0x3F & codepoint)) },
+            <= 0x1FFFFF => new byte[] { (byte)(0xF0 | (0x7 & codepoint >> 18)), (byte)(0x80 | (0x3F & codepoint >> 12)), (byte)(0x80 | (0x3F & codepoint >> 6)), (byte)(0x80 | (0x3F & codepoint)) },
+            <= 0x3FFFFFF => new byte[] { (byte)(0xF8 | (0x3 & codepoint >> 24)), (byte)(0x80 | (0x3F & codepoint >> 18)), (byte)(0x80 | (0x3F & codepoint >> 12)), (byte)(0x80 | (0x3F & codepoint >> 6)), (byte)(0x80 | (0x3F & codepoint)) },
+            _ => new byte[] { (byte)(0xFC | (0x1 & codepoint >> 30)), (byte)(0x80 | (0x3F & codepoint >> 24)), (byte)(0x80 | (0x3F & codepoint >> 18)), (byte)(0x80 | (0x3F & codepoint >> 12)), (byte)(0x80 | (0x3F & codepoint >> 6)), (byte)(0x80 | (0x3F & codepoint)) }
+        };
 
     private SyntaxDiagnosticInfo CreateIllegalEscapeDiagnostic(int start, ErrorCode code) =>
         new(

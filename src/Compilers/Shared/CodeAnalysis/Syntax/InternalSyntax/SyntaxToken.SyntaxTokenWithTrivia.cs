@@ -21,19 +21,19 @@ partial class SyntaxToken
         protected readonly GreenNode? _trailing;
 
         internal SyntaxTokenWithTrivia(SyntaxKind kind, GreenNode? leading, GreenNode? trailing) : base(kind) =>
-            SyntaxToken.InitializeWithTrivia(
+            InitializeWithTrivia(
                 this, ref this._leading, ref this._trailing,
                 leading, trailing
             );
 
         internal SyntaxTokenWithTrivia(SyntaxKind kind, GreenNode? leading, GreenNode? trailing, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations) : base(kind, diagnostics, annotations) =>
-            SyntaxToken.InitializeWithTrivia(
+            InitializeWithTrivia(
                 this, ref this._leading, ref this._trailing,
                 leading, trailing
             );
 
         internal SyntaxTokenWithTrivia(ObjectReader reader) : base(reader) =>
-            SyntaxToken.InitializeWithTrivia(
+            InitializeWithTrivia(
                 this, ref this._leading, ref this._trailing,
                 (GreenNode?)reader.ReadValue(),
                 (GreenNode?)reader.ReadValue()

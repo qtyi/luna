@@ -14,12 +14,14 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 using ThisParseOptions = LuaParseOptions;
 using ThisSyntaxNode = Lua.LuaSyntaxNode;
 using ThisInternalSyntaxNode = LuaSyntaxNode;
+using ThisInternalSyntaxVisitor<T> = LuaSyntaxVisitor<T>;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 using ThisParseOptions = MoonScriptParseOptions;
 using ThisSyntaxNode = MoonScript.MoonScriptSyntaxNode;
 using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
+using ThisInternalSyntaxVisitor<T> = MoonScriptSyntaxVisitor<T>;
 #endif
 
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
@@ -130,7 +132,7 @@ internal abstract partial class SyntaxParser : IDisposable
         if (this._isIncremental || allowModeReset) // 协调新旧节点。
         {
             this._firstBlender = new(lexer, oldTree, changes);
-            this._blendedTokens = SyntaxParser.s_blendedNodesPool.Allocate();
+            this._blendedTokens = s_blendedNodesPool.Allocate();
         }
         else // 均为新节点。
         {
@@ -152,8 +154,8 @@ internal abstract partial class SyntaxParser : IDisposable
     /// 若返回<see langword="true"/>时，<see cref="SyntaxParser._blendedTokens"/>不为<see langword="null"/>；
     /// 若返回<see langword="false"/>时，<see cref="SyntaxParser._lexedTokens"/>不为<see langword="null"/>。
     /// </remarks>
-    [MemberNotNullWhen(true, nameof(SyntaxParser._blendedTokens))]
-    [MemberNotNullWhen(false, nameof(SyntaxParser._lexedTokens))]
+    [MemberNotNullWhen(true, nameof(_blendedTokens))]
+    [MemberNotNullWhen(false, nameof(_lexedTokens))]
     protected bool IsBlending() => this._isIncremental || this._allowModeReset;
 
     /// <summary>
@@ -175,7 +177,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// <summary>
     /// 词法器预分析。
     /// </summary>
-    [MemberNotNull(nameof(SyntaxParser._lexedTokens))]
+    [MemberNotNull(nameof(_lexedTokens))]
     private void PreLex()
     {
         // 不应在这个方法内部处理取消标记。
@@ -195,7 +197,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// <summary>
     /// 获取当前的已协调节点。
     /// </summary>
-    [MemberNotNull(nameof(SyntaxParser._blendedTokens))]
+    [MemberNotNull(nameof(_blendedTokens))]
     protected ThisSyntaxNode? CurrentNode
     {
         get
@@ -218,7 +220,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// <summary>
     /// 读取当前的节点到<see cref="SyntaxParser._currentNode"/>。
     /// </summary>
-    [MemberNotNull(nameof(SyntaxParser._blendedTokens))]
+    [MemberNotNull(nameof(_blendedTokens))]
     private void ReadCurrentNode()
     {
         Debug.Assert(this.IsBlending());
@@ -237,7 +239,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// 语法解析器接受当前的语法节点，并返回其对应的绿树节点。
     /// </summary>
     /// <returns>接受的语法节点对应的绿树节点。</returns>
-    [MemberNotNull(nameof(SyntaxParser._blendedTokens))]
+    [MemberNotNull(nameof(_blendedTokens))]
     protected GreenNode? EatNode()
     {
         Debug.Assert(this.IsBlending());
@@ -265,7 +267,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// </summary>
     /// <typeparam name="T">要返回的绿树节点的类型。</typeparam>
     /// <returns>接受的语法节点对应的绿树节点。</returns>
-    [MemberNotNull(nameof(SyntaxParser._blendedTokens))]
+    [MemberNotNull(nameof(_blendedTokens))]
     protected T? EatNode<T>() where T : ThisInternalSyntaxNode => this.EatNode() as T;
 
     /// <summary>
@@ -317,7 +319,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// 添加指定标记。
     /// </summary>
     /// <param name="tokenResult">要添加的已协调节点。</param>
-    [MemberNotNull(nameof(SyntaxParser._blendedTokens))]
+    [MemberNotNull(nameof(_blendedTokens))]
     private void AddToken(in BlendedNode tokenResult)
     {
         Debug.Assert(tokenResult.Token is not null);
@@ -335,7 +337,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// 添加指定已词法分析的标记。
     /// </summary>
     /// <param name="token">要添加的已词法分析的标记。</param>
-    [MemberNotNull(nameof(SyntaxParser._lexedTokens))]
+    [MemberNotNull(nameof(_lexedTokens))]
     private void AddLexedToken(SyntaxToken token)
     {
         Debug.Assert(!this.IsBlending());
@@ -351,7 +353,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// <summary>
     /// 扩充已协调标记数组的容量。
     /// </summary>
-    [MemberNotNull(nameof(SyntaxParser._blendedTokens))]
+    [MemberNotNull(nameof(_blendedTokens))]
     private void AddTokenSlot()
     {
         Debug.Assert(this.IsBlending());
@@ -373,14 +375,14 @@ internal abstract partial class SyntaxParser : IDisposable
         {
             var old = this._blendedTokens;
             Array.Resize(ref this._blendedTokens, this._blendedTokens.Length * 2);
-            SyntaxParser.s_blendedNodesPool.ForgetTrackedObject(old, replacement: this._blendedTokens);
+            s_blendedNodesPool.ForgetTrackedObject(old, replacement: this._blendedTokens);
         }
     }
 
     /// <summary>
     /// 扩充已词法分析的标记数组的容量。
     /// </summary>
-    [MemberNotNull(nameof(SyntaxParser._lexedTokens))]
+    [MemberNotNull(nameof(_lexedTokens))]
     private void AddLexedTokenSlot()
     {
         Debug.Assert(!this.IsBlending());
@@ -594,7 +596,7 @@ internal abstract partial class SyntaxParser : IDisposable
     protected SyntaxToken EatTokenWithPrejudice(ErrorCode code, params object[] args)
     {
         var token = this.EatToken();
-        token = this.WithAdditionalDiagnostics(token, SyntaxParser.MakeError(token.GetLeadingTriviaWidth(), token.Width, code, args));
+        token = this.WithAdditionalDiagnostics(token, MakeError(token.GetLeadingTriviaWidth(), token.Width, code, args));
         return token;
     }
 
@@ -602,7 +604,7 @@ internal abstract partial class SyntaxParser : IDisposable
     /// 语法解析器接受当前的已词法分析的语法标记，转化为关键字语法标记并且返回。
     /// </summary>
     /// <returns>转化当前的已词法分析的语法标记为关键字语法标记并且返回。</returns>
-    protected SyntaxToken EatContextualToken() => SyntaxParser.ConvertToKeyword(this.EatToken());
+    protected SyntaxToken EatContextualToken() => ConvertToKeyword(this.EatToken());
 
     /// <summary>
     /// 语法解析器接受当前的已词法分析的语法标记，转化为关键字语法标记并且返回，这个语法标记的上下文种类必须符合指定语法部分种类。
@@ -748,7 +750,7 @@ internal abstract partial class SyntaxParser : IDisposable
     {
         // 不是缺失节点，直接添加附加诊断信息。
         if (!node.IsMissing)
-            return this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(node, code, args));
+            return this.WithAdditionalDiagnostics(node, MakeError(node, code, args));
 
         // 对指点范围添加诊断错误信息。
         int offset, width;
@@ -776,14 +778,14 @@ internal abstract partial class SyntaxParser : IDisposable
         else // 对缺失标记的文本添加。
             this.GetDiagnosticSpanForMissingToken(out offset, out width);
 
-        return this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(offset, width, code, args));
+        return this.WithAdditionalDiagnostics(node, MakeError(offset, width, code, args));
     }
 
     /// <param name="offset">文本范围的偏移量。</param>
     /// <param name="length">文本范围的长度。</param>
     /// <inheritdoc cref="SyntaxParser.AddError{TNode}(TNode, ErrorCode, object[])"/>
     protected TNode AddError<TNode>(TNode node, int offset, int length, ErrorCode code, params object[] args) where TNode : ThisInternalSyntaxNode =>
-        this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(offset, length, code, args));
+        this.WithAdditionalDiagnostics(node, MakeError(offset, length, code, args));
 
     /// <summary>
     /// 向指定根节点下的指定语法节点添加诊断错误信息。
@@ -795,7 +797,7 @@ internal abstract partial class SyntaxParser : IDisposable
     {
         // 查找偏移量。
         this.FindOffset(node, location, out var offset);
-        return this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(offset, location.Width, code, args));
+        return this.WithAdditionalDiagnostics(node, MakeError(offset, location.Width, code, args));
     }
 
     /// <summary>
@@ -807,16 +809,16 @@ internal abstract partial class SyntaxParser : IDisposable
     /// <returns>其第一个标记添加诊断错误信息后的<paramref name="node"/>。</returns>
     protected TNode AddErrorToFirstToken<TNode>(TNode node, ErrorCode code) where TNode : ThisInternalSyntaxNode
     {
-        SyntaxParser.GetOffsetAndWidthForFirstToken(node, out var offset, out var width);
-        return this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(offset, width, code));
+        GetOffsetAndWidthForFirstToken(node, out var offset, out var width);
+        return this.WithAdditionalDiagnostics(node, MakeError(offset, width, code));
     }
 
     /// <param name="args">诊断信息的参数。</param>
     /// <inheritdoc cref="AddErrorToFirstToken{TNode}(TNode, ErrorCode)"/>
     protected TNode AddErrorToFirstToken<TNode>(TNode node, ErrorCode code, params object[] args) where TNode : ThisInternalSyntaxNode
     {
-        SyntaxParser.GetOffsetAndWidthForFirstToken(node, out var offset, out var width);
-        return this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(offset, width, code, args));
+        GetOffsetAndWidthForFirstToken(node, out var offset, out var width);
+        return this.WithAdditionalDiagnostics(node, MakeError(offset, width, code, args));
     }
 
     /// <summary>
@@ -826,16 +828,16 @@ internal abstract partial class SyntaxParser : IDisposable
     /// <inheritdoc cref="AddErrorToFirstToken{TNode}(TNode, ErrorCode)"/>
     protected TNode AddErrorToLastToken<TNode>(TNode node, ErrorCode code) where TNode : ThisInternalSyntaxNode
     {
-        SyntaxParser.GetOffsetAndWidthForLastToken(node, out var offset, out var width);
-        return this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(offset, width, code));
+        GetOffsetAndWidthForLastToken(node, out var offset, out var width);
+        return this.WithAdditionalDiagnostics(node, MakeError(offset, width, code));
     }
 
     /// <inheritdoc cref="AddErrorToLastToken{TNode}(TNode, ErrorCode)"/>
     /// <inheritdoc cref="AddErrorToFirstToken{TNode}(TNode, ErrorCode, object[])"/>
     protected TNode AddErrorToLastToken<TNode>(TNode node, ErrorCode code, params object[] args) where TNode : ThisInternalSyntaxNode
     {
-        SyntaxParser.GetOffsetAndWidthForLastToken(node, out var offset, out var width);
-        return this.WithAdditionalDiagnostics(node, SyntaxParser.MakeError(offset, width, code, args));
+        GetOffsetAndWidthForLastToken(node, out var offset, out var width);
+        return this.WithAdditionalDiagnostics(node, MakeError(offset, width, code, args));
     }
 
     /// <summary>
@@ -1062,6 +1064,41 @@ internal abstract partial class SyntaxParser : IDisposable
         return target;
     }
 
+    protected void SkipTokens(
+        SyntaxListBuilder<SyntaxToken> builder,
+        Func<SyntaxToken, bool> predicate,
+        ThisInternalSyntaxVisitor<SyntaxToken>? visitor = null)
+    {
+        while (predicate(this.CurrentToken))
+        {
+            var token = this.EatToken();
+            builder.Add(visitor is null ? token : visitor.Visit(token));
+        }
+    }
+
+    protected void SkipTokensAndNodes(
+        SyntaxListBuilder<ThisInternalSyntaxNode> builder,
+        Func<SyntaxToken, bool> tokenPredicate,
+        Func<bool> nodePredicate,
+        Func<ThisInternalSyntaxNode> nodeProvider,
+        ThisInternalSyntaxVisitor<ThisInternalSyntaxNode>? visitor = null)
+    {
+        while (true)
+        {
+            if (nodePredicate())
+            {
+                var node = nodeProvider();
+                builder.Add(visitor is null ? node : visitor.Visit(node));
+            }
+            else if (tokenPredicate(this.CurrentToken))
+            {
+                var token = this.EatToken();
+                builder.Add(visitor is null ? token : visitor.Visit(token));
+            }
+            else break;
+        }
+    }
+
     /// <summary>
     /// 在指定根节点中查找指定语法节点的偏移量。
     /// </summary>
@@ -1196,11 +1233,11 @@ internal abstract partial class SyntaxParser : IDisposable
             if (blendedTokens.Length < 4096)
             {
                 Array.Clear(blendedTokens, 0, blendedTokens.Length);
-                SyntaxParser.s_blendedNodesPool.Free(blendedTokens);
+                s_blendedNodesPool.Free(blendedTokens);
             }
             else
             {
-                SyntaxParser.s_blendedNodesPool.ForgetTrackedObject(blendedTokens);
+                s_blendedNodesPool.ForgetTrackedObject(blendedTokens);
             }
         }
     }

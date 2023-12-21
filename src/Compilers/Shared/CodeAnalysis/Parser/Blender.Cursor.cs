@@ -74,7 +74,7 @@ internal partial struct Blender
                 for (int i = this._indexInParent + 1, n = siblings.Count; i < n; i++)
                 {
                     var sibling = siblings[i];
-                    if (Cursor.IsNonZeroWidthOrIsEndOfFile(sibling))
+                    if (IsNonZeroWidthOrIsEndOfFile(sibling))
                         return new(sibling, i);
                 }
 
@@ -93,7 +93,7 @@ internal partial struct Blender
         {
             var parent = this.CurrentNodeOrToken.Parent;
             Debug.Assert(parent is not null);
-            var index = Cursor.IndexOfNodeInParent(parent);
+            var index = IndexOfNodeInParent(parent);
             return new(parent, index);
         }
 
@@ -129,7 +129,7 @@ internal partial struct Blender
             {
                 // 首先快速检查当前节点的第一个子节点是否符合要求。
                 var child = ChildSyntaxList.ItemInternal(node, 0);
-                if (Cursor.IsNonZeroWidthOrIsEndOfFile(child))
+                if (IsNonZeroWidthOrIsEndOfFile(child))
                     return new(child, 0);
 
                 // 遍历所有子节点，查找符合要求的节点。
@@ -137,7 +137,7 @@ internal partial struct Blender
                 for (int i = 0, n = children.Count; i < n; i++)
                 {
                     child = children[i];
-                    if (Cursor.IsNonZeroWidthOrIsEndOfFile(child))
+                    if (IsNonZeroWidthOrIsEndOfFile(child))
                         return new(child, i);
                 }
             }

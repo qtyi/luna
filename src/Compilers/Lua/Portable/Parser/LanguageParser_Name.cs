@@ -93,7 +93,7 @@ partial class LanguageParser
 #else
     private
 #endif
-        IdentifierNameSyntax CreateMissingIdentifierName() => this._syntaxFactory.IdentifierName(LanguageParser.CreateMissingIdentifierToken());
+        IdentifierNameSyntax CreateMissingIdentifierName() => this._syntaxFactory.IdentifierName(CreateMissingIdentifierToken());
 
 #if TESTING
     internal

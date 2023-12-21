@@ -7,4 +7,6 @@ namespace Qtyi.CodeAnalysis.Lua;
 partial class MessageProvider
 {
     internal const string ErrorCodePrefix = "LUA";
+
+    private partial bool GetIsEnabledByDefault(ErrorCode code) => true;
 }

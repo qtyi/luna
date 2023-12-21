@@ -96,7 +96,7 @@ public sealed partial class
     /// </summary>
     /// <inheritdoc cref="Create(IEnumerable{ISourceGenerator}, IEnumerable{AdditionalText}?, ThisParseOptions?, AnalyzerConfigOptionsProvider?, GeneratorDriverOptions)"/>
     public static ThisGeneratorDriver Create(params ISourceGenerator[] generators) =>
-        ThisGeneratorDriver.Create(generators, additionalTexts: null);
+        Create(generators, additionalTexts: null);
 
     /// <summary>
     /// 使用指定的增量源生成器和默认的选项创建<see cref="ThisGeneratorDriver"/>的新实例。
@@ -104,7 +104,7 @@ public sealed partial class
     /// <param name="incrementalGenerators">用于创建生成器启动器的增量源生成器。</param>
     /// <inheritdoc cref="Create(IEnumerable{ISourceGenerator}, IEnumerable{AdditionalText}?, ThisParseOptions?, AnalyzerConfigOptionsProvider?, GeneratorDriverOptions)"/>
     public static ThisGeneratorDriver Create(params IIncrementalGenerator[] incrementalGenerators) =>
-        ThisGeneratorDriver.Create(incrementalGenerators.Select(GeneratorExtensions.AsSourceGenerator), additionalTexts: null);
+        Create(incrementalGenerators.Select(GeneratorExtensions.AsSourceGenerator), additionalTexts: null);
 
     /// <summary>
     /// 使用指定的源生成器和选项（未指定的为默认）创建<see cref="ThisGeneratorDriver"/>的新实例。
@@ -136,7 +136,7 @@ public sealed partial class
     /// <param name="cancellationToken">取消操作的标记。</param>
     /// <returns>解析后的与<paramref name="input"/>对应的语法树。</returns>
     internal override SyntaxTree ParseGeneratedSourceText(GeneratedSourceText input, string fileName, CancellationToken cancellationToken) =>
-        ThisSyntaxTree.ParseTextLazy(input.Text, (ThisParseOptions)base._state.ParseOptions, fileName);
+        ThisSyntaxTree.ParseTextLazy(input.Text, (ThisParseOptions)_state.ParseOptions, fileName);
 
     /// <summary>
     /// 使用已有的生成器启动器状态创建生成器启动器的新实例。

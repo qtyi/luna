@@ -19,7 +19,7 @@ internal sealed partial class MessageProvider : IObjectWritable
 
     static MessageProvider()
     {
-        ObjectBinder.RegisterTypeReader(typeof(MessageProvider), r => MessageProvider.Instance);
+        ObjectBinder.RegisterTypeReader(typeof(MessageProvider), r => Instance);
     }
 
     private MessageProvider() { }

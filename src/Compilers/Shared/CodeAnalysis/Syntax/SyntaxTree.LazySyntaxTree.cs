@@ -83,7 +83,7 @@ public partial class
 
         public override SyntaxTree WithRootAndOptions(SyntaxNode root, ParseOptions options)
         {
-            if (object.ReferenceEquals(this._lazyRoot, root) && object.ReferenceEquals(this._options, options)) return this;
+            if (ReferenceEquals(this._lazyRoot, root) && ReferenceEquals(this._options, options)) return this;
 
             return new ParsedSyntaxTree(
                 text: null,

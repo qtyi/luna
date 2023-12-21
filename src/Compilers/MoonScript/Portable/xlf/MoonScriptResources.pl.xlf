@@ -12,6 +12,11 @@
         <target state="new">Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_BadDirectivePlacement">
+        <source>Preprocessor directives must appear as the first non-whitespace character on a line.</source>
+        <target state="new">Preprocessor directives must appear as the first non-whitespace character on a line.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_CantReadConfigFile">
         <source>Cannot read config file '{0}' -- '{1}'</source>
         <target state="new">Cannot read config file '{0}' -- '{1}'</target>

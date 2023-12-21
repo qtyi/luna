@@ -1,32 +1,38 @@
-<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+﻿<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(TestResourcesTargetFrameworks)</TargetFrameworks>
-    <RootNamespace></RootNamespace>
-    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>
+      <!-- Remains empty -->
+    </RootNamespace>
+    <OutputType>Library</OutputType>
     <IsShipping>false</IsShipping>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingAnalyzer.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingGenerator.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingSuppressor.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\ResourceLoader.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestKeys.cs" />
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestResources.cs" />
+  <ItemGroup Label="CompilerVisibleItemMetadatas">
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="GeneratorName" />
+  </ItemGroup>
+
+  <Import Project="Microsoft.CodeAnalysis.Compiler.Test.Resources.targets" />
+
+  <ItemGroup Label="TestFiles">
+    <LuaTestFiles Include="$(LuaLuaRepositoryDirectory)testes\*.lua" />
+    <MoonScriptTestFiles Include="$(LeafoMoonscriptRepositoryDirectory)spec\inputs\*.moon" />
+    <MoonScriptTestFiles Include="$(LeafoMoonscriptRepositoryDirectory)spec\outputs\*.lua" />
+    
+    <EmbeddedResource Include="@(LuaTestFiles)" Link="LuaTestFiles\%(FileName)%(Extension)" />
+    <EmbeddedResource Include="@(MoonScriptTestFiles)" Link="MoonScriptTestFiles\%(FileName)%(Extension)" />
+    
+    <AdditionalFiles Include="@(LuaTestFiles)" Link="LuaTestFiles\%(FileName)%(Extension)" GeneratorName="LuaTestFilesGenerator" />
+    <AdditionalFiles Include="@(MoonScriptTestFiles)" Link="MoonScriptTestFiles\%(FileName)%(Extension)" GeneratorName="MoonScriptTestFilesGenerator" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\nativeCOFFResources.obj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <ProjectReference Include="..\..\..\..\Tools\Source\CompilerGeneratorTools\src\CodeAnalysisCompilerTestResourcesSourceGenerators\CodeAnalysisCompilerTestResourcesSourceGenerators.csproj">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

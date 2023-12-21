@@ -16,6 +16,7 @@ internal enum LexerMode
 
     Syntax = 0x0001,
     DebuggerSyntax = 0x0002,
+    Directive = 0x0004,
 
     MaskLexMode = 0xFFFF
 }
@@ -38,10 +39,10 @@ partial class Lexer
                 return this.QuickScanSyntaxToken() ?? this.LexSyntaxToken();
         }
 
-        switch (Lexer.ModeOf(this._mode))
+        switch (ModeOf(this._mode))
         {
             default:
-                throw ExceptionUtilities.UnexpectedValue(Lexer.ModeOf(this._mode));
+                throw ExceptionUtilities.UnexpectedValue(ModeOf(this._mode));
         }
     }
 
@@ -556,6 +557,7 @@ partial class Lexer
         bool isTrailing,
         ref SyntaxListBuilder triviaList)
     {
+        var onlyWhitespaceOnLine = !isTrailing;
         while (true)
         {
             this.Start();
@@ -588,9 +590,18 @@ partial class Lexer
                     {
                         this.TextWindow.AdvanceChar(2);
                         this.AddTrivia(this.ScanComment(), ref triviaList);
+                        onlyWhitespaceOnLine = false;
                         continue;
                     }
                     else goto default;
+
+                case '#':
+                    if (this._allowPreprocessorDirectives && !afterFirstToken)
+                    {
+                        this.LexDirectiveTrivia(afterFirstToken, isTrailing || !onlyWhitespaceOnLine, ref triviaList);
+                        continue;
+                    }
+                    goto default;
 
                 default:
                     {
@@ -608,8 +619,11 @@ partial class Lexer
                                 // 当分析的是后方语法琐碎内容时，分析成功后直接退出。
                                 return;
                             else
+                            {
+                                onlyWhitespaceOnLine = true;
                                 // 否则进行下一个语法琐碎内容的分析。
                                 continue;
+                            }
                         }
                     }
 
@@ -617,5 +631,112 @@ partial class Lexer
                     return;
             }
         }
+    }
+
+    private partial bool ScanDirectiveToken(ref TokenInfo info)
+    {
+        var c = this.TextWindow.PeekChar();
+        switch (c)
+        {
+            case SlidingTextWindow.InvalidCharacter:
+                if (TextWindow.IsReallyAtEnd())
+                {
+                    info.Kind = SyntaxKind.EndOfDirectiveToken;
+                    break;
+                }
+                else goto default;
+            case '\n':
+            case '\r':
+                info.Kind = SyntaxKind.EndOfDirectiveToken;
+                break;
+
+            case '#':
+                this.TextWindow.AdvanceChar();
+                if (this.TextWindow.PeekChar() == '!')
+                {
+                    this.TextWindow.AdvanceChar();
+                    info.Kind = SyntaxKind.HashExclamationToken;
+                }
+                else
+                    info.Kind = SyntaxKind.HashToken;
+                break;
+
+            default:
+                ScanToEndOfLine(trimEnd: false);
+                info.Kind = SyntaxKind.None;
+                info.Text = this.TextWindow.GetText(intern: true);
+                break;
+
+        }
+
+        return info.Kind != SyntaxKind.None;
+    }
+
+    private partial MoonScriptSyntaxNode? LexDirectiveTrivia()
+    {
+        this.Start();
+        var c = this.TextWindow.PeekChar();
+        if (c == ' ')
+            return this.ScanWhiteSpace();
+        else if (c > 127)
+        {
+            if (SyntaxFacts.IsWhiteSpace(c))
+                c = ' ';
+            else if (SyntaxFacts.IsNewLine(c))
+                c = '\n';
+        }
+
+        switch (c)
+        {
+            case ' ':
+            case '\t':
+            case '\v':
+            case '\f':
+            case '\u001A':
+                return this.ScanWhiteSpace();
+
+            case '-':
+                if (this.TextWindow.PeekChar(1) == '-')
+                {
+                    this.TextWindow.AdvanceChar(2);
+                    return this.ScanComment();
+                }
+                else goto default;
+
+            default:
+                {
+                    var endOfLine = this.ScanEndOfLine();
+                    if (endOfLine is not null)
+                    {
+                        /* 为了适应MoonScript根据缩进来表示块体，在识别后方琐碎内容时，连续的语法琐碎内容应在行尾换行后截断。
+                         * 并且将下一行起始的连续空白字符作为下一个语法标记的前方语法琐碎内容；
+                         * 但是当识别前方琐碎内容时，遇到多个空行（行中没有或只有空白字符）时，不应截断。
+                         * 应将所有空白字符和换行字符保存在同一个前方语法琐碎内容中，用于后续分析。
+                         */
+                        return endOfLine;
+                    }
+                }
+
+                // 下一个字符不是空白字符，终止扫描。
+                return null;
+        }
+    }
+
+    private partial void LexDirectiveTrivia(
+        bool afterFirstToken,
+        bool afterNonWhitespaceOnLine,
+        ref SyntaxListBuilder triviaList)
+    {
+        if (SyntaxFacts.IsWhiteSpace(this.TextWindow.PeekChar()))
+        {
+            this.Start();
+            this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
+        }
+
+        var saveMode = this._mode;
+        using var parser = new DirectiveParser(this);
+        var directive = parser.ParseDirective(afterFirstToken, afterNonWhitespaceOnLine);
+        this.AddTrivia(directive, ref triviaList);
+        this._mode = saveMode;
     }
 }

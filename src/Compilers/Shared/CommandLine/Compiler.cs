@@ -61,7 +61,7 @@ internal sealed class
     {
         FatalError.Handler = FailFast.Handler;
 
-        var responseFile = Path.Combine(buildPaths.ClientDirectory, ThisCompiler.ResponseFileName);
+        var responseFile = Path.Combine(buildPaths.ClientDirectory, ResponseFileName);
         var compiler = new Thisc(responseFile, buildPaths, args, analyzerLoader);
         return ConsoleUtil.RunWithUtf8Output(compiler.Arguments.Utf8Output, textWriter, tw => compiler.Run(tw));
     }

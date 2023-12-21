@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <SimulatorsSolutionDir Condition="'$(SimulatorsSolutionDir)' == ''">$(MSBuildThisFileDirectory)</SimulatorsSolutionDir>
+  </PropertyGroup>
+
+  <ItemGroup Label="SimulatorFrameworkEssential">
+    <ProjectReference Include="$(SimulatorsSolutionDir)Luna.Compilers.Simulators\Luna.Compilers.Simulators.csproj" />
+    <ProjectReference Include="$(SimulatorsSolutionDir)Luna.Compilers.Simulators.Tasks\Luna.Compilers.Simulators.Tasks.csproj" Condition="'$(ReferenceSimulatorsProjects)' == 'true'"/>
+  </ItemGroup>
+
+  <!-- 在下方ItemGroup中添加所有现有的模拟器项目。 -->
+  <ItemGroup Label="SimulatorsProjects" Condition="'$(ReferenceSimulatorsProjects)' == 'true'">
+    <ProjectReference Include="$(SimulatorsSolutionDir)LunaSimulators\LunaSimulators.csproj" ContainsSimulators="true" />
+    <ProjectReference Include="$(SimulatorsSolutionDir)RoslynSimulators\RoslynSimulators.csproj" ContainsSimulators="true" />
+  </ItemGroup>
+
+</Project>

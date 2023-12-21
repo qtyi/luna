@@ -2,19 +2,26 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using System.Globalization;
 using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
+
+using ThisDiagnostic = LuaDiagnostic;
+using ThisDiagnosticInfo = LuaDiagnosticInfo;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
+
+using ThisDiagnostic = MoonScriptDiagnostic;
+using ThisDiagnosticInfo = MoonScriptDiagnosticInfo;
 #endif
 
 #warning 未实现。
 partial class MessageProvider : CommonMessageProvider
 {
-    public override string CodePrefix => MessageProvider.ErrorCodePrefix;
+    public override string CodePrefix => ErrorCodePrefix;
 
     public override Type ErrorCodeType => typeof(ErrorCode);
 
@@ -154,25 +161,17 @@ partial class MessageProvider : CommonMessageProvider
 
     public override int ERR_BadAssemblyName => throw new NotImplementedException();
 
-    public override Diagnostic CreateDiagnostic(DiagnosticInfo info)
-    {
-        throw new NotImplementedException();
-    }
+    public override Diagnostic CreateDiagnostic(DiagnosticInfo info) => new ThisDiagnostic(info, Location.None);
 
     public override Diagnostic CreateDiagnostic(int code, Location location, params object[] args)
     {
-        throw new NotImplementedException();
+        var info = new ThisDiagnosticInfo((ErrorCode)code, args, ImmutableArray<Symbol>.Empty, ImmutableArray<Location>.Empty);
+        return new ThisDiagnostic(info, location);
     }
 
-    public override string GetCategory(int code)
-    {
-        throw new NotImplementedException();
-    }
+    public override string GetCategory(int code) => ErrorFacts.GetCategory((ErrorCode)code);
 
-    public override LocalizableString GetDescription(int code)
-    {
-        throw new NotImplementedException();
-    }
+    public override LocalizableString GetDescription(int code) => ErrorFacts.GetDescription((ErrorCode)code);
 
     public override ReportDiagnostic GetDiagnosticReport(DiagnosticInfo diagnosticInfo, CompilationOptions options)
     {
@@ -184,45 +183,26 @@ partial class MessageProvider : CommonMessageProvider
         throw new NotImplementedException();
     }
 
-    public override string GetHelpLink(int code)
-    {
-        throw new NotImplementedException();
-    }
+    public override string GetHelpLink(int code) => ErrorFacts.GetHelpLink((ErrorCode)code);
 
-    public override bool GetIsEnabledByDefault(int code)
-    {
-        throw new NotImplementedException();
-    }
+    public override bool GetIsEnabledByDefault(int code) => GetIsEnabledByDefault((ErrorCode)code);
 
-    public override LocalizableString GetMessageFormat(int code)
-    {
-        throw new NotImplementedException();
-    }
+    private partial bool GetIsEnabledByDefault(ErrorCode code);
 
-    public override string GetMessagePrefix(string id, DiagnosticSeverity severity, bool isWarningAsError, CultureInfo? culture)
-    {
-        throw new NotImplementedException();
-    }
+    public override LocalizableString GetMessageFormat(int code) => ErrorFacts.GetMessageFormat((ErrorCode)code);
 
-    public override DiagnosticSeverity GetSeverity(int code)
-    {
-        throw new NotImplementedException();
-    }
+    public override string GetMessagePrefix(string id, DiagnosticSeverity severity, bool isWarningAsError, CultureInfo? culture) =>
+        string.Format(culture, "{0} {1}",
+            severity == DiagnosticSeverity.Error || isWarningAsError ? "error" : "warning",
+            id);
 
-    public override LocalizableString GetTitle(int code)
-    {
-        throw new NotImplementedException();
-    }
+    public override DiagnosticSeverity GetSeverity(int code) => ErrorFacts.GetSeverity((ErrorCode)code);
 
-    public override int GetWarningLevel(int code)
-    {
-        throw new NotImplementedException();
-    }
+    public override LocalizableString GetTitle(int code) => ErrorFacts.GetTitle((ErrorCode)code);
 
-    public override string LoadMessage(int code, CultureInfo? language)
-    {
-        throw new NotImplementedException();
-    }
+    public override int GetWarningLevel(int code) => ErrorFacts.GetWarningLevel((ErrorCode)code);
+
+    public override string LoadMessage(int code, CultureInfo? language) => ErrorFacts.GetMessage((ErrorCode)code, language);
 
     public override void ReportDuplicateMetadataReferenceStrong(DiagnosticBag diagnostics, Location location, MetadataReference reference, AssemblyIdentity identity, MetadataReference equivalentReference, AssemblyIdentity equivalentIdentity)
     {

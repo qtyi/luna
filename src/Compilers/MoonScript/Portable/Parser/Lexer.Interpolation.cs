@@ -222,7 +222,7 @@ partial class Lexer
                 else if (c == SlidingTextWindow.InvalidCharacter && this._lexer.TextWindow.IsReallyAtEnd())
                 {
                     Debug.Assert(this._lexer.TextWindow.Width > 0);
-                    this.Error = AbstractLexer.MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
+                    this.Error = MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
 
                     if (this._lexer._builder.Length > 0)
                         spanBuilder.Add(this._lexer._builder.ToString());
@@ -338,7 +338,7 @@ partial class Lexer
                     // 直到文件结尾也未能平衡花括号或查看到右花括号，则产生错误。
                     case SyntaxKind.EndOfFileToken:
                         {
-                            this.Error = AbstractLexer.MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
+                            this.Error = MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
 
                             endToken = SyntaxFactory.MissingToken(SyntaxKind.InterpolationEndToken);
                             endRange = this._lexer.TextWindow.Position..(this._lexer.TextWindow.Position - 1);

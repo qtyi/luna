@@ -176,12 +176,12 @@ public sealed partial class
     public sealed override bool Equals(object? obj) => this.Equals(obj as ThisParseOptions);
     public bool Equals(ThisParseOptions? other)
     {
-        if (object.ReferenceEquals(this, other)) return true;
-        else if (!base.EqualsHelper(other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        else if (!EqualsHelper(other)) return false;
         else return this.SpecifiedLanguageVersion == other.SpecifiedLanguageVersion;
     }
 
     public override int GetHashCode() =>
-        Hash.Combine(base.GetHashCodeHelper(),
+        Hash.Combine(GetHashCodeHelper(),
             Hash.Combine((int)this.SpecifiedLanguageVersion, 0));
 }

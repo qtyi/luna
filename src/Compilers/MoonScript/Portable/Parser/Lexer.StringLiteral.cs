@@ -111,7 +111,7 @@ partial class Lexer
                     minIndent = Math.Min(minIndent, span.Sum(SyntaxFacts.WhiteSpaceIndent));
                 }
 
-                Lexer.TrimIndent(spanBuilder, minIndent);
+                TrimIndent(spanBuilder, minIndent);
 
                 info.InnerIndent = minIndent;
             }

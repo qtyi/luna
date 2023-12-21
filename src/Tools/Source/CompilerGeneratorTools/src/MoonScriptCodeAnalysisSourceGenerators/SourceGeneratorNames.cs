@@ -9,5 +9,5 @@ partial class LanguageNames
     /// <summary>
     /// The common name used for this language.
     /// </summary>
-    public const string This = LanguageNames.MoonScript;
+    public const string This = MoonScript;
 }

@@ -27,7 +27,7 @@ internal static partial class SyntaxEquivalence
 
         if (before is null || after is null) return false;
 
-        return SyntaxEquivalence.AreEquivalent(before.GetRoot(), after.GetRoot(), ignoreChildNode, topLevel);
+        return AreEquivalent(before.GetRoot(), after.GetRoot(), ignoreChildNode, topLevel);
     }
 
     public static bool AreEquivalent(ThisSyntaxNode? before, ThisSyntaxNode? after, Func<SyntaxKind, bool>? ignoreChildNode, bool topLevel)
@@ -36,11 +36,11 @@ internal static partial class SyntaxEquivalence
 
         if (before is null || after is null) return before == after;
 
-        return SyntaxEquivalence.AreEquivalentRecursive(before.Green, after.Green, ignoreChildNode, topLevel);
+        return AreEquivalentRecursive(before.Green, after.Green, ignoreChildNode, topLevel);
     }
 
     public static bool AreEquivalent(SyntaxTokenList before, SyntaxTokenList after) =>
-        SyntaxEquivalence.AreEquivalentRecursive(before.Node, after.Node, ignoreChildNode: null, topLevel: false);
+        AreEquivalentRecursive(before.Node, after.Node, ignoreChildNode: null, topLevel: false);
 
     public static bool AreEquivalent<TNode>(SyntaxList<TNode> before, SyntaxList<TNode> after, Func<SyntaxKind, bool>? ignoreChildNode, bool topLevel)
         where TNode : ThisSyntaxNode
@@ -49,7 +49,7 @@ internal static partial class SyntaxEquivalence
 
         if (before.Node is null || after.Node is null) return before.Node == after.Node;
 
-        return SyntaxEquivalence.AreEquivalentRecursive(before.Node.Green, after.Node.Green, ignoreChildNode, topLevel);
+        return AreEquivalentRecursive(before.Node.Green, after.Node.Green, ignoreChildNode, topLevel);
     }
 
     public static bool AreEquivalent<TNode>(SeparatedSyntaxList<TNode> before, SeparatedSyntaxList<TNode> after, Func<SyntaxKind, bool>? ignoreChildNode, bool topLevel)
@@ -59,14 +59,14 @@ internal static partial class SyntaxEquivalence
 
         if (before.Node is null || after.Node is null) return before.Node == after.Node;
 
-        return SyntaxEquivalence.AreEquivalentRecursive(before.Node.Green, after.Node.Green, ignoreChildNode, topLevel);
+        return AreEquivalentRecursive(before.Node.Green, after.Node.Green, ignoreChildNode, topLevel);
     }
 
     public static bool AreEquivalent(SyntaxToken before, SyntaxToken after)
     {
         if (before.RawKind != after.RawKind) return false;
 
-        return SyntaxEquivalence.AreTokensEquivalent(before.Node, after.Node, ignoreChildNode: null);
+        return AreTokensEquivalent(before.Node, after.Node, ignoreChildNode: null);
     }
 
     private static bool AreTokensEquivalent(GreenNode? before, GreenNode? after, Func<SyntaxKind, bool>? ignoreChildNode)
@@ -77,7 +77,7 @@ internal static partial class SyntaxEquivalence
 
         if (before.IsMissing != after.IsMissing) return false;
 
-        return SyntaxEquivalence.AreTokensEquivalentCore(before, after, (SyntaxKind)before.RawKind);
+        return AreTokensEquivalentCore(before, after, (SyntaxKind)before.RawKind);
     }
 
     private static partial bool AreTokensEquivalentCore(GreenNode before, GreenNode after, SyntaxKind kind);
@@ -93,11 +93,11 @@ internal static partial class SyntaxEquivalence
         if (before.IsToken)
         {
             Debug.Assert(after.IsToken);
-            return SyntaxEquivalence.AreTokensEquivalent(before, after, ignoreChildNode);
+            return AreTokensEquivalent(before, after, ignoreChildNode);
         }
 
         var topLevelEquivalence = false;
-        if (topLevel && SyntaxEquivalence.TryAreTopLevelEquivalent(before, after, (SyntaxKind)before.RawKind, ref ignoreChildNode, out topLevelEquivalence))
+        if (topLevel && TryAreTopLevelEquivalent(before, after, (SyntaxKind)before.RawKind, ref ignoreChildNode, out topLevelEquivalence))
             return topLevelEquivalence;
 
         if (ignoreChildNode is not null) // 选择性忽略子节点。
@@ -134,7 +134,7 @@ internal static partial class SyntaxEquivalence
                     // 若任意一边有子节点剩余，则不相等。
                     return child1 == child2;
 
-                if (!SyntaxEquivalence.AreEquivalentRecursive(child1, child2, ignoreChildNode, topLevel))
+                if (!AreEquivalentRecursive(child1, child2, ignoreChildNode, topLevel))
                     return false;
             }
         }
@@ -148,7 +148,7 @@ internal static partial class SyntaxEquivalence
                 var child1 = before.GetSlot(i);
                 var child2 = after.GetSlot(i);
 
-                if (!SyntaxEquivalence.AreEquivalentRecursive(child1, child2, ignoreChildNode, topLevel))
+                if (!AreEquivalentRecursive(child1, child2, ignoreChildNode, topLevel))
                     return false;
             }
 

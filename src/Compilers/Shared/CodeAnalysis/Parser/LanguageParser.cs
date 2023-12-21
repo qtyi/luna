@@ -12,15 +12,13 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
 using ThisSyntaxNode = Lua.LuaSyntaxNode;
 using ThisInternalSyntaxNode = LuaSyntaxNode;
-using ThisInternalSyntaxVisitor_SyntaxToken = LuaSyntaxVisitor<SyntaxToken>;
-using ThisInternalSyntaxVisitor_SyntaxNode = LuaSyntaxVisitor<LuaSyntaxNode>;
+using ThisInternalSyntaxVisitor<T> = LuaSyntaxVisitor<T>;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 using ThisSyntaxNode = MoonScript.MoonScriptSyntaxNode;
 using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
-using ThisInternalSyntaxVisitor_SyntaxToken = MoonScriptSyntaxVisitor<SyntaxToken>;
-using ThisInternalSyntaxVisitor_SyntaxNode = MoonScriptSyntaxVisitor<MoonScriptSyntaxNode>;
+using ThisInternalSyntaxVisitor<T> = MoonScriptSyntaxVisitor<T>;
 #endif
 
 internal partial class LanguageParser : SyntaxParser
@@ -57,10 +55,10 @@ internal partial class LanguageParser : SyntaxParser
     {
         get
         {
-            if (!base.IsIncremental) return false;
+            if (!IsIncremental) return false;
 
             var node = this.CurrentNode;
-            return node is not null && LanguageParser.MatchesFactoryContext(node.Green, this._syntaxFactoryContext);
+            return node is not null && MatchesFactoryContext(node.Green, this._syntaxFactoryContext);
         }
     }
 
@@ -75,7 +73,7 @@ internal partial class LanguageParser : SyntaxParser
     {
         if (this.CurrentTokenKind == SyntaxKind.EndOfFileToken) return true;
 
-        for (var i = 1; i < LanguageParser.LastTerminatorState; i <<= 1)
+        for (var i = 1; i < LastTerminatorState; i <<= 1)
         {
             var state = (TerminatorState)i;
             if (IsTerminalCore(state)) return true;
@@ -129,40 +127,22 @@ internal partial class LanguageParser : SyntaxParser
     #endregion
 
     #region SkipTokensAndNodes
-    private GreenNode? SkipTokens(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor_SyntaxToken? visitor = null)
+    private GreenNode? SkipTokens(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor<SyntaxToken>? visitor = null)
     {
         if (predicate(this.CurrentToken))
         {
             var builder = this._pool.Allocate<SyntaxToken>();
-            do
-            {
-                var token = this.EatToken();
-                builder.Add(visitor is null ? token : visitor.Visit(token));
-            }
-            while (predicate(this.CurrentToken));
+            this.SkipTokens(builder, predicate, visitor);
             return this._pool.ToListAndFree(builder).Node;
         }
 
         return null;
     }
 
-    private GreenNode? SkipTokensAndExpressions(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor_SyntaxNode? visitor = null)
+    private GreenNode? SkipTokensAndExpressions(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor<ThisInternalSyntaxNode>? visitor = null)
     {
         var builder = this._pool.Allocate<ThisInternalSyntaxNode>();
-        while (true)
-        {
-            if (this.IsPossibleExpression())
-            {
-                var expr = this.ParseExpressionCore();
-                builder.Add(visitor is null ? expr : visitor.Visit(expr));
-            }
-            else if (predicate(this.CurrentToken))
-            {
-                var token = this.EatToken();
-                builder.Add(visitor is null ? token : visitor.Visit(token));
-            }
-            else break;
-        }
+        this.SkipTokensAndNodes(builder, predicate, this.IsPossibleExpression, this.ParseExpressionCore, visitor);
 
         if (builder.Count == 0)
         {
@@ -177,23 +157,10 @@ internal partial class LanguageParser : SyntaxParser
 
     private partial ExpressionSyntax ParseExpressionCore();
 
-    private GreenNode? SkipTokensAndStatements(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor_SyntaxNode? visitor = null)
+    private GreenNode? SkipTokensAndStatements(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor<ThisInternalSyntaxNode>? visitor = null)
     {
         var builder = this._pool.Allocate<ThisInternalSyntaxNode>();
-        while (true)
-        {
-            if (this.IsPossibleStatement())
-            {
-                var stat = this.ParseStatement();
-                builder.Add(visitor is null ? stat : visitor.Visit(stat));
-            }
-            else if (predicate(this.CurrentToken))
-            {
-                var token = this.EatToken();
-                builder.Add(visitor is null ? token : visitor.Visit(token));
-            }
-            else break;
-        }
+        this.SkipTokensAndNodes(builder, predicate, this.IsPossibleStatement, this.ParseStatement, visitor);
 
         if (builder.Count == 0)
         {

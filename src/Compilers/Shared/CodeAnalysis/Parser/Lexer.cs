@@ -50,6 +50,8 @@ internal partial class Lexer : AbstractLexer
     /// <summary>产生的坏标记的累计数量。</summary>
     private int _badTokenCount;
 
+    private readonly bool _allowPreprocessorDirectives;
+
     /// <summary>
     /// 获取与解析相关的选项。
     /// </summary>
@@ -62,15 +64,17 @@ internal partial class Lexer : AbstractLexer
     /// 创建词法分析器的新实例。
     /// </summary>
     /// <param name="options">与解析相关的选项。</param>
+    /// <param name="allowPreprocessorDirectives"></param>
     /// <inheritdoc/>
-    public Lexer(SourceText text, ThisParseOptions options) : base(text)
+    public Lexer(SourceText text, ThisParseOptions options, bool allowPreprocessorDirectives = true) : base(text)
     {
         this._options = options;
         this._builder = new();
         this._utf8Builder = ArrayBuilder<byte>.GetInstance();
-        this._identifierBuffer = new char[Lexer.IdentifierBufferInitialCapacity];
+        this._identifierBuffer = new char[IdentifierBufferInitialCapacity];
         this._cache = new();
         this._createQuickTokenFunction = this.CreateQuickToken;
+        this._allowPreprocessorDirectives = allowPreprocessorDirectives;
     }
 
     /// <inheritdoc/>
@@ -88,7 +92,7 @@ internal partial class Lexer : AbstractLexer
             trivia = trivia.WithDiagnosticsGreen(this.GetErrors(leadingTriviaWidth: 0));
 
         if (list is null)
-            list = new(Lexer.TriviaListInitialCapacity);
+            list = new(TriviaListInitialCapacity);
 
         list.Add(trivia);
     }
@@ -111,7 +115,7 @@ internal partial class Lexer : AbstractLexer
     /// </summary>
     /// <param name="mode">要与词法分析器的当前模式的枚举值中的模式部分相比较的词法分析器模式枚举值。</param>
     /// <returns>若相等，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
-    private bool ModeIs(LexerMode mode) => Lexer.ModeOf(this._mode) == mode;
+    private bool ModeIs(LexerMode mode) => ModeOf(this._mode) == mode;
 
     /// <summary>
     /// 使用指定的词法分析器模式分析一个语法标记，并将它调整为分析后的词法分析器的当前模式。
@@ -174,7 +178,7 @@ internal partial class Lexer : AbstractLexer
         TokenInfo tokenInfo = default;
         this.Start();
         this.ScanSyntaxToken(ref tokenInfo);
-        var errors = this.GetErrors(Lexer.GetFullWidth(leading));
+        var errors = this.GetErrors(GetFullWidth(leading));
 
         // 分析后方语法琐碎内容。
         this.LexSyntaxTrailingTriviaCore();
@@ -232,6 +236,63 @@ internal partial class Lexer : AbstractLexer
             triviaList: ref this._trailingTriviaCache);
     }
 
+    private SyntaxToken LexDirectiveToken()
+    {
+        this.Start();
+        TokenInfo info = default;
+        this.ScanDirectiveToken(ref info);
+        var trailing = LexDirectiveTrailingTrivia(info.Kind == SyntaxKind.EndOfDirectiveToken);
+        return Create(in info, null, trailing, this.GetErrors(0));
+    }
+
+    private partial bool ScanDirectiveToken(ref TokenInfo info);
+
+    private SyntaxListBuilder? LexDirectiveTrailingTrivia(bool includeEndOfLine)
+    {
+        SyntaxListBuilder? triviaList = null;
+        while (true)
+        {
+            var position = TextWindow.Position;
+            var trivia = LexDirectiveTrivia();
+            if (trivia is null)
+                break;
+            else if (trivia.Kind == SyntaxKind.EndOfLineTrivia)
+            {
+                if (includeEndOfLine)
+                    this.AddTrivia(trivia, ref triviaList);
+                else
+                    this.TextWindow.Reset(position);
+
+                break;
+            }
+            else
+                this.AddTrivia(trivia, ref triviaList);
+        }
+        return triviaList;
+    }
+
+    private partial ThisInternalSyntaxNode? LexDirectiveTrivia();
+
+    private partial void LexDirectiveTrivia(
+        bool afterFirstToken,
+        bool afterNonWhitespaceOnLine,
+        ref SyntaxListBuilder triviaList);
+
+    public SyntaxToken LexEndOfDirectiveWithOptionalPreprocessingMessage()
+    {
+        var builder = PooledStringBuilder.GetInstance();
+        // Skip the rest of the line until we hit a EOL or EOF.  This follows the PP_Message portion of the specification.
+        this.ScanToEndOfLine(builder.Builder, trimEnd: false);
+
+        var leading = SyntaxFactory.PreprocessingMessage(builder.ToStringAndFree());
+
+        // now try to consume the EOL if there.
+        var trailing = this.LexDirectiveTrailingTrivia(includeEndOfLine: true)?.ToListNode();
+        var endOfDirective = SyntaxFactory.Token(leading, SyntaxKind.EndOfDirectiveToken, trailing);
+
+        return endOfDirective;
+    }
+
     /// <summary>
     /// 创建一个语法标记。
     /// </summary>
@@ -279,11 +340,14 @@ internal partial class Lexer : AbstractLexer
     /// <param name="additionalBytes">在后方追加的字节序列。</param>
     private void FlushToUtf8Builder(params byte[] additionalBytes)
     {
-        if (this._builder.Length == 0) return;
+        if (this._builder.Length != 0)
+        {
+            var strValue = this.TextWindow.Intern(this._builder);
+            this._builder.Length = 0;
 
-        var strValue = this.TextWindow.Intern(this._builder);
-        var utf8Bytes = Encoding.UTF8.GetBytes(strValue);
-        this._utf8Builder.AddRange(utf8Bytes);
+            var utf8Bytes = Encoding.UTF8.GetBytes(strValue);
+            this._utf8Builder.AddRange(utf8Bytes);
+        }
 
         this._utf8Builder.AddRange(additionalBytes);
     }
@@ -332,9 +396,13 @@ internal partial class Lexer : AbstractLexer
     /// <summary>
     /// 扫描到一行的末尾。
     /// </summary>
-    private void ScanToEndOfLine(bool isTrim = true)
+    private void ScanToEndOfLine(
+        StringBuilder? builder = null,
+        bool trimStart = true,
+        bool trimEnd = true)
     {
-        this._builder.Clear();
+        builder ??= this._builder;
+        builder.Clear();
         var length = 0;
         for (
             var c = this.TextWindow.PeekChar();
@@ -342,20 +410,17 @@ internal partial class Lexer : AbstractLexer
             c = this.TextWindow.PeekChar()
         )
         {
-            if (isTrim)
+            var isWhiteSpace = SyntaxFacts.IsWhiteSpace(c);
+            if (!trimStart || length != 0 || !isWhiteSpace)
             {
-                var isWhiteSpace = SyntaxFacts.IsWhiteSpace(c);
-                if (length != 0 || !isWhiteSpace)
-                {
-                    this._builder.Append(c);
+                builder.Append(c);
 
-                    if (!isWhiteSpace)
-                        length = this._builder.Length;
-                }
+                if (!trimEnd || !isWhiteSpace)
+                    length = builder.Length;
             }
             this.TextWindow.AdvanceChar();
         }
-        this._builder.Length = length;
+        builder.Length = length;
     }
 
     /// <summary>
@@ -408,9 +473,13 @@ internal partial class Lexer : AbstractLexer
             var c = this.TextWindow.NextChar();
             if (c == SlidingTextWindow.InvalidCharacter && this.TextWindow.IsReallyAtEnd()) break;
 
-            if (c == '\n' && (this._builder.Length > 0 && this._builder[this._builder.Length - 1] == '\r'))
-                // 匹配到“\r\n”，删除前方的回车符以替换为换行符。
-                this._builder.Length--;
+            if (c == '\r')
+            {
+                if (this.TextWindow.PeekChar() == '\n')
+                    // 匹配到“\r\n”，使用后方的换行符。
+                    this.TextWindow.AdvanceChar();
+                c = '\n';
+            }
 
             if (!(c == '\n' && this._builder.Length == 0))
                 // 忽略第一个新行。

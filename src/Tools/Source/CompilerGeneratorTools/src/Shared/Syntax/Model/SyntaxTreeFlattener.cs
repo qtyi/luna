@@ -42,7 +42,7 @@ public sealed class SyntaxTreeFlattener : TreeFlattener<SyntaxTree, SyntaxTreeTy
         switch (fieldOrChoice)
         {
             case Field field:
-                if (makeOptional && !SyntaxFileWriter.IsAnyNodeList(field.Type))
+                if (makeOptional && !field.Type.IsAnyNodeList())
                     field.Optional = "true";
 
                 fields.Add(field);

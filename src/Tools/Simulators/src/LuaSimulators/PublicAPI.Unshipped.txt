@@ -1,7 +1,0 @@
-﻿Luna.Compilers.Simulators.LuaLanguageParserSimulator
-Luna.Compilers.Simulators.LuaLanguageParserSimulator.GetKindText(int rawKind) -> string
-Luna.Compilers.Simulators.LuaLanguageParserSimulator.LuaLanguageParserSimulator() -> void
-Luna.Compilers.Simulators.LuaLanguageParserSimulator.ParseSyntaxTree(Microsoft.CodeAnalysis.Text.SourceText sourceText) -> Microsoft.CodeAnalysis.SyntaxTree
-Luna.Compilers.Simulators.LuaLexerSimulator
-Luna.Compilers.Simulators.LuaLexerSimulator.LexToEnd(Microsoft.CodeAnalysis.Text.SourceText sourceText) -> System.Collections.Generic.IEnumerable<Microsoft.CodeAnalysis.SyntaxToken>
-Luna.Compilers.Simulators.LuaLexerSimulator.LuaLexerSimulator() -> void

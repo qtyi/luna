@@ -135,5 +135,5 @@ internal sealed class
     /// </summary>
     /// <param name="info">The diagnostic info to be tested.</param>
     /// <returns><see langword="tree"/> if <paramref name="info"/> is empty; otherwise, <see langword="false"/>.</returns>
-    internal static bool IsEmpty(DiagnosticInfo info) => object.ReferenceEquals(info, ThisDiagnosticInfo.EmptyErrorInfo);
+    internal static bool IsEmpty(DiagnosticInfo info) => ReferenceEquals(info, EmptyErrorInfo);
 }

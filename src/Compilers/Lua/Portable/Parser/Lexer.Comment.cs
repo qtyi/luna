@@ -14,7 +14,7 @@ partial class Lexer
                 this.AddError(ErrorCode.ERR_OpenEndedComment);
         }
         else
-            this.ScanToEndOfLine(isTrim: true);
+            this.ScanToEndOfLine(trimEnd: true);
 
         var text = this.TextWindow.GetText(intern: false);
         return SyntaxFactory.Comment(text);
