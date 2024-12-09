@@ -11,53 +11,54 @@ using Roslyn.Utilities;
 namespace Luna.Compilers.Generators;
 
 /// <summary>
-/// Represents a writer that can write a sequential series of characters with corrent indent.
+/// Represents a helper that can write a sequential series of characters with indents into a <see cref="TextWriter"/> instance.
 /// </summary>
 internal partial class IndentWriter
 {
     /// <summary>
     /// Inner text writer that do the actual write job.
     /// </summary>
-    protected readonly TextWriter writer;
+    protected readonly TextWriter Writer;
 
     /// <summary>
-    /// Count of space characters of every indent.
+    /// Count of whitespace characters of every indent.
     /// </summary>
-    protected readonly int indentSize;
+    protected readonly int IndentSize;
+    /// <summary>
+    /// Whitespace character of every indent.
+    /// </summary>
+    protected readonly char IndentChar;
     private int _indentLevel;
     private bool _needIndent = true;
-
-    /// <summary>
-    /// Gets a token that propagates notification that this operation should be cancelled.
-    /// </summary>
-    protected CancellationToken CancellationToken { get; }
 
     /// <summary>
     /// Initialize an instance of <see cref="IndentWriter"/>.
     /// </summary>
     /// <param name="writer">Output text writer.</param>
-    /// <param name="cancellationToken">Token that propagates notification that this operation should be cancelled.</param>
-    public IndentWriter(TextWriter writer, CancellationToken cancellationToken) : this(writer, 4, cancellationToken) { }
+    public IndentWriter(TextWriter writer) : this(writer, 4, ' ') { }
 
-    /// <inheritdoc cref="IndentWriter.IndentWriter(TextWriter, CancellationToken)"/>
-    /// <param name="indentSize">Count of space characters of every indent.</param>
-    public IndentWriter(TextWriter writer, int indentSize, CancellationToken cancellationToken)
+    /// <inheritdoc cref="IndentWriter.IndentWriter(TextWriter)"/>
+    /// <param name="indentSize">Count of whitespace characters of every indent.</param>
+    /// <param name="indentChar">Whitespace character of every indent.</param>
+    public IndentWriter(TextWriter writer, int indentSize, char indentChar)
     {
-        this.writer = writer;
-        this.indentSize = indentSize;
-        CancellationToken = cancellationToken;
+        Debug.Assert(char.IsWhiteSpace(indentChar));
+
+        this.Writer = writer;
+        this.IndentSize = indentSize;
+        this.IndentChar = indentChar;
     }
 
     /// <summary>
     /// Increase indent level.
     /// </summary>
-    protected void Indent() => this._indentLevel++;
+    protected internal void Indent() => this._indentLevel++;
 
     /// <summary>
     /// Decrease indent level.
     /// </summary>
     /// <exception cref="InvalidOperationException">Cannot unindent from base level.</exception>
-    protected void Unindent()
+    protected internal void Unindent()
     {
         if (this._indentLevel <= 0) throw new InvalidOperationException("Cannot unindent from base level");
 
@@ -67,19 +68,15 @@ internal partial class IndentWriter
     /// <inheritdoc cref="TextWriter.Write(char)"/>
     public void Write(char value)
     {
-        this.CancellationToken.ThrowIfCancellationRequested();
-
         this.WriteIndentIfNeeded();
-        this.writer.Write(value);
+        this.Writer.Write(value);
     }
 
     /// <inheritdoc cref="TextWriter.Write(string)"/>
     public void Write(string? value)
     {
-        this.CancellationToken.ThrowIfCancellationRequested();
-
         this.WriteIndentIfNeeded();
-        this.writer.Write(value);
+        this.Writer.Write(value);
     }
 
     /// <inheritdoc cref="TextWriter.Write(string, object)"/>
@@ -97,9 +94,7 @@ internal partial class IndentWriter
     /// <inheritdoc cref="TextWriter.WriteLine()"/>
     public void WriteLine()
     {
-        this.CancellationToken.ThrowIfCancellationRequested();
-
-        this.writer.WriteLine();
+        this.Writer.WriteLine();
 
         this._needIndent = true; // Need an indent after each line break
     }
@@ -107,10 +102,8 @@ internal partial class IndentWriter
     /// <inheritdoc cref="TextWriter.WriteLine(char)"/>
     public void WriteLine(char value)
     {
-        this.CancellationToken.ThrowIfCancellationRequested();
-
         this.WriteIndentIfNeeded();
-        this.writer.WriteLine(value);
+        this.Writer.WriteLine(value);
 
         this._needIndent = true; // Need an indent after each line break
     }
@@ -118,11 +111,9 @@ internal partial class IndentWriter
     /// <inheritdoc cref="TextWriter.WriteLine(string)"/>
     public void WriteLine(string? value)
     {
-        this.CancellationToken.ThrowIfCancellationRequested();
-
         if (!string.IsNullOrEmpty(value))
             this.WriteIndentIfNeeded(); // Do not write indent if empty line.
-        this.writer.WriteLine(value);
+        this.Writer.WriteLine(value);
 
         this._needIndent = true; // Need an indent after each line break
     }
@@ -145,7 +136,7 @@ internal partial class IndentWriter
     /// <inheritdoc cref="TextWriter.WriteLine(string)"/>
     public void WriteLineWithoutIndent(string? value)
     {
-        this.writer.WriteLine(value);
+        this.Writer.WriteLine(value);
         this._needIndent = true; // Need an indent after each line break
     }
 
@@ -180,7 +171,7 @@ internal partial class IndentWriter
     {
         if (this._needIndent)
         {
-            this.writer.Write(new string(' ', this._indentLevel * indentSize));
+            this.Writer.Write(new string(IndentChar, this._indentLevel * IndentSize));
             this._needIndent = false;
         }
     }

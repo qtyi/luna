@@ -32,8 +32,7 @@ param (
 
   # Options
   [switch]$bootstrap,
-  [string]$bootstrapConfiguration = "Release",
-  [string]$bootstrapToolset = "",
+  [string]$bootstrapDir = "",
   [switch][Alias('bl')]$binaryLog,
   [string]$binaryLogName = "",
   [switch]$ci,
@@ -46,7 +45,6 @@ param (
   [switch]$warnAsError = $false,
   [switch]$sourceBuild = $false,
   [switch]$oop64bit = $true,
-  [switch]$oopCoreClr = $false,
   [switch]$lspEditor = $false,
 
   # official build settings
@@ -68,6 +66,7 @@ param (
   [switch]$sequential,
   [switch]$helix,
   [string]$helixQueueName = "",
+  [string]$helixApiAccessToken = "",
 
   [parameter(ValueFromRemainingArguments=$true)][string[]]$properties)
 
@@ -99,12 +98,12 @@ function Print-Usage() {
   Write-Host "  -testCompilerOnly         Run only the compiler unit tests"
   Write-Host "  -testVsi                  Run all integration tests"
   Write-Host "  -testIOperation           Run extra checks to validate IOperations"
-  Write-Host "  -testUsedAssemblies       Run extra checks to validate used assemblies feature (see ROSLYN_TEST_USEDASSEMBLIES & LUNA_TEST_USEDASSEMBLIES in codebase)"
+  Write-Host "  -testUsedAssemblies       Run extra checks to validate used assemblies feature (see LUNA_TEST_USEDASSEMBLIES in codebase)"
   Write-Host ""
   Write-Host "Advanced settings:"
   Write-Host "  -ci                       Set when running on CI server"
   Write-Host "  -bootstrap                Build using a bootstrap compilers"
-  Write-Host "  -bootstrapConfiguration   Build configuration for bootstrap compiler: 'Debug' or 'Release'"
+  Write-Host "  -bootstrapDir             Build using bootstrap compiler at specified location"
   Write-Host "  -msbuildEngine <value>    Msbuild engine to use to run build ('dotnet', 'vs', or unspecified)."
   Write-Host "  -collectDumps             Collect dumps from test runs"
   Write-Host "  -runAnalyzers             Run analyzers during build operations (short: -a)"
@@ -179,6 +178,10 @@ function Process-Arguments() {
     $script:binaryLogName = "Build.binlog"
   }
 
+  if ($bootstrapDir -ne "") {
+    $script:bootstrap = $true
+  }
+
   $anyUnit = $testDesktop -or $testCoreClr
   if ($anyUnit -and $testVsi) {
     Write-Host "Cannot combine unit and VSI testing"
@@ -223,7 +226,7 @@ function Restore-ExternalRepos() {
 
   # Archive dotnet/roslyn repository from GitHub that our work is based on.
   # We get its source link from NuGet with version exactly the same as Luna.
-  $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" (Get-LunaVersion)
+  $dotnetRoslynRepo = Get-SourceLink "Microsoft.Net.Compilers.Toolset" (Get-LunaVersion $false)
   Archive-Codebase $dotnetRoslynRepo.Owner $dotnetRoslynRepo.Name $dotnetRoslynRepo.Branch $dotnetRoslynRepo.CommitId
 
   # Archive lua/lua repository from Github for testing our Lua code analysis component.
@@ -261,20 +264,17 @@ function BuildSolution() {
   # that MSBuild output as well as ones that custom tasks output.
   $msbuildWarnAsError = if ($warnAsError) { "/warnAsError" } else { "" }
 
-  # Workaround for some machines in the AzDO pool not allowing long paths (%5c is msbuild escaped backslash)
-  $ibcDir = Join-Path $RepoRoot ".o%5c"
+  # Workaround for some machines in the AzDO pool not allowing long paths
+  $ibcDir = $RepoRoot
 
-  # Set DotNetBuildFromSource to 'true' if we're simulating building for source-build.
-  $buildFromSource = if ($sourceBuild) { "/p:DotNetBuildFromSource=true" } else { "" }
+  # Set DotNetBuildSourceOnly to 'true' if we're simulating building for source-build.
+  $buildFromSource = if ($sourceBuild) { "/p:DotNetBuildSourceOnly=true" } else { "" }
 
   $generateDocumentationFile = if ($skipDocumentation) { "/p:GenerateDocumentationFile=false" } else { "" }
   $lunaUseHardLinks = if ($ci) { "/p:LUNAUSEHARDLINKS=true" } else { "" }
 
- # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
-  # in our CI builds
-  # https://github.com/NuGet/Home/issues/12373
-  $restoreUseStaticGraphEvaluation = if ($ci) { $false } else { $true }
-  
+  $restoreUseStaticGraphEvaluation = $true
+
   try {
     MSBuild $toolsetBuildProj `
       $bl `
@@ -305,7 +305,6 @@ function BuildSolution() {
       @properties
   }
   finally {
-    ${env:ROSLYNCOMMANDLINELOGFILE} = $null
     ${env:LUNACOMMANDLINELOGFILE} = $null
   }
 }
@@ -334,6 +333,11 @@ function GetIbcSourceBranchName() {
 }
 
 function GetIbcDropName() {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+     'PSAvoidUsingConvertToSecureStringWithPlainText',
+     '',
+     Justification='$officialVisualStudioDropAccessToken is a script parameter so it needs to be plain text')]
+    param()
 
     if ($officialIbcDrop -and $officialIbcDrop -ne "default"){
         return $officialIbcDrop
@@ -345,7 +349,7 @@ function GetIbcDropName() {
     }
 
     # Bring in the ibc tools
-    $packagePath = Join-Path (Get-PackageDir "Microsoft.DevDiv.Optimization.Data.PowerShell") "lib\net461"
+    $packagePath = Join-Path (Get-PackageDir "Microsoft.DevDiv.Optimization.Data.PowerShell") "lib\net472"
     Import-Module (Join-Path $packagePath "Optimization.Data.PowerShell.dll")
 
     # Find the matching drop
@@ -362,6 +366,7 @@ function GetCompilerTestAssembliesIncludePaths() {
   #$assemblies += " --include '^Qtyi\.CodeAnalysis\.CompilerServer\.UnitTests$'"
   $assemblies += " --include '^Qtyi\.CodeAnalysis\.Lua\.Parser\.UnitTests$'"
   $assemblies += " --include '^Qtyi\.CodeAnalysis\.MoonScript\.Parser\.UnitTests$'"
+  #$assemblies += " --include '^Qtyi\.CodeAnalysis.[LangName]\.[Function].UnitTests$'"
   return $assemblies
 }
 
@@ -382,21 +387,18 @@ function TestUsingRunTests() {
   }
 
   if ($ci) {
-    $env:ROSLYN_TEST_CI = "true"
     $env:LUNA_TEST_CI = "true"
   }
 
   if ($testIOperation) {
-    $env:ROSLYN_TEST_IOPERATION = "true"
     $env:LUNA_TEST_IOPERATION = "true"
   }
 
   if ($testUsedAssemblies) {
-    $env:ROSLYN_TEST_USEDASSEMBLIES = "true"
     $env:LUNA_TEST_USEDASSEMBLIES = "true"
   }
 
-  $runTests = GetProjectOutputBinary "RunTests.dll" -tfm "net7.0"
+  $runTests = GetProjectOutputBinary "RunTests.dll" -tfm "net8.0"
 
   if (!(Test-Path $runTests)) {
     Write-Host "Test runner not found: '$runTests'. Run Build.cmd first." -ForegroundColor Red
@@ -409,17 +411,16 @@ function TestUsingRunTests() {
   $args += " --configuration $configuration"
 
   if ($testCoreClr) {
-    $args += " --tfm net6.0 --tfm net7.0"
+    $args += " --runtime core"
     $args += " --timeout 90"
     if ($testCompilerOnly) {
       $args += GetCompilerTestAssembliesIncludePaths
     } else {
-      $args += " --tfm net6.0-windows"
       $args += " --include '\.UnitTests'"
     }
   }
   elseif ($testDesktop -or ($testIOperation -and -not $testCoreClr)) {
-    $args += " --tfm net472"
+    $args += " --runtime framework"
     $args += " --timeout 90"
 
     if ($testCompilerOnly) {
@@ -434,8 +435,7 @@ function TestUsingRunTests() {
 
   } elseif ($testVsi) {
     $args += " --timeout 110"
-    $args += " --tfm net472"
-    $args += " --retry"
+    $args += " --runtime both"
     $args += " --sequential"
     #$args += " --include '\.IntegrationTests'"
     #$args += " --include 'Qtyi.CodeAnalysis.Workspaces.MSBuild.UnitTests'"
@@ -469,25 +469,26 @@ function TestUsingRunTests() {
     $args += " --helixQueueName $helixQueueName"
   }
 
+  if ($helixApiAccessToken) {
+    $args += " --helixApiAccessToken $helixApiAccessToken"
+  }
+
   try {
     Write-Host "$runTests $args"
-    Exec-Console $dotnetExe "$runTests $args"
+    Exec-Command $dotnetExe "$runTests $args"
   } finally {
     Get-Process "xunit*" -ErrorAction SilentlyContinue | Stop-Process
     if ($ci) {
-      Remove-Item env:\ROSLYN_TEST_CI
       Remove-Item env:\LUNA_TEST_CI
     }
 
     # Note: remember to update TestRunner when using new environment variables
     # (they need to be transferred over to the Helix machines that run the tests)
     if ($testIOperation) {
-      Remove-Item env:\ROSLYN_TEST_IOPERATION
       Remove-Item env:\LUNA_TEST_IOPERATION
     }
 
     if ($testUsedAssemblies) {
-      Remove-Item env:\ROSLYN_TEST_USEDASSEMBLIES
       Remove-Item env:\LUNA_TEST_USEDASSEMBLIES
     }
 
@@ -548,8 +549,13 @@ function EnablePreviewSdks() {
 # Deploy our core VSIX libraries to Visual Studio via the Roslyn VSIX tool.  This is an alternative to
 # deploying at build time.
 function Deploy-VsixViaTool() {
-  $vsixDir = Get-PackageDir "RoslynTools.VSIXExpInstaller"
-  $vsixExe = Join-Path $vsixDir "tools\VsixExpInstaller.exe"
+
+  $vsixExe = Join-Path $ArtifactsDir "bin\RunTests\$configuration\net8.0\VSIXExpInstaller\VSIXExpInstaller.exe"
+  Write-Host "VSIX EXE path: " $vsixExe
+  if (-not (Test-Path $vsixExe)) {
+    Write-Host "VSIX EXE not found: '$vsixExe'." -ForegroundColor Red
+    ExitWithExitCode 1
+  }
 
   $vsInfo = LocateVisualStudio
   if ($vsInfo -eq $null) {
@@ -561,6 +567,7 @@ function Deploy-VsixViaTool() {
   $vsMajorVersion = $vsInfo.installationVersion.Split('.')[0]
   $displayVersion = $vsInfo.catalog.productDisplayVersion
 
+  $hive = "LunaDev"
   Write-Host "Using VS Instance $vsId ($displayVersion) at `"$vsDir`""
   $baseArgs = "/rootSuffix:$hive /vsInstallDir:`"$vsDir`""
 
@@ -583,17 +590,18 @@ function Deploy-VsixViaTool() {
   $orderedVsixFileNames = @(
     #"Luna.Compilers.Extension.vsix",
     #"Luna.VisualStudio.Setup.vsix",
+    #"Luna.VisualStudio.ServiceHub.Setup.x64.vsix",
     #"Luna.VisualStudio.Setup.Dependencies.vsix",
-    #"ExpressionEvaluatorPackage.vsix",
+    #"Luna.ExpressionEvaluator.Setup.vsix",
     #"Luna.VisualStudio.DiagnosticsWindow.vsix",
-    #"Microsoft.VisualStudio.IntegrationTest.Setup.vsix"
+    #"Qtyi.VisualStudio.IntegrationTest.Setup.vsix"
   )
 
   foreach ($vsixFileName in $orderedVsixFileNames) {
     $vsixFile = Join-Path $VSSetupDir $vsixFileName
     $fullArg = "$baseArgs $vsixFile"
     Write-Host "`tInstalling $vsixFileName"
-    Exec-Console $vsixExe $fullArg
+    Exec-Command $vsixExe $fullArg
   }
 
   # Set up registry
@@ -611,10 +619,16 @@ function Deploy-VsixViaTool() {
   # Disable background download UI to avoid toasts
   &$vsRegEdit set "$vsDir" $hive HKCU "FeatureFlags\Setup\BackgroundDownload" Value dword 0
 
+  # Disable text spell checker to avoid spurious warnings in the error list
+  &$vsRegEdit set "$vsDir" $hive HKCU "FeatureFlags\Editor\EnableSpellChecker" Value dword 0
+
+  # Run source generators automatically during integration tests.
+  &$vsRegEdit set "$vsDir" $hive HKCU "FeatureFlags\Luna\SourceGeneratorExecutionBalanced" Value dword 0
+
   # Configure LSP
   $lspRegistryValue = [int]$lspEditor.ToBool()
   &$vsRegEdit set "$vsDir" $hive HKCU "FeatureFlags\Luna\LSP\Editor" Value dword $lspRegistryValue
-  &$vsRegEdit set "$vsDir" $hive HKCU "FeatureFlags\Lsp\PullDiagnostics" Value dword $lspRegistryValue
+  &$vsRegEdit set "$vsDir" $hive HKCU "FeatureFlags\Lsp\PullDiagnostics" Value dword 1
 
   # Disable text editor error reporting because it pops up a dialog. We want to either fail fast in our
   # custom handler or fail silently and continue testing.
@@ -624,9 +638,12 @@ function Deploy-VsixViaTool() {
   $oop64bitValue = [int]$oop64bit.ToBool()
   &$vsRegEdit set "$vsDir" $hive HKCU "Luna\Internal\OnOff\Features" OOP64Bit dword $oop64bitValue
 
-  # Configure RemoteHostOptions.OOPCoreClrFeatureFlag for testing
-  $oopCoreClrFeatureFlagValue = [int]$oopCoreClr.ToBool()
-  &$vsRegEdit set "$vsDir" $hive HKCU "FeatureFlags\Luna\ServiceHubCore" Value dword $oopCoreClrFeatureFlagValue
+  # Disable targeted notifications
+  if ($ci) {
+    # Currently does not work via vsregedit, so only apply this setting in CI
+    #&$vsRegEdit set "$vsDir" $hive HKCU "RemoteSettings" TurnOffSwitch dword 1
+    reg add hkcu\Software\Microsoft\VisualStudio\RemoteSettings /f /t REG_DWORD /v TurnOffSwitch /d 1
+  }
 }
 
 # Ensure that procdump is available on the machine.  Returns the path to the directory that contains
@@ -694,11 +711,7 @@ function Setup-IntegrationTestRun() {
     Capture-Screenshot $screenshotPath
   }
 
-  $env:ROSLYN_OOP64BIT = "$oop64bit"
   $env:LUNA_OOP64BIT = "$oop64bit"
-  $env:ROSLYN_OOPCORECLR = "$oopCoreClr"
-  $env:LUNA_OOPCORECLR = "$oopCoreClr"
-  $env:ROSLYN_LSPEDITOR = "$lspEditor"
   $env:LUNA_LSPEDITOR = "$lspEditor"
 }
 
@@ -724,11 +737,6 @@ try {
     exit 1
   }
 
-  $regKeyProperty = Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem -Name "LongPathsEnabled" -ErrorAction Ignore
-  if (($null -eq $regKeyProperty) -or ($regKeyProperty.LongPathsEnabled -ne 1)) {
-    Write-Host "LongPath is not enabled, you may experience build errors. You can avoid these by enabling LongPath with `"reg ADD HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1`""
-  }
-
   Process-Arguments
 
   . (Join-Path $PSScriptRoot "build-utils.ps1")
@@ -749,8 +757,7 @@ try {
       Setup-IntegrationTestRun
     }
 
-    $global:_DotNetInstallDir = Join-Path $RepoRoot ".dotnet"
-    InstallDotNetSdk $global:_DotNetInstallDir $GlobalJson.tools.dotnet
+    $dotnet = (InitializeDotNetCli -install:$true)
   }
 
   if ($restore) {
@@ -758,18 +765,11 @@ try {
     Restore-ExternalRepos
   }
 
-  try
-  {
-    if ($bootstrap) {
-      $bootstrapDir = Make-BootstrapBuild $bootstrapToolset
-    }
-  }
-  catch
-  {
-    if ($ci) {
-      Write-LogIssue -Type "error" -Message "(NETCORE_ENGINEERING_TELEMETRY=Build) Build failed"
-    }
-    throw $_
+  if ($bootstrap -and $bootstrapDir -eq "") {
+    Write-Host "Building bootstrap Compiler"
+    $bootstrapDir = Join-Path (Join-Path $ArtifactsDir "bootstrap") "build"
+    & eng/make-bootstrap.ps1 -output $bootstrapDir -force -ci:$ci
+    Test-LastExitCode
   }
 
   if ($restore -or $build -or $rebuild -or $pack -or $sign -or $publish) {
@@ -809,10 +809,8 @@ catch {
   ExitWithExitCode 1
 }
 finally {
-  if ($ci) {
-    Stop-Processes
+  if (Test-Path Function:\Unsubst-TempDir) {
+    Unsubst-TempDir
   }
-
-  Unsubst-TempDir
   Pop-Location
 }

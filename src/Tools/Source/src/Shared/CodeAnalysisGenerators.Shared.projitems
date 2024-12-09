@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Make sure we reference all common shared projects here in order to let their properties (like SharedGUID, Import_RootNamespace, etc.) been overwritten by this project properly -->
+  <Import Project="TreeSourceGeneratorsModel.projitems" />
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b2d21490-8284-48c7-8e96-85ebfb70c11f</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Luna.Compilers.Generators</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AbstractSourceFileWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)errors\ErrorFactsSourceProductionContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SourceFormatOptions.cs" />
+    <Compile Include="..\Shared\CompilationOptions\CompilationOptionsFileWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CompilationOptions\Model\OptionTreeModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compilationoptions\CompilationOptionsGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compilationoptions\CompilationOptionsSourceWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Errors\AbstractErrorFactsGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Errors\ErrorFactsSourceWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\AbstractSymbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\PredefinedSymbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\SymbolTreeModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\Model\Symbol.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\SymbolsFileWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\SymbolsGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Symbols\SymbolsSourceWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\AbstractNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\Comment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\Kind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\ModelExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\Node.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\PredefinedNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\SyntaxTreeFlattener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\Model\SyntaxTreeModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxFileWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Syntax\SyntaxSourceWriter.cs" />
+  </ItemGroup>
+</Project>

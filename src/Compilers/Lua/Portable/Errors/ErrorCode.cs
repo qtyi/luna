@@ -11,11 +11,55 @@ internal enum ErrorCode
     Void = InternalErrorCode.Void,
     Unknown = InternalErrorCode.Unknown,
 
-    #region 控制行
-    /// <summary>重复包含源文件。</summary>
+    #region Command line
+    /// <summary>Missing file specification for option.</summary>
+    ERR_NoFileSpec,
+    /// <summary>Include duplicate source files.</summary>
     WRN_FileAlreadyIncluded,
-    /// <summary>无法读取<c>app.config</c>文件。</summary>
+    /// <summary>The search path is invalid.</summary>
+    WRN_InvalidSearchPathDir,
+    /// <summary>Cannot read <c>app.config</c> file.</summary>
     ERR_CantReadConfigFile,
+    /// <summary>Command line switch needs extra argument.</summary>
+    ERR_SwitchNeedsArg,
+    /// <summary>Language version string are explicitly treat as identifiers, thus leading zeros are not allowed.</summary>
+    ERR_LanguageVersionCannotHaveLeadingZeroes,
+    /// <summary>Unrecognized language version string.</summary>
+    ERR_BadCompatMode,
+    /// <summary>Unrecognized platform type.</summary>
+    ERR_BadPlatformType,
+    /// <summary>Unrecognized output target type.</summary>
+    FTL_InvalidTarget,
+    /// <summary>The extern alias is not specified.</summary>
+    ERR_BadExternAlias,
+    /// <summary>Extern alias is not a valid identifier.</summary>
+    ERR_BadExternIdentifier,
+    /// <summary>One reference alias option can only have one alias.</summary>
+    ERR_OneAliasPerReference,
+    /// <summary>Missing filename in reference alias option.</summary>
+    ERR_AliasMissingFile,
+    /// <summary>Do not use refout when using refonly.</summary>
+    ERR_NoRefOutWhenRefOnly,
+    /// <summary>Cannot compile net modules when using /refout or /refonly.</summary>
+    ERR_NoNetModuleOutputWhenRefOutOrRefOnly,
+    /// <summary>Source file could not be opened.</summary>
+    WRN_NoSources,
+    /// <summary>Invalid image base number.</summary>
+    ERR_BadBaseNumber,
+    /// <summary>Output directory could not be determined.</summary>
+    ERR_NoOutputDirectory,
+    /// <summary>/sourcelink switch is only supported when emitting PDB.</summary>
+    ERR_SourceLinkRequiresPdb,
+    /// <summary>/embed switch is only supported when emitting a PDB.</summary>
+    ERR_CannotEmbedWithoutPdb,
+    /// <summary>Unrecognized command line switch.</summary>
+    ERR_BadSwitch,
+    /// <summary>Output name is needed if there is no input source file.</summary>
+    ERR_OutputNeedsName,
+    /// <summary>Cannot locate the input file, its path is invalid.</summary>
+    FTL_InvalidInputFileName,
+    /// <summary>Assembly name are specified when output type is not 'netmodule'.</summary>
+    ERR_AssemblyNameOnNonModule,
     #endregion
 
     ERR_InternalError,

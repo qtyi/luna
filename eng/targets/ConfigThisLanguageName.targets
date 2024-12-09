@@ -1,0 +1,16 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project>
+  <!-- 
+    Configurate projects that uses $(ThisLanguageName) property.
+    This targets should not be import before $(ThisLanguageName) being set!!!
+  -->
+
+  <PropertyGroup Condition="'$(ThisLanguageName)' != ''">
+    <DefineConstants>LANG_$(ThisLanguageName.ToUpper());$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup Condition="'$(ThisLanguageName)' != ''">
+    <CompilerVisibleProperty Include="ThisLanguageName" />
+  </ItemGroup>
+
+</Project>

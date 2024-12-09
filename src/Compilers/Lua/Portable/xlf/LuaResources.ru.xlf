@@ -7,9 +7,19 @@
         <target state="new">Compilation (Lua):</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_AliasMissingFile">
+        <source>Invalid reference alias option: '{0}=' -- missing filename.</source>
+        <target state="new">Invalid reference alias option: '{0}=' -- missing filename.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_AssemblyMatchBadVersion">
         <source>Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'.</source>
         <target state="new">Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_AssemblyNameOnNonModule">
+        <source>The /moduleassemblyname option may only be specified when building a target type of 'module'.</source>
+        <target state="new">The /moduleassemblyname option may only be specified when building a target type of 'module'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ERR_AssgLvalueExpected">
@@ -22,6 +32,16 @@
         <target state="new">Attribute expected.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_BadBaseNumber">
+        <source>Invalid image base number '{0}'.</source>
+        <target state="new">Invalid image base number '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_BadCompatMode">
+        <source>Invalid option '{0}' for /langversion. Use '/langversion:?' to list supported values.</source>
+        <target state="new">Invalid option '{0}' for /langversion. Use '/langversion:?' to list supported values.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_BadDirectivePlacement">
         <source>Preprocessor directives must appear as the first non-whitespace character on a line.</source>
         <target state="new">Preprocessor directives must appear as the first non-whitespace character on a line.</target>
@@ -32,14 +52,39 @@
         <target state="new">Provided documentation mode is unsupported or invalid: '{0}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_BadExternAlias">
+        <source>The extern alias '{0}' was not specified in a /reference option.</source>
+        <target state="new">The extern alias '{0}' was not specified in a /reference option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_BadExternIdentifier">
+        <source>Invalid extern alias for '/reference'; '{0}' is not a valid identifier.</source>
+        <target state="new">Invalid extern alias for '/reference'; '{0}' is not a valid identifier.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_BadLanguageVersion">
         <source>Provided language version is unsupported or invalid: '{0}'.</source>
         <target state="new">Provided language version is unsupported or invalid: '{0}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_BadPlatformType">
+        <source>Invalid option '{0}' for /platform; must be anycpu, x86, Itanium, arm, arm64 or x64.</source>
+        <target state="new">Invalid option '{0}' for /platform; must be anycpu, x86, Itanium, arm, arm64 or x64.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_BadSourceCodeKind">
         <source>Provided source code kind is unsupported or invalid: '{0}'.</source>
         <target state="new">Provided source code kind is unsupported or invalid: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_BadSwitch">
+        <source>Unrecognized option: '{0}'.</source>
+        <target state="new">Unrecognized option: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_CannotEmbedWithoutPdb">
+        <source>/embed switch is only supported when emitting a PDB.</source>
+        <target state="new">/embed switch is only supported when emitting a PDB.</target>
         <note />
       </trans-unit>
       <trans-unit id="ERR_CantReadConfigFile">
@@ -142,6 +187,11 @@
         <target state="new">Invocation arguments expected.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_LanguageVersionCannotHaveLeadingZeroes">
+        <source>Specified language version '{0}' cannot have leading zeroes.</source>
+        <target state="new">Specified language version '{0}' cannot have leading zeroes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_MisplacedReturnStat">
         <source>Return statement can only be the last statement of a block.</source>
         <target state="new">Return statement can only be the last statement of a block.</target>
@@ -152,9 +202,39 @@
         <target state="new">Newline in string literal constant.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_NoFileSpec">
+        <source>Missing file specification for '{0}' option.</source>
+        <target state="new">Missing file specification for '{0}' option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_NoNetModuleOutputWhenRefOutOrRefOnly">
+        <source>Cannot compile net modules when using /refout or /refonly.</source>
+        <target state="new">Cannot compile net modules when using /refout or /refonly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_NoOutputDirectory">
+        <source>Output directory could not be determined.</source>
+        <target state="new">Output directory could not be determined.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_NoRefOutWhenRefOnly">
+        <source>Do not use refout when using refonly.</source>
+        <target state="new">Do not use refout when using refonly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_NoSourceFile">
+        <source>Source file '{0}' could not be opened -- {1}.</source>
+        <target state="new">Source file '{0}' could not be opened -- {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_NumberOverflow">
         <source>Number constant is too large.</source>
         <target state="new">Number constant is too large.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_OneAliasPerReference">
+        <source>A /reference option that declares an extern alias can only have one filename. To specify multiple aliases or filenames, use multiple /reference options.</source>
+        <target state="new">A /reference option that declares an extern alias can only have one filename. To specify multiple aliases or filenames, use multiple /reference options.</target>
         <note />
       </trans-unit>
       <trans-unit id="ERR_OpenEndedComment">
@@ -162,9 +242,24 @@
         <target state="new">End-of-file found, close long brackect expected.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ERR_OutputNeedsName">
+        <source>Outputs without source must have the /out option specified.</source>
+        <target state="new">Outputs without source must have the /out option specified.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ERR_SemicolonExpected">
         <source>';' expected.</source>
         <target state="new">';' expected.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_SourceLinkRequiresPdb">
+        <source>/sourcelink switch is only supported when emitting PDB.</source>
+        <target state="new">/sourcelink switch is only supported when emitting PDB.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ERR_SwitchNeedsArg">
+        <source>Command-line syntax error: Missing '{0}' for '{1}' option.</source>
+        <target state="new">Command-line syntax error: Missing '{0}' for '{1}' option.</target>
         <note />
       </trans-unit>
       <trans-unit id="ERR_SyntaxError">
@@ -192,6 +287,36 @@
         <target state="new">Unterminated string literal.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FTL_InvalidInputFileName">
+        <source>File name '{0}' is empty, contains invalid characters, has a drive specification without an absolute path, or is too long.</source>
+        <target state="new">File name '{0}' is empty, contains invalid characters, has a drive specification without an absolute path, or is too long.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FTL_InvalidTarget">
+        <source>Invalid target type for /target: must specify 'exe', 'winexe', 'library', 'netmodule', or 'intermediate'.</source>
+        <target state="new">Invalid target type for /target: must specify 'exe', 'winexe', 'library', 'netmodule', or 'intermediate'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_DirectoryDoesNotExist">
+        <source>directory does not exist</source>
+        <target state="new">directory does not exist</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_DirectoryHasInvalidPath">
+        <source>path is too long or invalid</source>
+        <target state="new">path is too long or invalid</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_LIB_ENV">
+        <source>LIB environment variable</source>
+        <target state="new">LIB environment variable</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_LIB_OPTION">
+        <source>/LIB option</source>
+        <target state="new">/LIB option</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IDS_LUACHelp">
         <source>No help message found.</source>
         <target state="new">No help message found.</target>
@@ -210,6 +335,21 @@
       <trans-unit id="IDS_LogoLine2">
         <source>Copyright (C) Qtyi. All rights reserved.</source>
         <target state="new">Copyright (C) Qtyi. All rights reserved.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_Number">
+        <source>&lt;number&gt;</source>
+        <target state="new">&lt;number&gt;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_PathList">
+        <source>&lt;path list&gt;</source>
+        <target state="new">&lt;path list&gt;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IDS_Text">
+        <source>&lt;text&gt;</source>
+        <target state="new">&lt;text&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="IDS_ToolName">
@@ -277,14 +417,24 @@
         <target state="new">Source file '{0}' specified multiple times.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WRN_InvalidSearchPathDir">
+        <source>Invalid search path '{0}' specified in '{1}' -- '{2}'.</source>
+        <target state="new">Invalid search path '{0}' specified in '{1}' -- '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WRN_InvalidSearchPathDir_Title">
+        <source>Invalid search path specified</source>
+        <target state="new">Invalid search path specified</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WRN_UnifyReferenceBldRev_Description">
         <source>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</source>
         <target state="new">The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="WRN_UnifyReferenceBldRev_Title">
-        <source>Assuming assembly reference matches identity</source>
-        <target state="new">Assuming assembly reference matches identity</target>
+        <source>Assuming assembly reference matches identity.</source>
+        <target state="new">Assuming assembly reference matches identity.</target>
         <note />
       </trans-unit>
       <trans-unit id="WRN_UnifyReferenceMajMin">
@@ -298,8 +448,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WRN_UnifyReferenceMajMin_Title">
-        <source>Assuming assembly reference matches identity</source>
-        <target state="new">Assuming assembly reference matches identity</target>
+        <source>Assuming assembly reference matches identity.</source>
+        <target state="new">Assuming assembly reference matches identity.</target>
         <note />
       </trans-unit>
       <trans-unit id="WrongSemanticModelType">

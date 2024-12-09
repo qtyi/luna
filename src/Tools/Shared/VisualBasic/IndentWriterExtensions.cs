@@ -25,7 +25,7 @@ namespace Luna.Compilers.Generators
         {
             this.Unindent();
             this.WriteLine("End ");
-            this.writer.WriteLine(blockType);
+            this.Writer.WriteLine(blockType);
         }
 
         /// <summary>

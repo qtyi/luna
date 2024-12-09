@@ -7,7 +7,10 @@ T:Microsoft.CodeAnalysis.Recommendations;RecommendationOptions; Use Recommendati
 T:Microsoft.CodeAnalysis.Formatting.FormattingOptions; Use FormattingOptions2 instead
 T:Microsoft.CodeAnalysis.Options.PerLanguageOption`1; Use PerLanguageOption2<T> instead
 T:Microsoft.CodeAnalysis.Options.Option`1; Use 'Microsoft.CodeAnalysis.Options.Option2' instead
+T:Microsoft.CodeAnalysis.SyntaxWalker; Use SyntaxNode.DescendantNodes methods instead.
 P:Microsoft.CodeAnalysis.Completion.CompletionContext.Options; Use CompletionOptions instead.
+P:Microsoft.CodeAnalysis.Completion.CompletionItem.Properties; Use GetProperties instead.
+M:Microsoft.CodeAnalysis.Completion.CompletionItem.WithProperties(System.Collections.Immutable.ImmutableDictionary{System.String,System.String}); Use ImmutableArray overload instead.
 P:Microsoft.CodeAnalysis.Completion.CompletionList.Items; Use CompletionList.ItemsList instead
 M:Microsoft.CodeAnalysis.Completion.CompletionProvider.ShouldTriggerCompletion(Microsoft.CodeAnalysis.Text.SourceText,System.Int32,Microsoft.CodeAnalysis.Completion.CompletionTrigger,Microsoft.CodeAnalysis.Options.OptionSet); Use internal overload instead
 M:Microsoft.CodeAnalysis.Completion.CompletionProvider.GetDescriptionAsync(Microsoft.CodeAnalysis.Document,Microsoft.CodeAnalysis.Completion.CompletionItem,System.Threading.CancellationToken); Use internal overload instead
@@ -64,3 +67,20 @@ M:Microsoft.CodeAnalysis.CodeActions.CodeAction.PostProcessChangesAsync(Microsof
 M:Microsoft.CodeAnalysis.CodeActions.CodeActionWithOptions.GetOperationsAsync(System.Object,System.Threading.CancellationToken); Use overload that takes a solution
 M:Microsoft.CodeAnalysis.CodeActions.CodeAction.GetOperationsAsync(System.Threading.CancellationToken); Use overload that takes a solution
 M:Microsoft.CodeAnalysis.CodeActions.CodeAction.GetPreviewOperationsAsync(System.Threading.CancellationToken); Use overload that takes a solution
+M:Microsoft.CodeAnalysis.CodeActions.CodeAction.ComputeOperationsAsync(System.Threading.CancellationToken); Use overload that takes progress
+M:Microsoft.CodeAnalysis.CodeActions.CodeAction.GetChangedSolutionAsync(CSystem.Threading.CancellationToken); Use overload that takes progress
+M:Microsoft.CodeAnalysis.CodeActions.CodeAction.GetChangedDocumentAsync(CancellationToken); Use overload that takes progress
+M:Microsoft.CodeAnalysis.DesktopStrongNameProvider.#ctor(System.Collections.Immutable.ImmutableArray{System.String}); Use overload that takes in temp directory
+M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Object[]); Use WriteEventCore instead
+P:Microsoft.CodeAnalysis.CompilationOptions.OutputKind; Use 'Qtyi.CodeAnalysis.CompilationOptions.OutputKind' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.WithOutputKind(Microsoft.CodeAnalysis.OutputKind); Use overload that takes Qtyi.CodeAnalysis.OutputKind
+M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithOutputKind(Microsoft.CodeAnalysis.OutputKind); Use overload that takes Qtyi.CodeAnalysis.OutputKind
+P:Microsoft.CodeAnalysis.CompilationOptions.ModuleName; Use 'Microsoft.CodeAnalysis.CompilationOptions.NetmoduleName' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.WithModuleName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.WithNetmoduleName(System.String)' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithModuleName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.CommonWithNetmoduleName(System.String)' instead
+P:Microsoft.CodeAnalysis.CompilationOptions.ScriptClassName; Use 'Microsoft.CodeAnalysis.CompilationOptions.ScriptModuleName' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.WithScriptClassName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.WithScriptModuleName(System.String)' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithScriptClassName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.CommonWithScriptModuleName(System.String)' instead
+P:Microsoft.CodeAnalysis.CompilationOptions.MainTypeName; Use 'Microsoft.CodeAnalysis.CompilationOptions.MainModuleName' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.WithMainTypeName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.WithMainModuleName(System.String)' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithMainTypeName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.CommonWithMainModuleName(System.String)' instead

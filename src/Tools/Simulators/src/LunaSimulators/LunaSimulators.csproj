@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>Luna.Compilers.Simulators.Lua</AssemblyName>
-    <TargetFrameworks>$(TestResourcesTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(NetLunaNext);net472</TargetFrameworks>
     <Configurations>Debug;Release</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

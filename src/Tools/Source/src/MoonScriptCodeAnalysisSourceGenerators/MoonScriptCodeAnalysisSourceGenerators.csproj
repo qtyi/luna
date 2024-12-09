@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Luna.Compilers.Generators</RootNamespace>
+    <ImplicitUsings>true</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+    <RuntimeIdentifiers>$(LunaPortableRuntimeIdentifiers)</RuntimeIdentifiers>
+    <IsShipping>false</IsShipping>
+    <ExcludeFromSourceBuild>false</ExcludeFromSourceBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\..\..\Compilers\Core\Portable\Symbols\LanguageNames.cs" Link="LanguageNames.cs" />
+  </ItemGroup>
+
+  <Import Project="..\Shared\CodeAnalysisGenerators.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MoonScriptErrorFactsGenerator" />
+    <InternalsVisibleTo Include="MoonScriptSyntaxGenerator" />
+  </ItemGroup>
+
+</Project>

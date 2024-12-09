@@ -20,6 +20,9 @@
 .dotnet/
 .tools/
 .packages/
+.nuget/
+.complog/
+/MSBuild_Logs/
 
 # External Repositories
 .externalrepos/
@@ -49,7 +52,7 @@ UnitTestResults.html
 *.nuget.props
 *.nuget.targets
 project.lock.json
-msbuild.binlog
+*.binlog
 *.project.lock.json
 
 *_i.c

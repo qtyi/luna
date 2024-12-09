@@ -1,12 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TestUtilitiesTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(NetLunaAll);net472</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
+    <IsTestUtilityProject>true</IsTestUtilityProject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,22 +23,22 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
-    <PackageReference Include="Microsoft.DiaSymReader" Version="$(MicrosoftDiaSymReaderVersion)" Aliases="DSR"/>
-    <PackageReference Include="Microsoft.DiaSymReader.PortablePdb" Version="$(MicrosoftDiaSymReaderPortablePdbVersion)" />
-    <PackageReference Include="Microsoft.DiaSymReader.Converter" Version="$(MicrosoftDiaSymReaderConverterVersion)" />
-    <PackageReference Include="Microsoft.DiaSymReader.Converter.Xml" Version="$(MicrosoftDiaSymReaderConverterXmlVersion)" />
-    <PackageReference Include="Microsoft.Metadata.Visualizer" Version="$(MicrosoftMetadataVisualizerVersion)" />
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
-    <PackageReference Include="xunit.assert" Version="$(xunitassertVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+    <PackageReference Include="Microsoft.DiaSymReader" Aliases="DSR"/>
+    <PackageReference Include="Microsoft.DiaSymReader.PortablePdb" />
+    <PackageReference Include="Microsoft.DiaSymReader.Converter" />
+    <PackageReference Include="Microsoft.DiaSymReader.Converter.Xml" />
+    <PackageReference Include="Microsoft.Metadata.Visualizer" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="xunit.assert" />
     <!--
       Package references needed due to Microsoft.DiaSymReader.Converter dependency on Newtonsoft.Json 9.0.1, 
       which doesn't have netstandard 2.0 binaries.
     -->
-    <PackageReference Include="System.IO.FileSystem" Version="$(SystemIOFileSystemVersion)" />
-    <PackageReference Include="System.IO.FileSystem.Primitives" Version="$(SystemIOFileSystemPrimitivesVersion)" />
-    <PackageReference Include="System.Text.Encoding.Extensions" Version="$(SystemTextEncodingExtensionsVersion)" />
+    <PackageReference Include="System.IO.FileSystem" />
+    <PackageReference Include="System.IO.FileSystem.Primitives" />
+    <PackageReference Include="System.Text.Encoding.Extensions" />
   </ItemGroup>
   
   <ItemGroup>

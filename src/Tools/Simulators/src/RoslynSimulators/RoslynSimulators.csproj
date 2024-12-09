@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>Luna.Compilers.Simulators.Roslyn</AssemblyName>
-    <TargetFrameworks>$(TestResourcesTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(NetLunaNext);net472</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Luna.Compilers.Simulators</RootNamespace>
@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" />
   </ItemGroup>
 
 </Project>

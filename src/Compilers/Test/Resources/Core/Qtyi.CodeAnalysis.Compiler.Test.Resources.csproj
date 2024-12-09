@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TestResourcesTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(NetLunaNext);net472</TargetFrameworks>
     <RootNamespace>
       <!-- Remains empty -->
     </RootNamespace>
@@ -28,11 +28,13 @@
     <AdditionalFiles Include="@(MoonScriptTestFiles)" Link="MoonScriptTestFiles\%(FileName)%(Extension)" GeneratorName="MoonScriptTestFilesGenerator" />
   </ItemGroup>
 
+  <!--
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Tools\Source\CompilerGeneratorTools\src\CodeAnalysisCompilerTestResourcesSourceGenerators\CodeAnalysisCompilerTestResourcesSourceGenerators.csproj">
       <OutputItemType>Analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
+  -->
 
 </Project>

@@ -12,11 +12,20 @@ internal enum MessageID
     None = 0,
     MessageBase = 1200,
 
+    IDS_Text,
+    IDS_Number,
+    IDS_PathList,
+    IDS_LIB_ENV,
+    IDS_LIB_OPTION,
+
     IDS_LangVersions,
     IDS_ToolName,
     IDS_LogoLine1,
     IDS_LogoLine2,
     IDS_LUACHelp,
+
+    IDS_DirectoryDoesNotExist,
+    IDS_DirectoryHasInvalidPath,
 
     IDS_FeatureHexadecimalFloatConstant,
     IDS_FeatureBinaryExponent

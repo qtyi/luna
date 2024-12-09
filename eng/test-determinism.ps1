@@ -2,6 +2,8 @@
 param([string]$configuration = "Debug",
       [string]$msbuildEngine = "vs",
       [string]$altRootDrive = "q:",
+      [string]$bootstrapDir = "",
+      [switch]$ci = $false,
       [switch]$help)
 
 Set-StrictMode -version 2.0
@@ -23,8 +25,6 @@ if ($help) {
 # List of binary names that should be skipped because they have a known issue that
 # makes them non-deterministic.
 $script:skipList = @(
-  # Work around XLF issues https://github.com/dotnet/roslyn/issues/58840
-  #"Luna.VisualStudio.DiagnosticsWindow.dll.key"
 )
 
 function Run-Build([string]$rootDir, [string]$logFileName) {
@@ -49,10 +49,7 @@ function Run-Build([string]$rootDir, [string]$logFileName) {
 
   Stop-Processes
 
-  # Temporarily disable RestoreUseStaticGraphEvaluation to work around this NuGet issue 
-  # in our CI builds
-  # https://github.com/NuGet/Home/issues/12373
-  $restoreUseStaticGraphEvaluation = if ($ci) { $false } else { $true }
+  $restoreUseStaticGraphEvaluation = $true
 
   Write-Host "Building $solution using $bootstrapDir"
   MSBuild $toolsetBuildProj `
@@ -152,10 +149,11 @@ function Test-MapContents($dataMap) {
 
   # Test for some well known binaries
   $list = @(
-    "Microsoft.CodeAnalysis.dll",
-    "Microsoft.CodeAnalysis.CSharp.dll",
-    "Microsoft.CodeAnalysis.Workspaces.dll",
-    "Microsoft.VisualStudio.LanguageServices.Implementation.dll")
+    "Qtyi.CodeAnalysis.dll"
+    #"Qtyi.CodeAnalysis.[LangName].dll",
+    #"Qtyi.CodeAnalysis.Workspaces.dll",
+    #"Qtyi.CodeAnalysis.[LangName].Workspaces.dll",
+    )
 
   foreach ($fileName in $list) {
     $found = $false
@@ -220,7 +218,10 @@ function Test-Build([string]$rootDir, $dataMap, [string]$logFileName) {
     Write-Host "`tVerified $relativeDir\$fileName"
   }
 
-  if (-not $allGood) {
+  if ($allGood) {
+    Write-Host "Determinism check succeeded"
+  }
+  else {
     Write-Host "Determinism failed for the following binaries:"
     foreach ($name in $errorList) {
       Write-Host "`t$name"
@@ -264,6 +265,8 @@ function Run-Test() {
 
 try {
   . (Join-Path $PSScriptRoot "build-utils.ps1")
+  Push-Location $RepoRoot
+  $prepareMachine = $ci
 
   # Create all of the logging directories
   $errorDir = Join-Path $LogDir "DeterminismFailures"
@@ -274,28 +277,29 @@ try {
   Create-Directory $errorDirLeft
   Create-Directory $errorDirRight
 
-  $ci = $true
   $runAnalyzers = $false
   $binaryLog = $true
   $officialBuildId = ""
   $nodeReuse = $false
   $properties = @()
 
-  $script:bootstrapConfiguration = "Release"
-  $bootstrapDir = Make-BootstrapBuild
+  if ($bootstrapDir -eq "") {
+    Write-Host "Building bootstrap compiler"
+    $bootstrapDir = Join-Path $ArtifactsDir (Join-Path "bootstrap" "determinism")
+    & eng/make-bootstrap.ps1 -output $bootstrapDir -ci:$ci -force
+    Test-LastExitCode
+  }
 
   Run-Test
-  exit 0
+  ExitWithExitCode 0
 }
 catch {
   Write-Host $_
   Write-Host $_.Exception
   Write-Host $_.ScriptStackTrace
-  exit 1
+  ExitWithExitCode 1
 }
 finally {
-  Write-Host "Stopping VBCSCompiler"
-  Get-Process VBCSCompiler -ErrorAction SilentlyContinue | Stop-Process
-  Write-Host "Stopped VBCSCompiler"
+  Pop-Location
 }
 

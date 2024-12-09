@@ -3,9 +3,9 @@
   <Option Name="OutputKind"/>
   <Option Name="Platform"/>
 
-  <Option Name="NetmoduleName" Base="ModuleName"/>
-  <Option Name="MainModuleName" Base="MainTypeName"/>
-  <Option Name="ScriptModuleName" Base="ScriptClassName"/>
+  <Option Name="NetmoduleName"/>
+  <Option Name="MainModuleName"/>
+  <Option Name="ScriptModuleName"/>
 
   <Option Name="OptimizationLevel"/>
   <Option Name="WarningLevel"/>

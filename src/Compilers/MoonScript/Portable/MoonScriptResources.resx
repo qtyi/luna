@@ -120,11 +120,38 @@
   <data name="CompilationMoonScript" xml:space="preserve">
     <value>Compilation (MoonScript):</value>
   </data>
+  <data name="ERR_AliasMissingFile" xml:space="preserve">
+    <value>Invalid reference alias option: '{0}=' -- missing filename.</value>
+  </data>
   <data name="ERR_AssemblyMatchBadVersion" xml:space="preserve">
     <value>Assembly '{0}' with identity '{1}' uses '{2}' which has a higher version than referenced assembly '{3}' with identity '{4}'</value>
   </data>
+  <data name="ERR_AssemblyNameOnNonModule" xml:space="preserve">
+    <value>The /moduleassemblyname option may only be specified when building a target type of 'module'.</value>
+  </data>
+  <data name="ERR_BadBaseNumber" xml:space="preserve">
+    <value>Invalid image base number '{0}'.</value>
+  </data>
+  <data name="ERR_BadCompatMode" xml:space="preserve">
+    <value>Invalid option '{0}' for /langversion. Use '/langversion:?' to list supported values.</value>
+  </data>
   <data name="ERR_BadDirectivePlacement" xml:space="preserve">
     <value>Preprocessor directives must appear as the first non-whitespace character on a line.</value>
+  </data>
+  <data name="ERR_BadExternAlias" xml:space="preserve">
+    <value>The extern alias '{0}' was not specified in a /reference option.</value>
+  </data>
+  <data name="ERR_BadExternIdentifier" xml:space="preserve">
+    <value>Invalid extern alias for '/reference'; '{0}' is not a valid identifier.</value>
+  </data>
+  <data name="ERR_BadPlatformType" xml:space="preserve">
+    <value>Invalid option '{0}' for /platform; must be anycpu, x86, Itanium, arm, arm64 or x64.</value>
+  </data>
+  <data name="ERR_BadSwitch" xml:space="preserve">
+    <value>Unrecognized option: '{0}'.</value>
+  </data>
+  <data name="ERR_CannotEmbedWithoutPdb" xml:space="preserve">
+    <value>/embed switch is only supported when emitting a PDB.</value>
   </data>
   <data name="ERR_CantReadConfigFile" xml:space="preserve">
     <value>Cannot read config file '{0}' -- '{1}'</value>
@@ -138,11 +165,59 @@
   <data name="ERR_InsufficientStack" xml:space="preserve">
     <value>An expression is too long or complex to compile.</value>
   </data>
+  <data name="ERR_LanguageVersionCannotHaveLeadingZeroes" xml:space="preserve">
+    <value>Specified language version '{0}' cannot have leading zeroes.</value>
+  </data>
+  <data name="ERR_NoFileSpec" xml:space="preserve">
+    <value>Missing file specification for '{0}' option.</value>
+  </data>
+  <data name="ERR_NoNetModuleOutputWhenRefOutOrRefOnly" xml:space="preserve">
+    <value>Cannot compile net modules when using /refout or /refonly.</value>
+  </data>
+  <data name="ERR_NoOutputDirectory" xml:space="preserve">
+    <value>Output directory could not be determined.</value>
+  </data>
+  <data name="ERR_NoRefOutWhenRefOnly" xml:space="preserve">
+    <value>Do not use refout when using refonly.</value>
+  </data>
+  <data name="ERR_NoSourceFile" xml:space="preserve">
+    <value>Source file '{0}' could not be opened -- {1}.</value>
+  </data>
+  <data name="ERR_OneAliasPerReference" xml:space="preserve">
+    <value>A /reference option that declares an extern alias can only have one filename. To specify multiple aliases or filenames, use multiple /reference options.</value>
+  </data>
+  <data name="ERR_OutputNeedsName" xml:space="preserve">
+    <value>Outputs without source must have the /out option specified.</value>
+  </data>
+  <data name="ERR_SourceLinkRequiresPdb" xml:space="preserve">
+    <value>/sourcelink switch is only supported when emitting PDB.</value>
+  </data>
+  <data name="ERR_SwitchNeedsArg" xml:space="preserve">
+    <value>Command-line syntax error: Missing '{0}' for '{1}' option.</value>
+  </data>
   <data name="ERR_TypeForwardedToMultipleAssemblies" xml:space="preserve">
     <value>Module '{0}' in assembly '{1}' is forwarding the type '{2}' to multiple assemblies: '{3}' and '{4}'.</value>
   </data>
+  <data name="FTL_InvalidInputFileName" xml:space="preserve">
+    <value>File name '{0}' is empty, contains invalid characters, has a drive specification without an absolute path, or is too long.</value>
+  </data>
+  <data name="FTL_InvalidTarget" xml:space="preserve">
+    <value>Invalid target type for /target: must specify 'exe', 'winexe', 'library', 'netmodule', or 'intermediate'.</value>
+  </data>
+  <data name="IDS_DirectoryDoesNotExist" xml:space="preserve">
+    <value>directory does not exist</value>
+  </data>
+  <data name="IDS_DirectoryHasInvalidPath" xml:space="preserve">
+    <value>path is too long or invalid</value>
+  </data>
   <data name="IDS_LangVersions" xml:space="preserve">
     <value>Supported language versions:</value>
+  </data>
+  <data name="IDS_LIB_ENV" xml:space="preserve">
+    <value>LIB environment variable</value>
+  </data>
+  <data name="IDS_LIB_OPTION" xml:space="preserve">
+    <value>/LIB option</value>
   </data>
   <data name="IDS_LogoLine1" xml:space="preserve">
     <value>{0} version {1}</value>
@@ -152,6 +227,15 @@
   </data>
   <data name="IDS_MOONCHelp" xml:space="preserve">
     <value>No help message found.</value>
+  </data>
+  <data name="IDS_Number" xml:space="preserve">
+    <value>&lt;number&gt;</value>
+  </data>
+  <data name="IDS_PathList" xml:space="preserve">
+    <value>&lt;path list&gt;</value>
+  </data>
+  <data name="IDS_Text" xml:space="preserve">
+    <value>&lt;text&gt;</value>
   </data>
   <data name="IDS_ToolName" xml:space="preserve">
     <value>MoonScript Compiler</value>
@@ -189,6 +273,12 @@
   <data name="WRN_FileAlreadyIncluded" xml:space="preserve">
     <value>Source file '{0}' specified multiple times.</value>
   </data>
+  <data name="WRN_InvalidSearchPathDir" xml:space="preserve">
+    <value>Invalid search path '{0}' specified in '{1}' -- '{2}'</value>
+  </data>
+  <data name="WRN_InvalidSearchPathDir_Title" xml:space="preserve">
+    <value>Invalid search path specified</value>
+  </data>
   <data name="WRN_UnifyReferenceBldRev" xml:space="preserve">
     <value>Assuming assembly reference '{0}' used by '{1}' matches identity '{2}' of '{3}', you may need to supply runtime policy.</value>
   </data>
@@ -196,7 +286,7 @@
     <value>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</value>
   </data>
   <data name="WRN_UnifyReferenceBldRev_Title" xml:space="preserve">
-    <value>Assuming assembly reference matches identity</value>
+    <value>Assuming assembly reference matches identity.</value>
   </data>
   <data name="WRN_UnifyReferenceMajMin" xml:space="preserve">
     <value>Assuming assembly reference '{0}' used by '{1}' matches identity '{2}' of '{3}', you may need to supply runtime policy.</value>
@@ -205,7 +295,7 @@
     <value>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</value>
   </data>
   <data name="WRN_UnifyReferenceMajMin_Title" xml:space="preserve">
-    <value>Assuming assembly reference matches identity</value>
+    <value>Assuming assembly reference matches identity.</value>
   </data>
   <data name="WrongSemanticModelType" xml:space="preserve">
     <value>Expected a {0} SemanticModel.</value>

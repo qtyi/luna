@@ -6,7 +6,7 @@
   </ItemGroup>
 
   <ItemGroup Label="References">
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
   </ItemGroup>
 
   <!--

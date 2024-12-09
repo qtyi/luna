@@ -1,8 +1,9 @@
-﻿<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(NetLunaNext);net472</TargetFrameworks>
     <OutputType>Library</OutputType>
     <RootNamespace>Qtyi.CodeAnalysis.MoonScript.UnitTests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -25,7 +26,7 @@
 
   <ItemGroup Label="References">
     <!-- PackageReference -->
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
 
     <!-- ProjectReference -->
     <ProjectReference Include="..\..\..\Core\CodeAnalysisTest\Qtyi.CodeAnalysis.UnitTests.csproj" />
