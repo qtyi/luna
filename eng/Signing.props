@@ -4,27 +4,35 @@
 
   <PropertyGroup>
     <UseDotNetCertificate>true</UseDotNetCertificate>
+    <!--
+      We have a few large packages that when repacked in parallel can cause an OOM in MSBuild.
+      Reduce the parallelism from the default (16) so that we can avoid OOMs.
+    -->
+    <SignToolRepackParallelism>10</SignToolRepackParallelism>
+    <SignToolRepackMaximumParallelFileSize>64</SignToolRepackMaximumParallelFileSize>
   </PropertyGroup>
 
   <!--
     Non-default certificates.
   -->
   <ItemGroup>
+    <ItemsToSign Include="$(ArtifactsPackagesDir)**\*.tgz" />
+    <ItemsToSign Include="$(VisualStudioSetupOutputPath)**\*.zip" />
+
     <!-- Expression Compiler dependencies that run in remote debugger must be signed with Microsoft101240624 certificate in order to work on Windows 10S -->
 
-    <FileSignInfo Include="Microsoft.CodeAnalysis.ExpressionEvaluator.ExpressionCompiler.dll" CertificateName="Microsoft101240624"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.CSharp.ExpressionEvaluator.ExpressionCompiler.dll" CertificateName="Microsoft101240624"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator.ExpressionCompiler.dll" CertificateName="Microsoft101240624"/>
+    <!--
+    <FileSignInfo Include="Qtyi.CodeAnalysis.ExpressionEvaluator.ExpressionCompiler.dll" CertificateName="Microsoft101240624"/>
+    <FileSignInfo Include="Qtyi.CodeAnalysis.[LangName].ExpressionEvaluator.ExpressionCompiler.dll" CertificateName="Microsoft101240624"/>
 
-    <FileSignInfo Include="Microsoft.CodeAnalysis.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETStandard,Version=v1.3" CertificateName="Microsoft101240624"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.CSharp.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETStandard,Version=v1.3" CertificateName="Microsoft101240624"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETStandard,Version=v1.3" CertificateName="Microsoft101240624"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.ExpressionEvaluator.FunctionResolver.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETStandard,Version=v1.3" CertificateName="Microsoft101240624"/>
-
-    <FileSignInfo Include="Microsoft.CodeAnalysis.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETFramework,Version=v2.0" CertificateName="MicrosoftWin8WinBlue"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.CSharp.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETFramework,Version=v2.0" CertificateName="MicrosoftWin8WinBlue"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.VisualBasic.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETFramework,Version=v2.0" CertificateName="MicrosoftWin8WinBlue"/>
-    <FileSignInfo Include="Microsoft.CodeAnalysis.ExpressionEvaluator.FunctionResolver.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETFramework,Version=v4.5" CertificateName="MicrosoftWin8WinBlue"/>
+    <FileSignInfo Include="Qtyi.CodeAnalysis.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETStandard,Version=v1.3" CertificateName="Microsoft101240624"/>
+    <FileSignInfo Include="Qtyi.CodeAnalysis.ExpressionEvaluator.FunctionResolver.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETStandard,Version=v1.3" CertificateName="Microsoft101240624"/>
+    <FileSignInfo Include="Qtyi.CodeAnalysis.[LangName].ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETStandard,Version=v1.3" CertificateName="Microsoft101240624"/>
+    
+    <FileSignInfo Include="Qtyi.CodeAnalysis.ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETFramework,Version=v2.0" CertificateName="MicrosoftWin8WinBlue"/>
+    <FileSignInfo Include="Qtyi.CodeAnalysis.ExpressionEvaluator.FunctionResolver.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETFramework,Version=v4.5" CertificateName="MicrosoftWin8WinBlue"/>
+    <FileSignInfo Include="Qtyi.CodeAnalysis.[LangName].ExpressionEvaluator.ResultProvider.dll" PublicKeyToken="31bf3856ad364e35" TargetFramework=".NETFramework,Version=v2.0" CertificateName="MicrosoftWin8WinBlue"/>
+    -->
 
     <!-- Sign 3rd party dlls with 3rd party cert -->
     <FileSignInfo Include="ICSharpCode.Decompiler.dll" CertificateName="3PartySHA2" />
@@ -42,6 +50,7 @@
     <FileSignInfo Include="Nerdbank.Streams.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="Newtonsoft.Json.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="Validation.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="Humanizer.dll" CertificateName="3PartySHA2" />
 
     <!-- Sign VS/Microsoft dlls we crossgen'd and included in the vsix for our .NET remote host with Microsoft cert -->
     <FileSignInfo Include="Microsoft.CodeAnalysis.Elfie.dll" CertificateName="MicrosoftSHA2" />

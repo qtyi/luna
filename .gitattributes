@@ -65,8 +65,8 @@
 #*.RTF   diff=astextplain
 
 # Generated files
-src/Compilers/Lua/Portable/Generated/*                  linguist-generated=true
-src/Compilers/Lua/Portable/CSharpResources.Designer.cs  linguist-generated=true
-src/Compilers/MoonScript/Portable/Generated/*             linguist-generated=true
-src/Compilers/MoonScript/Portable/VBResources.Designer.vb linguist-generated=true
+src/Compilers/CSharp/Portable/Generated/*                  linguist-generated=true
+src/Compilers/CSharp/Portable/CSharpResources.Designer.cs  linguist-generated=true
+src/Compilers/VisualBasic/Portable/Generated/*             linguist-generated=true
+src/Compilers/VisualBasic/Portable/VBResources.Designer.vb linguist-generated=true
 *.xlf linguist-generated=true
