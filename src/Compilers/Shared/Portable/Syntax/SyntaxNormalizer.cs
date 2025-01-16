@@ -4,12 +4,8 @@
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
-
-using ThisSyntaxRewriter = LuaSyntaxRewriter;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax;
-
-using ThisSyntaxRewriter = MoonScriptSyntaxRewriter;
 #endif
 
 internal class SyntaxNormalizer : ThisSyntaxRewriter

@@ -2,7 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using Luna.Compilers.Generators.Model;
 
 namespace Luna.Compilers.Generators;
@@ -25,12 +24,12 @@ internal abstract class TreeFileWriter<TTree, TTreeType> : IndentWriter
     /// <summary>
     /// The tree this file writer work for.
     /// </summary>
-    protected TTree Tree => this._tree;
+    protected TTree Tree => _tree;
     /// <summary>
     /// Used to get parent tree type of every tree types in <see cref="Tree"/>.
     /// </summary>
-    protected IDictionary<string, string?> ParentMap => this._parentMap;
-    protected ILookup<string, string> ChildMap => this._childMap;
+    protected IDictionary<string, string?> ParentMap => _parentMap;
+    protected ILookup<string, string> ChildMap => _childMap;
 
     /// <inheritdoc cref="TreeFileWriter{TTree, TTreeType}.TreeFileWriter(TextWriter, int, char, TTree)"/>
     protected TreeFileWriter(TextWriter writer, TTree tree) : this(writer, 4, ' ', tree) { }
@@ -60,8 +59,8 @@ internal abstract class TreeFileWriter<TTree, TTreeType> : IndentWriter
     {
         if (typeName == derivedTypeName)
             return true;
-        else if (derivedTypeName is not null && this._parentMap.TryGetValue(derivedTypeName, out var baseType))
-            return this.IsDerivedType(typeName, baseType);
+        else if (derivedTypeName is not null && _parentMap.TryGetValue(derivedTypeName, out var baseType))
+            return IsDerivedType(typeName, baseType);
         else
             return false;
     }
@@ -72,6 +71,6 @@ internal abstract class TreeFileWriter<TTree, TTreeType> : IndentWriter
     /// <param name="typeName">Name of the type that is match.</param>
     /// <returns>A type with name match <paramref name="typeName"/>.</returns>
     protected TTreeType? GetTreeType(string? typeName)
-        => typeName is not null && this._typeMap.TryGetValue(typeName, out var type) ? type : default;
+        => typeName is not null && _typeMap.TryGetValue(typeName, out var type) ? type : default;
     #endregion
 }

@@ -16,15 +16,15 @@ public readonly struct ForInStatementInfo : IEquatable<ForInStatementInfo>
     private readonly SymbolInfo _initialValueInfo;
     private readonly SymbolInfo _closingValueInfo;
 
-    public SymbolInfo ControlVariableInfo => this._controlVariableInfo;
+    public SymbolInfo ControlVariableInfo => _controlVariableInfo;
 
-    public SymbolInfo IteratorFunctionInfo => this._iteratorFunctionInfo;
+    public SymbolInfo IteratorFunctionInfo => _iteratorFunctionInfo;
 
-    public SymbolInfo StateInfo => this._stateInfo;
+    public SymbolInfo StateInfo => _stateInfo;
 
-    public SymbolInfo InitialValueInfo => this._initialValueInfo;
+    public SymbolInfo InitialValueInfo => _initialValueInfo;
 
-    public SymbolInfo ClosingValueInfo => this._closingValueInfo;
+    public SymbolInfo ClosingValueInfo => _closingValueInfo;
 
     public ForInStatementInfo(
         SymbolInfo controlVariableInfo,
@@ -33,28 +33,28 @@ public readonly struct ForInStatementInfo : IEquatable<ForInStatementInfo>
         SymbolInfo initialValueInfo,
         SymbolInfo closingValueInfo)
     {
-        this._controlVariableInfo = controlVariableInfo;
-        this._iteratorFunctionInfo = iteratorFunctionInfo;
-        this._stateInfo = stateInfo;
-        this._initialValueInfo = initialValueInfo;
-        this._closingValueInfo = closingValueInfo;
+        _controlVariableInfo = controlVariableInfo;
+        _iteratorFunctionInfo = iteratorFunctionInfo;
+        _stateInfo = stateInfo;
+        _initialValueInfo = initialValueInfo;
+        _closingValueInfo = closingValueInfo;
     }
 
-    public override bool Equals(object? obj) => obj is ForInStatementInfo info && this.Equals(info);
+    public override bool Equals(object? obj) => obj is ForInStatementInfo info && Equals(info);
 
     public bool Equals(ForInStatementInfo other) =>
-        this._controlVariableInfo.Equals(other._controlVariableInfo) &&
-        this._iteratorFunctionInfo.Equals(other._iteratorFunctionInfo) &&
-        this._stateInfo.Equals(other._stateInfo) &&
-        this._initialValueInfo.Equals(other._initialValueInfo) &&
-        this._closingValueInfo.Equals(other._closingValueInfo);
+        _controlVariableInfo.Equals(other._controlVariableInfo) &&
+        _iteratorFunctionInfo.Equals(other._iteratorFunctionInfo) &&
+        _stateInfo.Equals(other._stateInfo) &&
+        _initialValueInfo.Equals(other._initialValueInfo) &&
+        _closingValueInfo.Equals(other._closingValueInfo);
 
     public override int GetHashCode() =>
         Hash.CombineValues(ImmutableArray.Create(
-            this._controlVariableInfo,
-            this._iteratorFunctionInfo,
-            this._stateInfo,
-            this._initialValueInfo,
-            this._closingValueInfo
+            _controlVariableInfo,
+            _iteratorFunctionInfo,
+            _stateInfo,
+            _initialValueInfo,
+            _closingValueInfo
         ));
 }

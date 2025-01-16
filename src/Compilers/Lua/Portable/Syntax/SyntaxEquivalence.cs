@@ -6,18 +6,18 @@ using Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.Lua;
 
-using InternalSyntax = Syntax.InternalSyntax;
+using SyntaxToken = Syntax.InternalSyntax.SyntaxToken;
 
 partial class SyntaxEquivalence
 {
     private static partial bool AreTokensEquivalentCore(GreenNode before, GreenNode after, SyntaxKind kind) =>
         kind switch
         {
-            SyntaxKind.IdentifierToken => ((InternalSyntax.SyntaxToken)before).ValueText == ((InternalSyntax.SyntaxToken)after).ValueText,
+            SyntaxKind.IdentifierToken => ((SyntaxToken)before).ValueText == ((SyntaxToken)after).ValueText,
 
             SyntaxKind.NumericLiteralToken or
             SyntaxKind.StringLiteralToken or
-            SyntaxKind.MultiLineRawStringLiteralToken => ((InternalSyntax.SyntaxToken)before).Text == ((InternalSyntax.SyntaxToken)after).Text,
+            SyntaxKind.MultiLineRawStringLiteralToken => ((SyntaxToken)before).Text == ((SyntaxToken)after).Text,
 
             _ => true
         };

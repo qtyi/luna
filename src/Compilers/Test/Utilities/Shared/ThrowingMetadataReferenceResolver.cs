@@ -21,7 +21,7 @@ public sealed class ThrowingMetadataReferenceResolver : MetadataReferenceResolve
 
     public MetadataReferenceResolver? Resolver { get; }
 
-    public ThrowingMetadataReferenceResolver(MetadataReferenceResolver? resolver = null) => this.Resolver = resolver;
+    public ThrowingMetadataReferenceResolver(MetadataReferenceResolver? resolver = null) => Resolver = resolver;
 
     public override bool Equals(object? other) => throw new NotImplementedException();
 
@@ -29,10 +29,10 @@ public sealed class ThrowingMetadataReferenceResolver : MetadataReferenceResolve
 
     public override ImmutableArray<PortableExecutableReference> ResolveReference(string reference, string? baseFilePath, MetadataReferenceProperties properties)
     {
-        if (this.Resolver is null)
+        if (Resolver is null)
             throw new NotImplementedException();
 
-        return this.Resolver.ResolveReference(reference, baseFilePath, properties);
+        return Resolver.ResolveReference(reference, baseFilePath, properties);
     }
 
 }

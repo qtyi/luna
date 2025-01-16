@@ -24,7 +24,7 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
-    <PackageReference Include="Microsoft.DiaSymReader" Aliases="DSR"/>
+    <PackageReference Include="Microsoft.DiaSymReader" Aliases="DSR" />
     <PackageReference Include="Microsoft.DiaSymReader.PortablePdb" />
     <PackageReference Include="Microsoft.DiaSymReader.Converter" />
     <PackageReference Include="Microsoft.DiaSymReader.Converter.Xml" />
@@ -40,9 +40,9 @@
     <PackageReference Include="System.IO.FileSystem.Primitives" />
     <PackageReference Include="System.Text.Encoding.Extensions" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <ProjectReference Include="..\..\Compilers\Test\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
+    <ProjectReference Include="..\..\Compilers\Test\Utilities\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
   </ItemGroup>
 
   <Import Project="$(RepositoryEngineeringDir)targets\DiaSymReaderNative.targets" />

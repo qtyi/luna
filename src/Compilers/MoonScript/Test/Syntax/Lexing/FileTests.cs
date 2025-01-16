@@ -18,7 +18,7 @@ public class FileTests : LexingTestBase
 
     public FileTests(ITestOutputHelper output)
     {
-        this.Output = output;
+        Output = output;
     }
 
     public static IEnumerable<object[]> TestSources { get; } =

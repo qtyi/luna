@@ -2,11 +2,9 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
 using Microsoft.Cci;
 using Microsoft.CodeAnalysis;
-using Qtyi.CodeAnalysis.Symbols;
-using Roslyn.Utilities;
+using Microsoft.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
@@ -14,45 +12,60 @@ namespace Qtyi.CodeAnalysis.Lua.Symbols;
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
 #endif
 
-partial class TypeSymbol : ITypeSymbolInternal
+/// <summary>
+/// A TypeSymbol is a base class for all the symbols that represent a type.
+/// </summary>
+abstract partial class TypeSymbol : NamespaceOrTypeSymbol, ITypeSymbolInternal
 {
-    /// <inheritdoc cref="ModuleSymbol()"/>
+    /// <inheritdoc cref="NamespaceOrTypeSymbol()"/>
     internal TypeSymbol() { }
 
-    public TypeKind TypeKind => this.TypeKindCore switch
+    public virtual TypeKind TypeKind
     {
-        Microsoft.CodeAnalysis.TypeKind.Unknown => TypeKind.Unknown,
-        Microsoft.CodeAnalysis.TypeKind.Array => TypeKind.Array,
-        Microsoft.CodeAnalysis.TypeKind.Dynamic => TypeKind.Dynamic,
-        Microsoft.CodeAnalysis.TypeKind.Error => TypeKind.Error,
-
-        Microsoft.CodeAnalysis.TypeKind.Class or
-        Microsoft.CodeAnalysis.TypeKind.Delegate or
-        Microsoft.CodeAnalysis.TypeKind.Enum or
-        Microsoft.CodeAnalysis.TypeKind.Interface or
-        Microsoft.CodeAnalysis.TypeKind.Struct or
-        Microsoft.CodeAnalysis.TypeKind.Structure => TypeKind.NamedType,
-
-        _ => TypeKind.Unknown
-    };
-
-    public SpecialType SpecialType => this.SpecialTypeCore;
-
-    internal PrimitiveTypeCode PrimitiveTypeCode =>
-        this.TypeKindCore switch
+        get
         {
-            Microsoft.CodeAnalysis.TypeKind.Pointer => PrimitiveTypeCode.Pointer,
-            Microsoft.CodeAnalysis.TypeKind.FunctionPointer => PrimitiveTypeCode.FunctionPointer,
-            _ => SpecialTypes.GetTypeCode(SpecialType)
-        };
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
-    public bool IsReferenceType => this.IsReferenceTypeCore;
+    public virtual SpecialType SpecialType
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
-    public bool IsValueType => this.IsValueTypeCore;
+    internal virtual PrimitiveTypeCode PrimitiveTypeCode
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
-    public sealed override bool IsGlobalModule => false;
+    public virtual bool IsReferenceType
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
-    #region 定义
+    public virtual bool IsValueType
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
+
+    #region OriginalDefinition
     /// <summary>
     /// 获取此类型符号的原始定义。
     /// </summary>
@@ -60,7 +73,7 @@ partial class TypeSymbol : ITypeSymbolInternal
     /// 此类型符号的原始定义。
     /// 若此类型符号是由另一个类型符号通过类型置换创建的，则返回其最原始的在源代码或元数据中的定义。
     /// </value>
-    public new TypeSymbol OriginalDefinition => this.OriginalTypeSymbolDefinition;
+    public new TypeSymbol OriginalDefinition => OriginalTypeSymbolDefinition;
 
     /// <summary>
     /// 由子类重写，获取此类型符号的原始定义。
@@ -70,13 +83,13 @@ partial class TypeSymbol : ITypeSymbolInternal
     /// </value>
     protected virtual TypeSymbol OriginalTypeSymbolDefinition => this;
 
-    protected sealed override Symbol OriginalSymbolDefinition => this.OriginalTypeSymbolDefinition;
+    protected sealed override Symbol OriginalSymbolDefinition => OriginalTypeSymbolDefinition;
     #endregion
 
-    #region 相等性
+    #region Equals
     internal virtual bool Equals(TypeSymbol? other, TypeCompareKind compareKind) => ReferenceEquals(this, other);
 
-    public sealed override bool Equals(Symbol? other, TypeCompareKind compareKind) => other is TypeSymbol symbol && this.Equals(symbol, compareKind);
+    public sealed override bool Equals(Symbol? other, TypeCompareKind compareKind) => other is TypeSymbol symbol && Equals(symbol, compareKind);
 
     public static bool Equals(TypeSymbol? first, TypeSymbol? second, TypeCompareKind compareKind)
     {
@@ -97,23 +110,13 @@ partial class TypeSymbol : ITypeSymbolInternal
     /// <returns></returns>
     internal abstract TypeSymbol MergeEquivalentTypes(TypeSymbol other, VarianceKind variance);
 
-    #region GetMembers
-    /// <inheritdoc/>
-    internal sealed override ImmutableArray<ModuleSymbol> GetNamespaceMembers() => ImmutableArray<ModuleSymbol>.Empty;
-
-    /// <inheritdoc/>
-    internal sealed override ImmutableArray<ModuleSymbol> GetNamespaceMembers(string name) => ImmutableArray<ModuleSymbol>.Empty;
-    #endregion
-
     #region Public Symbol
-    protected sealed override Microsoft.CodeAnalysis.ITypeSymbol GetITypeSymbolCore() => this.GetITypeSymbol(this.DefaultNullableAnnotation);
-
     internal ITypeSymbol GetITypeSymbol(NullableAnnotation nullableAnnotation)
     {
-        if (nullableAnnotation == this.DefaultNullableAnnotation)
+        if (nullableAnnotation == DefaultNullableAnnotation)
             return (ITypeSymbol)this.ISymbol;
 
-        return this.CreateITypeSymbol(nullableAnnotation);
+        return CreateITypeSymbol(nullableAnnotation);
     }
 
     internal NullableAnnotation DefaultNullableAnnotation => NullableAnnotation.None;
@@ -121,38 +124,7 @@ partial class TypeSymbol : ITypeSymbolInternal
     protected abstract ITypeSymbol CreateITypeSymbol(NullableAnnotation nullableAnnotation);
     #endregion
 
-    #region ModuleSymbol_Event
-    #endregion
-
-    #region ModuleSymbol_Field
-    /// <inheritdoc/>
-    protected sealed override bool IsVolatileCore => throw ExceptionUtilities.Unreachable();
-    #endregion
-
-    #region ModuleSymbol_Method
-    /// <inheritdoc/>
-    protected sealed override bool IsIteratorCore => throw ExceptionUtilities.Unreachable();
-
-    /// <inheritdoc/>
-    protected sealed override bool IsAsyncCore => throw ExceptionUtilities.Unreachable();
-
-    /// <inheritdoc/>
-    protected sealed override int CalculateLocalSyntaxOffsetCore(int declaratorPosition, SyntaxTree declaratorTree) => throw ExceptionUtilities.Unreachable();
-
-    /// <inheritdoc/>
-    protected sealed override Microsoft.CodeAnalysis.Symbols.IMethodSymbolInternal ConstructCore(params Microsoft.CodeAnalysis.Symbols.ITypeSymbolInternal[] typeArguments) => throw ExceptionUtilities.Unreachable();
-    #endregion
-
-    #region ModuleSymbol_Property
-    #endregion
-
     #region ITypeSymbolInternal
-    ITypeSymbol ITypeSymbolInternal.GetITypeSymbol() => this.GetITypeSymbol(this.DefaultNullableAnnotation);
-    #endregion
-
-    #region Microsoft.CodeAnalysis.Symbols.ITypeSymbolInternal
-    Microsoft.CodeAnalysis.TypeKind Microsoft.CodeAnalysis.Symbols.ITypeSymbolInternal.TypeKind => this.TypeKindCore;
-
-    Microsoft.CodeAnalysis.ITypeSymbol Microsoft.CodeAnalysis.Symbols.ITypeSymbolInternal.GetITypeSymbol() => this.GetITypeSymbol(this.DefaultNullableAnnotation);
+    ITypeSymbol ITypeSymbolInternal.GetITypeSymbol() => GetITypeSymbol(DefaultNullableAnnotation);
     #endregion
 }

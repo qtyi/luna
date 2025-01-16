@@ -83,11 +83,16 @@
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\aacorlib\Key.snk" Link="NetFX\aacorlib\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\minasync.dll" Link="NetFX\Minimal\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\mincorlib.dll" Link="NetFX\Minimal\%(FileName)%(Extension)" />
+    <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\PortableProfile7\mscorlib.dll" Link="NetFX\PortableProfile7\%(FileName)%(Extension)" />
+    <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\PortableProfile7\System.Runtime.dll" Link="NetFX\PortableProfile7\%(FileName)%(Extension)" />
+    <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\WinRt\System.Runtime.WindowsRuntime.dll" Link="NetFX\WinRt\%(FileName)%(Extension)" />
+    <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\WinRt\System.Runtime.WindowsRuntime.UI.Xaml.dll" Link="NetFX\WinRt\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\build.cmd" Link="NetFX\Minimal\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\Key.snk" Link="NetFX\Minimal\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\minasync.cs" Link="NetFX\Minimal\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\minasynccorlib.dll" Link="NetFX\Minimal\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\mincorlib.cs" Link="NetFX\Minimal\%(FileName)%(Extension)" />
+    <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\Minimal\mincorlib.cs" Link="NetFX\Minimal\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\ValueTuple\System.ValueTuple.dll" Link="NetFX\ValueTuple\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Metadata\public-and-private.dll" Link="SymbolsTests\Metadata\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CustomModifiers\GenericMethodWithModifiers.dll" Link="SymbolsTests\CustomModifiers\%(FileName)%(Extension)" />
@@ -101,7 +106,6 @@
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CorLibrary\GuidTest2.exe" Link="SymbolsTests\CorLibrary\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CorLibrary\NoMsCorLibRef.dll" Link="SymbolsTests\CorLibrary\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CorLibrary\NoMsCorLibRef.il" Link="SymbolsTests\CorLibrary\%(FileName)%(Extension)" />
-    <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CustomModifiers\CppCli.cpp" Link="SymbolsTests\CustomModifiers\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CustomModifiers\CppCli.dll" Link="SymbolsTests\CustomModifiers\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CustomModifiers\Modifiers.dll" Link="SymbolsTests\CustomModifiers\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CustomModifiers\Modifiers.il" Link="SymbolsTests\CustomModifiers\%(FileName)%(Extension)" />
@@ -188,6 +192,7 @@
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Metadata\MDTestAttributeDefLib.dll" Link="SymbolsTests\Metadata\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Metadata\MDTestAttributeDefLib.vb" Link="SymbolsTests\Metadata\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Metadata\MscorlibNamespacesAndTypes.bsl" Link="SymbolsTests\Metadata\%(FileName)%(Extension)" />
+    <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Metadata\BadDefaultParameterValue.dll" Link="SymbolsTests\Metadata\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Methods\ByRefReturn.dll" Link="SymbolsTests\Methods\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Methods\ByRefReturn.il" Link="SymbolsTests\Methods\%(FileName)%(Extension)" />
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Methods\CSMethods.cs" Link="SymbolsTests\Methods\%(FileName)%(Extension)" />
@@ -369,14 +374,9 @@
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\WinRt\WImpl.il" Link="WinRt\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\WinRt\WImpl.winmd" Link="WinRt\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\PerfTests\VBPerfTest.vb" Link="PerfTests\%(FileName)%(Extension)" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\ValueTuple\ValueTuple.cs" Link="NetFX\ValueTuple\%(FileName)%(Extension)" />
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\NetFX\ValueTuple\TupleElementNamesAttribute.cs" Link="NetFX\ValueTuple\%(FileName)%(Extension)" />
-    <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\CustomModifiers\GenericMethodWithModifiers.cpp" Link="SymbolsTests\CustomModifiers\%(FileName)%(Extension)" />
     <None Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\Metadata\public-and-private.cs" Link="SymbolsTests\Metadata\%(FileName)%(Extension)" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\README.md" Link="Analyzers\%(FileName)%(Extension)" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingAnalyzer.cs" Link="Analyzers\%(FileName)%(Extension)" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\Analyzers\DoNothingGenerator.cs" Link="Analyzers\%(FileName)%(Extension)" />
@@ -384,8 +384,6 @@
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\ResourceLoader.cs" Link="%(FileName)%(Extension)" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestKeys.cs" Link="%(FileName)%(Extension)" />
     <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\TestResources.cs" Link="%(FileName)%(Extension)" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Test\Resources\Core\SymbolsTests\nativeCOFFResources.obj" Link="SymbolsTests\%(FileName)%(Extension)" />
   </ItemGroup>
 

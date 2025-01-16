@@ -10,7 +10,7 @@ partial class SyntaxParser
 {
     protected virtual partial SyntaxDiagnosticInfo GetExpectedTokenError(SyntaxKind expected, SyntaxKind actual, int offset, int width)
     {
-        var code = GetExpectedTokenErrorCode(expected, actual);
+        var code = GetExpectedTokenErrorCode(expected, actual, Options);
         return code switch
         {
             ErrorCode.ERR_SyntaxError =>
@@ -26,7 +26,7 @@ partial class SyntaxParser
     /// </summary>
     /// <returns>对应未得到期望的标记的错误码。</returns>
     /// <inheritdoc cref="SyntaxParser.GetExpectedTokenError(SyntaxKind, SyntaxKind)"/>
-    protected static partial ErrorCode GetExpectedTokenErrorCode(SyntaxKind expected, SyntaxKind actual) =>
+    protected static partial ErrorCode GetExpectedTokenErrorCode(SyntaxKind expected, SyntaxKind actual, ThisParseOptions options) =>
         expected switch
         {
 #warning 需完善未得到期望的标记对应的错误码。
@@ -37,7 +37,7 @@ partial class SyntaxParser
     protected partial TNode CheckFeatureAvailability<TNode>(TNode node, MessageID feature, bool forceWarning/* = false*/)
         where TNode : GreenNode
     {
-        var avaliableVersion = this.Options.LanguageVersion;
+        var avaliableVersion = Options.LanguageVersion;
 
         switch (feature)
         {
@@ -45,13 +45,13 @@ partial class SyntaxParser
                 break;
         };
 
-        var info = feature.GetFeatureAvailabilityDiagnosticInfo(this.Options);
+        var info = feature.GetFeatureAvailabilityDiagnosticInfo(Options);
         if (info is null)
             return node;
 
         if (forceWarning)
-            return this.AddError(node, ErrorCode.WRN_ErrorOverride, info, (int)info.Code);
+            return AddError(node, ErrorCode.WRN_ErrorOverride, info, (int)info.Code);
         else
-            return this.AddError(node, info.Code, info.Arguments);
+            return AddError(node, info.Code, info.Arguments);
     }
 }

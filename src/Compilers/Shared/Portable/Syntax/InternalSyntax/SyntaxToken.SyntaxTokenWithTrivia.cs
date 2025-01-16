@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -15,45 +14,51 @@ partial class SyntaxToken
 {
     internal class SyntaxTokenWithTrivia : SyntaxToken
     {
-        static SyntaxTokenWithTrivia() => ObjectBinder.RegisterTypeReader(typeof(SyntaxTokenWithTrivia), r => new SyntaxTokenWithTrivia(r));
+        protected readonly GreenNode? LeadingField;
+        protected readonly GreenNode? TrailingField;
 
-        protected readonly GreenNode? _leading;
-        protected readonly GreenNode? _trailing;
-
-        internal SyntaxTokenWithTrivia(SyntaxKind kind, GreenNode? leading, GreenNode? trailing) : base(kind) =>
-            InitializeWithTrivia(
-                this, ref this._leading, ref this._trailing,
-                leading, trailing
-            );
-
-        internal SyntaxTokenWithTrivia(SyntaxKind kind, GreenNode? leading, GreenNode? trailing, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations) : base(kind, diagnostics, annotations) =>
-            InitializeWithTrivia(
-                this, ref this._leading, ref this._trailing,
-                leading, trailing
-            );
-
-        internal SyntaxTokenWithTrivia(ObjectReader reader) : base(reader) =>
-            InitializeWithTrivia(
-                this, ref this._leading, ref this._trailing,
-                (GreenNode?)reader.ReadValue(),
-                (GreenNode?)reader.ReadValue()
-            );
-
-        internal override void WriteTo(ObjectWriter writer)
+        internal SyntaxTokenWithTrivia(SyntaxKind kind, GreenNode? leading, GreenNode? trailing) : base(kind)
         {
-            base.WriteTo(writer);
-            writer.WriteValue(this._leading);
-            writer.WriteValue(this._trailing);
+            if (leading is not null)
+            {
+                AdjustFlagsAndWidth(leading);
+                LeadingField = leading;
+            }
+            if (trailing is not null)
+            {
+                AdjustFlagsAndWidth(trailing);
+                TrailingField = trailing;
+            }
         }
 
-        public sealed override GreenNode? GetLeadingTrivia() => this._leading;
+        internal SyntaxTokenWithTrivia(SyntaxKind kind, GreenNode? leading, GreenNode? trailing, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations) : base(kind, diagnostics, annotations)
+        {
+            if (leading is not null)
+            {
+                AdjustFlagsAndWidth(leading);
+                LeadingField = leading;
+            }
+            if (trailing is not null)
+            {
+                AdjustFlagsAndWidth(trailing);
+                TrailingField = trailing;
+            }
+        }
 
-        public sealed override GreenNode? GetTrailingTrivia() => this._trailing;
+        public sealed override GreenNode? GetLeadingTrivia() => LeadingField;
 
-        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics) =>
-            new SyntaxTokenWithTrivia(this.Kind, this.GetLeadingTrivia(), this.GetTrailingTrivia(), diagnostics, this.GetAnnotations());
+        public sealed override GreenNode? GetTrailingTrivia() => TrailingField;
 
-        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations) =>
-            new SyntaxTokenWithTrivia(this.Kind, this.GetLeadingTrivia(), this.GetTrailingTrivia(), this.GetDiagnostics(), annotations);
+        public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia)
+            => new SyntaxTokenWithTrivia(Kind, trivia, TrailingField, GetDiagnostics(), GetAnnotations());
+
+        public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia)
+            => new SyntaxTokenWithTrivia(Kind, LeadingField, trivia, GetDiagnostics(), GetAnnotations());
+
+        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+            => new SyntaxTokenWithTrivia(Kind, GetLeadingTrivia(), GetTrailingTrivia(), diagnostics, GetAnnotations());
+
+        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+            => new SyntaxTokenWithTrivia(Kind, GetLeadingTrivia(), GetTrailingTrivia(), GetDiagnostics(), annotations);
     }
 }

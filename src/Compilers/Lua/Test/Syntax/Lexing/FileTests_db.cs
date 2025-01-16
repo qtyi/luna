@@ -5794,7 +5794,7 @@ partial class FileTests
         V(SyntaxKind.StringLiteralToken, text: "\"div\"", value: ImmutableArray.Create("div"U8.ToArray()));
         V(SyntaxKind.AndKeyword);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.IdentifierToken, text: "a");
         V(SyntaxKind.EqualsEqualsToken);
         V(SyntaxKind.StringLiteralToken, text: "\"mod\"", value: ImmutableArray.Create("mod"U8.ToArray()));
@@ -15522,7 +15522,7 @@ partial class FileTests
         V(SyntaxKind.AndKeyword);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.IdentifierToken, text: "a");
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.EqualsEqualsToken);

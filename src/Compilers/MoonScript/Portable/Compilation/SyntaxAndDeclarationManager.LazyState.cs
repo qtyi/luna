@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Reflection;
 using Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.MoonScript;
@@ -31,11 +30,11 @@ partial class SyntaxAndDeclarationManager
             Debug.Assert(syntaxTrees.All(tree => syntaxTrees[syntaxTreeOrdinalMap[tree]] == tree));
             Debug.Assert(syntaxTrees.SetEquals(modules.Keys.AsImmutable(), EqualityComparer<SyntaxTree>.Default));
 
-            this.SyntaxTrees = syntaxTrees;
-            this.OrdinalMap = syntaxTreeOrdinalMap;
-            this.LoadedSyntaxTreeMap = loadedSyntaxTreeMap;
-            this.Modules = modules;
-            this.DeclarationTable = declarationTable;
+            SyntaxTrees = syntaxTrees;
+            OrdinalMap = syntaxTreeOrdinalMap;
+            LoadedSyntaxTreeMap = loadedSyntaxTreeMap;
+            Modules = modules;
+            DeclarationTable = declarationTable;
         }
     }
 }

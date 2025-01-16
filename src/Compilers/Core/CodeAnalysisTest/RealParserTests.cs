@@ -20,7 +20,7 @@ public class RealParserTests
         const int SampleCount = 31000;
         Parallel.For(0, SampleCount, body =>
         {
-            var source = this.GetRandomDouble();
+            var source = GetRandomDouble();
             var decimalStr = source.ToString();
 
             var success = RealParser.TryParseDecimalDouble(decimalStr, out var result);

@@ -3,17 +3,24 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Luna.Compilers.Generators.ErrorFacts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
 using Roslyn.Utilities;
+using Luna.Compilers.Generators.ErrorFacts;
 
 namespace Luna.Compilers.Generators;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class ErrorFactsGenerator : AbstractSourceGenerator<ImmutableArray<IFieldSymbol>>
 {
+    public const string CategoryName_Fatal = "Fatal";
+    public const string CategoryName_Error = nameof(DiagnosticSeverity.Error);
+    public const string CategoryName_Warning = nameof(DiagnosticSeverity.Warning);
+    public const string CategoryName_Info = nameof(DiagnosticSeverity.Info);
+    public const string CategoryName_Hidden = nameof(DiagnosticSeverity.Hidden);
+
     protected sealed override IncrementalValueProvider<ImmutableArray<IFieldSymbol>> GetRelevantInputs(IncrementalGeneratorInitializationContext context)
     {
         return GetErrorCodeType(context)
@@ -81,23 +88,16 @@ public sealed class ErrorFactsGenerator : AbstractSourceGenerator<ImmutableArray
             }
         }
 
-        ImmutableDictionary<string, ImmutableArray<string>> categorizedErrorCodeNames;
-
-        if (dic.Count == 0)
+        var dicBuilder = ImmutableDictionary.CreateBuilder<string, ImmutableArray<string>>();
+        string[] orderedCategoryNames = [CategoryName_Fatal, CategoryName_Error, CategoryName_Warning, CategoryName_Info, CategoryName_Hidden];
+        foreach (var categoryName in orderedCategoryNames)
         {
-            categorizedErrorCodeNames = ImmutableDictionary<string, ImmutableArray<string>>.Empty;
-        }
-        else
-        {
-            var dicBuilder = ImmutableDictionary.CreateBuilder<string, ImmutableArray<string>>();
-            foreach ((var categoryName, var errorCodeNames) in dic)
-                dicBuilder.Add(categoryName, errorCodeNames.ToImmutableAndFree());
-
-            categorizedErrorCodeNames = dicBuilder.ToImmutable();
+            var errorCodeNames = dic.TryGetValue(categoryName, out var builder) ? builder.ToImmutableAndFree() : [];
+            dicBuilder.Add(categoryName, errorCodeNames);
         }
         dic.Free();
 
-        GenerateOutputs(context, thisLanguageName!, categorizedErrorCodeNames);
+        GenerateOutputs(context, thisLanguageName!, dicBuilder.ToImmutable());
     }
 
     private bool TryCategorizeErrorCodeField(SourceProductionContext context, IFieldSymbol field,
@@ -107,7 +107,12 @@ public sealed class ErrorFactsGenerator : AbstractSourceGenerator<ImmutableArray
         errorCodeName = field.Name;
         if (!TryCategorizeErrorCodeName(errorCodeName, out categoryName))
         {
-            ReportUncategorizableErrorCodeField(context, field);
+            Debug.Assert(field.HasConstantValue, "Public enum field should has constant value.");
+
+            // Do not report diagnostic if const value of field is internal error code.
+            if (field.ConstantValue is not InternalErrorCode.Void and not InternalErrorCode.Unknown)
+                ReportUncategorizableErrorCodeField(context, field);
+
             return false;
         }
         return true;
@@ -122,15 +127,15 @@ public sealed class ErrorFactsGenerator : AbstractSourceGenerator<ImmutableArray
         [NotNullWhen(true)] out string? categoryName)
     {
         if (errorCodeName.StartsWith("ERR"))
-            categoryName = "Error";
+            categoryName = CategoryName_Error;
         else if (errorCodeName.StartsWith("WRN_"))
-            categoryName = "Warning";
+            categoryName = CategoryName_Warning;
         else if (errorCodeName.StartsWith("FTL_"))
-            categoryName = "Fatal";
+            categoryName = CategoryName_Fatal;
         else if (errorCodeName.StartsWith("INF_"))
-            categoryName = "Info";
+            categoryName = CategoryName_Info;
         else if (errorCodeName.StartsWith("HDN_"))
-            categoryName = "Hidden";
+            categoryName = CategoryName_Hidden;
         else
             categoryName = null;
 
@@ -139,7 +144,11 @@ public sealed class ErrorFactsGenerator : AbstractSourceGenerator<ImmutableArray
 
     private void GenerateOutputs(SourceProductionContext context, string thisLanguageName, ImmutableDictionary<string, ImmutableArray<string>> categorizedErrorCodeNames)
     {
-        WriteAndAddSource(context, ErrorFactsSourceWriter.WriteMain, new ErrorFactsSourceProductionContext(thisLanguageName, categorizedErrorCodeNames), "ErrorFacts.Generated.cs");
+        var errorFactsContext = new ErrorFactsSourceProductionContext(thisLanguageName, categorizedErrorCodeNames);
+        var hintName = "ErrorFacts.Generated.cs";
+
+        AddSource(context, new ErrorFactsSourceProducer(errorFactsContext).Produce(), hintName);
+        //WriteAndAddSource(context, ErrorFactsSourceWriter.WriteMain, errorFactsContext, hintName);
     }
 }
 

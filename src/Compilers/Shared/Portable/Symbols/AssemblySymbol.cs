@@ -8,21 +8,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Symbols;
 using Microsoft.Cci;
-using Qtyi.CodeAnalysis.Symbols;
 using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
-
-using ThisDiagnosticInfo = LuaDiagnosticInfo;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
-
-using ThisDiagnosticInfo = MoonScriptDiagnosticInfo;
 #endif
 
-partial class AssemblySymbol : IAssemblySymbolInternal
+abstract partial class AssemblySymbol : Symbol, IAssemblySymbolInternal
 {
     /// <summary>
     /// Gets the name of the assembly.
@@ -36,7 +32,7 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     /// the assembly-level attributes that contain the version number and other assembly
     /// information.
     /// </remarks>
-    public override string Name => this.Identity.Name;
+    public override string Name => Identity.Name;
 
     /// <value>Returns <see cref="SymbolKind.Assembly"/>.</value>
     /// <inheritdoc/>
@@ -53,15 +49,10 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     /// <inheritdoc/>
     public sealed override NamedTypeSymbol? ContainingType => null;
 
-    /// <remarks>Assemblies are always not contained by a module.</remarks>
-    /// <value>Returns <see langword="null"/>.</value>
-    /// <inheritdoc/>
-    public sealed override ModuleSymbol? ContainingModule => null;
-
     /// <remarks>Assemblies are always not contained by a .NET module.</remarks>
     /// <value>Returns <see langword="null"/>.</value>
     /// <inheritdoc/>
-    internal sealed override NetmoduleSymbol? ContainingNetmodule => null;
+    internal sealed override ModuleSymbol? ContainingModule => null;
 
     /// <remarks>Assemblies are always not contained by an assembly.</remarks>
     /// <value>Returns <see langword="null"/>.</value>
@@ -114,7 +105,7 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     /// <para>返回值至少包含一个项。</para>
     /// <para>返回值第一项表示此程序集中包含清单的主模块。</para>
     /// </value>
-    public abstract ImmutableArray<NetmoduleSymbol> Netmodules { get; }
+    public abstract ImmutableArray<ModuleSymbol> Modules { get; }
 
     /// <summary>
     /// 获取此程序集符号的目标机器架构。
@@ -122,10 +113,10 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     /// <value>
     /// 此程序集符号的目标机器架构。
     /// </value>
-    internal Machine Machine => this.Netmodules[0].Machine;
+    internal Machine Machine => Modules[0].Machine;
 
-    /// <inheritdoc cref="NetmoduleSymbol.Bit32Required"/>
-    internal bool Bit32Required => this.Netmodules[0].Bit32Required;
+    /// <inheritdoc cref="ModuleSymbol.Bit32Required"/>
+    internal bool Bit32Required => Modules[0].Bit32Required;
 
     /// <summary>
     /// 获取一个值，指示此程序集是否缺失。
@@ -181,16 +172,16 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     {
         get
         {
-            Debug.Assert(this._corLibrary is not null);
-            return this._corLibrary;
+            Debug.Assert(_corLibrary is not null);
+            return _corLibrary;
         }
     }
 
     [MemberNotNull(nameof(_corLibrary))]
     internal void SetCorLibrary(AssemblySymbol corLibrary)
     {
-        Debug.Assert(this._corLibrary is null);
-        this._corLibrary = corLibrary;
+        Debug.Assert(_corLibrary is null);
+        _corLibrary = corLibrary;
     }
     #endregion
 
@@ -243,21 +234,7 @@ partial class AssemblySymbol : IAssemblySymbolInternal
         return null;
     }
 
-    internal ErrorTypeSymbol CreateCycleInTypeForwarderErrorTypeSymbol(ref MetadataTypeName emittedName)
-    {
-        DiagnosticInfo diagnosticInfo = new ThisDiagnosticInfo(ErrorCode.ERR_CycleInTypeForwarder, emittedName.FullName, this.Name);
-        return new MissingMetadataTypeSymbol.TopLevel(this.Netmodules[0], ref emittedName, diagnosticInfo);
-    }
-
-    internal ErrorTypeSymbol CreateMultipleForwardingErrorTypeSymbol(ref MetadataTypeName emittedName, NetmoduleSymbol forwardingModule, AssemblySymbol destination1, AssemblySymbol destination2)
-    {
-        var diagnosticInfo = new ThisDiagnosticInfo(ErrorCode.ERR_TypeForwardedToMultipleAssemblies, forwardingModule, this, emittedName.FullName, destination1, destination2);
-        return new MissingMetadataTypeSymbol.TopLevel(forwardingModule, ref emittedName, diagnosticInfo);
-    }
-
     internal abstract IEnumerable<NamedTypeSymbol> GetAllTopLevelForwardedTypes();
-
-#nullable disable
 
     /// <summary>
     /// Lookup declaration for predefined CorLib type in this Assembly.
@@ -336,7 +313,7 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     /// Gets the symbol for the pre-defined type from core library associated with this assembly.
     /// </summary>
     /// <returns>The symbol for the pre-defined type or an error type if the type is not defined in the core library.</returns>
-    internal NamedTypeSymbol GetSpecialType(SpecialType type) => this.CorLibrary.GetDeclaredSpecialType(type);
+    internal NamedTypeSymbol GetSpecialType(SpecialType type) => CorLibrary.GetDeclaredSpecialType(type);
 
     /// <summary>
     /// Gets a type symbol for the dynamic type.
@@ -344,7 +321,14 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     /// <value>
     /// The type symbol for the dynamic type.
     /// </value>
-    internal static TypeSymbol DynamicType => DynamicTypeSymbol.Instance;
+    internal static TypeSymbol DynamicType
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
     /// <summary>
     /// A named type symbol for the .NET <see cref="object"/> type.
@@ -353,18 +337,18 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     /// The named type symbol for the .NET <see cref="object"/> type, which could have a TypeKind of
     /// <see cref="TypeKind.Error"/> if there was no COR Library in a compilation using the assembly.
     /// </value>
-    internal NamedTypeSymbol ObjectType => this.GetSpecialType(SpecialType.System_Object);
+    internal NamedTypeSymbol ObjectType => GetSpecialType(SpecialType.System_Object);
 
     /// <summary>
     /// Get symbol for predefined type from Cor Library used by this assembly.
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    internal NamedTypeSymbol GetPrimitiveType(PrimitiveTypeCode type) => this.GetSpecialType(SpecialTypes.GetTypeFromMetadataName(type));
+    internal NamedTypeSymbol GetPrimitiveType(PrimitiveTypeCode type) => GetSpecialType(SpecialTypes.GetTypeFromMetadataName(type));
 
     public NamedTypeSymbol? GetTypeByMetadataName(string fullyQualifiedMetadataName)
     {
-#warning 未完成
+#warning Not implemented.
         throw new NotImplementedException();
     }
 
@@ -372,10 +356,24 @@ partial class AssemblySymbol : IAssemblySymbolInternal
     internal AssemblySymbol() { }
 
     #region IAssemblySymbolInternal
-    IAssemblySymbolInternal IAssemblySymbolInternal.CorLibrary => this.CorLibrary;
-    #endregion
+    IAssemblySymbolInternal IAssemblySymbolInternal.CorLibrary => CorLibrary;
+    IEnumerable<ImmutableArray<byte>> IAssemblySymbolInternal.GetInternalsVisibleToPublicKeys(string simpleName)
+    {
+#warning Not implemented.
+        throw new NotImplementedException();
+    }
 
-    #region Microsoft.CodeAnalysis.Symbols.IAssemblySymbolInternal
-    Microsoft.CodeAnalysis.Symbols.IAssemblySymbolInternal Microsoft.CodeAnalysis.Symbols.IAssemblySymbolInternal.CorLibrary => this.CorLibrary;
+    IEnumerable<string> IAssemblySymbolInternal.GetInternalsVisibleToAssemblyNames()
+    {
+#warning Not implemented.
+        throw new NotImplementedException();
+    }
+
+    bool IAssemblySymbolInternal.AreInternalsVisibleToThisAssembly(IAssemblySymbolInternal? otherAssembly)
+    {
+#warning Not implemented.
+        throw new NotImplementedException();
+    }
+
     #endregion
 }

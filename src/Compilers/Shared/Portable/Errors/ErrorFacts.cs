@@ -14,8 +14,6 @@ using Microsoft.CodeAnalysis;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Language not supported.
 #endif
 
 #warning 未实现。
@@ -28,7 +26,42 @@ internal static partial class ErrorFacts
 
     private static partial ImmutableDictionary<ErrorCode, string> CreateCategoriesMap();
 
-    private static string GetId(ErrorCode errorCode) => MessageProvider.Instance.GetIdForErrorCode((int)errorCode);
+    private static string GetId(ErrorCode errorCode) => ThisMessageProvider.Instance.GetIdForErrorCode((int)errorCode);
+
+    /// <summary>
+    /// Gets a value indicates that specified error code value represents a fatal error.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="code"/> represents a fatal error; otherwise, <see langword="false"/>.</returns>
+    public static partial bool IsFatal(ErrorCode code); // Implementation is in generated code.
+
+    /// <summary>
+    /// Gets a value indicates that specified error code value represents a normal error.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="code"/> represents a normal error; otherwise, <see langword="false"/>.</returns>
+    public static partial bool IsError(ErrorCode code); // Implementation is in generated code.
+
+    /// <summary>
+    /// Gets a value indicates that specified error code value represents a warning.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="code"/> represents a warning; otherwise, <see langword="false"/>.</returns>
+    public static partial bool IsWarning(ErrorCode code); // Implementation is in generated code.
+
+    /// <summary>
+    /// Gets a value indicates that specified error code value represents an info that does not indicate a problem.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="code"/> represents an info; otherwise, <see langword="false"/>.</returns>
+    public static partial bool IsInfo(ErrorCode code); // Implementation is in generated code.
+
+    /// <summary>
+    /// Gets a value indicates that specified error code value represents an issue.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="code"/> represents an issue; otherwise, <see langword="false"/>.</returns>
+    public static partial bool IsHidden(ErrorCode code); // Implementation is in generated code.
 
     internal static DiagnosticSeverity GetSeverity(ErrorCode code)
     {
@@ -49,7 +82,7 @@ internal static partial class ErrorFacts
     private static ResourceManager? s_resourceManager;
     [MemberNotNull(nameof(s_resourceManager))]
     private static ResourceManager ResourceManager =>
-        s_resourceManager ??= new(typeof(ThisResource).FullName, typeof(ErrorCode).GetTypeInfo().Assembly);
+        s_resourceManager ??= new(typeof(ThisResources).FullName!, typeof(ErrorCode).GetTypeInfo().Assembly);
 
     public static string GetMessage(MessageID code, CultureInfo? culture)
     {

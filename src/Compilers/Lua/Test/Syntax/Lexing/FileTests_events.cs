@@ -1359,7 +1359,7 @@ partial class FileTests
         V(SyntaxKind.IdentifierToken, text: "assert");
         V(SyntaxKind.OpenParenToken);
         V(SyntaxKind.IdentifierToken, text: "a");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "2", value: 2L);
         V(SyntaxKind.EqualsEqualsToken);
         V(SyntaxKind.IdentifierToken, text: "a");
@@ -6342,7 +6342,7 @@ partial class FileTests
         V(SyntaxKind.IdentifierToken, text: "assert");
         V(SyntaxKind.OpenParenToken);
         V(SyntaxKind.IdentifierToken, text: "a");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "2", value: 2L);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.EqualsEqualsToken);

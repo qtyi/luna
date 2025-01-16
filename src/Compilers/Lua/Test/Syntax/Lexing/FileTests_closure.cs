@@ -1114,7 +1114,7 @@ partial class FileTests
         V(SyntaxKind.DoKeyword);
         V(SyntaxKind.IfKeyword);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.EqualsEqualsToken);
         V(SyntaxKind.NumericLiteralToken, text: "0", value: 0L);
@@ -1146,7 +1146,7 @@ partial class FileTests
         V(SyntaxKind.EndKeyword);
         V(SyntaxKind.ElseIfKeyword);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.EqualsEqualsToken);
         V(SyntaxKind.NumericLiteralToken, text: "1", value: 1L);
@@ -1185,7 +1185,7 @@ partial class FileTests
         V(SyntaxKind.EndKeyword);
         V(SyntaxKind.ElseIfKeyword);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.EqualsEqualsToken);
         V(SyntaxKind.NumericLiteralToken, text: "2", value: 2L);
@@ -1266,7 +1266,7 @@ partial class FileTests
         V(SyntaxKind.CloseParenToken);
         V(SyntaxKind.EqualsEqualsToken);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.AndKeyword);
         V(SyntaxKind.IdentifierToken, text: "a");
@@ -3575,7 +3575,7 @@ partial class FileTests
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.IdentifierToken, text: "i");
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
@@ -3635,7 +3635,7 @@ partial class FileTests
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.IdentifierToken, text: "i");
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
@@ -3709,7 +3709,7 @@ partial class FileTests
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.IdentifierToken, text: "i");
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
@@ -3855,7 +3855,7 @@ partial class FileTests
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.IdentifierToken, text: "i");
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.NumericLiteralToken, text: "3", value: 3L);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);

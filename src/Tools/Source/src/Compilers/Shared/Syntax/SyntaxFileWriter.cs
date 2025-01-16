@@ -4,7 +4,6 @@
 
 namespace Luna.Compilers.Generators.Syntax;
 
-using Luna.Compilers.Generators.Model;
 using Model;
 
 /// <summary>
@@ -19,7 +18,7 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTree
     protected SyntaxFileWriter(TextWriter writer, SyntaxSourceProductionContext context) : base(writer, context.SyntaxTree)
     {
         ThisLanguageName = context.ThisLanguageName;
-        this._nodeMap = context.SyntaxTree.Types.OfType<Node>().ToDictionary(static n => n.Name);
+        _nodeMap = context.SyntaxTree.Types.OfType<Node>().ToDictionary(static n => n.Name);
     }
 
     #region 帮助方法
@@ -89,7 +88,7 @@ internal abstract class SyntaxFileWriter : TreeFileWriter<SyntaxTree, SyntaxTree
 
     protected bool IsNode(string typeName)
     {
-        return this.ParentMap.ContainsKey(typeName);
+        return ParentMap.ContainsKey(typeName);
     }
 
     protected Node? GetNode(string? typeName)

@@ -1,0 +1,25 @@
+// Microsoft.CodeAnalysis.CompilationOptions
+P:Microsoft.CodeAnalysis.CompilationOptions.OutputKind; Use 'Qtyi.CodeAnalysis.CompilationOptions.OutputKind' instead
+M:Microsoft.CodeAnalysis.CompilationOptions.WithOutputKind(Microsoft.CodeAnalysis.OutputKind); Use overload that takes Qtyi.CodeAnalysis.OutputKind
+M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithOutputKind(Microsoft.CodeAnalysis.OutputKind); Use overload that takes Qtyi.CodeAnalysis.OutputKind
+
+// Microsoft.CodeAnalysis.SemanticModel
+M:Microsoft.CodeAnalysis.SemanticModel.GetAliasInfoCore(Microsoft.CodeAnalysis.SyntaxNode,System.Threading.CancellationToken); Luna do not support alias.
+M:Microsoft.CodeAnalysis.SemanticModel.GetSpeculativeAliasInfoCore(System.Int32,Microsoft.CodeAnalysis.SyntaxNode,Microsoft.CodeAnalysis.SpeculativeBindingOption); Luna do not support alias.
+
+// Microsoft.CodeAnalysis.SymbolVisitor
+M:Microsoft.CodeAnalysis.SymbolVisitor.VisitAlias(Microsoft.CodeAnalysis.IAliasSymbol); Luna do not support alias.
+M:Microsoft.CodeAnalysis.SymbolVisitor.VisitPointerType(Microsoft.CodeAnalysis.IPointerTypeSymbol); Luna do not support pointer type.
+M:Microsoft.CodeAnalysis.SymbolVisitor.VisitRangeVariable(Microsoft.CodeAnalysis.IRangeVariableSymbol); Luna do not support range variable.
+M:Microsoft.CodeAnalysis.SymbolVisitor.VisitDiscard(Microsoft.CodeAnalysis.IDiscardSymbol); Luna do not support discard.
+M:Microsoft.CodeAnalysis.SymbolVisitor.VisitFunctionPointerType(Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol); Luna do not support function pointer type.
+M:Microsoft.CodeAnalysis.SymbolVisitor`1.VisitAlias(Microsoft.CodeAnalysis.IAliasSymbol); Luna do not support alias.
+M:Microsoft.CodeAnalysis.SymbolVisitor`1.VisitPointerType(Microsoft.CodeAnalysis.IPointerTypeSymbol); Luna do not support pointer type.
+M:Microsoft.CodeAnalysis.SymbolVisitor`1.VisitRangeVariable(Microsoft.CodeAnalysis.IRangeVariableSymbol); Luna do not support range variable.
+M:Microsoft.CodeAnalysis.SymbolVisitor`1.VisitDiscard(Microsoft.CodeAnalysis.IDiscardSymbol); Luna do not support discard.
+M:Microsoft.CodeAnalysis.SymbolVisitor`1.VisitFunctionPointerType(Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol); Luna do not support function pointer type.
+M:Microsoft.CodeAnalysis.SymbolVisitor`2.VisitAlias(Microsoft.CodeAnalysis.IAliasSymbol,`0); Luna do not support alias.
+M:Microsoft.CodeAnalysis.SymbolVisitor`2.VisitPointerType(Microsoft.CodeAnalysis.IPointerTypeSymbol,`0); Luna do not support pointer type.
+M:Microsoft.CodeAnalysis.SymbolVisitor`2.VisitRangeVariable(Microsoft.CodeAnalysis.IRangeVariableSymbol,`0); Luna do not support range variable.
+M:Microsoft.CodeAnalysis.SymbolVisitor`2.VisitDiscard(Microsoft.CodeAnalysis.IDiscardSymbol,`0); Luna do not support discard.
+M:Microsoft.CodeAnalysis.SymbolVisitor`2.VisitFunctionPointerType(Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol,`0); Luna do not support function pointer type.

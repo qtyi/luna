@@ -6,13 +6,13 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax;
 
 partial class SimpleMemberAccessExpressionSyntax
 {
-    public override ExpressionSyntax Member => this.MemberName;
+    public override ExpressionSyntax Member => MemberName;
 
     internal override MemberAccessExpressionSyntax WithMemberCore(ExpressionSyntax member)
     {
         if (member is IdentifierNameSyntax memberName)
-            return this.WithMemberName(memberName);
+            return WithMemberName(memberName);
         else
-            return SyntaxFactory.IndexMemberAccessExpression(this.Self, member);
+            return SyntaxFactory.IndexMemberAccessExpression(Self, member);
     }
 }

@@ -1682,7 +1682,7 @@ partial class FileTests
         V(SyntaxKind.NumericLiteralToken, text: "0x89abcdef", value: 2309737967L);
         V(SyntaxKind.CommaToken);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "32", value: 32L);
         V(SyntaxKind.CloseParenToken);
         V(SyntaxKind.CloseParenToken);
@@ -5753,7 +5753,7 @@ partial class FileTests
         V(SyntaxKind.CommaToken);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "32", value: 32L);
         V(SyntaxKind.CloseParenToken);
         V(SyntaxKind.CloseParenToken);

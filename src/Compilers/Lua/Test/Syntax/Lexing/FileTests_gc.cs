@@ -2066,7 +2066,7 @@ partial class FileTests
         V(SyntaxKind.IdentifierToken, text: "nk");
         V(SyntaxKind.EqualsToken);
         V(SyntaxKind.IdentifierToken, text: "k");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "10", value: 10L);
         V(SyntaxKind.PlusToken);
         V(SyntaxKind.NumericLiteralToken, text: "1", value: 1L);
@@ -7449,7 +7449,7 @@ partial class FileTests
         V(SyntaxKind.EqualsToken);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.IdentifierToken, text: "k");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "10", value: 10L);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.PlusToken);

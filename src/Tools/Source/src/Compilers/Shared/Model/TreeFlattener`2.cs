@@ -23,8 +23,8 @@ public abstract class TreeFlattener<TTree, TTreeType>
     {
         foreach (var treeType in tree.Types)
         {
-            if (this.ShouldFlattenType(treeType, tree, cancellationToken))
-                this.FlattenType(treeType, tree, cancellationToken);
+            if (ShouldFlattenType(treeType, tree, cancellationToken))
+                FlattenType(treeType, tree, cancellationToken);
         }
     }
 

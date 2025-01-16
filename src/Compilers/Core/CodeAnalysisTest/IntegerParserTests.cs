@@ -50,7 +50,7 @@ public class IntegerParserTests
         const int SampleCount = 31000;
         Parallel.For(0, SampleCount, body =>
         {
-            var source = this.GetRandomUnsignedBigInteger();
+            var source = GetRandomUnsignedBigInteger();
             var decimalStr = source.ToString();
 
             var success = IntegerParser.TryParseDecimalInt64(decimalStr, out var result);
@@ -71,7 +71,7 @@ public class IntegerParserTests
         const int SampleCount = 31000;
         Parallel.For(0, SampleCount, body =>
         {
-            var source = this.GetRandomInt64();
+            var source = GetRandomInt64();
             var hexadecimalStr = Convert.ToString(source, 16);
 
             var success = IntegerParser.TryParseHexadecimalInt64(hexadecimalStr, out var result);

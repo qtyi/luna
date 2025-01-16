@@ -7,12 +7,8 @@ using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisSemanticModel = LuaSemanticModel;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisSemanticModel = MoonScriptSemanticModel;
 #endif
 
 public static partial class SymbolDisplay

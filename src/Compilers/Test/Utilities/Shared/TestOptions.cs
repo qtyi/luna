@@ -24,7 +24,7 @@ public static class TestOptions
     public static readonly ThisParseOptions Script = new(kind: SourceCodeKind.Script, documentationMode: DocumentationMode.Parse);
 
     public static readonly ThisParseOptions RegularDefault = Regular.WithLanguageVersion(LanguageVersion.Default);
-    public static readonly ThisParseOptions RegularPreview = Regular.WithLanguageVersion(LanguageVersion.Preview);
+    public static readonly ThisParseOptions RegularPreview = Regular.WithLanguageVersion(LanguageVersion.DotNet);
 
     public static readonly ThisCompilationOptions ReleaseDll = CreateTestOptions(outputKind: OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release);
     public static readonly ThisCompilationOptions ReleaseExe = CreateTestOptions(outputKind: OutputKind.ConsoleApplication, optimizationLevel: OptimizationLevel.Release);

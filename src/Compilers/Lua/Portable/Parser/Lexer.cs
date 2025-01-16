@@ -12,40 +12,51 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 [Flags]
 internal enum LexerMode
 {
-    None = 0,
-
     Syntax = 0x0001,
     DebuggerSyntax = 0x0002,
     Directive = 0x0004,
 
-    MaskLexMode = 0xFFFF
+    MaskLexMode = 0xFFFF,
+
+    None = 0,
 }
 
 /// <summary>
-/// 针对Lua语言特定的词法解析器。
+/// Lexer for Lua language.
 /// </summary>
 internal partial class Lexer
 {
     private static partial LexerMode ModeOf(LexerMode mode) => mode & LexerMode.MaskLexMode;
 
+#if DEBUG
+    /// <summary>
+    /// Number of tokens lexed.
+    /// </summary>
+    internal static int TokensLexed;
+#endif
+
     public partial SyntaxToken Lex(LexerMode mode)
     {
-        this._mode = mode;
+#if DEBUG
+        TokensLexed++;
+#endif
 
-        switch (this._mode)
+        _mode = mode;
+
+        switch (_mode)
         {
             case LexerMode.Syntax:
             case LexerMode.DebuggerSyntax:
-                return this.QuickScanSyntaxToken() ?? this.LexSyntaxToken();
+                return QuickScanSyntaxToken() ?? LexSyntaxToken();
 
             case LexerMode.Directive:
-                return this.LexDirectiveToken();
+                return LexDirectiveToken();
         }
 
-        switch (ModeOf(this._mode))
+        switch (ModeOf(_mode))
         {
             default:
-                throw ExceptionUtilities.UnexpectedValue(ModeOf(this._mode));
+                throw ExceptionUtilities.UnexpectedValue(ModeOf(_mode));
         }
     }
 
@@ -62,37 +73,37 @@ internal partial class Lexer
 
         var token = info.Kind switch
         {
-            // 标识符标记
-            SyntaxKind.IdentifierToken => SyntaxFactory.Identifier(info.ContextualKind, leadingNode, info.Text!, info.StringValue!, trailingNode),
+            // Identifier
+            SyntaxKind.IdentifierToken => ThisInternalSyntaxFactory.Identifier(info.ContextualKind, leadingNode, info.Text!, info.StringValue!, trailingNode),
 
-            // 数字字面量标记
-            SyntaxKind.NumericLiteralToken =>
-                info.ValueKind switch
-                {
-                    // 64位整数
-                    SpecialType.System_Int64 => SyntaxFactory.Literal(leadingNode, info.Text!, info.LongValue, trailingNode),
-                    SpecialType.System_UInt64 => SyntaxFactory.Literal(leadingNode, info.Text!, info.ULongValue, trailingNode),
-                    // 64位双精度浮点数
-                    SpecialType.System_Double => SyntaxFactory.Literal(leadingNode, info.Text!, info.DoubleValue, trailingNode),
-                    _ => throw ExceptionUtilities.UnexpectedValue(info.ValueKind),
-                },
+            // Numeric literal
+            SyntaxKind.NumericLiteralToken => info.ValueKind switch
+            {
+                // 64-bit integer
+                TokenValueType.Int64 => ThisInternalSyntaxFactory.Literal(leadingNode, info.Text!, info.LongValue, trailingNode),
+                TokenValueType.UInt64 => ThisInternalSyntaxFactory.Literal(leadingNode, info.Text!, info.ULongValue, trailingNode),
+                // 64-bit double-precision floating-point
+                TokenValueType.Double => ThisInternalSyntaxFactory.Literal(leadingNode, info.Text!, info.DoubleValue, trailingNode),
+                // Error case
+                _ => throw ExceptionUtilities.UnexpectedValue(info.ValueKind),
+            },
 
-            // 字符串字面量标记
+            // String literal
             SyntaxKind.StringLiteralToken or
-            // 多行原始字符串字面量标记
-            SyntaxKind.MultiLineRawStringLiteralToken => SyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.Utf8StringValue, trailingNode),
+            // Multi-line raw string literal
+            SyntaxKind.MultiLineRawStringLiteralToken => ThisInternalSyntaxFactory.Literal(leadingNode, info.Text!, info.Kind, info.Utf8StringValue!, trailingNode),
 
-            // 文件结尾标记
-            SyntaxKind.EndOfFileToken => SyntaxFactory.Token(leadingNode, SyntaxKind.EndOfFileToken, trailingNode),
+            // End of file
+            SyntaxKind.EndOfFileToken => ThisInternalSyntaxFactory.Token(leadingNode, SyntaxKind.EndOfFileToken, trailingNode),
 
-            // 异常枚举值
-            SyntaxKind.None => SyntaxFactory.BadToken(leadingNode, info.Text!, trailingNode),
+            // Bad
+            SyntaxKind.None => ThisInternalSyntaxFactory.BadToken(leadingNode, info.Text!, trailingNode),
 
-            // 标点或关键字
-            _ => SyntaxFactory.Token(leadingNode, info.Kind, trailingNode)
+            // Punctuation or keyword
+            _ => ThisInternalSyntaxFactory.Token(leadingNode, info.Kind, trailingNode)
         };
 
-        // 为标记添加诊断。
+        // Add diagnostics to token.
         if (errors is not null)
             token = token.WithDiagnosticsGreen(errors);
 
@@ -101,36 +112,37 @@ internal partial class Lexer
 
     private partial void ScanSyntaxToken(ref TokenInfo info)
     {
-        // 初始化以准备新的标记扫描。
+        // Initialize for new token scan.
         info.Kind = SyntaxKind.None;
         info.ContextualKind = SyntaxKind.None;
         info.Text = null;
-        char c;
-        var startingPosition = this.TextWindow.Position;
 
-        // 开始扫描标记。
-        c = this.TextWindow.PeekChar();
+        char c;
+        var startingPosition = TextWindow.Position;
+
+        // Start scanning the token.
+        c = TextWindow.PeekChar();
         switch (c)
         {
             case '+':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.PlusToken;
                 break;
 
             case '-':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.MinusToken;
                 break;
             case '*':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.AsteriskToken;
                 break;
 
             case '/':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '/')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '/' && IsPunctuationAvaliable(SyntaxKind.SlashSlashToken))
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.SlashSlashToken;
                 }
                 else
@@ -138,52 +150,79 @@ internal partial class Lexer
                 break;
 
             case '^':
-                this.TextWindow.AdvanceChar();
+                if (!IsPunctuationAvaliable(SyntaxKind.CaretToken))
+                    goto default;
+
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CaretToken;
                 break;
 
             case '%':
-                this.TextWindow.AdvanceChar();
-                info.Kind = SyntaxKind.PersentToken;
+                TextWindow.AdvanceChar();
+                info.Kind = SyntaxKind.PercentToken;
+                break;
+
+            case '@':
+                if (!IsPunctuationAvaliable(SyntaxKind.CommercialAtToken))
+                    goto default;
+
+                TextWindow.AdvanceChar();
+                info.Kind = SyntaxKind.CommercialAtToken;
                 break;
 
             case '#':
-                this.TextWindow.AdvanceChar();
+                if (!IsPunctuationAvaliable(SyntaxKind.HashToken))
+                    goto default;
+
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.HashToken;
                 break;
 
             case '&':
-                this.TextWindow.AdvanceChar();
+                if (!IsPunctuationAvaliable(SyntaxKind.AmpersandToken))
+                    goto default;
+
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.AmpersandToken;
                 break;
 
             case '~':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                if (TextWindow.PeekChar(1) == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar(2);
                     info.Kind = SyntaxKind.TildeEqualsToken;
                 }
-                else
+                else if (IsPunctuationAvaliable(SyntaxKind.TildeToken))
+                {
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.TildeToken;
+                }
+                else
+                    goto default;
                 break;
 
             case '|':
-                this.TextWindow.AdvanceChar();
+                if (!IsPunctuationAvaliable(SyntaxKind.BarToken))
+                    goto default;
+
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.BarToken;
                 break;
 
             case '<':
-                this.TextWindow.AdvanceChar();
-                switch (this.TextWindow.PeekChar())
+                TextWindow.AdvanceChar();
+                switch (TextWindow.PeekChar())
                 {
                     case '=':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.LessThanEqualsToken;
                         break;
 
                     case '<':
-                        this.TextWindow.AdvanceChar();
+                        if (!IsPunctuationAvaliable(SyntaxKind.LessThanLessThanToken))
+                            goto default;
+
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.LessThanLessThanToken;
                         break;
 
@@ -194,15 +233,18 @@ internal partial class Lexer
                 break;
 
             case '>':
-                this.TextWindow.AdvanceChar();
-                switch (this.TextWindow.PeekChar())
+                TextWindow.AdvanceChar();
+                switch (TextWindow.PeekChar())
                 {
                     case '=':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.GreaterThanEqualsToken;
                         break;
                     case '>':
-                        this.TextWindow.AdvanceChar();
+                        if (!IsPunctuationAvaliable(SyntaxKind.GreaterThanGreaterThanToken))
+                            goto default;
+
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.GreaterThanGreaterThanToken;
                         break;
 
@@ -213,10 +255,10 @@ internal partial class Lexer
                 break;
 
             case '=':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=' && IsPunctuationAvaliable(SyntaxKind.EqualsEqualsToken))
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.EqualsEqualsToken;
                 }
                 else
@@ -224,40 +266,46 @@ internal partial class Lexer
                 break;
 
             case '(':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.OpenParenToken;
                 break;
 
             case ')':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CloseParenToken;
                 break;
 
             case '{':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.OpenBraceToken;
                 break;
 
             case '}':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CloseBraceToken;
                 break;
 
             case '[':
-                switch (this.TextWindow.PeekChar(1))
+                switch (TextWindow.PeekChar(1))
                 {
                     case '[':
-                        this.ScanMultiLineRawStringLiteral(ref info);
+                        if (!IsMultiLineRawStringLiteralAvaliable())
+                            goto default;
+
+                        ScanMultiLineRawStringLiteral(ref info);
                         break;
 
                     case '=':
+                        if (!IsLeveledMultiLineRawStringLiteralAvaliable())
+                            goto default;
+
                         for (var i = 2; ; i++)
                         {
-                            var nextChar = this.TextWindow.PeekChar(i);
+                            var nextChar = TextWindow.PeekChar(i);
                             if (nextChar == '=') continue;
                             else if (nextChar == '[')
                             {
-                                this.ScanMultiLineRawStringLiteral(ref info, i - 1);
+                                ScanMultiLineRawStringLiteral(ref info, i - 1);
                                 break;
                             }
                             else goto default; // 未匹配到完整的多行原始字符字面量的起始语法。
@@ -265,22 +313,25 @@ internal partial class Lexer
                         break;
 
                     default:
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.OpenBracketToken;
                         break;
                 }
                 break;
 
             case ']':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CloseBracketToken;
                 break;
 
             case ':':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == ':')
+                if (!IsPunctuationAvaliable(SyntaxKind.ColonToken))
+                    goto default;
+
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == ':' && IsPunctuationAvaliable(SyntaxKind.ColonColonToken))
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.ColonColonToken;
                 }
                 else
@@ -288,25 +339,25 @@ internal partial class Lexer
                 break;
 
             case ';':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.SemicolonToken;
                 break;
 
             case ',':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CommaToken;
                 break;
 
             case '.':
-                if (!this.ScanNumericLiteral(ref info))
+                if (!ScanNumericLiteral(ref info))
                 {
-                    this.TextWindow.AdvanceChar();
-                    if (this.TextWindow.PeekChar() == '.')
+                    TextWindow.AdvanceChar();
+                    if (TextWindow.PeekChar() == '.')
                     {
-                        this.TextWindow.AdvanceChar();
-                        if (this.TextWindow.PeekChar() == '.')
+                        TextWindow.AdvanceChar();
+                        if (TextWindow.PeekChar() == '.' && IsPunctuationAvaliable(SyntaxKind.DotDotDotToken))
                         {
-                            this.TextWindow.AdvanceChar();
+                            TextWindow.AdvanceChar();
                             info.Kind = SyntaxKind.DotDotDotToken;
                         }
                         else
@@ -320,7 +371,7 @@ internal partial class Lexer
             // 字符串字面量
             case '\"':
             case '\'':
-                this.ScanStringLiteral(ref info);
+                ScanStringLiteral(ref info);
                 break;
 
             case 'a':
@@ -376,7 +427,7 @@ internal partial class Lexer
             case 'Y':
             case 'Z':
             case '_':
-                this.ScanIdentifierOrKeyword(ref info);
+                ScanIdentifierOrKeyword(ref info);
                 break;
 
             case '0':
@@ -389,39 +440,39 @@ internal partial class Lexer
             case '7':
             case '8':
             case '9':
-                this.ScanNumericLiteral(ref info);
+                ScanNumericLiteral(ref info);
                 break;
 
             case SlidingTextWindow.InvalidCharacter:
-                if (!this.TextWindow.IsReallyAtEnd())
+                if (!TextWindow.IsReallyAtEnd())
                     goto default;
                 else
                     info.Kind = SyntaxKind.EndOfFileToken;
                 break;
 
             default:
-                if (SyntaxFacts.IsIdentifierStartCharacter(this.TextWindow.PeekChar()))
+                if (SyntaxFacts.IsIdentifierStartCharacter(TextWindow.PeekChar()))
                     goto case 'a';
 
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
 
-                if (this._badTokenCount++ > 200)
+                if (_badTokenCount++ > 200)
                 {
                     //当遇到大量无法决定的字符时，将剩下的输出也合并入。
-                    var end = this.TextWindow.Text.Length;
+                    var end = TextWindow.Text.Length;
                     var width = end - startingPosition;
-                    info.Text = this.TextWindow.Text.ToString(new(startingPosition, width));
-                    this.TextWindow.Reset(end);
+                    info.Text = TextWindow.Text.ToString(new(startingPosition, width));
+                    TextWindow.Reset(end);
                 }
                 else
-                    info.Text = this.TextWindow.GetText(intern: true);
+                    info.Text = TextWindow.GetText(intern: true);
 
-                this.AddError(ErrorCode.ERR_UnexpectedCharacter, info.Text);
+                AddError(ErrorCode.ERR_UnexpectedCharacter, info.Text);
                 break;
         }
     }
 
-    private partial void LexSyntaxTrivia(
+    private partial void ScanSyntaxTrivia(
         bool afterFirstToken,
         bool isTrailing,
         ref SyntaxListBuilder triviaList)
@@ -429,11 +480,11 @@ internal partial class Lexer
         var onlyWhitespaceOnLine = !isTrailing;
         while (true)
         {
-            this.Start();
-            var c = this.TextWindow.PeekChar();
+            Start();
+            var c = TextWindow.PeekChar();
             if (c == ' ')
             {
-                this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
+                AddTrivia(ScanWhiteSpace(), ref triviaList);
                 continue;
             }
             else if (c > 127)
@@ -451,33 +502,33 @@ internal partial class Lexer
                 case '\v':
                 case '\f':
                 case '\u001A':
-                    this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
+                    AddTrivia(ScanWhiteSpace(), ref triviaList);
                     continue;
 
                 case '-':
-                    if (this.TextWindow.PeekChar(1) == '-')
+                    if (TextWindow.PeekChar(1) == '-')
                     {
-                        this.TextWindow.AdvanceChar(2);
-                        this.AddTrivia(this.ScanComment(), ref triviaList);
+                        TextWindow.AdvanceChar(2);
+                        AddTrivia(LexComment(), ref triviaList);
                         onlyWhitespaceOnLine = false;
                         continue;
                     }
                     goto default;
 
                 case '#':
-                    if (this._allowPreprocessorDirectives && !afterFirstToken)
+                    if (_allowPreprocessorDirectives && !afterFirstToken)
                     {
-                        this.LexDirectiveTrivia(afterFirstToken, isTrailing || !onlyWhitespaceOnLine, ref triviaList);
+                        ScanDirectiveTrivia(afterFirstToken, isTrailing || !onlyWhitespaceOnLine, ref triviaList);
                         continue;
                     }
                     goto default;
 
                 default:
                     {
-                        var endOfLine = this.ScanEndOfLine();
+                        var endOfLine = LexEndOfLine();
                         if (endOfLine is not null)
                         {
-                            this.AddTrivia(endOfLine, ref triviaList);
+                            AddTrivia(endOfLine, ref triviaList);
                             if (isTrailing)
                                 // 当分析的是后方语法琐碎内容时，分析成功后直接退出。
                                 return;
@@ -498,7 +549,7 @@ internal partial class Lexer
 
     private partial bool ScanDirectiveToken(ref TokenInfo info)
     {
-        var c = this.TextWindow.PeekChar();
+        var c = TextWindow.PeekChar();
         switch (c)
         {
             case SlidingTextWindow.InvalidCharacter:
@@ -514,10 +565,10 @@ internal partial class Lexer
                 break;
 
             case '#':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '!')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '!')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.HashExclamationToken;
                 }
                 else
@@ -525,9 +576,9 @@ internal partial class Lexer
                 break;
 
             default:
-                ScanToEndOfLine(trimEnd: false);
+                ScanToEndOfLine(_builder, trimEnd: false);
                 info.Kind = SyntaxKind.None;
-                info.Text = this.TextWindow.GetText(intern: true);
+                info.Text = TextWindow.GetText(intern: true);
                 break;
 
         }
@@ -535,12 +586,12 @@ internal partial class Lexer
         return info.Kind != SyntaxKind.None;
     }
 
-    private partial LuaSyntaxNode? LexDirectiveTrivia()
+    private partial ThisInternalSyntaxNode? LexDirectiveTrivia()
     {
-        this.Start();
-        var c = this.TextWindow.PeekChar();
+        Start();
+        var c = TextWindow.PeekChar();
         if (c == ' ')
-            return this.ScanWhiteSpace();
+            return ScanWhiteSpace();
         else if (c > 127)
         {
             if (SyntaxFacts.IsWhiteSpace(c))
@@ -556,19 +607,19 @@ internal partial class Lexer
             case '\v':
             case '\f':
             case '\u001A':
-                return this.ScanWhiteSpace();
+                return ScanWhiteSpace();
 
             case '-':
-                if (this.TextWindow.PeekChar(1) == '-')
+                if (TextWindow.PeekChar(1) == '-')
                 {
-                    this.TextWindow.AdvanceChar(2);
-                    return this.ScanComment();
+                    TextWindow.AdvanceChar(2);
+                    return LexComment();
                 }
                 else goto default;
 
             default:
                 {
-                    var endOfLine = this.ScanEndOfLine();
+                    var endOfLine = LexEndOfLine();
                     if (endOfLine is not null)
                         return endOfLine;
                 }
@@ -578,21 +629,25 @@ internal partial class Lexer
         }
     }
 
-    private partial void LexDirectiveTrivia(
+    private partial void ScanDirectiveTrivia(
         bool afterFirstToken,
         bool afterNonWhitespaceOnLine,
         ref SyntaxListBuilder triviaList)
     {
-        if (SyntaxFacts.IsWhiteSpace(this.TextWindow.PeekChar()))
+        if (SyntaxFacts.IsWhiteSpace(TextWindow.PeekChar()))
         {
-            this.Start();
-            this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
+            Start();
+            AddTrivia(ScanWhiteSpace(), ref triviaList);
         }
 
-        var saveMode = this._mode;
+        var saveMode = _mode;
         using var parser = new DirectiveParser(this);
         var directive = parser.ParseDirective(afterFirstToken, afterNonWhitespaceOnLine);
-        this.AddTrivia(directive, ref triviaList);
-        this._mode = saveMode;
+        AddTrivia(directive, ref triviaList);
+        _mode = saveMode;
     }
+
+    private bool IsMultiLineRawStringLiteralAvaliable() => _options.LanguageVersion >= LanguageVersion.Lua2_2;
+
+    private bool IsLeveledMultiLineRawStringLiteralAvaliable() => _options.LanguageVersion >= LanguageVersion.Lua5_1;
 }

@@ -163,7 +163,7 @@ partial class FileTests
         V(SyntaxKind.StringLiteralToken, text: "\"?\"", value: ImmutableArray.Create("?"U8.ToArray()));
         V(SyntaxKind.CommaToken);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "10", value: 10L);
         V(SyntaxKind.PlusToken);
         V(SyntaxKind.NumericLiteralToken, text: "1", value: 1L);
@@ -3756,7 +3756,7 @@ partial class FileTests
         V(SyntaxKind.CommaToken);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.IdentifierToken, text: "i");
-        V(SyntaxKind.PersentToken);
+        V(SyntaxKind.PercentToken);
         V(SyntaxKind.NumericLiteralToken, text: "10", value: 10L);
         V(SyntaxKind.WhiteSpaceTrivia, location: TriviaLocation.Trailing);
         V(SyntaxKind.PlusToken);

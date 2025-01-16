@@ -18,8 +18,8 @@ public abstract class TreeFlattener<TTree, TTreeType, TTreeTypeChild> : TreeFlat
     {
         foreach (var child in type.Children)
         {
-            if (this.ShouldFlattenChild(child, containingTree, type, cancellationToken))
-                this.FlattenChild(child, containingTree, type, cancellationToken);
+            if (ShouldFlattenChild(child, containingTree, type, cancellationToken))
+                FlattenChild(child, containingTree, type, cancellationToken);
         }
     }
 

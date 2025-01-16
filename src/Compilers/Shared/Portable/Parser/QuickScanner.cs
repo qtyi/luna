@@ -11,27 +11,25 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 #endif
 
-// 此文件中定义了一个基于状态的快速扫描器。
 partial class Lexer
 {
+    // Maximum size of tokens/trivia that we cache and use in quick scanner.
+    // From what I see in our own codebase, tokens longer then 40-50 chars are 
+    // not very common. 
+    // So it seems reasonable to limit the sizes to some round number like 42.
     internal const int MaxCachedTokenSize = 42;
 
-#if TESTING
-    internal
-#else
-    private
-#endif
-        SyntaxToken? QuickScanSyntaxToken()
+    private SyntaxToken? QuickScanSyntaxToken()
     {
-        this.Start();
-        var state = QuickScanState.Initial; // 初始状态。
-        var i = this.TextWindow.Offset;
-        var n = this.TextWindow.CharacterWindowCount;
+        Start();
+        var state = QuickScanState.Initial; // Set initial state.
+        var i = TextWindow.Offset;
+        var n = TextWindow.CharacterWindowCount;
         n = Math.Min(n, i + MaxCachedTokenSize);
 
         var hashCode = Hash.FnvOffsetBias;
 
-        var charWindow = this.TextWindow.CharacterWindow;
+        var charWindow = TextWindow.CharacterWindow;
         var charProp = CharProperties;
         var charPropLength = charProp.Length;
 
@@ -39,49 +37,50 @@ partial class Lexer
         {
             int uc = charWindow[i];
 
-            // 获取当前字符的属性，超出0x180范围的字符属性默认为Complex。
+            // Get CharFlag of current character, Complex if not in CharProperties.
             var flag = uc < charPropLength ? (CharFlag)charProp[uc] : CharFlag.Complex;
 
             state = (QuickScanState)s_stateTransitions[(int)state, (int)flag];
-            // 所有不小于Done的状态（包括Bad）都将导致扫描过程终止。
+            // NOTE: that Bad > Done and it is the only state like that as a result, we will exit the loop on either Bad or Done.
+            // The assert below will validate that these are the only states on which we exit.
+            // Also note that we must exit on Done or Bad since the state machine does not have transitions for these states and will promptly fail if we do not exit.
             if (state >= QuickScanState.Done)
                 goto exitWhile;
 
             hashCode = unchecked((hashCode ^ uc) * Hash.FnvPrime);
         }
 
-        state = QuickScanState.Bad; // 字符缓冲窗口中的字符已用尽。
+        state = QuickScanState.Bad; // ran out of characters in window
 exitWhile:
 
-        this.TextWindow.AdvanceChar(i - this.TextWindow.Offset);
-        Debug.Assert(state == QuickScanState.Bad || state == QuickScanState.Done, "无法在Bad和Done的状态下退出。");
+        TextWindow.AdvanceChar(i - TextWindow.Offset);
+        Debug.Assert(state == QuickScanState.Bad || state == QuickScanState.Done, "Can only exit with Bad or Done");
 
-        if (state == QuickScanState.Done) // 成功扫描到标记。
+        if (state == QuickScanState.Done) // Scanning succeeded.
         {
             var token = _cache.LookupToken(
-                this.TextWindow.CharacterWindow,
-                this.TextWindow.LexemeRelativeStart,
-                i - this.TextWindow.LexemeRelativeStart,
+                TextWindow.CharacterWindow,
+                TextWindow.LexemeRelativeStart,
+                i - TextWindow.LexemeRelativeStart,
                 hashCode,
-                _createQuickTokenFunction);
+                CreateQuickToken,
+                this);
             return token;
         }
-        else // 扫描失败。
+        else // Scanning failed.
         {
-            this.TextWindow.Reset(this.TextWindow.LexemeStartPosition);
+            TextWindow.Reset(TextWindow.LexemeStartPosition);
             return null;
         }
     }
 
-    private readonly Func<SyntaxToken> _createQuickTokenFunction;
-
-    private SyntaxToken CreateQuickToken()
+    private static SyntaxToken CreateQuickToken(Lexer lexer)
     {
 #if DEBUG
-        var quickWidth = TextWindow.Width;
+        var quickWidth = lexer.TextWindow.Width;
 #endif
-        this.TextWindow.Reset(this.TextWindow.LexemeStartPosition);
-        var token = this.LexSyntaxToken();
+        lexer.TextWindow.Reset(lexer.TextWindow.LexemeStartPosition);
+        var token = lexer.LexSyntaxToken();
 #if DEBUG
         Debug.Assert(quickWidth == token.FullWidth);
 #endif

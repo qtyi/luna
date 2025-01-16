@@ -19,37 +19,37 @@ partial class DeclarationTreeBuilder
         var builder = ArrayBuilder<ClassDeclaration>.GetInstance();
         foreach (var node in chunk.DescendantNodes())
         {
-            var result = this.Visit(node);
+            var result = Visit(node);
             if (result is ClassDeclaration subClass)
                 builder.Add(subClass);
         }
 
         return new(
-        name: this._scriptModuleName,
-        syntaxReference: this._syntaxTree.GetReference(chunk),
+        name: _scriptModuleName,
+        syntaxReference: _syntaxTree.GetReference(chunk),
         children: builder.ToImmutableAndFree(),
         diagnostics: ImmutableArray<Diagnostic>.Empty);
     }
 
     public override Declaration VisitClassStatement(ClassStatementSyntax node) => new ClassDeclaration(
         name: node.Name.Identifier.ValueText,
-        syntaxReference: this._syntaxTree.GetReference(node),
+        syntaxReference: _syntaxTree.GetReference(node),
         nameLocation: new(node.Name),
-        memberNames: this.GetMemberNames(node.Statements),
+        memberNames: GetMemberNames(node.Statements),
         diagnostics: ImmutableArray<Diagnostic>.Empty);
 
     public override Declaration? VisitClassExpression(ClassExpressionSyntax node) => new ClassDeclaration(
         name: node.Name.Identifier.ValueText,
-        syntaxReference: this._syntaxTree.GetReference(node),
+        syntaxReference: _syntaxTree.GetReference(node),
         nameLocation: new(node.Name),
-        memberNames: this.GetMemberNames(node.Statements),
+        memberNames: GetMemberNames(node.Statements),
         diagnostics: ImmutableArray<Diagnostic>.Empty);
 
     public override Declaration? VisitAnomymousClassExpression(AnomymousClassExpressionSyntax node) => new ClassDeclaration(
         name: "",
-        syntaxReference: this._syntaxTree.GetReference(node),
+        syntaxReference: _syntaxTree.GetReference(node),
         nameLocation: null,
-        memberNames: this.GetMemberNames(node.Statements),
+        memberNames: GetMemberNames(node.Statements),
         diagnostics: ImmutableArray<Diagnostic>.Empty);
 
     private static readonly ObjectPool<ImmutableSegmentedDictionary<string, VoidResult>.Builder> s_memberNameBuilderPool =
@@ -74,7 +74,8 @@ partial class DeclarationTreeBuilder
         {
             if (statement is not MemberStatementSyntax memberStatement) continue;
 
-            memberNamesBuilder.TryAdd(memberStatement.NameColon.Name.Identifier.ValueText);
+#warning Not implemented.
+            throw new NotImplementedException();
         }
 
         return ToImmutableAndFree(memberNamesBuilder);

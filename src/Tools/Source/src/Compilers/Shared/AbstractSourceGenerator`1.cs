@@ -2,9 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
-using System.Xml.Serialization;
-using System.Xml;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
@@ -58,13 +55,13 @@ public abstract class AbstractSourceGenerator<TInputs> : IIncrementalGenerator
     void IIncrementalGenerator.Initialize(IncrementalGeneratorInitializationContext context)
     {
 #if DEBUG
-        if (this.ShouldAttachDebugger && !Debugger.IsAttached)
+        if (ShouldAttachDebugger && !Debugger.IsAttached)
         {
             Debugger.Launch();
         }
 #endif
 
-        this.Initialize(context);
+        Initialize(context);
     }
 
     /// <summary>
@@ -88,5 +85,22 @@ public abstract class AbstractSourceGenerator<TInputs> : IIncrementalGenerator
         // And create a SourceText from the StringBuilder, once again avoiding allocating a single massive string
         var sourceText = SourceText.From(new StringBuilderReader(stringBuilder), stringBuilder.Length, encoding: Encoding.UTF8);
         context.AddSource(hintName, sourceText);
+    }
+
+    /// <summary>
+    /// Add a syntax tree as source to context.
+    /// </summary>
+    /// <param name="context">Incremental source generator context during source production.</param>
+    /// <param name="syntaxTree">The syntax tree as source to add.</param>
+    /// <param name="hintName">An identifier that can be used to reference this source text, must be unique within this generator. Use file name of <see cref="SyntaxTree.FilePath"/> of <paramref name="syntaxTree"/> if not valid.</param>
+    protected static void AddSource(SourceProductionContext context, SyntaxTree syntaxTree, string? hintName = null)
+    {
+        if (string.IsNullOrEmpty(hintName))
+            hintName = Path.GetFileName(syntaxTree.FilePath);
+
+        Debug.Assert(!string.IsNullOrEmpty(hintName), "Hint name not specified");
+
+        var sourceText = syntaxTree.GetText(context.CancellationToken);
+        context.AddSource(hintName!, sourceText);
     }
 }

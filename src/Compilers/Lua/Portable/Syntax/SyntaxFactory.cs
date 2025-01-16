@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 
 namespace Qtyi.CodeAnalysis.Lua;
 
-using System.Collections.Generic;
 using Syntax;
 
 public static partial class SyntaxFactory
@@ -17,14 +16,14 @@ public static partial class SyntaxFactory
         switch (kind)
         {
             case SyntaxKind.IdentifierToken:
-                throw new ArgumentException(LuaResources.UseIdentifierForTokens, nameof(kind));
+                throw new ArgumentException(ThisResources.UseIdentifierForTokens, nameof(kind));
 
             case SyntaxKind.NumericLiteralToken:
-                throw new ArgumentException(LuaResources.UseLiteralForNumeric, nameof(kind));
+                throw new ArgumentException(ThisResources.UseLiteralForNumeric, nameof(kind));
         }
 
         if (!SyntaxFacts.IsAnyToken(kind))
-            throw new ArgumentException(string.Format(LuaResources.ThisMethodCanOnlyBeUsedToCreateTokens, kind), nameof(kind));
+            throw new ArgumentException(string.Format(ThisResources.ThisMethodCanOnlyBeUsedToCreateTokens, kind), nameof(kind));
     }
 
     #region 字面量
@@ -32,7 +31,7 @@ public static partial class SyntaxFactory
         Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, long value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -43,7 +42,7 @@ public static partial class SyntaxFactory
         string text,
         long value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,
@@ -53,7 +52,7 @@ public static partial class SyntaxFactory
         Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, ulong value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -64,7 +63,7 @@ public static partial class SyntaxFactory
         string text,
         ulong value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,
@@ -74,7 +73,7 @@ public static partial class SyntaxFactory
         Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, double value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -85,7 +84,7 @@ public static partial class SyntaxFactory
         string text,
         double value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,
@@ -95,7 +94,7 @@ public static partial class SyntaxFactory
         Literal(SymbolDisplay.FormatLiteral(value, quoteStrings: true), value);
 
     public static partial SyntaxToken Literal(string text, string value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -106,7 +105,7 @@ public static partial class SyntaxFactory
         string text,
         string value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,
@@ -119,7 +118,7 @@ public static partial class SyntaxFactory
         yield return new(parent: null, token: green, position: position, index: 0);
     }
 
-    public static ChunkSyntax ParseCompilationUnit(string text, int offset = 0, LuaParseOptions? options = null)
+    public static ChunkSyntax ParseCompilationUnit(string text, int offset = 0, ThisParseOptions? options = null)
     {
         using var lexer = MakeLexer(text, offset, options);
         using var parser = MakeParser(lexer);

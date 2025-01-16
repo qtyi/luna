@@ -8,20 +8,8 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisGeneratorDriver = LuaGeneratorDriver;
-using ThisMessageProvider = MessageProvider;
-using ThisParseOptions = LuaParseOptions;
-using ThisSyntaxHelper = LuaSyntaxHelper;
-using ThisSyntaxTree = LuaSyntaxTree;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisGeneratorDriver = MoonScriptGeneratorDriver;
-using ThisMessageProvider = MessageProvider;
-using ThisParseOptions = MoonScriptParseOptions;
-using ThisSyntaxHelper = MoonScriptSyntaxHelper;
-using ThisSyntaxTree = MoonScriptSyntaxTree;
 #endif
 
 #if LANG_LUA

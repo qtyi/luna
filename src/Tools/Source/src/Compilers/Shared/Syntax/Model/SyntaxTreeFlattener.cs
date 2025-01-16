@@ -27,11 +27,11 @@ public sealed class SyntaxTreeFlattener : TreeFlattener<SyntaxTree, SyntaxTreeTy
         switch (containingTreeType)
         {
             case AbstractNode abstractNode:
-                this.FlattenChildAndItsChildren(child, abstractNode.Fields, makeOptional: false);
+                FlattenChildAndItsChildren(child, abstractNode.Fields, makeOptional: false);
                 break;
 
             case Node node:
-                this.FlattenChildAndItsChildren(child, node.Fields, makeOptional: false);
+                FlattenChildAndItsChildren(child, node.Fields, makeOptional: false);
                 break;
         }
     }

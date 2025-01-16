@@ -30,7 +30,7 @@ public enum SyntaxKind : ushort
     /// <summary>Represents <c>^</c> token.</summary>
     CaretToken,
     /// <summary>Represents <c>%</c> token.</summary>
-    PersentToken,
+    PercentToken,
     /// <summary>Represents <c>#</c> token.</summary>
     HashToken,
     /// <summary>Represents <c>&amp;</c> token.</summary>

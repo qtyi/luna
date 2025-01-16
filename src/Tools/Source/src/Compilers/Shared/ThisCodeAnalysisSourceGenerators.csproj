@@ -21,8 +21,6 @@
 
   <ItemGroup>
     <!-- InternalsVisibleTos -->
-    <InternalsVisibleTo Include="LuaCodeAnalysisSourceGenerators" />
-    <InternalsVisibleTo Include="MoonScriptCodeAnalysisSourceGenerators" />
     
     <!-- InternalsVisibleFrom -->
     <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
@@ -31,8 +29,7 @@
   <ItemGroup>
     <!-- Make sure to reference the same version of Microsoft.CodeAnalysis.Analyzers as the rest of the build -->
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Qtyi.Net.Compilers.Toolset.DevEnv.Compilers" />
   </ItemGroup>
   
 </Project>

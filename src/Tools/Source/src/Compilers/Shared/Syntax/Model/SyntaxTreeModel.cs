@@ -20,8 +20,8 @@ public class SyntaxTree : ITree<SyntaxTreeType, SyntaxTreeTypeChild>
     [XmlElement(ElementName = "PredefinedNode", Type = typeof(PredefinedNode))]
     public List<SyntaxTreeType> Types;
 
-    string ITree<SyntaxTreeType>.Root => this.Root;
-    ImmutableList<SyntaxTreeType> ITree<SyntaxTreeType>.Types => this.Types.ToImmutableList();
+    string ITree<SyntaxTreeType>.Root => Root;
+    ImmutableList<SyntaxTreeType> ITree<SyntaxTreeType>.Types => Types.ToImmutableList();
 }
 
 public abstract class SyntaxTreeType : ITreeType<SyntaxTreeTypeChild>
@@ -46,9 +46,9 @@ public abstract class SyntaxTreeType : ITreeType<SyntaxTreeTypeChild>
     [XmlElement(ElementName = "Sequence", Type = typeof(Sequence))]
     public List<SyntaxTreeTypeChild> Children;
 
-    string ITreeType.Name => this.Name;
-    string? ITreeType.Base => this.Base;
-    ImmutableList<SyntaxTreeTypeChild> ITreeType<SyntaxTreeTypeChild>.Children => this.Children.ToImmutableList();
+    string ITreeType.Name => Name;
+    string? ITreeType.Base => Base;
+    ImmutableList<SyntaxTreeTypeChild> ITreeType<SyntaxTreeTypeChild>.Children => Children.ToImmutableList();
 }
 
 public abstract class SyntaxTreeTypeChild : ITreeTypeChild { }
@@ -98,10 +98,10 @@ public class Field : SyntaxTreeTypeChild
     [XmlElement]
     public Comment? PropertyComment;
 
-    internal bool IsToken => this.Type.IsToken();
+    internal bool IsToken => Type.IsToken();
 
-    internal bool IsNodeList => this.Type.IsNodeList();
+    internal bool IsNodeList => Type.IsNodeList();
 
-    internal bool IsSeparatedNodeList => this.Type.IsSeparatedNodeList();
+    internal bool IsSeparatedNodeList => Type.IsSeparatedNodeList();
 }
 #pragma warning restore CS8618

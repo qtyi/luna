@@ -9,12 +9,8 @@ using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
-
-using ThisSyntaxRewriter = LuaSyntaxRewriter;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax;
-
-using ThisSyntaxRewriter = MoonScriptSyntaxRewriter;
 #endif
 
 static partial class SyntaxReplacer
@@ -87,15 +83,15 @@ static partial class SyntaxReplacer
             bool visitTrivia,
             bool visitInfoStructuredTrivia)
         {
-            this._elementSpan = elementSpan;
+            _elementSpan = elementSpan;
             this.editKind = editKind;
-            this._visitTrivia = visitTrivia || visitInfoStructuredTrivia;
-            this._visitInfoStructuredTrivia = visitInfoStructuredTrivia;
+            _visitTrivia = visitTrivia || visitInfoStructuredTrivia;
+            _visitInfoStructuredTrivia = visitInfoStructuredTrivia;
         }
 
-        public override bool VisitIntoStructuredTrivia => this._visitInfoStructuredTrivia;
+        public override bool VisitIntoStructuredTrivia => _visitInfoStructuredTrivia;
 
-        private bool ShouldVisit(TextSpan span) => span.IntersectsWith(this._elementSpan);
+        private bool ShouldVisit(TextSpan span) => span.IntersectsWith(_elementSpan);
 
         [return: NotNullIfNotNull(nameof(node))]
         public override SyntaxNode? Visit(SyntaxNode? node)
@@ -104,7 +100,7 @@ static partial class SyntaxReplacer
 
             SyntaxNode? rewritten;
 
-            if (this.ShouldVisit(node.FullSpan))
+            if (ShouldVisit(node.FullSpan))
                 rewritten = base.Visit(node);
             else
                 rewritten = node;
@@ -116,7 +112,7 @@ static partial class SyntaxReplacer
         {
             SyntaxToken rewritten;
 
-            if (this._visitTrivia && this.ShouldVisit(token.FullSpan))
+            if (_visitTrivia && ShouldVisit(token.FullSpan))
                 rewritten = base.VisitToken(token);
             else
                 rewritten = token;
@@ -128,8 +124,8 @@ static partial class SyntaxReplacer
         {
             SyntaxTrivia rewritten;
 
-            if (this.VisitIntoStructuredTrivia && trivia.HasStructure && this.ShouldVisit(trivia.FullSpan))
-                rewritten = this.VisitTrivia(trivia);
+            if (VisitIntoStructuredTrivia && trivia.HasStructure && ShouldVisit(trivia.FullSpan))
+                rewritten = VisitTrivia(trivia);
             else
                 rewritten = trivia;
 
@@ -151,14 +147,14 @@ static partial class SyntaxReplacer
                 visitTrivia: false,
                 visitInfoStructuredTrivia: originalNode.IsPartOfStructuredTrivia())
         {
-            this._originalNode = originalNode;
-            this._newNodes = newNodes;
+            _originalNode = originalNode;
+            _newNodes = newNodes;
         }
 
         [return: NotNullIfNotNull(nameof(node))]
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
-            if (node == this._originalNode)
+            if (node == _originalNode)
                 throw GetItemNotListElementException();
 
             return base.Visit(node);
@@ -166,13 +162,13 @@ static partial class SyntaxReplacer
 
         public override SeparatedSyntaxList<TNode> VisitList<TNode>(SeparatedSyntaxList<TNode> list)
         {
-            if (this._originalNode is TNode originalNode)
+            if (_originalNode is TNode originalNode)
             {
                 var index = list.IndexOf(originalNode);
                 if (index >= 0 && index < list.Count)
                 {
-                    var newNodes = this._newNodes.Cast<TNode>();
-                    switch (this.editKind)
+                    var newNodes = _newNodes.Cast<TNode>();
+                    switch (editKind)
                     {
                         case ListEditKind.Replace:
                             return list.ReplaceRange(originalNode, newNodes);
@@ -191,13 +187,13 @@ static partial class SyntaxReplacer
 
         public override SyntaxList<TNode> VisitList<TNode>(SyntaxList<TNode> list)
         {
-            if (this._originalNode is TNode originalNode)
+            if (_originalNode is TNode originalNode)
             {
                 var index = list.IndexOf(originalNode);
                 if (index >= 0 && index < list.Count)
                 {
-                    var newNodes = this._newNodes.Cast<TNode>();
-                    switch (this.editKind)
+                    var newNodes = _newNodes.Cast<TNode>();
+                    switch (editKind)
                     {
                         case ListEditKind.Replace:
                             return list.ReplaceRange(originalNode, newNodes);
@@ -229,13 +225,13 @@ static partial class SyntaxReplacer
                 visitTrivia: false,
                 visitInfoStructuredTrivia: originalToken.IsPartOfStructuredTrivia())
         {
-            this._originalToken = originalToken;
-            this._newTokens = newTokens;
+            _originalToken = originalToken;
+            _newTokens = newTokens;
         }
 
         public override SyntaxToken VisitToken(SyntaxToken token)
         {
-            if (token == this._originalToken)
+            if (token == _originalToken)
                 throw GetItemNotListElementException();
 
             return base.VisitToken(token);
@@ -243,19 +239,19 @@ static partial class SyntaxReplacer
 
         public override SyntaxTokenList VisitList(SyntaxTokenList list)
         {
-            var index = list.IndexOf(this._originalToken);
+            var index = list.IndexOf(_originalToken);
             if (index >= 0 && index < list.Count)
             {
-                switch (this.editKind)
+                switch (editKind)
                 {
                     case ListEditKind.Replace:
-                        return list.ReplaceRange(this._originalToken, this._newTokens);
+                        return list.ReplaceRange(_originalToken, _newTokens);
 
                     case ListEditKind.InsertBefore:
-                        return list.InsertRange(index, this._newTokens);
+                        return list.InsertRange(index, _newTokens);
 
                     case ListEditKind.InsertAfter:
-                        return list.InsertRange(index + 1, this._newTokens);
+                        return list.InsertRange(index + 1, _newTokens);
                 }
             }
 
@@ -277,25 +273,25 @@ static partial class SyntaxReplacer
                 visitTrivia: true,
                 visitInfoStructuredTrivia: originalTrivia.IsPartOfStructuredTrivia())
         {
-            this._originalTrivia = originalTrivia;
-            this._newTrivia = newTrivia;
+            _originalTrivia = originalTrivia;
+            _newTrivia = newTrivia;
         }
 
         public override SyntaxTriviaList VisitList(SyntaxTriviaList list)
         {
-            var index = list.IndexOf(this._originalTrivia);
+            var index = list.IndexOf(_originalTrivia);
             if (index >= 0 && index < list.Count)
             {
-                switch (this.editKind)
+                switch (editKind)
                 {
                     case ListEditKind.Replace:
-                        return list.ReplaceRange(this._originalTrivia, this._newTrivia);
+                        return list.ReplaceRange(_originalTrivia, _newTrivia);
 
                     case ListEditKind.InsertBefore:
-                        return list.InsertRange(index, this._newTrivia);
+                        return list.InsertRange(index, _newTrivia);
 
                     case ListEditKind.InsertAfter:
-                        return list.InsertRange(index + 1, this._newTrivia);
+                        return list.InsertRange(index + 1, _newTrivia);
                 }
             }
 
