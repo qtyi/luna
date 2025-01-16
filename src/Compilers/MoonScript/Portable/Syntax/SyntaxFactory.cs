@@ -31,7 +31,7 @@ public static partial class SyntaxFactory
         Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, long value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -42,7 +42,7 @@ public static partial class SyntaxFactory
         string text,
         long value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,
@@ -52,7 +52,7 @@ public static partial class SyntaxFactory
         Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, ulong value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -63,7 +63,7 @@ public static partial class SyntaxFactory
         string text,
         ulong value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,
@@ -73,7 +73,7 @@ public static partial class SyntaxFactory
         Literal(ObjectDisplay.FormatLiteral(value, ObjectDisplayOptions.None), value);
 
     public static partial SyntaxToken Literal(string text, double value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -84,7 +84,7 @@ public static partial class SyntaxFactory
         string text,
         double value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,
@@ -94,7 +94,7 @@ public static partial class SyntaxFactory
         Literal(SymbolDisplay.FormatLiteral(value, quoteStrings: true), value);
 
     public static partial SyntaxToken Literal(string text, string value) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             ElasticMarker.UnderlyingNode,
             text,
             value,
@@ -105,7 +105,7 @@ public static partial class SyntaxFactory
         string text,
         string value,
         SyntaxTriviaList trailing) =>
-        new(Syntax.InternalSyntax.SyntaxFactory.Literal(
+        new(ThisInternalSyntaxFactory.Literal(
             leading.Node,
             text,
             value,

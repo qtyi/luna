@@ -2,8 +2,9 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Qtyi.CodeAnalysis.Symbols;
+using Microsoft.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
@@ -11,40 +12,44 @@ namespace Qtyi.CodeAnalysis.Lua.Symbols;
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
 #endif
 
-partial class NamedTypeSymbol : INamedTypeSymbolInternal
+abstract partial class NamedTypeSymbol : TypeSymbol, INamedTypeSymbolInternal
 {
     /// <inheritdoc cref="TypeSymbol()"/>
     internal NamedTypeSymbol() { }
-
-    #region 包含关系
-    public override NamedTypeSymbol? ContainingType => this.ContainingSymbol as NamedTypeSymbol;
-
-    #endregion
 
     public abstract int Arity { get; }
 
     public virtual NamedTypeSymbol? EnumUnderlyingType => null;
 
-    #region 公共符号
-#warning 未完成
+    #region Public Symbol
     protected override ISymbol CreateISymbol()
     {
+#warning Not implemented.
         throw new NotImplementedException();
     }
 
     protected override ITypeSymbol CreateITypeSymbol(NullableAnnotation nullableAnnotation)
     {
+#warning Not implemented.
         throw new NotImplementedException();
     }
     #endregion
 
     #region INamedTypeSymbolInternal
-    INamedTypeSymbolInternal? INamedTypeSymbolInternal.EnumUnderlyingType => this.EnumUnderlyingType;
-    #endregion
-
-    #region Microsoft.CodeAnalysis.INamedTypeSymbolInternal
 #nullable disable
-    Microsoft.CodeAnalysis.Symbols.INamedTypeSymbolInternal Microsoft.CodeAnalysis.Symbols.INamedTypeSymbolInternal.EnumUnderlyingType => this.EnumUnderlyingType;
+    INamedTypeSymbolInternal INamedTypeSymbolInternal.EnumUnderlyingType => EnumUnderlyingType;
+
+    ImmutableArray<ISymbolInternal> INamedTypeSymbolInternal.GetMembers()
+    {
+#warning Not implemented.
+        throw new NotImplementedException();
+    }
+
+    ImmutableArray<ISymbolInternal> INamedTypeSymbolInternal.GetMembers(string name)
+    {
+#warning Not implemented.
+        throw new NotImplementedException();
+    }
 #nullable enable
     #endregion
 }

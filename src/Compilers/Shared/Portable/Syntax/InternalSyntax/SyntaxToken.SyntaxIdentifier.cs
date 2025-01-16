@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -15,42 +14,37 @@ partial class SyntaxToken
 {
     internal class SyntaxIdentifier : SyntaxToken
     {
-        static SyntaxIdentifier() => ObjectBinder.RegisterTypeReader(typeof(SyntaxIdentifier), r => new SyntaxIdentifier(r));
+        protected readonly string TextField;
 
-        protected readonly string _text;
+        /// <inheritdoc/>
+        public override string Text => TextField;
 
-        public override string Text => this._text;
+        /// <inheritdoc/>
+        public override object? Value => TextField;
 
-        public override object? Value => this._text;
+        /// <inheritdoc/>
+        public override string ValueText => TextField;
 
-        public override string ValueText => this._text;
-
-        internal SyntaxIdentifier(string text) : base(SyntaxKind.IdentifierToken, text.Length) => this._text = text;
-
-        internal SyntaxIdentifier(string text, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations) : base(SyntaxKind.IdentifierToken, text.Length, diagnostics) => this._text = text;
-
-        internal SyntaxIdentifier(ObjectReader reader) : base(reader)
+        internal SyntaxIdentifier(string text) : base(SyntaxKind.IdentifierToken, text.Length)
         {
-            this._text = reader.ReadString();
-            this.FullWidth = this._text.Length;
+            TextField = text;
         }
 
-        internal override void WriteTo(ObjectWriter writer)
+        internal SyntaxIdentifier(string text, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations) : base(SyntaxKind.IdentifierToken, text.Length, diagnostics, annotations)
         {
-            base.WriteTo(writer);
-            writer.WriteString(this._text);
+            TextField = text;
         }
 
-        public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia) =>
-            new SyntaxIdentifierWithTrivia(this.Kind, this._text, this._text, trivia, this.GetTrailingTrivia(), this.GetDiagnostics(), this.GetAnnotations());
+        public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia)
+            => new SyntaxIdentifierWithTrivia(Kind, TextField, TextField, trivia, trailing: null, GetDiagnostics(), GetAnnotations());
 
-        public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia) =>
-            new SyntaxIdentifierWithTrivia(this.Kind, this._text, this._text, this.GetLeadingTrivia(), trivia, this.GetDiagnostics(), this.GetAnnotations());
+        public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia)
+            => new SyntaxIdentifierWithTrivia(Kind, TextField, TextField, leading: null, trivia, GetDiagnostics(), GetAnnotations());
 
-        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics) =>
-            new SyntaxIdentifier(this.Text, diagnostics, this.GetAnnotations());
+        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+            => new SyntaxIdentifier(Text, diagnostics, GetAnnotations());
 
-        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations) =>
-            new SyntaxIdentifier(this.Text, this.GetDiagnostics(), annotations);
+        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+            => new SyntaxIdentifier(Text, GetDiagnostics(), annotations);
     }
 }

@@ -19,8 +19,8 @@ internal class SyntaxTokenAccumulator : ThisInternalSyntaxAccumulator
 
     public override IEnumerable<SyntaxToken> VisitToken(SyntaxToken token)
     {
-        this.VisitList(token.LeadingTrivia);
+        VisitList(token.LeadingTrivia);
         yield return token;
-        this.VisitList(token.TrailingTrivia);
+        VisitList(token.TrailingTrivia);
     }
 }

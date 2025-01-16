@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
-using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
@@ -14,8 +13,6 @@ partial class Lexer
 {
     private sealed class BuilderStringLiteralToken : SyntaxToken
     {
-        static BuilderStringLiteralToken() => ObjectBinder.RegisterTypeReader(typeof(BuilderStringLiteralToken), r => new BuilderStringLiteralToken(r));
-
         private readonly string _text;
         private readonly ArrayBuilder<string?>? _builder;
         private string? _value;
@@ -24,24 +21,24 @@ partial class Lexer
         private readonly GreenNode? _leading;
         private readonly GreenNode? _trailing;
 
-        public override string Text => this._text;
+        public override string Text => _text;
 
         [MemberNotNull(nameof(_value))]
         public override object? Value
         {
             get
             {
-                this.Build();
-                return this._value;
+                Build();
+                return _value;
             }
         }
 
         [MemberNotNull(nameof(_value))]
-        public override string ValueText => Convert.ToString(this.Value, CultureInfo.InvariantCulture) ?? string.Empty;
+        public override string ValueText => Convert.ToString(Value, CultureInfo.InvariantCulture) ?? string.Empty;
 
-        internal ArrayBuilder<string?>? Builder => this._builder;
+        internal ArrayBuilder<string?>? Builder => _builder;
 
-        internal int InnerIndent { get => this._innerIndent; set => this._innerIndent = value; }
+        internal int InnerIndent { get => _innerIndent; set => _innerIndent = value; }
 
         internal BuilderStringLiteralToken(
             SyntaxKind kind,
@@ -51,18 +48,18 @@ partial class Lexer
             GreenNode? leading,
             GreenNode? trailing) : base(kind, text.Length)
         {
-            this._text = text;
-            this._builder = builder;
-            this._innerIndent = innerIndent;
+            _text = text;
+            _builder = builder;
+            _innerIndent = innerIndent;
 
             if (leading is not null)
             {
-                this.AdjustFlagsAndWidth(leading);
-                this._leading = leading;
+                AdjustFlagsAndWidth(leading);
+                _leading = leading;
             }
             if (trailing is not null)
             {
-                this.AdjustFlagsAndWidth(trailing);
+                AdjustFlagsAndWidth(trailing);
                 _trailing = trailing;
             }
         }
@@ -77,90 +74,57 @@ partial class Lexer
             DiagnosticInfo[]? diagnostics,
             SyntaxAnnotation[]? annotations) : base(kind, text.Length, diagnostics, annotations)
         {
-            this._text = text;
-            this._builder = builder;
-            this._innerIndent = innerIndent;
+            _text = text;
+            _builder = builder;
+            _innerIndent = innerIndent;
 
             if (leading is not null)
             {
-                this.AdjustFlagsAndWidth(leading);
-                this._leading = leading;
+                AdjustFlagsAndWidth(leading);
+                _leading = leading;
             }
             if (trailing is not null)
             {
-                this.AdjustFlagsAndWidth(trailing);
+                AdjustFlagsAndWidth(trailing);
                 _trailing = trailing;
             }
         }
 
-        internal BuilderStringLiteralToken(ObjectReader reader) : base(reader)
-        {
-            this._text = reader.ReadString();
-            this.FullWidth = this._text.Length;
-            this._builder = null;
-            this._value = reader.ReadString();
-            this._innerIndent = reader.ReadInt32();
+        public override GreenNode? GetLeadingTrivia() => _leading;
 
-            var leading = (GreenNode?)reader.ReadValue();
-            if (leading is not null)
-            {
-                this.AdjustFlagsAndWidth(leading);
-                this._leading = leading;
-            }
-            var trailing = (GreenNode?)reader.ReadValue();
-            if (trailing is not null)
-            {
-                this.AdjustFlagsAndWidth(trailing);
-                this._trailing = trailing;
-            }
-        }
-
-        internal override void WriteTo(ObjectWriter writer)
-        {
-            base.WriteTo(writer);
-            writer.WriteString(this._text);
-            writer.WriteString(this._value);
-            writer.WriteInt32(this._innerIndent);
-
-            writer.WriteValue(this._leading);
-            writer.WriteValue(this._trailing);
-        }
-
-        public override GreenNode? GetLeadingTrivia() => this._leading;
-
-        public override GreenNode? GetTrailingTrivia() => this._trailing;
+        public override GreenNode? GetTrailingTrivia() => _trailing;
 
         public override bool TryGetInnerWhiteSpaceIndent(out int indent)
         {
-            indent = this._innerIndent;
+            indent = _innerIndent;
             return true;
         }
 
         [MemberNotNull(nameof(_value))]
         internal void Build()
         {
-            if (this._value is not null) return;
-            if (this._builder is null)
+            if (_value is not null) return;
+            if (_builder is null)
             {
-                this._value ??= string.Empty;
+                _value ??= string.Empty;
                 return;
             }
 
-            TrimIndent(this._builder, this._innerIndent);
+            TrimIndent(_builder, _innerIndent);
 
-            this._value = string.Concat(this._builder.ToImmutableOrEmptyAndFree());
+            _value = string.Concat(_builder.ToImmutableOrEmptyAndFree());
         }
 
         public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia) =>
-            new IndentedSyntaxTokenWithValueAndTrivia<string>(this.Kind, this._text, this._value, this._innerIndent, trivia, this.GetTrailingTrivia(), this.GetDiagnostics(), this.GetAnnotations());
+            new IndentedSyntaxTokenWithValueAndTrivia<string>(Kind, _text, _value, _innerIndent, trivia, GetTrailingTrivia(), GetDiagnostics(), GetAnnotations());
 
         public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia) =>
-            new IndentedSyntaxTokenWithValueAndTrivia<string>(this.Kind, this._text, this._value, this._innerIndent, this.GetLeadingTrivia(), trivia, this.GetDiagnostics(), this.GetAnnotations());
+            new IndentedSyntaxTokenWithValueAndTrivia<string>(Kind, _text, _value, _innerIndent, GetLeadingTrivia(), trivia, GetDiagnostics(), GetAnnotations());
 
         internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics) =>
-            new IndentedSyntaxTokenWithValueAndTrivia<string>(this.Kind, this._text, this._value, this._innerIndent, this.GetLeadingTrivia(), this.GetTrailingTrivia(), diagnostics, this.GetAnnotations());
+            new IndentedSyntaxTokenWithValueAndTrivia<string>(Kind, _text, _value, _innerIndent, GetLeadingTrivia(), GetTrailingTrivia(), diagnostics, GetAnnotations());
 
         internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations) =>
-             new IndentedSyntaxTokenWithValueAndTrivia<string>(this.Kind, this._text, this._value, this._innerIndent, this.GetLeadingTrivia(), this.GetTrailingTrivia(), this.GetDiagnostics(), annotations);
+             new IndentedSyntaxTokenWithValueAndTrivia<string>(Kind, _text, _value, _innerIndent, GetLeadingTrivia(), GetTrailingTrivia(), GetDiagnostics(), annotations);
     }
 }

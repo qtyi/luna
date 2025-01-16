@@ -2,6 +2,7 @@
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
   <PropertyGroup>
-    <DefineConstants>LANG_MOONSCRIPT;$(DefineConstants)</DefineConstants>
+    <ThisLanguageName>MoonScript</ThisLanguageName>
   </PropertyGroup>
+  <Import Project="$(RepositoryEngineeringDir)targets\ConfigThisLanguageName.targets" />
 </Project>

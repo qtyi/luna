@@ -47,15 +47,15 @@ partial class SyntaxAndDeclarationManager
 
     public partial SyntaxAndDeclarationManager AddSyntaxTrees(IEnumerable<SyntaxTree> trees)
     {
-        var scriptModuleName = this.ScriptClassName;
-        var resolver = this.Resolver;
-        var messageProvider = this.MessageProvider;
-        var isSubmission = this.IsSubmission;
+        var scriptModuleName = ScriptClassName;
+        var resolver = Resolver;
+        var messageProvider = MessageProvider;
+        var isSubmission = IsSubmission;
 
-        var state = this._lazyState;
-        var newExternalSyntaxTrees = this.ExternalSyntaxTrees.AddRange(trees);
+        var state = _lazyState;
+        var newExternalSyntaxTrees = ExternalSyntaxTrees.AddRange(trees);
         if (state is null)
-            return this.WithExternalSyntaxTrees(newExternalSyntaxTrees);
+            return WithExternalSyntaxTrees(newExternalSyntaxTrees);
 
         var ordinalMapBuilder = state.OrdinalMap.ToBuilder();
         var loadedSyntaxTreeMapBuilder = state.LoadedSyntaxTreeMap.ToBuilder();
@@ -133,9 +133,9 @@ partial class SyntaxAndDeclarationManager
     public partial SyntaxAndDeclarationManager RemoveSyntaxTrees(HashSet<SyntaxTree> trees)
     {
         var state = _lazyState;
-        var newExternalSyntaxTrees = this.ExternalSyntaxTrees.RemoveAll(trees.Contains);
+        var newExternalSyntaxTrees = ExternalSyntaxTrees.RemoveAll(trees.Contains);
         if (state is null)
-            return this.WithExternalSyntaxTrees(newExternalSyntaxTrees);
+            return WithExternalSyntaxTrees(newExternalSyntaxTrees);
 
         var syntaxTrees = state.SyntaxTrees;
         var loadedSyntaxTreeMap = state.LoadedSyntaxTreeMap;
@@ -179,10 +179,10 @@ partial class SyntaxAndDeclarationManager
 
         return new(
             newExternalSyntaxTrees,
-            this.ScriptClassName,
-            this.Resolver,
-            this.MessageProvider,
-            this.IsSubmission,
+            ScriptClassName,
+            Resolver,
+            MessageProvider,
+            IsSubmission,
             state);
     }
 
@@ -217,10 +217,10 @@ partial class SyntaxAndDeclarationManager
 
     public partial SyntaxAndDeclarationManager ReplaceSyntaxTree(SyntaxTree oldTree, SyntaxTree newTree)
     {
-        var state = this._lazyState;
-        var newExternalSyntaxTrees = this.ExternalSyntaxTrees.Replace(oldTree, newTree);
+        var state = _lazyState;
+        var newExternalSyntaxTrees = ExternalSyntaxTrees.Replace(oldTree, newTree);
         if (state is null)
-            return this.WithExternalSyntaxTrees(newExternalSyntaxTrees);
+            return WithExternalSyntaxTrees(newExternalSyntaxTrees);
 
         var syntaxTrees = state.SyntaxTrees;
         var ordinalMap = state.OrdinalMap;
@@ -243,7 +243,7 @@ partial class SyntaxAndDeclarationManager
 
         var oldOrdinal = ordinalMap[oldTree];
         ImmutableArray<SyntaxTree> newTrees;
-        AddSyntaxTreeToDeclarationMapAndTable(newTree, this.ScriptClassName, this.IsSubmission, declMapBuilder, ref declTable);
+        AddSyntaxTreeToDeclarationMapAndTable(newTree, ScriptClassName, IsSubmission, declMapBuilder, ref declTable);
 
         Debug.Assert(ordinalMap.ContainsKey(oldTree)); // Checked by RemoveSyntaxTreeFromDeclarationMapAndTable
 
@@ -261,10 +261,10 @@ partial class SyntaxAndDeclarationManager
 
         return new(
             newExternalSyntaxTrees,
-            this.ScriptClassName,
-            this.Resolver,
-            this.MessageProvider,
-            this.IsSubmission,
+            ScriptClassName,
+            Resolver,
+            MessageProvider,
+            IsSubmission,
             state);
     }
 

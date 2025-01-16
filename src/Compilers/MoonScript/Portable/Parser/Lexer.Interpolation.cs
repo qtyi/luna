@@ -48,11 +48,11 @@ partial class Lexer
             in Range startRange,
             in Range endRange)
         {
-            this.StartToken = startToken;
-            this.InnerTokens = innerTokens;
-            this.EndToken = endToken;
-            this.StartRange = startRange;
-            this.EndRange = endRange;
+            StartToken = startToken;
+            InnerTokens = innerTokens;
+            EndToken = endToken;
+            StartRange = startRange;
+            EndRange = endRange;
         }
     }
 
@@ -66,15 +66,15 @@ partial class Lexer
         /// 获取或设置扫描过程中搜集到的错误。
         /// 一旦搜集到了一个错误，我们就应在下一个可能的结束位置停下解析，以避免混淆错误提示。
         /// </summary>
-        public SyntaxDiagnosticInfo? Error { get => this._error; set => this._error ??= value; }
+        public SyntaxDiagnosticInfo? Error { get => _error; set => _error ??= value; }
 
         public InterpolatedStringScanner(Lexer lexer) => _lexer = lexer;
 
-        private bool IsAtEnd() => this.IsAtEnd(true);
+        private bool IsAtEnd() => IsAtEnd(true);
 
         private bool IsAtEnd(bool allowNewline)
         {
-            var c = this._lexer.TextWindow.PeekChar();
+            var c = _lexer.TextWindow.PeekChar();
             return
                 (!allowNewline && SyntaxFacts.IsNewLine(c)) ||
                 (c == SlidingTextWindow.InvalidCharacter && _lexer.TextWindow.IsReallyAtEnd());
@@ -82,7 +82,7 @@ partial class Lexer
 
         public bool ScanInterpolatedStringLiteral(ref TokenInfo info)
         {
-            var quote = this._lexer.TextWindow.NextChar();
+            var quote = _lexer.TextWindow.NextChar();
             Debug.Assert(quote == '"');
 
             var buffer = ArrayBuilder<BuilderStringLiteralToken>.GetInstance(); // 缓存需要重设缩进量的语法标记。
@@ -96,13 +96,13 @@ partial class Lexer
             while (true)
             {
                 // 扫描一个字符串字面量。
-                if (this.ScanInterpolatedStringLiteralText(quote, ref hasInterpolation, out var textRange, out var spanBuilder, ref minIndent))
+                if (ScanInterpolatedStringLiteralText(quote, ref hasInterpolation, out var textRange, out var spanBuilder, ref minIndent))
                 {
                     // 扫描到符合字符串字面量格式的标记。
-                    var errors = this.Error is null ? null : new[] { this.Error };
+                    var errors = Error is null ? null : new[] { Error };
                     if (hasInterpolation) // 存在插值语法，则是插值字符串字面量文本标记。
                     {
-                        var builderToken = createBuilderToken(this._lexer, textRange, spanBuilder, errors);
+                        var builderToken = createBuilderToken(_lexer, textRange, spanBuilder, errors);
                         buffer.Add(builderToken);
                         builder.Add(builderToken);
                         // 若上一个标记位于行尾，则表明需要检查扫描到的字符串字面量的缩进量。
@@ -113,7 +113,7 @@ partial class Lexer
                         isLastTokenAtEndOfLine = builderToken.IsTokenAtEndOfLine();
 
                         // 添加插值内容的语法标记。
-                        var contents = this.ScanInterpolatedStringContent(
+                        var contents = ScanInterpolatedStringContent(
                             out var startRange,
                             out var endRange,
                             out var startToken,
@@ -125,7 +125,7 @@ partial class Lexer
                             endToken,
                             startRange,
                             endRange);
-                        var contentToken = createInterpolationToken(this._lexer, interpolation, errors);
+                        var contentToken = createInterpolationToken(_lexer, interpolation, errors);
                         builder.Add(contentToken);
                         isLastTokenAtEndOfLine = false; // 无论如何，默认插值结束是在同一行上的。
 
@@ -136,7 +136,7 @@ partial class Lexer
                             return false; // 此方法仅处理插值字符串字面量，因此返回失败。
 
                         // 最后一个也应为插值字符串字面量文本标记。
-                        var builderToken = createBuilderToken(this._lexer, textRange, spanBuilder, errors);
+                        var builderToken = createBuilderToken(_lexer, textRange, spanBuilder, errors);
                         buffer.Add(builderToken);
                         builder.Add(builderToken);
                         // 若上一个标记位于行尾，则表明需要检查扫描到的字符串字面量的缩进量。
@@ -158,13 +158,13 @@ partial class Lexer
 
             var tokens = builder.ToImmutableOrEmptyAndFree();
             // 复原前后方语法琐碎。
-            this._lexer._leadingTriviaCache.Clear();
-            this._lexer._leadingTriviaCache.AddRange(tokens[0].LeadingTrivia);
-            this._lexer._trailingTriviaCache.Clear();
-            this._lexer._trailingTriviaCache.AddRange(tokens[tokens.Length - 1].TrailingTrivia);
+            _lexer._leadingTriviaCache.Clear();
+            _lexer._leadingTriviaCache.AddRange(tokens[0].LeadingTrivia);
+            _lexer._trailingTriviaCache.Clear();
+            _lexer._trailingTriviaCache.AddRange(tokens[tokens.Length - 1].TrailingTrivia);
 
             info.Kind = SyntaxKind.InterpolatedStringLiteralToken;
-            info.Text = this._lexer.TextWindow.GetText(intern: true);
+            info.Text = _lexer.TextWindow.GetText(intern: true);
             info.SyntaxTokenArrayValue = tokens;
 
             return true;
@@ -200,80 +200,80 @@ partial class Lexer
             out ArrayBuilder<string?> spanBuilder,
             ref int minIndent)
         {
-            var textRangeStart = this._lexer.TextWindow.Position;
+            var textRangeStart = _lexer.TextWindow.Position;
 
             spanBuilder = ArrayBuilder<string?>.GetInstance();
-            this._lexer._builder.Clear();
+            _lexer._builder.Clear();
 
             while (true)
             {
-                var c = this._lexer.TextWindow.PeekChar();
+                var c = _lexer.TextWindow.PeekChar();
                 if (c == quote) // 字符串结尾
                 {
-                    this._lexer.TextWindow.AdvanceChar();
+                    _lexer.TextWindow.AdvanceChar();
 
-                    if (this._lexer._builder.Length > 0)
-                        spanBuilder.Add(this._lexer._builder.ToString());
+                    if (_lexer._builder.Length > 0)
+                        spanBuilder.Add(_lexer._builder.ToString());
 
                     hasInterpolation = false;
                     break;
                 }
                 // 字符串中可能包含非正规的UTF-16以外的字符，检查是否真正到达文本结尾来验证这些字符不是由用户代码引入的情况。
-                else if (c == SlidingTextWindow.InvalidCharacter && this._lexer.TextWindow.IsReallyAtEnd())
+                else if (c == SlidingTextWindow.InvalidCharacter && _lexer.TextWindow.IsReallyAtEnd())
                 {
-                    Debug.Assert(this._lexer.TextWindow.Width > 0);
-                    this.Error = MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
+                    Debug.Assert(_lexer.TextWindow.Width > 0);
+                    Error = MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
 
-                    if (this._lexer._builder.Length > 0)
-                        spanBuilder.Add(this._lexer._builder.ToString());
+                    if (_lexer._builder.Length > 0)
+                        spanBuilder.Add(_lexer._builder.ToString());
 
                     hasInterpolation = false;
                     break;
                 }
-                else if (SyntaxFacts.IsWhiteSpace(c))
+                else if (SyntaxFacts.IsWhitespace(c))
                 {
                     // 扫描缩进或内容（第一行）状态。
-                    this._lexer.TextWindow.AdvanceChar();
-                    this._lexer._builder.Append(c);
+                    _lexer.TextWindow.AdvanceChar();
+                    _lexer._builder.Append(c);
                 }
                 else
                 {
                     if (spanBuilder.Count % 2 == 1) // 处于扫描缩进状态。
                     {
-                        if (this._lexer._builder.Length > 0)
+                        if (_lexer._builder.Length > 0)
                         {
-                            spanBuilder.Add(this._lexer._builder.ToString());
-                            this._lexer._builder.Clear();
+                            spanBuilder.Add(_lexer._builder.ToString());
+                            _lexer._builder.Clear();
                         }
                         else
                             spanBuilder.Add(null);
                     }
 
                     if (c == '\\') // 转义字符前缀
-                        this._lexer.ScanEscapeSequence();
-                    else if (c == '#' && this._lexer.TextWindow.PeekChar(1) == '{')
+                        _lexer.ScanEscapeSequence();
+                    else if (c == '#' && _lexer.TextWindow.PeekChar(1) == '{')
                     {
-                        if (this._lexer._builder.Length > 0)
-                            spanBuilder.Add(this._lexer._builder.ToString());
+                        if (_lexer._builder.Length > 0)
+                            spanBuilder.Add(_lexer._builder.ToString());
 
                         hasInterpolation = true;
                         break;
                     }
                     else if (SyntaxFacts.IsNewLine(c))
                     {
-                        this._lexer.TextWindow.AdvanceChar();
-                        if (SyntaxFacts.IsNewLine(c, this._lexer.TextWindow.PeekChar()))
-                            this._lexer.TextWindow.AdvanceChar();
-                        this._lexer._builder.Append('\n');
+                        _lexer.TextWindow.AdvanceChar();
+                        if (SyntaxFacts.IsNewLine(c, _lexer.TextWindow.PeekChar()))
+                            _lexer.TextWindow.AdvanceChar();
+                        _lexer._builder.Append('\n');
 
-                        spanBuilder.Add(this._lexer._builder.ToString());
-                        this._lexer._builder.Clear();
+                        spanBuilder.Add(_lexer._builder.ToString());
+                        _lexer._builder.Clear();
                     }
                     else // 普通字符
                     {
                         // 扫描内容状态。
-                        this._lexer.TextWindow.AdvanceChar();
-                        this._lexer._builder.Append(c);
+                        _lexer.TextWindow.AdvanceChar();
+                        _lexer._builder.Append(c);
                     }
                 }
             }
@@ -293,7 +293,7 @@ partial class Lexer
                 }
             }
 
-            var textRangeEnd = this._lexer.TextWindow.Position - 1;
+            var textRangeEnd = _lexer.TextWindow.Position - 1;
             textRange = textRangeStart..textRangeEnd;
             return true;
         }
@@ -305,8 +305,8 @@ partial class Lexer
             out SyntaxToken endToken)
         {
             startToken = SyntaxFactory.Token(SyntaxKind.InterpolationStartToken);
-            startRange = this._lexer.TextWindow.Position..(this._lexer.TextWindow.Position + 1);
-            this._lexer.TextWindow.AdvanceChar(2);
+            startRange = _lexer.TextWindow.Position..(_lexer.TextWindow.Position + 1);
+            _lexer.TextWindow.AdvanceChar(2);
 
             var tokens = ArrayBuilder<SyntaxToken>.GetInstance();
 
@@ -314,7 +314,7 @@ partial class Lexer
             var mode = LexerMode.Syntax;
             while (true)
             {
-                var token = this._lexer.Lex(mode);
+                var token = _lexer.Lex(mode);
                 switch (token.Kind)
                 {
                     case SyntaxKind.OpenBraceToken:
@@ -324,9 +324,9 @@ partial class Lexer
                         // 花括号已平衡，且下一个是右花括号标记，终止枚举。
                         if (braceBalance == 0)
                         {
-                            this._lexer.Reset(this._lexer.TextWindow.Position - token.GetTrailingTriviaWidth()); // 回退到右花括号的下一个字符位置。
+                            _lexer.TextWindow.Reset(_lexer.TextWindow.Position - token.GetTrailingTriviaWidth()); // 回退到右花括号的下一个字符位置。
                             endToken = SyntaxFactory.Token(SyntaxKind.InterpolationEndToken);
-                            endRange = (this._lexer.TextWindow.Position - 1)..(this._lexer.TextWindow.Position - 1);
+                            endRange = (_lexer.TextWindow.Position - 1)..(_lexer.TextWindow.Position - 1);
 
                             appendTrailingTrivia(token);
                             return tokens;
@@ -338,10 +338,10 @@ partial class Lexer
                     // 直到文件结尾也未能平衡花括号或查看到右花括号，则产生错误。
                     case SyntaxKind.EndOfFileToken:
                         {
-                            this.Error = MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
+                            Error = MakeError(ErrorCode.ERR_UnterminatedStringLiteral);
 
                             endToken = SyntaxFactory.MissingToken(SyntaxKind.InterpolationEndToken);
-                            endRange = this._lexer.TextWindow.Position..(this._lexer.TextWindow.Position - 1);
+                            endRange = _lexer.TextWindow.Position..(_lexer.TextWindow.Position - 1);
 
                             appendTrailingTrivia(token);
                             return tokens;

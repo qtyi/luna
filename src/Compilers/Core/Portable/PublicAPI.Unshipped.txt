@@ -1,0 +1,43 @@
+const Qtyi.CodeAnalysis.LanguageNames.Lua = "Lua" -> string!
+const Qtyi.CodeAnalysis.LanguageNames.MoonScript = "MoonScript" -> string!
+override abstract Qtyi.CodeAnalysis.CompilationOptions.Language.get -> string!
+override abstract Qtyi.CodeAnalysis.ParseOptions.Language.get -> string!
+override abstract Qtyi.CodeAnalysis.SemanticModel.Language.get -> string!
+override sealed Qtyi.CodeAnalysis.SemanticModel.GetAliasInfoCore(Microsoft.CodeAnalysis.SyntaxNode! nameSyntax, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Microsoft.CodeAnalysis.IAliasSymbol?
+override sealed Qtyi.CodeAnalysis.SemanticModel.GetSpeculativeAliasInfoCore(int position, Microsoft.CodeAnalysis.SyntaxNode! nameSyntax, Microsoft.CodeAnalysis.SpeculativeBindingOption bindingOption) -> Microsoft.CodeAnalysis.IAliasSymbol?
+override sealed Qtyi.CodeAnalysis.SymbolVisitor.VisitAlias(Microsoft.CodeAnalysis.IAliasSymbol! symbol) -> void
+override sealed Qtyi.CodeAnalysis.SymbolVisitor.VisitDiscard(Microsoft.CodeAnalysis.IDiscardSymbol! symbol) -> void
+override sealed Qtyi.CodeAnalysis.SymbolVisitor.VisitFunctionPointerType(Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol! symbol) -> void
+override sealed Qtyi.CodeAnalysis.SymbolVisitor.VisitPointerType(Microsoft.CodeAnalysis.IPointerTypeSymbol! symbol) -> void
+override sealed Qtyi.CodeAnalysis.SymbolVisitor.VisitRangeVariable(Microsoft.CodeAnalysis.IRangeVariableSymbol! symbol) -> void
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TArgument, TResult>.VisitAlias(Microsoft.CodeAnalysis.IAliasSymbol! symbol, TArgument argument) -> TResult
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TArgument, TResult>.VisitDiscard(Microsoft.CodeAnalysis.IDiscardSymbol! symbol, TArgument argument) -> TResult
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TArgument, TResult>.VisitFunctionPointerType(Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol! symbol, TArgument argument) -> TResult
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TArgument, TResult>.VisitPointerType(Microsoft.CodeAnalysis.IPointerTypeSymbol! symbol, TArgument argument) -> TResult
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TArgument, TResult>.VisitRangeVariable(Microsoft.CodeAnalysis.IRangeVariableSymbol! symbol, TArgument argument) -> TResult
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TResult>.VisitAlias(Microsoft.CodeAnalysis.IAliasSymbol! symbol) -> TResult?
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TResult>.VisitDiscard(Microsoft.CodeAnalysis.IDiscardSymbol! symbol) -> TResult?
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TResult>.VisitFunctionPointerType(Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol! symbol) -> TResult?
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TResult>.VisitPointerType(Microsoft.CodeAnalysis.IPointerTypeSymbol! symbol) -> TResult?
+override sealed Qtyi.CodeAnalysis.SymbolVisitor<TResult>.VisitRangeVariable(Microsoft.CodeAnalysis.IRangeVariableSymbol! symbol) -> TResult?
+Qtyi.CodeAnalysis.CompilationOptions
+Qtyi.CodeAnalysis.CompilationOptions.OutputKind.get -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.CompilationOptions.WithOutputKind(Qtyi.CodeAnalysis.OutputKind kind) -> Qtyi.CodeAnalysis.CompilationOptions!
+Qtyi.CodeAnalysis.LanguageNames
+Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.OutputKind.ConsoleApplication = 0 -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary = 2 -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.OutputKind.LuaBytecodes = 6 -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.OutputKind.NetModule = 3 -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.OutputKind.WindowsApplication = 1 -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.OutputKind.WindowsRuntimeApplication = 5 -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.OutputKind.WindowsRuntimeMetadata = 4 -> Qtyi.CodeAnalysis.OutputKind
+Qtyi.CodeAnalysis.ParseOptions
+Qtyi.CodeAnalysis.SemanticModel
+Qtyi.CodeAnalysis.SemanticModel.SemanticModel() -> void
+Qtyi.CodeAnalysis.SymbolVisitor
+Qtyi.CodeAnalysis.SymbolVisitor.SymbolVisitor() -> void
+Qtyi.CodeAnalysis.SymbolVisitor<TArgument, TResult>
+Qtyi.CodeAnalysis.SymbolVisitor<TArgument, TResult>.SymbolVisitor() -> void
+Qtyi.CodeAnalysis.SymbolVisitor<TResult>
+Qtyi.CodeAnalysis.SymbolVisitor<TResult>.SymbolVisitor() -> void

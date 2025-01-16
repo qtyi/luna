@@ -4,12 +4,12 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(NetLunaSourceBuild);netstandard2.0</TargetFrameworks>
-    <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <DefineConstants>$(DefineConstants);COMPILERCORE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateMicrosoftCodeAnalysisCommitHashAttribute>true</GenerateMicrosoftCodeAnalysisCommitHashAttribute>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == 'netstandard2.0'">full</ApplyNgenOptimization>
+    <GeneratePerformanceSensitiveAttribute>true</GeneratePerformanceSensitiveAttribute>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>
@@ -20,6 +20,12 @@
     </PackageDescription>
     <PackageTags>Luna CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup Label="AdditionalFiles">
+    <AdditionalFiles Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Core\Portable\BannedSymbols.CompilerLibraries.txt" Link="BannedSymbols.RoslynCompilerLibraries.txt" />
+    <PublicAPI Include="PublicAPI.Shipped.txt" />
+    <PublicAPI Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
 
   <ItemGroup Label="Resources">
     <EmbeddedResource Update="LunaResources.resx" GenerateSource="true" />
@@ -36,6 +42,16 @@
   </ItemGroup>
 
   <ItemGroup Label="References">
+    <ProjectReference Include="..\..\..\Dependencies\Lua.Corelib\Lua.Corelib.csproj" />
+    
+    <!--
+      Analyzers that will be used to analyze projects that references
+      Microsoft.CodeAnalysis project or Microsoft.CodeAnalysis.Common package.
+
+      Note: PrivateAssets="ContentFiles" ensures that projects referencing Microsoft.CodeAnalysis.Common package
+      will import everything but content files from Microsoft.CodeAnalysis.Analyzers, specifically, analyzers.
+    -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Condition="'$(DotNetBuildSourceOnly)' != 'true'" PrivateAssets="ContentFiles" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
   </ItemGroup>
 

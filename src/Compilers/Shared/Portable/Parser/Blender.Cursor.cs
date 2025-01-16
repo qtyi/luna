@@ -10,8 +10,6 @@ using Roslyn.Utilities;
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-#else
-#error Language not supported.
 #endif
 
 internal partial struct Blender
@@ -23,13 +21,16 @@ internal partial struct Blender
     {
         /// <summary>当前节点或标记。</summary>
         public readonly SyntaxNodeOrToken CurrentNodeOrToken;
+
+        private readonly LanguageVersion _languageVersion;
+
         /// <summary>当前节点或标记在父节点中的索引位置。</summary>
         private readonly int _indexInParent;
 
         /// <summary>
         /// 判断指针指向的节点是否是结束节点。
         /// </summary>
-        public bool IsFinished => this.CurrentNodeOrToken.Kind() switch
+        public bool IsFinished => CurrentNodeOrToken.Kind() switch
         {
             SyntaxKind.None or SyntaxKind.EndOfFileToken => true,
             _ => false
@@ -40,10 +41,11 @@ internal partial struct Blender
         /// </summary>
         /// <param name="node">要指向的节点。</param>
         /// <param name="indexInParent"><paramref name="node"/>在父节点中的索引位置。</param>
-        private Cursor(SyntaxNodeOrToken node, int indexInParent)
+        private Cursor(SyntaxNodeOrToken node, LanguageVersion languageVersion, int indexInParent)
         {
-            this.CurrentNodeOrToken = node;
-            this._indexInParent = indexInParent;
+            CurrentNodeOrToken = node;
+            _languageVersion = languageVersion;
+            _indexInParent = indexInParent;
         }
 
         /// <summary>
@@ -51,7 +53,7 @@ internal partial struct Blender
         /// </summary>
         /// <param name="node">要指向的根节点。</param>
         /// <returns>指向<paramref name="node"/>的指针。</returns>
-        public static Cursor FromRoot(ThisSyntaxNode node) => new(node, indexInParent: 0);
+        public static Cursor FromRoot(ThisSyntaxNode node, LanguageVersion languageVersion) => new(node, languageVersion, indexInParent: 0);
 
         /// <summary>
         /// 判断一个节点是否为零宽标记或文件结尾标记。
@@ -65,19 +67,19 @@ internal partial struct Blender
         /// <returns>指向下一个同属节点的指针。</returns>
         public Cursor MoveToNextSibling()
         {
-            if (this.CurrentNodeOrToken.Parent is not null)
+            if (CurrentNodeOrToken.Parent is not null)
             {
                 // 首先在同父级节点下依次向右查看，找到下一个符合条件的同级节点。
-                var siblings = this.CurrentNodeOrToken.Parent.ChildNodesAndTokens();
-                for (int i = this._indexInParent + 1, n = siblings.Count; i < n; i++)
+                var siblings = CurrentNodeOrToken.Parent.ChildNodesAndTokens();
+                for (int i = _indexInParent + 1, n = siblings.Count; i < n; i++)
                 {
                     var sibling = siblings[i];
                     if (IsNonZeroWidthOrIsEndOfFile(sibling))
-                        return new(sibling, i);
+                        return new(sibling, _languageVersion, i);
                 }
 
                 // 同级节点均不符合要求，则移动到父节点，查找父节点右侧符合要求的节点。
-                return this.MoveToParent().MoveToNextSibling();
+                return MoveToParent().MoveToNextSibling();
             }
 
             // 找不到符合条件的节点。
@@ -89,10 +91,10 @@ internal partial struct Blender
         /// </summary>
         private Cursor MoveToParent()
         {
-            var parent = this.CurrentNodeOrToken.Parent;
+            var parent = CurrentNodeOrToken.Parent;
             Debug.Assert(parent is not null);
             var index = IndexOfNodeInParent(parent);
-            return new(parent, index);
+            return new(parent, _languageVersion, index);
         }
 
         /// <summary>
@@ -119,16 +121,16 @@ internal partial struct Blender
         /// <returns>指向第一个子节点的指针。</returns>
         public Cursor MoveToFirstChild()
         {
-            Debug.Assert(this.CurrentNodeOrToken.IsNode);
+            Debug.Assert(CurrentNodeOrToken.IsNode);
 
-            var node = this.CurrentNodeOrToken.AsNode();
+            var node = CurrentNodeOrToken.AsNode();
             Debug.Assert(node is not null);
             if (node.SlotCount > 0)
             {
                 // 首先快速检查当前节点的第一个子节点是否符合要求。
                 var child = ChildSyntaxList.ItemInternal(node, 0);
                 if (IsNonZeroWidthOrIsEndOfFile(child))
-                    return new(child, 0);
+                    return new(child, _languageVersion, 0);
 
                 // 遍历所有子节点，查找符合要求的节点。
                 var children = node.ChildNodesAndTokens();
@@ -136,7 +138,7 @@ internal partial struct Blender
                 {
                     child = children[i];
                     if (IsNonZeroWidthOrIsEndOfFile(child))
-                        return new(child, i);
+                        return new(child, _languageVersion, i);
                 }
             }
 
@@ -155,7 +157,7 @@ internal partial struct Blender
             {
                 for (
                     var node = cursor.CurrentNodeOrToken;
-                    node.Kind() != SyntaxKind.None && !SyntaxFacts.IsAnyToken(node.Kind());
+                    node.Kind() != SyntaxKind.None && !SyntaxFacts.IsAnyToken(node.Kind(), _languageVersion);
                     node = cursor.CurrentNodeOrToken)
                     cursor = cursor.MoveToFirstChild();
             }

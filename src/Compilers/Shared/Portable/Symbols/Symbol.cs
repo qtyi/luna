@@ -5,39 +5,22 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Microsoft.Cci;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
-using Qtyi.CodeAnalysis.Symbols;
+using Microsoft.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisCompilation = LuaCompilation;
-using ThisDiagnosticInfo = LuaDiagnosticInfo;
-using ThisSemanticModel = LuaSemanticModel;
-using ThisSymbolVisitor = LuaSymbolVisitor;
-using ThisSymbolVisitor<TResult> = LuaSymbolVisitor<TResult>;
-using ThisSymbolVisitor<TResult, TArgument> = LuaSymbolVisitor<TResult, TArgument>;
-using ThisSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisCompilation = MoonScriptCompilation;
-using ThisDiagnosticInfo = MoonScriptDiagnosticInfo;
-using ThisSemanticModel = MoonScriptSemanticModel;
-using ThisSymbolVisitor = MoonScriptSymbolVisitor;
-using ThisSymbolVisitor<TResult> = MoonScriptSymbolVisitor<TResult>;
-using ThisSymbolVisitor<TResult, TArgument> = MoonScriptSymbolVisitor<TResult, TArgument>;
-using ThisSyntaxNode = MoonScriptSyntaxNode;
-#else
-#error Not implemented
 #endif
 
 using Symbols;
 
 /// <summary>
-/// The base class for all symbols (module, type, field, parameter, etc.) that are 
-/// exposed by the compiler.
+/// The base class for all symbols (namespaces, classes, method, parameters, etc.) that are exposed by the compiler.
 /// </summary>
 [DebuggerDisplay("{GetDebuggerDisplay(), nq}")]
 internal abstract partial class Symbol : ISymbolInternal, IFormattable
@@ -47,31 +30,31 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// <summary>
     /// Gets the name of this symbol.
     /// </summary>
-    /// <value>
+    /// <remarks>
     /// Symbols without a name return the empty string; <see langword="null"/> is
     /// never returned.
-    /// </value>
+    /// </remarks>
     public virtual string Name => string.Empty;
 
     /// <summary>
     /// Gets the name of a symbol as it appears in metadata.
     /// </summary>
-    /// <value>
-    /// Most of the time, this is the same as the Name property, with the following exceptions:
+    /// <remarks>
+    /// Most of the time, this is the same as the <see cref="Name"/> property, with the following exceptions:
     /// 1) The metadata name of generic types includes the "`1", "`2" etc. suffix that
     /// indicates the number of type parameters (it does not include, however, names of
     /// containing types or namespaces).
     /// 2) The metadata name of explicit interface names have spaces removed, compared to
-    /// the name property.
-    /// </value>
-    public virtual string MetadataName => this.Name;
+    /// the <see cref="Name"/> property.
+    /// </remarks>
+    public virtual string MetadataName => Name;
 
     /// <summary>
     /// Gets the token for this symbol as it appears in metadata.
     /// </summary>
-    /// <value>
-    /// Most of the time this is 0, as it is when the symbol is not loaded from metadata.
-    /// </value>
+    /// <remarks>
+    /// Most of the time this is <c>0</c>, as it is when the symbol is not loaded from metadata.
+    /// </remarks>
     public virtual int MetadataToken => 0;
 
     /// <summary>
@@ -99,20 +82,14 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// Returns the named type symbol containing this symbol.  If this symbol doesn't
     /// belong to any named type symbol, returns <see langword="null"/>.
     /// </value>
-    public virtual NamedTypeSymbol? ContainingType =>
-        // PERF: Derived class should provider more efficient implementation.
-        this.GetContainingSymbolHelper<NamedTypeSymbol>();
-
-    /// <summary>
-    /// Get the module symbol that logically contains this symbol.
-    /// </summary>
-    /// <value>
-    /// Returns the module symbol containing this symbol.  If this symbol doesn't belong
-    /// to any module symbol, returns <see langword="null"/>.
-    /// </value>
-    public virtual ModuleSymbol? ContainingModule =>
-        // PERF: Derived class should provider more efficient implementation.
-        this.GetContainingSymbolHelper<ModuleSymbol>();
+    public virtual NamedTypeSymbol? ContainingType
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
     /// <summary>
     /// Get the module symbol that represent the .NET namespace that logically contains
@@ -122,9 +99,14 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// Returns the module symbol that represent the .NET namespace that containing this
     /// symbol.  If this symbol doesn't belong to any .NET namespace, returns <see langword="null"/>.
     /// </value>
-    internal virtual ModuleSymbol? ContainingNamespace =>
-        // PERF: Derived class should provider more efficient implementation.
-        this.GetContainingSymbolHelper<ModuleSymbol>(static module => module.IsNamespace);
+    public virtual NamespaceSymbol? ContainingNamespace
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
     /// <summary>
     /// Get the module symbol that represent the .NET module that logically contains
@@ -134,9 +116,14 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// Returns the .NET module symbol that containing this symbol.  If this symbol
     /// doesn't belong to any .NET module, returns <see langword="null"/>.
     /// </value>
-    internal virtual NetmoduleSymbol? ContainingNetmodule =>
-        // PERF: Derived class should provider more efficient implementation.
-        this.ContainingSymbol?.ContainingNetmodule;
+    internal virtual ModuleSymbol? ContainingModule
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 
     /// <summary>
     /// Get the assembly symbol that logically contains this symbol.
@@ -145,25 +132,13 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// Returns the assembly symbol containing this symbol.  If this symbol doesn't
     /// belong to any assembly symbol, returns <see langword="null"/>.
     /// </value>
-    public virtual AssemblySymbol? ContainingAssembly =>
-        // PERF: Derived class should provider more efficient implementation.
-        this.ContainingSymbol?.ContainingAssembly;
-
-    /// <summary>
-    /// Helper method to get the first symbol containing this symbol.
-    /// </summary>
-    /// <typeparam name="TSymbol">Type of symbol to get.</typeparam>
-    /// <param name="predicate">Check if symbol is match.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private TSymbol? GetContainingSymbolHelper<TSymbol>(Func<TSymbol, bool>? predicate = null) where TSymbol : Symbol
+    public virtual AssemblySymbol? ContainingAssembly
     {
-        for (var container = this.ContainingSymbol; container is not null; container = container.ContainingSymbol)
+        get
         {
-            if (container is TSymbol symbol &&
-                (predicate is null || predicate(symbol)))
-                return symbol;
+#warning Not implemented.
+            throw new NotImplementedException();
         }
-        return null;
     }
     #endregion
 
@@ -254,7 +229,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// For any other assembly, null.
     /// For a source .NET module, the <see cref="SourceAssemblySymbol.DeclaringCompilation"/> of the associated source assembly.
     /// For any other .NET module, null.
-    /// For any other symbol, the <see cref="SourceNetmoduleSymbol.DeclaringCompilation"/> of the associated .NET module.
+    /// For any other symbol, the <see cref="SourceModuleSymbol.DeclaringCompilation"/> of the associated .NET module.
     /// </value>
     /// <remarks>
     /// We're going through the containing .NET module, rather than the containing assembly,
@@ -266,28 +241,8 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     {
         get
         {
-            if (!this.IsDefinition)
-                return this.OriginalDefinition.DeclaringCompilation;
-
-            switch (this.Kind)
-            {
-                case SymbolKind.ErrorType:
-                    return null;
-                case SymbolKind.Assembly:
-                    Debug.Assert(this is not SourceAssemblySymbol, $"{nameof(SourceAssemblySymbol)} must override {nameof(DeclaringCompilation)}");
-                    return null;
-                case SymbolKind.Netmodule:
-                    Debug.Assert(this is not SourceNetmoduleSymbol, $"{nameof(SourceNetmoduleSymbol)} must override {nameof(DeclaringCompilation)}");
-                    return null;
-            }
-
-            switch (this.ContainingNetmodule)
-            {
-                case SourceNetmoduleSymbol sourceModuleSymbol:
-                    return sourceModuleSymbol.DeclaringCompilation;
-            }
-
-            return null;
+#warning Not implemented.
+            throw new NotImplementedException();
         }
     }
 
@@ -315,7 +270,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// If this symbol is constructed from another symbol by type substitution then returns
     /// the original symbol as it was defined in source or metadata.
     /// </value>
-    public Symbol OriginalDefinition => this.OriginalSymbolDefinition;
+    public Symbol OriginalDefinition => OriginalSymbolDefinition;
 
     /// <summary>
     /// Gets the original definition of this symbol.
@@ -332,7 +287,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// Returns <see langword="true"/> if this is the original definition of this symbol;
     /// otherwise, <see langword="false"/>.
     /// </value>
-    public bool IsDefinition => ReferenceEquals(this, this.OriginalDefinition);
+    public bool IsDefinition => ReferenceEquals(this, OriginalDefinition);
     #endregion
 
     /// <summary>
@@ -360,8 +315,8 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// </remarks>
     internal virtual LexicalSortKey GetLexicalSortKey()
     {
-        var locations = this.Locations;
-        var declaringCompilation = this.DeclaringCompilation;
+        var locations = Locations;
+        var declaringCompilation = DeclaringCompilation;
         Debug.Assert(declaringCompilation != null); // require that it is a source symbol
         return (locations.Length > 0) ? new LexicalSortKey(locations[0], declaringCompilation) : LexicalSortKey.NotInSource;
     }
@@ -384,7 +339,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     internal virtual void ForceComplete(SourceLocation? location, CancellationToken cancellationToken)
     {
         // must be overridden by source symbols, no-op for other symbols
-        Debug.Assert(!this.RequiresCompletion);
+        Debug.Assert(!RequiresCompletion);
     }
 
     /// <summary>
@@ -396,7 +351,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     internal virtual bool HasComplete(CompletionPart part)
     {
         // must be overridden by source symbols, no-op for other symbols
-        Debug.Assert(!this.RequiresCompletion);
+        Debug.Assert(!RequiresCompletion);
         return true;
     }
     #endregion
@@ -491,7 +446,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     }
 
     /// <inheritdoc/>
-    public sealed override bool Equals(object? obj) => this.Equals(obj as Symbol, SymbolEqualityComparer.Default.CompareKind);
+    public sealed override bool Equals(object? obj) => Equals(obj as Symbol, SymbolEqualityComparer.Default.CompareKind);
 
     /// <summary>
     /// Determines whether the specified symbol is equals to the current symbol.
@@ -499,7 +454,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// <param name="other">The symbol to compare with the current symbol.</param>
     /// <returns>Returns <see langword="true"/> if the specified symbol is equals to the
     /// current symbol; otherwise, <see langword="false"/>.</returns>
-    public bool Equals(Symbol? other) => this.Equals(other, SymbolEqualityComparer.Default.CompareKind);
+    public bool Equals(Symbol? other) => Equals(other, SymbolEqualityComparer.Default.CompareKind);
 
     /// <summary>
     /// Determines whether the specified symbol is equals to the current symbol.  Use
@@ -544,8 +499,8 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     {
         get
         {
-            if (this._lazyISymbol is null)
-                Interlocked.CompareExchange(ref _lazyISymbol, this.CreateISymbol(), null);
+            if (_lazyISymbol is null)
+                Interlocked.CompareExchange(ref _lazyISymbol, CreateISymbol(), null);
 
             return _lazyISymbol;
         }
@@ -584,7 +539,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     /// <value>
     /// Returns <see langword="true"/> if the symbol has a use-site diagnostic with error severity; otherwise, <see langword="false"/>.
     /// </value>
-    internal bool HasUseSiteError => this.GetUseSiteInfo().DiagnosticInfo?.Severity == DiagnosticSeverity.Error;
+    internal bool HasUseSiteError => GetUseSiteInfo().DiagnosticInfo?.Severity == DiagnosticSeverity.Error;
 
     /// <summary>
     /// Returns diagnostic info that should be reported at the use site of the symbol.
@@ -605,7 +560,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     {
         get
         {
-            var dependency = this.ContainingAssembly;
+            var dependency = ContainingAssembly;
             if (dependency is not null && ReferenceEquals(dependency.CorLibrary, dependency))
                 return null;
 
@@ -718,28 +673,17 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
     internal Symbol() { }
 
     #region ISymbolInternal
-    ISymbolInternal? ISymbolInternal.ContainingSymbol => this.ContainingSymbol;
-    INamedTypeSymbolInternal? ISymbolInternal.ContainingType => this.ContainingType;
-    IModuleSymbolInternal? ISymbolInternal.ContainingModule => this.ContainingModule;
-    INetmoduleSymbolInternal? ISymbolInternal.ContainingNetmodule => this.ContainingNetmodule;
-    IAssemblySymbolInternal? ISymbolInternal.ContainingAssembly => this.ContainingAssembly;
-    ISymbol ISymbolInternal.GetISymbol() => this.ISymbol;
-    bool ISymbolInternal.Equals(ISymbolInternal? other, TypeCompareKind compareKind) => this.Equals(other as Symbol, compareKind);
-    #endregion
+    ISymbolInternal? ISymbolInternal.ContainingSymbol => ContainingSymbol;
+    INamedTypeSymbolInternal? ISymbolInternal.ContainingType => ContainingType;
+    INamespaceSymbolInternal? ISymbolInternal.ContainingNamespace => ContainingNamespace;
+    IModuleSymbolInternal? ISymbolInternal.ContainingModule => ContainingModule;
+    IAssemblySymbolInternal? ISymbolInternal.ContainingAssembly => ContainingAssembly;
+    Compilation? ISymbolInternal.DeclaringCompilation => DeclaringCompilation;
 
-    #region Microsoft.CodeAnalysis.Symbols.ISymbolInternal
-#nullable disable
-    Microsoft.CodeAnalysis.SymbolKind Microsoft.CodeAnalysis.Symbols.ISymbolInternal.Kind => (Microsoft.CodeAnalysis.SymbolKind)this.Kind;
+    public abstract TypeMemberVisibility MetadataVisibility { get; }
 
-    Microsoft.CodeAnalysis.Symbols.ISymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingSymbol => this.ContainingSymbol;
-    Microsoft.CodeAnalysis.Symbols.INamespaceSymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingNamespace => this.ContainingNamespace;
-    Microsoft.CodeAnalysis.Symbols.INamedTypeSymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingType => this.ContainingType;
-    Microsoft.CodeAnalysis.Symbols.IModuleSymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingModule => this.ContainingNetmodule;
-    Microsoft.CodeAnalysis.Symbols.IAssemblySymbolInternal Microsoft.CodeAnalysis.Symbols.ISymbolInternal.ContainingAssembly => this.ContainingAssembly;
-    Compilation Microsoft.CodeAnalysis.Symbols.ISymbolInternal.DeclaringCompilation => this.DeclaringCompilation;
-    Microsoft.CodeAnalysis.ISymbol Microsoft.CodeAnalysis.Symbols.ISymbolInternal.GetISymbol() => this.ISymbol;
-    bool Microsoft.CodeAnalysis.Symbols.ISymbolInternal.Equals(Microsoft.CodeAnalysis.Symbols.ISymbolInternal other, TypeCompareKind compareKind) => this.Equals(other as Symbol, compareKind);
-#nullable enable
+    ISymbol ISymbolInternal.GetISymbol() => ISymbol;
+    bool ISymbolInternal.Equals(ISymbolInternal? other, TypeCompareKind compareKind) => Equals(other as Symbol, compareKind);
     #endregion
 
     #region IFormattable
@@ -764,6 +708,7 @@ internal abstract partial class Symbol : ISymbolInternal, IFormattable
         SymbolDisplayFormat? format = null) =>
         SymbolDisplay.ToMinimalDisplayParts(this.ISymbol, semanticModel, position, format);
     */
-    string IFormattable.ToString(string? format, IFormatProvider? formatProvider) => this.ToString();
+    string IFormattable.ToString(string? format, IFormatProvider? formatProvider) => ToString();
+    public abstract bool IsDefinedInSourceTree(SyntaxTree tree, TextSpan? definedWithinSpan, CancellationToken cancellationToken = default);
     #endregion
 }

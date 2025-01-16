@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
@@ -31,7 +30,7 @@ internal abstract class Declaration
     /// <value>
     /// Name of the declaration.
     /// </value>
-    public string Name => this.name;
+    public string Name => name;
 
     /// <summary>
     /// Gets the kind of the declaration.
@@ -55,5 +54,5 @@ internal abstract class Declaration
     /// <value>
     /// Child declarations of the declaration.
     /// </value>
-    public ImmutableArray<Declaration> Children => this.GetDeclarationChildren();
+    public ImmutableArray<Declaration> Children => GetDeclarationChildren();
 }

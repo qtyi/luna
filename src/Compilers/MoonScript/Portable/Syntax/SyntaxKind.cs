@@ -30,7 +30,7 @@ public enum SyntaxKind : ushort
     /// <summary>Represents <c>^</c> token.</summary>
     CaretToken,
     /// <summary>Represents <c>%</c> token.</summary>
-    PersentToken,
+    PercentToken,
     /// <summary>Represents <c>#</c> token.</summary>
     HashToken,
     /// <summary>Represents <c>&amp;</c> token.</summary>
@@ -308,17 +308,17 @@ public enum SyntaxKind : ushort
     /// <summary>表示换行。</summary>
     EndOfLineTrivia = 9249,
     /// <summary>表示空白字符。</summary>
-    WhiteSpaceTrivia,
+    WhitespaceTrivia,
     /// <summary>表示单行注释。</summary>
     SingleLineCommentTrivia,
     /// <summary>表示多行注释。</summary>
     /// <remarks>仅在MoonScript预览版本中使用。</remarks>
     MultiLineCommentTrivia,
+    DisabledTextTrivia,
     PreprocessingMessageTrivia,
     BadDirectiveTrivia,
     /// <summary>Represents <c>#!</c> interpreter directive.</summary>
     ShebangDirectiveTrivia,
-    CommentDirectiveTrivia,
     /// <summary>表示被跳过的多个语法标记。</summary>
     SkippedTokensTrivia,
     #endregion

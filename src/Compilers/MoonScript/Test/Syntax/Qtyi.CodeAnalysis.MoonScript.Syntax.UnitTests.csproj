@@ -2,37 +2,6 @@
 <!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>$(NetLunaNext);net472</TargetFrameworks>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Qtyi.CodeAnalysis.MoonScript.UnitTests</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Lexing\LexerTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Lexing\LexerTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup Label="InternalsVisibles">
-    <!-- InternalsVisibleFrom -->
-    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
-  </ItemGroup>
-
-  <ItemGroup Label="References">
-    <!-- PackageReference -->
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
-
-    <!-- ProjectReference -->
-    <ProjectReference Include="..\..\..\Core\CodeAnalysisTest\Qtyi.CodeAnalysis.UnitTests.csproj" />
-    <ProjectReference Include="..\..\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
-  </ItemGroup>
-
-  <Import Project="..\..\..\Test\Shared\Qtyi.CodeAnalysis.Syntax.UnitTests.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\Shared\Test\Syntax\Qtyi.CodeAnalysis.This.Syntax.UnitTests.targets" />
 
 </Project>

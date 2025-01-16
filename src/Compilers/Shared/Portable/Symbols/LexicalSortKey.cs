@@ -7,14 +7,8 @@ using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
-
-using ThisSyntaxNode = LuaSyntaxNode;
-using ThisCompilation = LuaCompilation;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
-
-using ThisSyntaxNode = MoonScriptSyntaxNode;
-using ThisCompilation = MoonScriptCompilation;
 #endif
 
 internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<LexicalSortKey>
@@ -22,12 +16,12 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
     private int _treeOrdinal;
     private int _position;
 
-    public int TreeOrdinal => this._treeOrdinal;
-    public int Position => this._position;
+    public int TreeOrdinal => _treeOrdinal;
+    public int Position => _position;
 
-    public bool IsInSource => Volatile.Read(ref this._treeOrdinal) >= 0;
-    public bool IsInMetadata => Volatile.Read(ref this._treeOrdinal) < 0;
-    public bool IsInitialized => Volatile.Read(ref this._position) >= 0;
+    public bool IsInSource => Volatile.Read(ref _treeOrdinal) >= 0;
+    public bool IsInMetadata => Volatile.Read(ref _treeOrdinal) < 0;
+    public bool IsInitialized => Volatile.Read(ref _position) >= 0;
 
     public static readonly LexicalSortKey NotInSource = new() { _treeOrdinal = -1, _position = 0 };
     public static readonly LexicalSortKey NotInitialized = new() { _treeOrdinal = -1, _position = -1 };
@@ -36,8 +30,8 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
     {
         Debug.Assert(treeOrdinal >= 0);
         Debug.Assert(position >= 0);
-        this._treeOrdinal = treeOrdinal;
-        this._position = position;
+        _treeOrdinal = treeOrdinal;
+        _position = position;
     }
 
     private LexicalSortKey(
@@ -98,11 +92,11 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
         return x.Position - y.Position;
     }
 
-    public override bool Equals(object? obj) => obj is LexicalSortKey sortKey && this.Equals(sortKey);
+    public override bool Equals(object? obj) => obj is LexicalSortKey sortKey && Equals(sortKey);
 
     bool IEquatable<LexicalSortKey>.Equals(LexicalSortKey other) => Compare(this, other) == 0;
 
-    public override int GetHashCode() => this._treeOrdinal.GetHashCode() ^ this._position.GetHashCode();
+    public override int GetHashCode() => _treeOrdinal.GetHashCode() ^ _position.GetHashCode();
 
     public static LexicalSortKey First(LexicalSortKey xSortKey, LexicalSortKey ySortKey)
     {
@@ -113,7 +107,7 @@ internal struct LexicalSortKey : IComparable<LexicalSortKey>, IEquatable<Lexical
     public void SetFrom(LexicalSortKey other)
     {
         Debug.Assert(other.IsInitialized);
-        Volatile.Write(ref this._treeOrdinal, other._treeOrdinal);
-        Volatile.Write(ref this._position, other._position);
+        Volatile.Write(ref _treeOrdinal, other._treeOrdinal);
+        Volatile.Write(ref _position, other._position);
     }
 }

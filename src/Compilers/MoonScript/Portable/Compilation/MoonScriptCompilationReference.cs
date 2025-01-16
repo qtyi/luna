@@ -7,6 +7,6 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 partial class MoonScriptCompilationReference
 {
     #region Debugger Display
-    private partial string GetDebugDisplay() => MoonScriptResources.CompilationMoonScript + this.Compilation.AssemblyName;
+    private partial string GetDebugDisplay() => MoonScriptResources.CompilationMoonScript + Compilation.AssemblyName;
     #endregion
 }

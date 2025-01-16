@@ -27,50 +27,50 @@ partial class SyntaxParser
             GreenNode? prevTokenTrailingTrivia
         )
         {
-            this.ResetCount = resetCount;
-            this.Mode = mode;
-            this.Position = position;
-            this.PrevTokenTrailingTrivia = prevTokenTrailingTrivia;
+            ResetCount = resetCount;
+            Mode = mode;
+            Position = position;
+            PrevTokenTrailingTrivia = prevTokenTrailingTrivia;
         }
     }
 
     protected ResetPoint GetResetPoint()
     {
-        var pos = this.CurrentTokenPosition;
-        if (this._resetCount == 0)
-            this._resetStart = pos;
+        var pos = CurrentTokenPosition;
+        if (_resetCount == 0)
+            _resetStart = pos;
 
-        this._resetCount++;
-        return new(this._resetCount, this._mode, pos, this.prevTokenTrailingTrivia);
+        _resetCount++;
+        return new(_resetCount, _mode, pos, prevTokenTrailingTrivia);
     }
 
     protected void Reset(ref ResetPoint point)
     {
-        var offset = point.Position - this._firstToken;
+        var offset = point.Position - _firstToken;
         Debug.Assert(offset >= 0);
 
-        if (offset >= this._tokenCount)
+        if (offset >= _tokenCount)
         {
-            this.PeekToken(offset - this._tokenOffset);
+            PeekToken(offset - _tokenOffset);
 
-            offset = point.Position - this._firstToken;
+            offset = point.Position - _firstToken;
         }
 
-        this._mode = point.Mode;
-        Debug.Assert(offset >= 0 && offset < this._tokenCount);
-        this._tokenOffset = offset;
-        this._currentToken = null;
-        this._currentNode = default;
-        this.prevTokenTrailingTrivia = point.PrevTokenTrailingTrivia;
-        if (this.IsBlending())
+        _mode = point.Mode;
+        Debug.Assert(offset >= 0 && offset < _tokenCount);
+        _tokenOffset = offset;
+        _currentToken = null;
+        _currentNode = default;
+        prevTokenTrailingTrivia = point.PrevTokenTrailingTrivia;
+        if (IsBlending())
         {
-            for (var i = this._tokenOffset; i < this._tokenCount; i++)
+            for (var i = _tokenOffset; i < _tokenCount; i++)
             {
-                if (this._blendedTokens[i].Token is null)
+                if (_blendedTokens[i].Token is null)
                 {
-                    this._tokenCount = i;
-                    if (this._tokenCount == this._tokenOffset)
-                        this.FetchCurrentToken();
+                    _tokenCount = i;
+                    if (_tokenCount == _tokenOffset)
+                        FetchCurrentToken();
                     break;
                 }
             }
@@ -79,9 +79,9 @@ partial class SyntaxParser
 
     protected void Release(ref ResetPoint point)
     {
-        Debug.Assert(this._resetCount == point.ResetCount);
-        this._resetCount--;
-        if (this._resetCount == 0)
-            this._resetStart = -1;
+        Debug.Assert(_resetCount == point.ResetCount);
+        _resetCount--;
+        if (_resetCount == 0)
+            _resetStart = -1;
     }
 }

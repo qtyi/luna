@@ -350,4 +350,10 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(RoslynCoreComponentsVersion)" />
   </ItemGroup>
 
+  <!--
+    Packages to build components (like analyzers, source generators etc.) for develop environment.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="Qtyi.Net.Compilers.Toolset.DevEnv.Compilers" Version="$(QtyiNetCompilersToolsetDevEnvVersion)" />
+  </ItemGroup>
 </Project>

@@ -2,82 +2,51 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
-using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisSyntaxNode = LuaSyntaxNode;
-using ThisInternalSyntaxVisitor<T> = LuaSyntaxVisitor<T>;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisSyntaxNode = MoonScriptSyntaxNode;
-using ThisSyntaxVisitor<T> = MoonScriptSyntaxVisitor<T>;
-#else
-#error Language not supported.
 #endif
 
 internal partial class DirectiveParser : SyntaxParser
 {
-    internal DirectiveParser(Lexer lexer) : base(lexer, LexerMode.Directive, null, null, allowModeReset: false) { }
+    private DirectiveStack _context;
 
-    public ThisSyntaxNode ParseDirective(bool isAfterFirstTokenInFile, bool isAfterNonWhitespaceOnLine)
+    internal DirectiveParser(Lexer lexer) : base(lexer, LexerMode.Directive, oldTree: null, changes: null, allowModeReset: false) { }
+
+    public void ReInitialize(DirectiveStack context)
     {
-        switch (this.CurrentTokenKind)
-        {
-            case SyntaxKind.HashExclamationToken:
-                {
-                    var hashExclamation = this.EatToken(SyntaxKind.HashExclamationToken);
-                    if (isAfterNonWhitespaceOnLine)
-                        hashExclamation = this.AddError(hashExclamation, ErrorCode.ERR_BadDirectivePlacement);
-
-                    if (this.lexer.Options.Kind == SourceCodeKind.Script && !isAfterFirstTokenInFile && !hashExclamation.HasTrailingTrivia)
-                        return this.ParseShebangDirective(hashExclamation);
-
-                    return this.ParseBadDirective(hashExclamation);
-                }
-
-            case SyntaxKind.HashToken:
-                {
-                    var hash = this.EatToken(SyntaxKind.HashToken);
-                    if (isAfterNonWhitespaceOnLine)
-                        hash = this.AddError(hash, ErrorCode.ERR_BadDirectivePlacement);
-
-                    if (this.lexer.Options.Kind == SourceCodeKind.Script && !isAfterFirstTokenInFile)
-                        return this.ParseCommentDirective(hash);
-
-                    return this.ParseBadDirective(hash);
-                }
-
-            default:
-                throw ExceptionUtilities.Unreachable();
-        }
+        ReInitialize();
+        _context = context;
     }
 
-    private BadDirectiveTriviaSyntax ParseBadDirective(SyntaxToken promptToken) =>
-        SyntaxFactory.BadDirectiveTrivia(promptToken, this.ParseEndOfDirectiveToken(ignoreErrors: false));
+    public partial ThisInternalSyntaxNode ParseDirective(
+        bool isActive,
+        bool endIsActive,
+        bool isAfterFirstTokenInFile,
+        bool isAfterNonWhitespaceOnLine);
 
-    private ShebangDirectiveTriviaSyntax ParseShebangDirective(SyntaxToken hashExclamation) =>
-        SyntaxFactory.ShebangDirectiveTrivia(hashExclamation, this.ParseEndOfDirectiveTokenWithOptionalPreprocessingMessage());
+    private DirectiveTriviaSyntax ParseBadDirective(SyntaxToken prompt, bool isActive)
+        => ThisInternalSyntaxFactory.BadDirectiveTrivia(prompt, ParseEndOfDirectiveToken(ignoreErrors: false), isActive);
 
-    private CommentDirectiveTriviaSyntax ParseCommentDirective(SyntaxToken hash) => SyntaxFactory.CommentDirectiveTrivia(hash, this.ParseEndOfDirectiveTokenWithOptionalPreprocessingMessage());
+    private DirectiveTriviaSyntax ParseShebangDirective(SyntaxToken hashExclamation)
+        => ThisInternalSyntaxFactory.ShebangDirectiveTrivia(hashExclamation, ParseEndOfDirectiveTokenWithOptionalPreprocessingMessage(trimEnd: true), isActive: true);
 
-    private SyntaxToken ParseEndOfDirectiveTokenWithOptionalPreprocessingMessage() =>
-        this.lexer.LexEndOfDirectiveWithOptionalPreprocessingMessage();
+    private SyntaxToken ParseEndOfDirectiveTokenWithOptionalPreprocessingMessage(bool trimEnd)
+        => lexer.LexEndOfDirectiveWithOptionalPreprocessingMessage(trimEnd: trimEnd);
 
     private SyntaxToken ParseEndOfDirectiveToken(bool ignoreErrors)
     {
         var skippedTokens = SyntaxListBuilder<SyntaxToken>.Create();
-        this.SkipTokens(skippedTokens, static token => token.Kind is not SyntaxKind.EndOfDirectiveToken or SyntaxKind.EndOfFileToken, visitor: new DirectiveTokenVisitor(ignoreErrors));
+        SkipTokens(skippedTokens, static token => token.Kind is not SyntaxKind.EndOfDirectiveToken or SyntaxKind.EndOfFileToken, visitor: new DirectiveTokenVisitor(ignoreErrors));
 
-        var endOfDirective = this.CurrentTokenKind == SyntaxKind.EndOfDirectiveToken ? this.EatToken() : SyntaxFactory.Token(SyntaxKind.EndOfDirectiveToken);
+        var endOfDirective = CurrentTokenKind == SyntaxKind.EndOfDirectiveToken ? EatToken() : ThisInternalSyntaxFactory.Token(SyntaxKind.EndOfDirectiveToken);
 
         if (skippedTokens.Count > 0)
-            endOfDirective = endOfDirective.TokenWithLeadingTrivia(SyntaxFactory.SkippedTokensTrivia(skippedTokens.ToList()));
+            endOfDirective = endOfDirective.TokenWithLeadingTrivia(ThisInternalSyntaxFactory.SkippedTokensTrivia(skippedTokens.ToList()));
 
         return endOfDirective;
     }
@@ -88,12 +57,12 @@ internal partial class DirectiveParser : SyntaxParser
 
         public DirectiveTokenVisitor(bool ignoreErrors)
         {
-            this._ignoreErrors = ignoreErrors;
+            _ignoreErrors = ignoreErrors;
         }
 
         public override SyntaxToken? VisitToken(SyntaxToken token)
         {
-            if (token is not null && this._ignoreErrors)
+            if (token is not null && _ignoreErrors)
                 return token.WithoutDiagnosticsGreen();
 
             return token;

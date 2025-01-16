@@ -2,13 +2,8 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using ICSharpCode.Decompiler.Metadata;
-using ICSharpCode.Decompiler.TypeSystem;
-using Internal.TypeSystem;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Qtyi.CodeAnalysis.Lua.UnitTests.Lexing;
@@ -26,29 +21,29 @@ public class StringLiteralTests : LexingTestBase
         ValidateUtf8StringLiteral(source, isMultiLine ? SyntaxKind.MultiLineRawStringLiteralToken : SyntaxKind.StringLiteralToken, value);
     }
 
-    public static IEnumerable<(string text, byte[] value)> SpecialEscapeSequences { get; } = new[]
-    {
-        ("\\a", "\a"U8.ToArray()),
-        ("\\b", "\b"U8.ToArray()),
-        ("\\f", "\f"U8.ToArray()),
-        ("\\n", "\n"U8.ToArray()),
-        ("\\r", "\r"U8.ToArray()),
-        ("\\t", "\t"U8.ToArray()),
-        ("\\v", "\v"U8.ToArray()),
-        ("\\\\", "\\"U8.ToArray()),
-        ("\\'", "'"U8.ToArray()),
-        ("\\\"", "\""U8.ToArray()),
-        ("\\\n", "\n"U8.ToArray()),
-        ("\\\r", "\n"U8.ToArray()),
-        ("\\\r\n", "\n"U8.ToArray()),
-        ("\\z ", ""U8.ToArray()),
-        ("\\z\f", ""U8.ToArray()),
-        ("\\z\n", ""U8.ToArray()),
-        ("\\z\r", ""U8.ToArray()),
-        ("\\z\t", ""U8.ToArray()),
-        ("\\z\v", ""U8.ToArray()),
-        ("\\z\r\n", ""U8.ToArray())
-    };
+    public static IEnumerable<(string text, byte[] value)> SpecialEscapeSequences { get; } =
+    [
+        ("\\a", [.. "\a"U8]),
+        ("\\b", [.. "\b"U8]),
+        ("\\f", [.. "\f"U8]),
+        ("\\n", [.. "\n"U8]),
+        ("\\r", [.. "\r"U8]),
+        ("\\t", [.. "\t"U8]),
+        ("\\v", [.. "\v"U8]),
+        ("\\\\", [.. "\\"U8]),
+        ("\\'", [.. "'"U8]),
+        ("\\\"", [.. "\""U8]),
+        ("\\\n", [.. "\n"U8]),
+        ("\\\r", [.. "\n"U8]),
+        ("\\\r\n", [.. "\n"U8]),
+        ("\\z ", [.. ""U8]),
+        ("\\z\f", [.. ""U8]),
+        ("\\z\n", [.. ""U8]),
+        ("\\z\r", [.. ""U8]),
+        ("\\z\t", [.. ""U8]),
+        ("\\z\v", [.. ""U8]),
+        ("\\z\r\n", [.. ""U8])
+    ];
 
     [Fact]
     public void TestSpecialEscapeSequence()
@@ -105,11 +100,11 @@ public class StringLiteralTests : LexingTestBase
         select ($"\\u{{{digit.ToString(format)}}}", digit switch
         {
             <= 0x7F => new byte[] { (byte)digit },
-            <= 0x7FF => new byte[] { (byte)(0xC0 | (0x1F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            <= 0xFFFF => new byte[] { (byte)(0xE0 | (0xF & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            <= 0x1FFFFF => new byte[] { (byte)(0xF0 | (0x7 & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            <= 0x3FFFFFF => new byte[] { (byte)(0xF8 | (0x3 & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            _ => new byte[] { (byte)(0xFC | (0x1 & digit >> 30)), (byte)(0x80 | (0x3F & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) }
+            <= 0x7FF => [(byte)(0xC0 | (0x1F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+            <= 0xFFFF => [(byte)(0xE0 | (0xF & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+            <= 0x1FFFFF => [(byte)(0xF0 | (0x7 & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+            <= 0x3FFFFFF => [(byte)(0xF8 | (0x3 & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+            _ => [(byte)(0xFC | (0x1 & digit >> 30)), (byte)(0x80 | (0x3F & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))]
         });
 
     [Fact]
@@ -142,7 +137,7 @@ public class StringLiteralTests : LexingTestBase
         }
 
         text = Quote(text, out var isMultiLine);
-        ValidateUtf8StringLiteral(text, isMultiLine ? SyntaxKind.MultiLineRawStringLiteralToken : SyntaxKind.StringLiteralToken, value);
+        ValidateUtf8StringLiteral(text, isMultiLine ? SyntaxKind.MultiLineRawStringLiteralToken : SyntaxKind.StringLiteralToken, new Utf8String(value));
 
         static byte[] ConcatValues(params byte[]?[] values) => values.Where(static v => v is not null).SelectMany(static v => v!).ToArray();
     }

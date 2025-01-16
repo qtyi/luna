@@ -33,7 +33,7 @@ internal sealed class ClassDeclaration : Declaration
     /// <value>
     /// The location of the syntax referenced by the declaration in source code
     /// </value>
-    public SourceLocation Location => new(this._syntaxReference);
+    public SourceLocation Location => new(_syntaxReference);
 
     /// <summary>
     /// Gets the syntax referenced by the declaration.
@@ -41,7 +41,7 @@ internal sealed class ClassDeclaration : Declaration
     /// <value>
     /// The syntax referenced by the declaration.
     /// </value>
-    public SyntaxReference SyntaxReference => this._syntaxReference;
+    public SyntaxReference SyntaxReference => _syntaxReference;
 
     /// <summary>
     /// Gets the location of the name syntax of the declaration in source code.
@@ -49,7 +49,7 @@ internal sealed class ClassDeclaration : Declaration
     /// <value>
     /// The location of the name syntax of the declaration in source code, or <see langword="null"/> if none.
     /// </value>
-    public SourceLocation? NameLocation => this._nameLocation;
+    public SourceLocation? NameLocation => _nameLocation;
 
     /// <value>
     /// Always returns <see cref="DeclarationKind.Class"/>.
@@ -80,10 +80,10 @@ internal sealed class ClassDeclaration : Declaration
         ImmutableArray<Diagnostic> diagnostics)
         : base(name)
     {
-        this._syntaxReference = syntaxReference;
-        this._nameLocation = nameLocation;
-        this.MemberNames = memberNames;
-        this.Diagnostics = diagnostics;
+        _syntaxReference = syntaxReference;
+        _nameLocation = nameLocation;
+        MemberNames = memberNames;
+        Diagnostics = diagnostics;
     }
 
     /// <returns>Always returns an empty array as a Lua module declaration does not contains any child declaration.</returns>

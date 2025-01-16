@@ -52,7 +52,7 @@
     <MicrosoftExtensionsOptionsConfigurationExtensionVersion>8.0.0</MicrosoftExtensionsOptionsConfigurationExtensionVersion>
     <MicrosoftExtensionsOptionsVersion>8.0.0</MicrosoftExtensionsOptionsVersion>
     <MicrosoftExtensionsPrimitivesVersion>8.0.0</MicrosoftExtensionsPrimitivesVersion>
-    <QtyiNetCompilersToolsetDevEnvVersion>4.13.0-1.final</QtyiNetCompilersToolsetDevEnvVersion>
+    <QtyiNetCompilersToolsetDevEnvVersion>4.14.0-2.final</QtyiNetCompilersToolsetDevEnvVersion>
     <MicrosoftVSSDKBuildToolsVersion>17.9.3137-preview3</MicrosoftVSSDKBuildToolsVersion>
     <vswhereVersion>2.4.1</vswhereVersion>
     <!--

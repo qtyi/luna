@@ -28,7 +28,6 @@
     <Kind Name="IdentifierName"/>
     <Field Name="Identifier" Type="SyntaxToken" Override="true">
       <Kind Name="IdentifierToken"/>
-      <Kind Name="GlobalEnvironmentKeyword"/>
       <Kind Name="EnvironmentKeyword"/>
       <PropertyComment>
         <summary>SyntaxToken representing the keyword for the kind of the identifier name.</summary>
@@ -442,7 +441,7 @@
       <Kind Name="SlashToken"/>
       <Kind Name="SlashSlashToken"/>
       <Kind Name="CaretToken"/>
-      <Kind Name="PersentToken"/>
+      <Kind Name="PercentToken"/>
       <Kind Name="AmpersandToken"/>
       <Kind Name="TildeToken"/>
       <Kind Name="BarToken"/>
@@ -892,6 +891,7 @@
 
   <!-- Trivia -->
   <AbstractNode Name="DirectiveTriviaSyntax" Base="StructuredTriviaSyntax">
+    <Field Name="IsActive" Type="bool"/>
     <Field Name="PromptToken" Type="SyntaxToken"/>
     <Field Name="EndOfDirectiveToken" Type="SyntaxToken"/>
   </AbstractNode>
@@ -901,6 +901,7 @@
     <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
       <Kind Name="EndOfDirectiveToken"/>
     </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
   </Node>
   <Node Name="ShebangDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
     <Kind Name="ShebangDirectiveTrivia"/>
@@ -910,15 +911,7 @@
     <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
       <Kind Name="EndOfDirectiveToken"/>
     </Field>
-  </Node>
-  <Node Name="CommentDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
-    <Kind Name="CommentDirectiveTrivia"/>
-    <Field Name="HashToken" Type="SyntaxToken" Override="PromptToken">
-      <Kind Name="HashToken"/>
-    </Field>
-    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
-      <Kind Name="EndOfDirectiveToken"/>
-    </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
   </Node>
   <Node Name="SkippedTokensTriviaSyntax" Base="StructuredTriviaSyntax">
     <Kind Name="SkippedTokensTrivia"/>

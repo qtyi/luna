@@ -4,7 +4,7 @@
 
 using System.Text;
 
-namespace Luna.Compilers.Generators;
+namespace Luna.Tools;
 
 /// <summary>
 /// 表示可以读取字符串构造器的读取器。

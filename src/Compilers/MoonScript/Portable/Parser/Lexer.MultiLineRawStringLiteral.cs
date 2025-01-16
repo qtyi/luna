@@ -10,16 +10,16 @@ partial class Lexer
 {
     private partial bool ScanMultiLineRawStringLiteral(ref TokenInfo info, int level)
     {
-        if (this.ScanLongBrackets(out var isTerminal, level))
+        if (ScanLongBrackets(out var isTerminal, level))
         {
             info.Kind = SyntaxKind.MultiLineRawStringLiteralToken;
-            info.ValueKind = SpecialType.System_String;
-            info.Text = this.TextWindow.GetText(intern: true);
-            info.StringValue = this.TextWindow.Intern(this._builder);
+            info.ValueKind = TokenValueType.String;
+            info.Text = TextWindow.GetText(intern: true);
+            info.StringValue = TextWindow.Intern(_builder);
 
-            this.CheckFeatureAvaliability(MessageID.IDS_FeatureMultiLineRawStringLiteral);
+            CheckFeatureAvaliability(MessageID.IDS_FeatureMultiLineRawStringLiteral);
             if (!isTerminal)
-                this.AddError(ErrorCode.ERR_UnterminatedStringLiteral);
+                AddError(ErrorCode.ERR_UnterminatedStringLiteral);
 
             return true;
         }

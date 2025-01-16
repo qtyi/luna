@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using Luna.Test.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.PooledObjects;
+using Microsoft.CodeAnalysis.Text;
 using Qtyi.CodeAnalysis.MoonScript.Test.Utilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,38 +14,19 @@ using Xunit.Sdk;
 
 namespace Qtyi.CodeAnalysis.MoonScript.UnitTests.Lexing;
 
-public class FileTests : LexingTestBase
+public class FileTests(ITestOutputHelper output) : LexingTestBase
 {
-    protected override ITestOutputHelper? Output { get; }
+    protected override ITestOutputHelper? Output { get; } = output;
 
-    public FileTests(ITestOutputHelper output)
-    {
-        this.Output = output;
-    }
-
-    public static IEnumerable<object[]> TestSources { get; } =
-        TestResources.MoonScriptTestFiles.GetAllFiles().SelectMany(static file => new object[][]
-        {
-            new object[] { file.inputName, file.inputSource, SourceCodeKind.Regular },
-            new object[] { file.inputName, file.inputSource, SourceCodeKind.Script },
-        });
+    public static readonly TheoryData<string, SourceCodeKind> InputFileNames =
+        new TheoryData<string>(TestResources.MoonScriptTestFiles.GetAllInputFileNames())
+        .Combine(new EnumTheoryData<SourceCodeKind>());
 
     [Theory]
-    [MemberData(nameof(TestSources))]
-    public void TestOfficialTestFiles(string name, string source, SourceCodeKind kind)
+    [MemberData(nameof(InputFileNames))]
+    public void TestOfficialTestFilesWithTrivia(string name, SourceCodeKind kind)
     {
-        Print(source, options: TestOptions.RegularDefault.WithKind(kind));
-        switch (name)
-        {
-            default:
-                throw new XunitException($"Test file '{name}' not tested");
-        }
-    }
-
-    [Theory]
-    [MemberData(nameof(TestSources))]
-    public void TestOfficialTestFilesWithTrivia(string name, string source, SourceCodeKind kind)
-    {
+        var source = SourceText.From(TestResources.LuaTestFiles.GetSource(name));
         Print(source, options: TestOptions.RegularDefault.WithKind(kind), withTrivia: true);
         switch (name)
         {

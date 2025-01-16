@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Qtyi.CodeAnalysis.Lua.Symbols;
 
 namespace Qtyi.CodeAnalysis.Lua;
 
