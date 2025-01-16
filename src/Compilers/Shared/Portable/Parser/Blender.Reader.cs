@@ -11,8 +11,6 @@ using Microsoft.CodeAnalysis.Text;
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-#else
-#error Language not supported.
 #endif
 
 internal partial struct Blender
@@ -24,107 +22,115 @@ internal partial struct Blender
         private ImmutableStack<TextChangeRange> _changes;
         private int _newPosition;
         private int _changeDelta;
+        private DirectiveStack _newDirectives;
+        private DirectiveStack _oldDirectives;
         private LexerMode _newLexerDrivenMode;
 
         public Reader(Blender blender)
         {
-            this._lexer = blender._lexer;
-            this._oldTreeCursor = blender._oldTreeCursor;
-            this._changes = blender._changes;
-            this._newPosition = blender._newPosition;
-            this._changeDelta = blender._changeDelta;
-            this._newLexerDrivenMode = blender._newLexerDrivenMode;
+            _lexer = blender._lexer;
+            _oldTreeCursor = blender._oldTreeCursor;
+            _changes = blender._changes;
+            _newPosition = blender._newPosition;
+            _changeDelta = blender._changeDelta;
+            _newDirectives = blender._newDirectives;
+            _oldDirectives = blender._oldDirectives;
+            _newLexerDrivenMode = blender._newLexerDrivenMode;
         }
 
         internal BlendedNode ReadNodeOrToken(LexerMode mode, bool asToken)
         {
             while (true)
             {
-                if (this._oldTreeCursor.IsFinished)
-                    return this.ReadNewToken(mode);
+                if (_oldTreeCursor.IsFinished)
+                    return ReadNewToken(mode);
 
-                if (this._changeDelta < 0)
-                    this.SkipOldToken();
-                else if (this._changeDelta > 0)
-                    return this.ReadNewToken(mode);
+                if (_changeDelta < 0)
+                    SkipOldToken();
+                else if (_changeDelta > 0)
+                    return ReadNewToken(mode);
                 else
                 {
-                    if (this.TryTakeOldNodeOrToken(asToken, out var blendedNode))
+                    if (TryTakeOldNodeOrToken(asToken, out var blendedNode))
                         return blendedNode;
 
-                    if (this._oldTreeCursor.CurrentNodeOrToken.IsNode)
-                        this._oldTreeCursor = this._oldTreeCursor.MoveToFirstChild();
+                    if (_oldTreeCursor.CurrentNodeOrToken.IsNode)
+                        _oldTreeCursor = _oldTreeCursor.MoveToFirstChild();
                     else
-                        this.SkipOldToken();
+                        SkipOldToken();
                 }
             }
         }
 
         private void SkipOldToken()
         {
-            Debug.Assert(!this._oldTreeCursor.IsFinished);
+            Debug.Assert(!_oldTreeCursor.IsFinished);
 
-            this._oldTreeCursor = this._oldTreeCursor.MoveToFirstToken();
-            var node = this._oldTreeCursor.CurrentNodeOrToken;
+            _oldTreeCursor = _oldTreeCursor.MoveToFirstToken();
+            var node = _oldTreeCursor.CurrentNodeOrToken;
 
-            this._changeDelta += node.FullWidth;
+            _changeDelta += node.FullWidth;
 
-            this.SkipPastChanges();
+            SkipPastChanges();
         }
 
         private void SkipPastChanges()
         {
-            var oldPosition = this._oldTreeCursor.CurrentNodeOrToken.Position;
-            while (!this._changes.IsEmpty && oldPosition >= this._changes.Peek().Span.End)
+            var oldPosition = _oldTreeCursor.CurrentNodeOrToken.Position;
+            while (!_changes.IsEmpty && oldPosition >= _changes.Peek().Span.End)
             {
-                var change = this._changes.Peek();
+                var change = _changes.Peek();
 
-                this._changes = this._changes.Pop();
-                this._changeDelta += change.NewLength - change.Span.Length;
+                _changes = _changes.Pop();
+                _changeDelta += change.NewLength - change.Span.Length;
             }
         }
 
         private BlendedNode ReadNewToken(LexerMode mode)
         {
-            Debug.Assert(this._changeDelta > 0 || this._oldTreeCursor.IsFinished);
+            Debug.Assert(_changeDelta > 0 || _oldTreeCursor.IsFinished);
 
-            var token = this.LexNewToken(mode);
+            var token = LexNewToken(mode);
 
             var width = token.FullWidth;
-            this._newPosition += width;
-            this._changeDelta -= width;
+            _newPosition += width;
+            _changeDelta -= width;
 
-            this.SkipPastChanges();
+            SkipPastChanges();
 
-            return this.CreateBlendedNode(node: null, token: token);
+            return CreateBlendedNode(node: null, token: token);
         }
 
         private SyntaxToken LexNewToken(LexerMode mode)
         {
-            if (this._lexer.TextWindow.Position != this._newPosition)
-                this._lexer.Reset(this._newPosition);
+            if (_lexer.TextWindow.Position != _newPosition)
+                _lexer.Reset(_newPosition, _newDirectives);
 
-            var token = this._lexer.Lex(ref mode);
-            this._newLexerDrivenMode = mode;
+            var token = _lexer.Lex(ref mode);
+            _newDirectives = _lexer.Directives;
+            _newLexerDrivenMode = mode;
             return token;
         }
 
         private bool TryTakeOldNodeOrToken(bool asToken, out BlendedNode blendedNode)
         {
             if (asToken)
-                this._oldTreeCursor = this._oldTreeCursor.MoveToFirstToken();
+                _oldTreeCursor = _oldTreeCursor.MoveToFirstToken();
 
-            var currentNodeOrToken = this._oldTreeCursor.CurrentNodeOrToken;
-            if (!this.CanReuse(currentNodeOrToken))
+            var currentNodeOrToken = _oldTreeCursor.CurrentNodeOrToken;
+            if (!CanReuse(currentNodeOrToken))
             {
                 blendedNode = default;
                 return false;
             }
 
-            this._newPosition += currentNodeOrToken.FullWidth;
-            this._oldTreeCursor = this._oldTreeCursor.MoveToNextSibling();
+            _newPosition += currentNodeOrToken.FullWidth;
+            _oldTreeCursor = _oldTreeCursor.MoveToNextSibling();
 
-            blendedNode = this.CreateBlendedNode(node: (ThisSyntaxNode?)currentNodeOrToken.AsNode(), token: (SyntaxToken)currentNodeOrToken.AsToken().Node);
+            _newDirectives = currentNodeOrToken.ApplyDirectives(_newDirectives);
+            _oldDirectives = currentNodeOrToken.ApplyDirectives(_oldDirectives);
+
+            blendedNode = CreateBlendedNode(node: (ThisSyntaxNode?)currentNodeOrToken.AsNode(), token: (SyntaxToken)currentNodeOrToken.AsToken().Node);
             return true;
         }
 
@@ -134,28 +140,30 @@ internal partial struct Blender
 
             if (nodeOrToken.ContainsAnnotations) return false;
 
-            if (this.IntersectsNextChange(nodeOrToken)) return false;
+            if (IntersectsNextChange(nodeOrToken)) return false;
 
             if (nodeOrToken.ContainsDiagnostics ||
                 (nodeOrToken.IsToken && ((ThisInternalSyntaxNode)nodeOrToken.AsToken().Node).ContainsSkippedText && nodeOrToken.Parent.ContainsDiagnostics)
             ) return false;
 
-            if (IsFabricatedToken(nodeOrToken.Kind())) return false;
+            if (IsFabricatedToken(nodeOrToken.Kind(), _lexer.Options.LanguageVersion)) return false;
 
             if (
                 (nodeOrToken.IsToken && nodeOrToken.AsToken().IsMissing) ||
                 (nodeOrToken.IsNode && IsIncomplete((ThisSyntaxNode)nodeOrToken.AsNode()))
             ) return false;
 
-            return true;
+            if (!nodeOrToken.ContainsDirectives) return true;
+
+            return _newDirectives.IncrementallyEquivalent(_oldDirectives);
         }
 
         private bool IntersectsNextChange(SyntaxNodeOrToken nodeOrToken)
         {
-            if (this._changes.IsEmpty) return false;
+            if (_changes.IsEmpty) return false;
 
             var oldSpan = nodeOrToken.FullSpan;
-            var changeSpan = this._changes.Peek().Span;
+            var changeSpan = _changes.Peek().Span;
 
             return oldSpan.IntersectsWith(changeSpan);
         }
@@ -168,19 +176,21 @@ internal partial struct Blender
             // 使用绿树API比红树API更快。
             node.Green.GetLastTerminal()!.IsMissing;
 
-        internal static bool IsFabricatedToken(SyntaxKind kind) => kind switch
+        internal static bool IsFabricatedToken(SyntaxKind kind, LanguageVersion version) => kind switch
         {
-            _ => SyntaxFacts.IsContextualKeyword(kind)
+            _ => SyntaxFacts.IsContextualKeyword(kind, version)
         };
 
         private BlendedNode CreateBlendedNode(ThisSyntaxNode? node, SyntaxToken token) => new(node, token,
             new(
-                this._lexer,
-                this._oldTreeCursor,
-                this._changes,
-                this._newPosition,
-                this._changeDelta,
-                this._newLexerDrivenMode
+                _lexer,
+                _oldTreeCursor,
+                _changes,
+                _newPosition,
+                _changeDelta,
+                _newDirectives,
+                _oldDirectives,
+                _newLexerDrivenMode
             ));
     }
 }

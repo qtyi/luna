@@ -6,12 +6,8 @@ using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
 internal static class SyntaxNodeExtensions

@@ -372,6 +372,9 @@
   <data name="WRN_InvalidSearchPathDir_Title" xml:space="preserve">
     <value>Invalid search path specified</value>
   </data>
+  <data name="WRN_ShebangOnlySupportedInScript" xml:space="preserve">
+    <value>`#!` only supported in script.</value>
+  </data>
   <data name="WRN_UnifyReferenceBldRev_Description" xml:space="preserve">
     <value>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</value>
   </data>

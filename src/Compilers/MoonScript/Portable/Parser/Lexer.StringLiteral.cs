@@ -12,85 +12,85 @@ partial class Lexer
 {
     private partial bool ScanStringLiteral(ref TokenInfo info)
     {
-        var quote = this.TextWindow.PeekChar();
+        var quote = TextWindow.PeekChar();
         Debug.Assert(quote == '\'' || quote == '"');
 
         if (quote == '"') // 可能是插值字符串字面量。
         {
-            var start = this.TextWindow.Position; // 记录起始位置。
+            var start = TextWindow.Position; // 记录起始位置。
 
             var scanner = new InterpolatedStringScanner(this);
             if (scanner.ScanInterpolatedStringLiteral(ref info)) return true;
 
             // 将内部扫描器搜集的错误消息传递出来。
             if (scanner.Error is not null)
-                this.AddError(scanner.Error);
+                AddError(scanner.Error);
 
-            info.Text = this.TextWindow.GetText(start, this.TextWindow.Position - start, intern: true);
+            info.Text = TextWindow.GetText(start, TextWindow.Position - start, intern: true);
         }
         else
         {
-            this.TextWindow.AdvanceChar();
+            TextWindow.AdvanceChar();
             var spanBuilder = ArrayBuilder<string?>.GetInstance();
-            this._builder.Clear();
+            _builder.Clear();
 
             while (true)
             {
-                var c = this.TextWindow.PeekChar();
+                var c = TextWindow.PeekChar();
                 if (c == quote) // 字符串结尾
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
 
-                    if (this._builder.Length > 0)
-                        spanBuilder.Add(this._builder.ToString());
+                    if (_builder.Length > 0)
+                        spanBuilder.Add(_builder.ToString());
                     break;
                 }
                 // 字符串中可能包含非正规的UTF-16以外的字符，检查是否真正到达文本结尾来验证这些字符不是由用户代码引入的情况。
-                else if (c == SlidingTextWindow.InvalidCharacter && this.TextWindow.IsReallyAtEnd())
+                else if (c == SlidingTextWindow.InvalidCharacter && TextWindow.IsReallyAtEnd())
                 {
-                    Debug.Assert(this.TextWindow.Width > 0);
-                    this.AddError(ErrorCode.ERR_UnterminatedStringLiteral);
+                    Debug.Assert(TextWindow.Width > 0);
+                    AddError(ErrorCode.ERR_UnterminatedStringLiteral);
 
-                    if (this._builder.Length > 0)
-                        spanBuilder.Add(this._builder.ToString());
+                    if (_builder.Length > 0)
+                        spanBuilder.Add(_builder.ToString());
                     break;
                 }
-                else if (SyntaxFacts.IsWhiteSpace(c))
+                else if (SyntaxFacts.IsWhitespace(c))
                 {
                     // 扫描缩进或内容（第一行）状态。
-                    this.TextWindow.AdvanceChar();
-                    this._builder.Append(c);
+                    TextWindow.AdvanceChar();
+                    _builder.Append(c);
                 }
                 else
                 {
                     if (spanBuilder.Count % 2 == 1) // 处于扫描缩进状态。
                     {
-                        if (this._builder.Length > 0)
+                        if (_builder.Length > 0)
                         {
-                            spanBuilder.Add(this._builder.ToString());
-                            this._builder.Clear();
+                            spanBuilder.Add(_builder.ToString());
+                            _builder.Clear();
                         }
                         else
                             spanBuilder.Add(null);
                     }
 
                     if (c == '\\') // 转义字符前缀
-                        this.ScanEscapeSequence();
+                        ScanEscapeSequence();
                     else if (SyntaxFacts.IsNewLine(c))
                     {
-                        this.TextWindow.AdvanceChar();
-                        if (SyntaxFacts.IsNewLine(c, this.TextWindow.PeekChar()))
-                            this.TextWindow.AdvanceChar();
-                        this._builder.Append('\n');
+                        TextWindow.AdvanceChar();
+                        if (SyntaxFacts.IsNewLine(c, TextWindow.PeekChar()))
+                            TextWindow.AdvanceChar();
+                        _builder.Append('\n');
 
-                        spanBuilder.Add(this._builder.ToString());
-                        this._builder.Clear();
+                        spanBuilder.Add(_builder.ToString());
+                        _builder.Clear();
                     }
                     else // 普通字符
                     {
                         // 扫描内容状态。
-                        this.TextWindow.AdvanceChar();
-                        this._builder.Append(c);
+                        TextWindow.AdvanceChar();
+                        _builder.Append(c);
                     }
                 }
             }
@@ -118,19 +118,19 @@ partial class Lexer
             else
                 info.InnerIndent = 0; // 单行字符串。
 
-            info.Text = this.TextWindow.GetText(intern: true);
+            info.Text = TextWindow.GetText(intern: true);
 
-            this._builder.Clear();
-            this._builder.Append(string.Concat(spanBuilder.ToImmutableAndFree()));
+            _builder.Clear();
+            _builder.Append(string.Concat(spanBuilder.ToImmutableAndFree()));
         }
 
         info.Kind = SyntaxKind.StringLiteralToken;
-        info.ValueKind = SpecialType.System_String;
+        info.ValueKind = TokenValueType.String;
 
-        if (this._builder.Length == 0)
+        if (_builder.Length == 0)
             info.StringValue = string.Empty;
         else
-            info.StringValue = this.TextWindow.Intern(this._builder);
+            info.StringValue = TextWindow.Intern(_builder);
 
         return true;
     }

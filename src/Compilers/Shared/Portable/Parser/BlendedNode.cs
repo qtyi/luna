@@ -6,8 +6,6 @@
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-#else
-#error Language not supported.
 #endif
 
 /// <summary>
@@ -21,8 +19,8 @@ internal readonly struct BlendedNode
 
     internal BlendedNode(ThisSyntaxNode? node, SyntaxToken token, Blender blender)
     {
-        this.Node = node;
-        this.Token = token;
-        this.Blender = blender;
+        Node = node;
+        Token = token;
+        Blender = blender;
     }
 }

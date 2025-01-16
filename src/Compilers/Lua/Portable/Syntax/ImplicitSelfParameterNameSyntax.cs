@@ -6,5 +6,9 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax;
 
 partial class ImplicitSelfParameterNameSyntax
 {
-    internal override IdentifierNameSyntax GetUnqualifiedName() => this.Right;
+    public override int Arity => 0;
+
+    internal override SimpleNameSyntax GetUnqualifiedName() => Right;
+
+    internal override string ErrorDisplayName() => Left.ErrorDisplayName() + ";" + Right.ErrorDisplayName();
 }

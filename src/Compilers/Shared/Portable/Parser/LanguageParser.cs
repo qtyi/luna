@@ -9,16 +9,8 @@ using GreenNode = Microsoft.CodeAnalysis.GreenNode;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisSyntaxNode = Lua.LuaSyntaxNode;
-using ThisInternalSyntaxNode = LuaSyntaxNode;
-using ThisInternalSyntaxVisitor<T> = LuaSyntaxVisitor<T>;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisSyntaxNode = MoonScript.MoonScriptSyntaxNode;
-using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
-using ThisInternalSyntaxVisitor<T> = MoonScriptSyntaxVisitor<T>;
 #endif
 
 internal partial class LanguageParser : SyntaxParser
@@ -47,8 +39,8 @@ internal partial class LanguageParser : SyntaxParser
         cancellationToken: cancellationToken
     )
     {
-        this._syntaxFactoryContext = new();
-        this._syntaxFactory = new(this._syntaxFactoryContext);
+        _syntaxFactoryContext = new();
+        _syntaxFactory = new(_syntaxFactoryContext);
     }
 
     private bool IsIncrementalAndFactoryContextMatches
@@ -57,8 +49,8 @@ internal partial class LanguageParser : SyntaxParser
         {
             if (!IsIncremental) return false;
 
-            var node = this.CurrentNode;
-            return node is not null && MatchesFactoryContext(node.Green, this._syntaxFactoryContext);
+            var node = CurrentNode;
+            return node is not null && MatchesFactoryContext(node.Green, _syntaxFactoryContext);
         }
     }
 
@@ -71,7 +63,7 @@ internal partial class LanguageParser : SyntaxParser
 #endif
         bool IsTerminal()
     {
-        if (this.CurrentTokenKind == SyntaxKind.EndOfFileToken) return true;
+        if (CurrentTokenKind == SyntaxKind.EndOfFileToken) return true;
 
         for (var i = 1; i < LastTerminatorState; i <<= 1)
         {
@@ -105,7 +97,7 @@ internal partial class LanguageParser : SyntaxParser
         }
         catch (InsufficientExecutionStackException)
         {
-            return this.CreateForGlobalFailure(lexer.TextWindow.Position, createEmptyNodeFunc());
+            return CreateForGlobalFailure(lexer.TextWindow.Position, createEmptyNodeFunc());
         }
     }
 
@@ -116,24 +108,24 @@ internal partial class LanguageParser : SyntaxParser
         where TNode : ThisInternalSyntaxNode
     {
         var builder = new SyntaxListBuilder(1);
-        builder.Add(SyntaxFactory.BadToken(null, lexer.TextWindow.Text.ToString(), null));
+        builder.Add(ThisInternalSyntaxFactory.BadToken(null, lexer.TextWindow.Text.ToString(), null));
         var fileAsTrivia = _syntaxFactory.SkippedTokensTrivia(builder.ToList<SyntaxToken>());
 
         node = AddLeadingSkippedSyntax(node, fileAsTrivia);
-        this.ForceEndOfFile(); // 强制使当前的语法标记为文件结尾标记。
+        ForceEndOfFile(); // 强制使当前的语法标记为文件结尾标记。
 
-        return this.AddError(node, position, 0, ErrorCode.ERR_InsufficientStack);
+        return AddError(node, position, 0, ErrorCode.ERR_InsufficientStack);
     }
     #endregion
 
     #region SkipTokensAndNodes
     private GreenNode? SkipTokens(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor<SyntaxToken>? visitor = null)
     {
-        if (predicate(this.CurrentToken))
+        if (predicate(CurrentToken))
         {
-            var builder = this._pool.Allocate<SyntaxToken>();
-            this.SkipTokens(builder, predicate, visitor);
-            return this._pool.ToListAndFree(builder).Node;
+            var builder = _pool.Allocate<SyntaxToken>();
+            SkipTokens(builder, predicate, visitor);
+            return _pool.ToListAndFree(builder).Node;
         }
 
         return null;
@@ -141,16 +133,16 @@ internal partial class LanguageParser : SyntaxParser
 
     private GreenNode? SkipTokensAndExpressions(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor<ThisInternalSyntaxNode>? visitor = null)
     {
-        var builder = this._pool.Allocate<ThisInternalSyntaxNode>();
-        this.SkipTokensAndNodes(builder, predicate, this.IsPossibleExpression, this.ParseExpressionCore, visitor);
+        var builder = _pool.Allocate<ThisInternalSyntaxNode>();
+        SkipTokensAndNodes(builder, predicate, IsPossibleExpression, ParseExpressionCore, visitor);
 
         if (builder.Count == 0)
         {
-            this._pool.Free(builder);
+            _pool.Free(builder);
             return null;
         }
         else
-            return this._pool.ToListAndFree(builder).Node;
+            return _pool.ToListAndFree(builder).Node;
     }
 
     private partial bool IsPossibleExpression();
@@ -159,16 +151,16 @@ internal partial class LanguageParser : SyntaxParser
 
     private GreenNode? SkipTokensAndStatements(Func<SyntaxToken, bool> predicate, ThisInternalSyntaxVisitor<ThisInternalSyntaxNode>? visitor = null)
     {
-        var builder = this._pool.Allocate<ThisInternalSyntaxNode>();
-        this.SkipTokensAndNodes(builder, predicate, this.IsPossibleStatement, this.ParseStatement, visitor);
+        var builder = _pool.Allocate<ThisInternalSyntaxNode>();
+        SkipTokensAndNodes(builder, predicate, IsPossibleStatement, ParseStatement, visitor);
 
         if (builder.Count == 0)
         {
-            this._pool.Free(builder);
+            _pool.Free(builder);
             return null;
         }
         else
-            return this._pool.ToListAndFree(builder).Node;
+            return _pool.ToListAndFree(builder).Node;
     }
 
     private partial bool IsPossibleStatement();
@@ -186,8 +178,8 @@ internal partial class LanguageParser : SyntaxParser
     {
         var lastTokenPosition = -1;
         var index = 0;
-        while (this.CurrentTokenKind != SyntaxKind.EndOfFileToken &&
-            this.IsMakingProgress(ref lastTokenPosition))
+        while (CurrentTokenKind != SyntaxKind.EndOfFileToken &&
+            IsMakingProgress(ref lastTokenPosition))
         {
             if (!predicateNode(index)) break;
 
@@ -214,9 +206,9 @@ internal partial class LanguageParser : SyntaxParser
         int minCount = 0)
         where TNode : ThisInternalSyntaxNode
     {
-        var builder = this._pool.Allocate<TNode>();
-        this.ParseSyntaxList(builder, predicateNode, parseNode, minCount);
-        var list = this._pool.ToListAndFree(builder);
+        var builder = _pool.Allocate<TNode>();
+        ParseSyntaxList(builder, predicateNode, parseNode, minCount);
+        var list = _pool.ToListAndFree(builder);
         return list;
     }
 
@@ -228,7 +220,7 @@ internal partial class LanguageParser : SyntaxParser
         where TNode : ThisInternalSyntaxNode
         where TList : ThisInternalSyntaxNode
     {
-        var list = createListFunc(this.ParseSyntaxList(predicateNode, parseNode, minCount));
+        var list = createListFunc(ParseSyntaxList(predicateNode, parseNode, minCount));
         return list;
     }
 
@@ -253,12 +245,12 @@ internal partial class LanguageParser : SyntaxParser
 
             var lastTokenPosition = -1;
             index = 1;
-            while (this.CurrentTokenKind != SyntaxKind.EndOfFileToken &&
-                this.IsMakingProgress(ref lastTokenPosition))
+            while (CurrentTokenKind != SyntaxKind.EndOfFileToken &&
+                IsMakingProgress(ref lastTokenPosition))
             {
                 if (!predicateSeparator(index - 1)) break;
 
-                var resetPoint = this.GetResetPoint();
+                var resetPoint = GetResetPoint();
 
                 var separator = parseSeparator(index - 1, missing);
                 if (predicateNode(index))
@@ -269,18 +261,18 @@ internal partial class LanguageParser : SyntaxParser
                     builder.Add(node);
 
                     index++;
-                    this.Release(ref resetPoint);
+                    Release(ref resetPoint);
                 }
                 else if (allowTrailingSeparator) // 刚才解析的分隔为最后一个语法节点，处理结束后直接退出循环。
                 {
                     builder.AddSeparator(separator);
-                    this.Release(ref resetPoint);
+                    Release(ref resetPoint);
                     break;
                 }
                 else // 无法继续，恢复到上一个重置点并退出循环。
                 {
-                    this.Reset(ref resetPoint);
-                    this.Release(ref resetPoint);
+                    Reset(ref resetPoint);
+                    Release(ref resetPoint);
                     break;
                 }
             }
@@ -321,9 +313,9 @@ internal partial class LanguageParser : SyntaxParser
         where TNode : ThisInternalSyntaxNode
         where TSeparator : ThisInternalSyntaxNode
     {
-        var builder = this._pool.AllocateSeparated<TNode>();
-        this.ParseSeparatedSyntaxList(builder, predicateNode, parseNode, predicateSeparator, parseSeparator, allowTrailingSeparator, minCount);
-        var list = this._pool.ToListAndFree(builder);
+        var builder = _pool.AllocateSeparated<TNode>();
+        ParseSeparatedSyntaxList(builder, predicateNode, parseNode, predicateSeparator, parseSeparator, allowTrailingSeparator, minCount);
+        var list = _pool.ToListAndFree(builder);
         return list;
     }
 
@@ -339,7 +331,7 @@ internal partial class LanguageParser : SyntaxParser
         where TSeparator : ThisInternalSyntaxNode
         where TList : ThisInternalSyntaxNode
     {
-        var list = createListFunc(this.ParseSeparatedSyntaxList(predicateNode, parseNodeFunc, predicateSeparator, parseSeparator, allowTrailingSeparator, minCount));
+        var list = createListFunc(ParseSeparatedSyntaxList(predicateNode, parseNodeFunc, predicateSeparator, parseSeparator, allowTrailingSeparator, minCount));
         return list;
     }
     #endregion

@@ -2,7 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
@@ -11,24 +10,27 @@ namespace Qtyi.CodeAnalysis.Lua;
 namespace Qtyi.CodeAnalysis.MoonScript;
 #endif
 
+/// <summary>
+/// Provides internal helper methods for <see cref="LanguageVersion"/>.
+/// </summary>
 internal static partial class LanguageVersionExtensionsInternal
 {
     /// <summary>
-    /// 检查指定的值是否合法（在<see cref="LanguageVersion"/>枚举中）。
+    /// Checks if a <see cref="LanguageVersion"/> value is effective version.
     /// </summary>
-    /// <param name="value">指定的语言版本枚举值。</param>
-    /// <returns>指定的值是否合法。</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsValid(this LanguageVersion value) => Enum.IsDefined(typeof(LanguageVersion), value);
+    /// <param name="version">Specified enum value to be checked.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="version"/> is effective version; otherwise, <see langword="false"/>.</returns>
+    internal static partial bool IsValid(this LanguageVersion version);
 
     /// <summary>
-    /// 获取与指定<see cref="LanguageVersion"/>枚举值对应的“该特性在当前版本中不支持”的<see cref="ErrorCode"/>。
+    /// Gets "FeatureNotAvailableInVersionN" <see cref="ErrorCode"/> value that specified <see cref="LanguageVersion"/> value corresponding to.
     /// </summary>
-    /// <param name="version">指定的语言版本枚举值。</param>
-    /// <returns>对应的错误码。</returns>
+    /// <param name="version">Specified enum value.</param>
+    /// <returns>"FeatureNotAvailableInVersionN" <see cref="ErrorCode"/> value that <paramref name="version"/> corresponding to.</returns>
     internal static partial ErrorCode GetErrorCode(this LanguageVersion version);
 }
 
+/// <inheritdoc/>
 internal sealed partial class
 #if LANG_LUA
     LuaRequiredLanguageVersion
@@ -37,41 +39,71 @@ internal sealed partial class
 #endif
     : RequiredLanguageVersion
 {
-    internal LanguageVersion Version { get; init; }
+    /// <summary>
+    /// Gets underlying language version.
+    /// </summary>
+    /// <value>
+    /// Language version wrapped.
+    /// </value>
+    internal LanguageVersion Version { get; }
 
+    /// <summary>
+    /// Create a new instance of <see cref="ThisRequiredLanguageVersion"/> type.
+    /// </summary>
+    /// <param name="version">Specified language version enum value to wrap.</param>
     internal
 #if LANG_LUA
         LuaRequiredLanguageVersion
 #elif LANG_MOONSCRIPT
         MoonScriptRequiredLanguageVersion
 #endif
-        (LanguageVersion version) => this.Version = version;
+        (LanguageVersion version) => Version = version;
 
-    public override string ToString() => this.Version.ToDisplayString();
+    /// <inheritdoc/>
+    public override string ToString() => Version.ToDisplayString();
 }
 
+/// <summary>
+/// Provides helper methods for <see cref="LanguageVersion"/>.
+/// </summary>
 public static partial class LanguageVersionFacts
 {
+    internal static partial LanguageVersion CurrentVersion { get; }
+
     /// <summary>
-    /// 返回在控制行中（开启/langver开关）显示文本的格式一致的版本数字。
-    /// 例如："5"、"5.4"、"latest"。
+    /// Displays the version number in the format expected on the command-line (/langver flag).
+    /// For instance, "5"、"5.4"、"latest".
     /// </summary>
-    /// <param name="version">要获取显示文本的语言版本。</param>
-    /// <returns>语言版本的显示文本。</returns>
+    /// <param name="version">Language version enum value to display.</param>
+    /// <returns>Formatted version number string.</returns>
     public static partial string ToDisplayString(this LanguageVersion version);
 
     /// <summary>
-    /// 尝试从字符串输入中分析出<see cref="LanguageVersion"/>，若<paramref name="result"/>为<see langword="null"/>时返回<see cref="LanguageVersion.Default"/>。
+    /// Try parse a <see cref="LanguageVersion"/> from a string input, returning <see cref="LanguageVersion.Default"/> if input is <see langword="null"/> or unrecognized.
     /// </summary>
-    /// <param name="version">字符串输入。</param>
-    /// <param name="result">分析出的语言版本。</param>
-    /// <returns></returns>
+    /// <param name="version">String input.</param>
+    /// <param name="result">Parsed <see cref="LanguageVersion"/> enum value from <paramref name="version"/>; <see cref="LanguageVersion.Default"/> if <paramref name="version"/> is unrecognized.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="version"/> is recognized; otherwise, <see langword="false"/>.</returns>
     public static partial bool TryParse(string? version, out LanguageVersion result);
 
     /// <summary>
-    /// 将一个特定的语言版本（例如<see cref="LanguageVersion.Default"/>、<see cref="LanguageVersion.Latest"/>）映射到一个具体的版本。
+    /// Map a language version (such as <see cref="LanguageVersion.Default"/>, <see cref="LanguageVersion.Latest"/>) to an effective version.
     /// </summary>
-    /// <param name="version">要映射的语言版本。</param>
-    /// <returns></returns>
-    public static partial LanguageVersion MapSpecifiedToEffectiveVersion(this LanguageVersion version);
+    /// <param name="version">Language version enum value to map.</param>
+    /// <returns>An effective <see cref="LanguageVersion"/> enum value mapped from <paramref name="version"/>.</returns>
+
+    public static LanguageVersion MapSpecifiedToEffectiveVersion(this LanguageVersion version)
+    {
+        var enumType = typeof(LanguageVersion);
+        if (!Enum.IsDefined(enumType, version))
+            throw new ArgumentException(string.Format(LunaResources.ArgMustBeDefinedInEnum, nameof(version), enumType), nameof(version));
+
+        return version switch
+        {
+            LanguageVersion.Latest or
+            LanguageVersion.Default => CurrentVersion,
+
+            _ => version
+        };
+    }
 }

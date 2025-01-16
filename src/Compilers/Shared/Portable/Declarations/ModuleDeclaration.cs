@@ -31,7 +31,7 @@ internal partial class ModuleDeclaration : Declaration
     /// <value>
     /// The location of the syntax referenced by the declaration in source code
     /// </value>
-    public SourceLocation Location => new(this._syntaxReference);
+    public SourceLocation Location => new(_syntaxReference);
 
     /// <summary>
     /// Gets the syntax referenced by the declaration.
@@ -39,5 +39,5 @@ internal partial class ModuleDeclaration : Declaration
     /// <value>
     /// The syntax referenced by the declaration.
     /// </value>
-    public SyntaxReference SyntaxReference => this._syntaxReference;
+    public SyntaxReference SyntaxReference => _syntaxReference;
 }

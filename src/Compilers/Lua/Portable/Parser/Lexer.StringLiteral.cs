@@ -10,42 +10,51 @@ partial class Lexer
 {
     private partial bool ScanStringLiteral(ref TokenInfo info)
     {
-        var quote = this.TextWindow.NextChar();
+        var quote = TextWindow.NextChar();
         Debug.Assert(quote == '\'' || quote == '"');
 
-        this._builder.Clear();
+        _builder.Clear();
+        _utf8Builder.Clear();
 
         while (true)
         {
-            var c = this.TextWindow.PeekChar();
-            if (c == '\\') // 转义字符前缀
-                this.ScanEscapeSequence();
-            else if (c == quote) // 字符串结尾
+            var c = TextWindow.PeekChar();
+            // The start of escape sequence
+            if (c == '\\')
+                ScanEscapeSequence();
+            // Close quote that indicates the end of string literal
+            else if (c == quote)
             {
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 break;
             }
-            // 字符串中可能包含非正规的UTF-16以外的字符，检查是否真正到达文本结尾来验证这些字符不是由用户代码引入的情况。
+            // String and character literals can contain any Unicode character.
+            // They are not limited to valid UTF-16 characters.
+            // So if we get the SlidingTextWindow's sentinel value, double check that it was not real user-code contents.
+            // This will be rare.
             else if (SyntaxFacts.IsNewLine(c) ||
-                (c == SlidingTextWindow.InvalidCharacter && this.TextWindow.IsReallyAtEnd())
+                (c == SlidingTextWindow.InvalidCharacter && TextWindow.IsReallyAtEnd())
             )
             {
-                Debug.Assert(this.TextWindow.Width > 0);
-                this.AddError(ErrorCode.ERR_NewlineInConst);
+                Debug.Assert(TextWindow.Width > 0);
+                AddError(ErrorCode.ERR_NewlineInConst);
                 break;
             }
-            else // 普通字符
+            // Normal UTF-16 characters.
+            // We should check surrogate pair since we do not want to break encoding process to UTF-8.
+            else
             {
-                this.TextWindow.AdvanceChar();
-                this._builder.Append(c);
+                var cs = TextWindow.SingleOrSurrogatePair(out var error);
+                if (error is not null)
+                    AddError(error);
+                _builder.Append(new string(cs));
+                FlushToUtf8Builder();
             }
         }
 
         info.Kind = SyntaxKind.StringLiteralToken;
-        info.Text = this.TextWindow.GetText(intern: true);
-
-        this.FlushToUtf8Builder();
-        info.Utf8StringValue = this._utf8Builder.ToImmutableAndClear();
+        info.Text = TextWindow.GetText(intern: true);
+        info.Utf8StringValue = new(_utf8Builder.ToArrayAndFree());
 
         return true;
     }

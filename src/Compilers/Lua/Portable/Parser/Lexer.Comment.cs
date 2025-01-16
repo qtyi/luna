@@ -6,17 +6,17 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
 partial class Lexer
 {
-    private partial SyntaxTrivia ScanComment()
+    private partial SyntaxTrivia LexComment()
     {
-        if (this.ScanLongBrackets(out var isTerminal))
+        if (ScanLongBrackets(out var isTerminal))
         {
             if (!isTerminal)
-                this.AddError(ErrorCode.ERR_OpenEndedComment);
+                AddError(ErrorCode.ERR_OpenEndedComment);
         }
         else
-            this.ScanToEndOfLine(trimEnd: true);
+            ScanToEndOfLine(_builder, trimEnd: true);
 
-        var text = this.TextWindow.GetText(intern: false);
-        return SyntaxFactory.Comment(text);
+        var text = TextWindow.GetText(intern: false);
+        return ThisInternalSyntaxFactory.Comment(text);
     }
 }

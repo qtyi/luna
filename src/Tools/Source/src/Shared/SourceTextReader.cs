@@ -4,7 +4,7 @@
 
 using Microsoft.CodeAnalysis.Text;
 
-namespace Luna.Compilers.Generators;
+namespace Luna.Tools;
 
 /// <summary>
 /// Represents a reader that can read source text.
@@ -20,34 +20,34 @@ internal sealed class SourceTextReader : TextReader
     /// <param name="sourceText">Source text to read.</param>
     public SourceTextReader(SourceText sourceText)
     {
-        this._sourceText = sourceText;
-        this._position = 0;
+        _sourceText = sourceText;
+        _position = 0;
     }
 
     /// <inheritdoc/>
     public override int Peek()
     {
-        if (this._position == this._sourceText.Length)
+        if (_position == _sourceText.Length)
             return -1;
 
-        return this._sourceText[this._position];
+        return _sourceText[_position];
     }
 
     /// <inheritdoc/>
     public override int Read()
     {
-        if (this._position == this._sourceText.Length)
+        if (_position == _sourceText.Length)
             return -1;
 
-        return this._sourceText[this._position++];
+        return _sourceText[_position++];
     }
 
     /// <inheritdoc/>
     public override int Read(char[] buffer, int index, int count)
     {
-        var charsToCopy = Math.Min(count, this._sourceText.Length - this._position);
-        this._sourceText.CopyTo(this._position, buffer, index, charsToCopy);
-        this._position += charsToCopy;
+        var charsToCopy = Math.Min(count, _sourceText.Length - _position);
+        _sourceText.CopyTo(_position, buffer, index, charsToCopy);
+        _position += charsToCopy;
         return charsToCopy;
     }
 }

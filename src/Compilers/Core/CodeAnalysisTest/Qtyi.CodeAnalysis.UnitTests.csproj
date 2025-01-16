@@ -4,14 +4,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(NetLunaNext);net472</TargetFrameworks>
-    <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup Label="LinkedFiles">
-    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\GlobalAssemblyCacheHelpers\FusionAssemblyIdentity.cs" Link="FusionAssemblyIdentity" />
+    <Compile Include="$(DotnetRoslynRepositoryDirectory)src\Compilers\Shared\GlobalAssemblyCacheHelpers\FusionAssemblyIdentity.cs" />
   </ItemGroup>
 
   <ItemGroup Label="InternalsVisibles">
@@ -26,13 +25,12 @@
 
     <!-- ProjectReference -->
     <ProjectReference Include="..\..\..\Test\PdbUtilities\Luna.Test.PdbUtilities.csproj" Aliases="PDB" />
-    <ProjectReference Include="..\..\Test\Core\Qtyi.CodeAnalysis.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\Test\Resources\Core\Qtyi.CodeAnalysis.Compiler.Test.Resources.csproj" />
     <ProjectReference Include="..\Portable\Qtyi.CodeAnalysis.csproj" />
-    <ProjectReference Include="..\..\Test\Utilities\Lua\Qtyi.CodeAnalysis.Lua.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\Lua\Portable\Qtyi.CodeAnalysis.Lua.csproj" />
-    <ProjectReference Include="..\..\Test\Utilities\MoonScript\Qtyi.CodeAnalysis.MoonScript.Test.Utilities.csproj" />
+    <ProjectReference Include="..\..\Test\Utilities\Lua\Qtyi.CodeAnalysis.Lua.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\MoonScript\Portable\Qtyi.CodeAnalysis.MoonScript.csproj" />
+    <ProjectReference Include="..\..\Test\Utilities\MoonScript\Qtyi.CodeAnalysis.MoonScript.Test.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,7 @@
 
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Roslyn.Utilities;
 
 #if LANG_LUA
@@ -43,18 +44,18 @@ internal static partial class SymbolExtensions
     internal static IAssemblySymbol? GetPublicSymbol(this AssemblySymbol? symbol) => symbol.GetPublicSymbol<AssemblySymbol, IAssemblySymbol>();
 
     /// <summary>
-    /// Get internal symbol of a particular <see cref="INetmoduleSymbol"/>.
-    /// </summary>
-    /// <inheritdoc cref="GetPublicSymbol{TSymbol, TISymbol}(TSymbol)"/>
-    [return: NotNullIfNotNull(nameof(symbol))]
-    internal static INetmoduleSymbol? GetPublicSymbol(this NetmoduleSymbol? symbol) => symbol.GetPublicSymbol<NetmoduleSymbol, INetmoduleSymbol>();
-
-    /// <summary>
     /// Get internal symbol of a particular <see cref="IModuleSymbol"/>.
     /// </summary>
     /// <inheritdoc cref="GetPublicSymbol{TSymbol, TISymbol}(TSymbol)"/>
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static IModuleSymbol? GetPublicSymbol(this ModuleSymbol? symbol) => symbol.GetPublicSymbol<ModuleSymbol, IModuleSymbol>();
+
+    /// <summary>
+    /// Get internal symbol of a particular <see cref="INamespaceSymbol"/>.
+    /// </summary>
+    /// <inheritdoc cref="GetPublicSymbol{TSymbol, TISymbol}(TSymbol)"/>
+    [return: NotNullIfNotNull(nameof(symbol))]
+    internal static INamespaceSymbol? GetPublicSymbol(this NamespaceSymbol? symbol) => symbol.GetPublicSymbol<NamespaceSymbol, INamespaceSymbol>();
 
     /// <summary>
     /// Get internal symbol of a particular <see cref="ITypeSymbol"/>.
@@ -63,6 +64,7 @@ internal static partial class SymbolExtensions
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static ITypeSymbol? GetPublicSymbol(this TypeSymbol? symbol) => symbol.GetPublicSymbol<TypeSymbol, ITypeSymbol>();
 
+#if false
     /// <summary>
     /// Get internal symbol of a particular <see cref="IFieldSymbol"/>.
     /// </summary>
@@ -76,6 +78,7 @@ internal static partial class SymbolExtensions
     /// <inheritdoc cref="GetPublicSymbol{TSymbol, TISymbol}(TSymbol)"/>
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static IDynamicTypeSymbol? GetPublicSymbol(this DynamicTypeSymbol? symbol) => symbol.GetPublicSymbol<DynamicTypeSymbol, IDynamicTypeSymbol>();
+#endif
 
     /// <summary>
     /// Get internal symbol of a particular <see cref="INamedTypeSymbol"/>.
@@ -84,6 +87,7 @@ internal static partial class SymbolExtensions
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static INamedTypeSymbol? GetPublicSymbol(this NamedTypeSymbol? symbol) => symbol.GetPublicSymbol<NamedTypeSymbol, INamedTypeSymbol>();
 
+#if false
     /// <summary>
     /// Get internal symbol of a particular <see cref="IErrorTypeSymbol"/>.
     /// </summary>
@@ -113,6 +117,7 @@ internal static partial class SymbolExtensions
     /// <inheritdoc cref="GetPublicSymbol{TSymbol, TISymbol}(TSymbol)"/>
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static IParameterSymbol? GetPublicSymbol(this ParameterSymbol? symbol) => symbol.GetPublicSymbol<ParameterSymbol, IParameterSymbol>();
+#endif
 
     /// <summary>
     /// Get corresponding public symbols of a enumerable of particular <see cref="Symbol"/>s.
@@ -146,16 +151,16 @@ internal static partial class SymbolExtensions
     internal static ImmutableArray<IAssemblySymbol> GetPublicSymbols(this ImmutableArray<AssemblySymbol> symbols) => symbols.GetPublicSymbols<AssemblySymbol, IAssemblySymbol>();
 
     /// <summary>
-    /// Get corresponding public symbols of an array of particular <see cref="NetmoduleSymbol"/>.
-    /// </summary>
-    /// <inheritdoc cref="GetPublicSymbols{TSymbol, TISymbol}(ImmutableArray{TSymbol})"/>
-    internal static ImmutableArray<INetmoduleSymbol> GetPublicSymbols(this ImmutableArray<NetmoduleSymbol> symbols) => symbols.GetPublicSymbols<NetmoduleSymbol, INetmoduleSymbol>();
-
-    /// <summary>
     /// Get corresponding public symbols of an array of particular <see cref="ModuleSymbol"/>.
     /// </summary>
     /// <inheritdoc cref="GetPublicSymbols{TSymbol, TISymbol}(ImmutableArray{TSymbol})"/>
     internal static ImmutableArray<IModuleSymbol> GetPublicSymbols(this ImmutableArray<ModuleSymbol> symbols) => symbols.GetPublicSymbols<ModuleSymbol, IModuleSymbol>();
+
+    /// <summary>
+    /// Get corresponding public symbols of an array of particular <see cref="NamespaceSymbol"/>.
+    /// </summary>
+    /// <inheritdoc cref="GetPublicSymbols{TSymbol, TISymbol}(ImmutableArray{TSymbol})"/>
+    internal static ImmutableArray<INamespaceSymbol> GetPublicSymbols(this ImmutableArray<NamespaceSymbol> symbols) => symbols.GetPublicSymbols<NamespaceSymbol, INamespaceSymbol>();
 
     /// <summary>
     /// Get corresponding public symbols of an array of particular <see cref="TypeSymbol"/>.
@@ -163,6 +168,7 @@ internal static partial class SymbolExtensions
     /// <inheritdoc cref="GetPublicSymbols{TSymbol, TISymbol}(ImmutableArray{TSymbol})"/>
     internal static ImmutableArray<ITypeSymbol> GetPublicSymbols(this ImmutableArray<TypeSymbol> symbols) => symbols.GetPublicSymbols<TypeSymbol, ITypeSymbol>();
 
+#if false
     /// <summary>
     /// Get corresponding public symbols of an array of particular <see cref="FieldSymbol"/>.
     /// </summary>
@@ -174,6 +180,7 @@ internal static partial class SymbolExtensions
     /// </summary>
     /// <inheritdoc cref="GetPublicSymbols{TSymbol, TISymbol}(ImmutableArray{TSymbol})"/>
     internal static ImmutableArray<IDynamicTypeSymbol> GetPublicSymbols(this ImmutableArray<DynamicTypeSymbol> symbols) => symbols.GetPublicSymbols<DynamicTypeSymbol, IDynamicTypeSymbol>();
+#endif
 
     /// <summary>
     /// Get corresponding public symbols of an array of particular <see cref="NamedTypeSymbol"/>.
@@ -181,6 +188,7 @@ internal static partial class SymbolExtensions
     /// <inheritdoc cref="GetPublicSymbols{TSymbol, TISymbol}(ImmutableArray{TSymbol})"/>
     internal static ImmutableArray<INamedTypeSymbol> GetPublicSymbols(this ImmutableArray<NamedTypeSymbol> symbols) => symbols.GetPublicSymbols<NamedTypeSymbol, INamedTypeSymbol>();
 
+#if false
     /// <summary>
     /// Get corresponding public symbols of an array of particular <see cref="ErrorTypeSymbol"/>.
     /// </summary>
@@ -206,6 +214,7 @@ internal static partial class SymbolExtensions
     /// </summary>
     /// <inheritdoc cref="GetPublicSymbols{TSymbol, TISymbol}(ImmutableArray{TSymbol})"/>
     internal static ImmutableArray<IParameterSymbol> GetPublicSymbols(this ImmutableArray<ParameterSymbol> symbols) => symbols.GetPublicSymbols<ParameterSymbol, IParameterSymbol>();
+#endif
     #endregion
 
     #region GetSymbol
@@ -237,18 +246,18 @@ internal static partial class SymbolExtensions
     internal static AssemblySymbol? GetSymbol(this IAssemblySymbol? symbol) => symbol.GetSymbol<IAssemblySymbol, AssemblySymbol>();
 
     /// <summary>
-    /// Get internal symbol of a particular <see cref="INetmoduleSymbol"/>.
-    /// </summary>
-    /// <inheritdoc cref="GetSymbol{TISymbol, TSymbol}(TISymbol)"/>
-    [return: NotNullIfNotNull(nameof(symbol))]
-    internal static NetmoduleSymbol? GetSymbol(this INetmoduleSymbol? symbol) => symbol.GetSymbol<INetmoduleSymbol, NetmoduleSymbol>();
-
-    /// <summary>
     /// Get internal symbol of a particular <see cref="IModuleSymbol"/>.
     /// </summary>
     /// <inheritdoc cref="GetSymbol{TISymbol, TSymbol}(TISymbol)"/>
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static ModuleSymbol? GetSymbol(this IModuleSymbol? symbol) => symbol.GetSymbol<IModuleSymbol, ModuleSymbol>();
+
+    /// <summary>
+    /// Get internal symbol of a particular <see cref="INamespaceSymbol"/>.
+    /// </summary>
+    /// <inheritdoc cref="GetSymbol{TISymbol, TSymbol}(TISymbol)"/>
+    [return: NotNullIfNotNull(nameof(symbol))]
+    internal static NamespaceSymbol? GetSymbol(this INamespaceSymbol? symbol) => symbol.GetSymbol<INamespaceSymbol, NamespaceSymbol>();
 
     /// <summary>
     /// Get internal symbol of a particular <see cref="ITypeSymbol"/>.
@@ -257,6 +266,7 @@ internal static partial class SymbolExtensions
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static TypeSymbol? GetSymbol(this ITypeSymbol? symbol) => symbol.GetSymbol<ITypeSymbol, TypeSymbol>();
 
+#if false
     /// <summary>
     /// Get internal symbol of a particular <see cref="IFieldSymbol"/>.
     /// </summary>
@@ -270,6 +280,7 @@ internal static partial class SymbolExtensions
     /// <inheritdoc cref="GetSymbol{TISymbol, TSymbol}(TISymbol)"/>
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static DynamicTypeSymbol? GetSymbol(this IDynamicTypeSymbol? symbol) => symbol.GetSymbol<IDynamicTypeSymbol, DynamicTypeSymbol>();
+#endif
 
     /// <summary>
     /// Get internal symbol of a particular <see cref="INamedTypeSymbol"/>.
@@ -278,6 +289,7 @@ internal static partial class SymbolExtensions
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static NamedTypeSymbol? GetSymbol(this INamedTypeSymbol? symbol) => symbol.GetSymbol<INamedTypeSymbol, NamedTypeSymbol>();
 
+#if false
     /// <summary>
     /// Get internal symbol of a particular <see cref="IErrorTypeSymbol"/>.
     /// </summary>
@@ -307,5 +319,6 @@ internal static partial class SymbolExtensions
     /// <inheritdoc cref="GetSymbol{TISymbol, TSymbol}(TISymbol)"/>
     [return: NotNullIfNotNull(nameof(symbol))]
     internal static ParameterSymbol? GetSymbol(this IParameterSymbol? symbol) => symbol.GetSymbol<IParameterSymbol, ParameterSymbol>();
+#endif
     #endregion
 }

@@ -13,15 +13,15 @@ partial class Lexer
     /// </summary>
     private void ScanEscapeSequence()
     {
-        var start = this.TextWindow.Position;
+        var start = TextWindow.Position;
 
-        var c = this.TextWindow.NextChar();
+        var c = TextWindow.NextChar();
         SyntaxDiagnosticInfo? error;
         char surrogate;
 
         Debug.Assert(c == '\\');
 
-        c = this.TextWindow.NextChar();
+        c = TextWindow.NextChar();
         switch (c)
         {
             // 转义后返回自己的字符
@@ -29,30 +29,30 @@ partial class Lexer
             case '"':
             case '\\':
             case '#': // 插值字符串起始（“#{”）
-                this._builder.Append(c);
+                _builder.Append(c);
                 break;
 
             // 常用转义字符
             case 'a':
-                this._builder.Append('\a');
+                _builder.Append('\a');
                 break;
             case 'b':
-                this._builder.Append('\b');
+                _builder.Append('\b');
                 break;
             case 'f':
-                this._builder.Append('\f');
+                _builder.Append('\f');
                 break;
             case 'n':
-                this._builder.Append('\n');
+                _builder.Append('\n');
                 break;
             case 'r':
-                this._builder.Append('\r');
+                _builder.Append('\r');
                 break;
             case 't':
-                this._builder.Append('\t');
+                _builder.Append('\t');
                 break;
             case 'v':
-                this._builder.Append('\v');
+                _builder.Append('\v');
                 break;
 
             // 十进制数字表示的Unicode字符
@@ -69,26 +69,26 @@ partial class Lexer
 
             // 十六进制数字表示的ASCII字符
             case 'x':
-                this.TextWindow.Reset(start);
-                var b = this.TextWindow.NextByteEscape(out error);
+                TextWindow.Reset(start);
+                var b = TextWindow.NextByteEscape(out error);
                 if (error is null)
-                    this.FlushToUtf8Builder(b);
-                this.AddError(error);
+                    FlushToUtf8Builder(b);
+                AddError(error);
                 break;
 
             // 十六进制数字表示的Unicode字符
             case 'u':
-                this.TextWindow.Reset(start);
-                var bs = this.TextWindow.NextUnicodeEscape(out error);
+                TextWindow.Reset(start);
+                var bs = TextWindow.NextUnicodeEscape(out error);
                 if (error is null)
-                    this.FlushToUtf8Builder(bs);
-                this.AddError(error);
+                    FlushToUtf8Builder(bs);
+                AddError(error);
                 break;
 
             default:
-                this.AddError(
+                AddError(
                     start,
-                    this.TextWindow.Position - start,
+                    TextWindow.Position - start,
                     ErrorCode.ERR_IllegalEscape);
                 break;
         }

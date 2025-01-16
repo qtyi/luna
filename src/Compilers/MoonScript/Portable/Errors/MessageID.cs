@@ -63,7 +63,7 @@ internal static partial class MessageIDExtensions
             MessageID.IDS_FeatureBitwiseOrAssignmentOperator or
             MessageID.IDS_FeatureExponentiationAssignmentOperator or
             MessageID.IDS_FeatureBitwiseLeftShiftAssignmentOperator or
-            MessageID.IDS_FeatureBitwiseRightShiftAssignmentOperator => LanguageVersion.Preview,
+            MessageID.IDS_FeatureBitwiseRightShiftAssignmentOperator => LanguageVersion.DotNet,
 
             // MoonScript 0.5的特性
             MessageID.IDS_FeatureHexadecimalFloatConstant or

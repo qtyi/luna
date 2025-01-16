@@ -22,7 +22,7 @@ internal enum LexerMode
 }
 
 /// <summary>
-/// 针对MoonScript语言特定的词法解析器。
+/// Lexer for MoonScript language.
 /// </summary>
 partial class Lexer
 {
@@ -30,19 +30,19 @@ partial class Lexer
 
     public partial SyntaxToken Lex(LexerMode mode)
     {
-        this._mode = mode;
+        _mode = mode;
 
-        switch (this._mode)
+        switch (_mode)
         {
             case LexerMode.Syntax:
             case LexerMode.DebuggerSyntax:
-                return this.QuickScanSyntaxToken() ?? this.LexSyntaxToken();
+                return QuickScanSyntaxToken() ?? LexSyntaxToken();
         }
 
-        switch (ModeOf(this._mode))
+        switch (ModeOf(_mode))
         {
             default:
-                throw ExceptionUtilities.UnexpectedValue(ModeOf(this._mode));
+                throw ExceptionUtilities.UnexpectedValue(ModeOf(_mode));
         }
     }
 
@@ -67,10 +67,10 @@ partial class Lexer
                 info.ValueKind switch
                 {
                     // 64位整数
-                    SpecialType.System_Int64 => SyntaxFactory.Literal(leadingNode, info.Text!, info.LongValue, trailingNode),
-                    SpecialType.System_UInt64 => SyntaxFactory.Literal(leadingNode, info.Text!, info.ULongValue, trailingNode),
+                    TokenValueType.Int64 => SyntaxFactory.Literal(leadingNode, info.Text!, info.LongValue, trailingNode),
+                    TokenValueType.UInt64 => SyntaxFactory.Literal(leadingNode, info.Text!, info.ULongValue, trailingNode),
                     // 64位双精度浮点数
-                    SpecialType.System_Double => SyntaxFactory.Literal(leadingNode, info.Text!, info.DoubleValue, trailingNode),
+                    TokenValueType.Double => SyntaxFactory.Literal(leadingNode, info.Text!, info.DoubleValue, trailingNode),
                     _ => throw ExceptionUtilities.UnexpectedValue(info.ValueKind),
                 },
 
@@ -107,17 +107,17 @@ partial class Lexer
         info.ContextualKind = SyntaxKind.None;
         info.Text = null;
         char c;
-        var startingPosition = this.TextWindow.Position;
+        var startingPosition = TextWindow.Position;
 
         // 开始扫描标记。
-        c = this.TextWindow.PeekChar();
+        c = TextWindow.PeekChar();
         switch (c)
         {
             case '+':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.PlusEqualsToken;
                 }
                 else
@@ -125,16 +125,16 @@ partial class Lexer
                 break;
 
             case '-':
-                this.TextWindow.AdvanceChar();
-                switch (this.TextWindow.PeekChar())
+                TextWindow.AdvanceChar();
+                switch (TextWindow.PeekChar())
                 {
                     case '=':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.MinusEqualsToken;
                         break;
 
                     case '>':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.MinusGreaterThanToken;
                         break;
 
@@ -144,10 +144,10 @@ partial class Lexer
                 }
                 break;
             case '*':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.AsteriskEqualsToken;
                 }
                 else
@@ -155,22 +155,22 @@ partial class Lexer
                 break;
 
             case '/':
-                this.TextWindow.AdvanceChar();
-                switch (this.TextWindow.PeekChar())
+                TextWindow.AdvanceChar();
+                switch (TextWindow.PeekChar())
                 {
                     case '/':
-                        this.TextWindow.AdvanceChar();
-                        if (this.TextWindow.PeekChar() == '=')
+                        TextWindow.AdvanceChar();
+                        if (TextWindow.PeekChar() == '=')
                         {
-                            this.TextWindow.AdvanceChar();
+                            TextWindow.AdvanceChar();
                             info.Kind = SyntaxKind.SlashSlashEqualsToken;
-                            this.CheckFeatureAvaliability(MessageID.IDS_FeatureFloorDivisionAssignmentOperator);
+                            CheckFeatureAvaliability(MessageID.IDS_FeatureFloorDivisionAssignmentOperator);
                         }
                         info.Kind = SyntaxKind.SlashSlashToken;
                         break;
 
                     case '=':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.SlashEqualsToken;
                         break;
 
@@ -181,16 +181,16 @@ partial class Lexer
                 break;
 
             case '\\':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.BackSlashToken;
                 break;
 
             case '^':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
-                    this.CheckFeatureAvaliability(MessageID.IDS_FeatureExponentiationAssignmentOperator);
+                    TextWindow.AdvanceChar();
+                    CheckFeatureAvaliability(MessageID.IDS_FeatureExponentiationAssignmentOperator);
                     info.Kind = SyntaxKind.CaretEqualsToken;
                 }
                 else
@@ -198,38 +198,38 @@ partial class Lexer
                 break;
 
             case '%':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.PersentEqualsToken;
                 }
                 else
-                    info.Kind = SyntaxKind.PersentToken;
+                    info.Kind = SyntaxKind.PercentToken;
                 break;
 
             case '#':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.HashToken;
                 break;
 
             case '&':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.AmpersandEqualsToken;
-                    this.CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseAndAssignmentOperator);
+                    CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseAndAssignmentOperator);
                 }
                 else
                     info.Kind = SyntaxKind.AmpersandToken;
                 break;
 
             case '~':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.TildeEqualsToken;
                 }
                 else
@@ -237,32 +237,32 @@ partial class Lexer
                 break;
 
             case '|':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.BarEqualsToken;
-                    this.CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseOrAssignmentOperator);
+                    CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseOrAssignmentOperator);
                 }
                 else
                     info.Kind = SyntaxKind.BarToken;
                 break;
 
             case '<':
-                this.TextWindow.AdvanceChar();
-                switch (this.TextWindow.PeekChar())
+                TextWindow.AdvanceChar();
+                switch (TextWindow.PeekChar())
                 {
                     case '=':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.LessThanEqualsToken;
                         break;
 
                     case '<':
-                        this.TextWindow.AdvanceChar();
-                        if (this.TextWindow.PeekChar() == '=')
+                        TextWindow.AdvanceChar();
+                        if (TextWindow.PeekChar() == '=')
                         {
-                            this.TextWindow.AdvanceChar();
-                            this.CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseLeftShiftAssignmentOperator);
+                            TextWindow.AdvanceChar();
+                            CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseLeftShiftAssignmentOperator);
                             info.Kind = SyntaxKind.LessThanLessThanEqualsToken;
                         }
                         info.Kind = SyntaxKind.LessThanLessThanToken;
@@ -275,19 +275,19 @@ partial class Lexer
                 break;
 
             case '>':
-                this.TextWindow.AdvanceChar();
-                switch (this.TextWindow.PeekChar())
+                TextWindow.AdvanceChar();
+                switch (TextWindow.PeekChar())
                 {
                     case '=':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.GreaterThanEqualsToken;
                         break;
                     case '>':
-                        this.TextWindow.AdvanceChar();
-                        if (this.TextWindow.PeekChar() == '=')
+                        TextWindow.AdvanceChar();
+                        if (TextWindow.PeekChar() == '=')
                         {
-                            this.TextWindow.AdvanceChar();
-                            this.CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseRightShiftAssignmentOperator);
+                            TextWindow.AdvanceChar();
+                            CheckFeatureAvaliability(MessageID.IDS_FeatureBitwiseRightShiftAssignmentOperator);
                             info.Kind = SyntaxKind.GreaterThanGreaterThanEqualsToken;
                         }
                         info.Kind = SyntaxKind.GreaterThanGreaterThanToken;
@@ -300,16 +300,16 @@ partial class Lexer
                 break;
 
             case '=':
-                this.TextWindow.AdvanceChar();
-                switch (this.TextWindow.PeekChar())
+                TextWindow.AdvanceChar();
+                switch (TextWindow.PeekChar())
                 {
                     case '=':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.EqualsEqualsToken;
                         break;
 
                     case '>':
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.EqualsGreaterThanToken;
                         break;
 
@@ -320,10 +320,10 @@ partial class Lexer
                 break;
 
             case '!':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '=')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '=')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.ExclamationEqualsToken;
                 }
                 else
@@ -331,40 +331,40 @@ partial class Lexer
                 break;
 
             case '(':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.OpenParenToken;
                 break;
 
             case ')':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CloseParenToken;
                 break;
 
             case '{':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.OpenBraceToken;
                 break;
 
             case '}':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CloseBraceToken;
                 break;
 
             case '[':
-                switch (this.TextWindow.PeekChar(2))
+                switch (TextWindow.PeekChar(2))
                 {
                     case '[':
-                        this.ScanMultiLineRawStringLiteral(ref info);
+                        ScanMultiLineRawStringLiteral(ref info);
                         break;
 
                     case '=':
                         for (var i = 2; ; i++)
                         {
-                            var nextChar = this.TextWindow.PeekChar(i);
+                            var nextChar = TextWindow.PeekChar(i);
                             if (nextChar == '=') continue;
                             else if (nextChar == '[')
                             {
-                                this.ScanMultiLineRawStringLiteral(ref info, i - 1);
+                                ScanMultiLineRawStringLiteral(ref info, i - 1);
                                 break;
                             }
                             else goto default; // 未匹配到完整的多行原始字符字面量的起始语法。
@@ -372,43 +372,43 @@ partial class Lexer
                         break;
 
                     default:
-                        this.TextWindow.AdvanceChar();
+                        TextWindow.AdvanceChar();
                         info.Kind = SyntaxKind.OpenBracketToken;
                         break;
                 }
                 break;
 
             case ']':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CloseBracketToken;
                 break;
 
             case ':':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.ColonToken;
                 break;
 
             case ',':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 info.Kind = SyntaxKind.CommaToken;
                 break;
 
             case '.':
-                if (!this.ScanNumericLiteral(ref info))
+                if (!ScanNumericLiteral(ref info))
                 {
-                    this.TextWindow.AdvanceChar();
-                    if (this.TextWindow.PeekChar() == '.')
+                    TextWindow.AdvanceChar();
+                    if (TextWindow.PeekChar() == '.')
                     {
-                        this.TextWindow.AdvanceChar();
-                        switch (this.TextWindow.PeekChar())
+                        TextWindow.AdvanceChar();
+                        switch (TextWindow.PeekChar())
                         {
                             case '.':
-                                this.TextWindow.AdvanceChar();
+                                TextWindow.AdvanceChar();
                                 info.Kind = SyntaxKind.DotDotDotToken;
                                 break;
 
                             case '=':
-                                this.TextWindow.AdvanceChar();
+                                TextWindow.AdvanceChar();
                                 info.Kind = SyntaxKind.DotDotEqualsToken;
                                 break;
 
@@ -423,10 +423,10 @@ partial class Lexer
                 break;
 
             case '@':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '@')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '@')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.CommercialAtCommercialAtToken;
                 }
                 else
@@ -436,13 +436,13 @@ partial class Lexer
             // 字符串字面量
             case '\"':
             case '\'':
-                this.ScanStringLiteral(ref info);
+                ScanStringLiteral(ref info);
                 break;
 
             case 'a':
-                if (this.TextWindow.PeekChars(4) == "and=")
+                if (TextWindow.PeekChars(4) == "and=")
                 {
-                    this.TextWindow.AdvanceChar(4);
+                    TextWindow.AdvanceChar(4);
                     info.Kind = SyntaxKind.AndEqualsToken;
                     break;
                 }
@@ -462,9 +462,9 @@ partial class Lexer
             case 'n':
                 goto case 'p';
             case 'o':
-                if (this.TextWindow.PeekChars(3) == "or=")
+                if (TextWindow.PeekChars(3) == "or=")
                 {
-                    this.TextWindow.AdvanceChar(3);
+                    TextWindow.AdvanceChar(3);
                     info.Kind = SyntaxKind.OrEqualsToken;
                     break;
                 }
@@ -507,7 +507,7 @@ partial class Lexer
             case 'Y':
             case 'Z':
             case '_':
-                this.ScanIdentifierOrKeyword(ref info);
+                ScanIdentifierOrKeyword(ref info);
                 break;
 
             case '0':
@@ -520,56 +520,56 @@ partial class Lexer
             case '7':
             case '8':
             case '9':
-                this.ScanNumericLiteral(ref info);
+                ScanNumericLiteral(ref info);
                 break;
 
             case SlidingTextWindow.InvalidCharacter:
-                if (!this.TextWindow.IsReallyAtEnd())
+                if (!TextWindow.IsReallyAtEnd())
                     goto default;
                 else
                     info.Kind = SyntaxKind.EndOfFileToken;
                 break;
 
             default:
-                if (SyntaxFacts.IsIdentifierStartCharacter(this.TextWindow.PeekChar()))
+                if (SyntaxFacts.IsIdentifierStartCharacter(TextWindow.PeekChar()))
                     goto case 'a';
 
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
 
-                if (this._badTokenCount++ > 200)
+                if (_badTokenCount++ > 200)
                 {
                     //当遇到大量无法决定的字符时，将剩下的输出也合并入。
-                    var end = this.TextWindow.Text.Length;
+                    var end = TextWindow.Text.Length;
                     var width = end - startingPosition;
-                    info.Text = this.TextWindow.Text.ToString(new(startingPosition, width));
-                    this.TextWindow.Reset(end);
+                    info.Text = TextWindow.Text.ToString(new(startingPosition, width));
+                    TextWindow.Reset(end);
                 }
                 else
-                    info.Text = this.TextWindow.GetText(intern: true);
+                    info.Text = TextWindow.GetText(intern: true);
 
-                this.AddError(ErrorCode.ERR_UnexpectedCharacter, info.Text);
+                AddError(ErrorCode.ERR_UnexpectedCharacter, info.Text);
                 break;
         }
     }
 
-    private partial void LexSyntaxTrivia(
+    private partial void ScanSyntaxTrivia(
         bool afterFirstToken,
         bool isTrailing,
         ref SyntaxListBuilder triviaList)
     {
-        var onlyWhitespaceOnLine = !isTrailing;
+        var onlyWhiteSpaceOnLine = !isTrailing;
         while (true)
         {
-            this.Start();
-            var c = this.TextWindow.PeekChar();
+            Start();
+            var c = TextWindow.PeekChar();
             if (c == ' ')
             {
-                this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
+                AddTrivia(LexWhitespace(), ref triviaList);
                 continue;
             }
             else if (c > 127)
             {
-                if (SyntaxFacts.IsWhiteSpace(c))
+                if (SyntaxFacts.IsWhitespace(c))
                     c = ' ';
                 else if (SyntaxFacts.IsNewLine(c))
                     c = '\n';
@@ -582,33 +582,33 @@ partial class Lexer
                 case '\v':
                 case '\f':
                 case '\u001A':
-                    this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
+                    AddTrivia(LexWhitespace(), ref triviaList);
                     continue;
 
                 case '-':
-                    if (this.TextWindow.PeekChar(1) == '-')
+                    if (TextWindow.PeekChar(1) == '-')
                     {
-                        this.TextWindow.AdvanceChar(2);
-                        this.AddTrivia(this.ScanComment(), ref triviaList);
-                        onlyWhitespaceOnLine = false;
+                        TextWindow.AdvanceChar(2);
+                        AddTrivia(LexComment(), ref triviaList);
+                        onlyWhiteSpaceOnLine = false;
                         continue;
                     }
                     else goto default;
 
                 case '#':
-                    if (this._allowPreprocessorDirectives && !afterFirstToken)
+                    if (!afterFirstToken)
                     {
-                        this.LexDirectiveTrivia(afterFirstToken, isTrailing || !onlyWhitespaceOnLine, ref triviaList);
+                        ScanDirectiveAndExcludedTrivia(afterFirstToken, isTrailing || !onlyWhiteSpaceOnLine, ref triviaList);
                         continue;
                     }
                     goto default;
 
                 default:
                     {
-                        var endOfLine = this.ScanEndOfLine();
+                        var endOfLine = LexEndOfLine();
                         if (endOfLine is not null)
                         {
-                            this.AddTrivia(endOfLine, ref triviaList);
+                            AddTrivia(endOfLine, ref triviaList);
 
                             /* 为了适应MoonScript根据缩进来表示块体，在识别后方琐碎内容时，连续的语法琐碎内容应在行尾换行后截断。
                              * 并且将下一行起始的连续空白字符作为下一个语法标记的前方语法琐碎内容；
@@ -620,7 +620,7 @@ partial class Lexer
                                 return;
                             else
                             {
-                                onlyWhitespaceOnLine = true;
+                                onlyWhiteSpaceOnLine = true;
                                 // 否则进行下一个语法琐碎内容的分析。
                                 continue;
                             }
@@ -635,7 +635,7 @@ partial class Lexer
 
     private partial bool ScanDirectiveToken(ref TokenInfo info)
     {
-        var c = this.TextWindow.PeekChar();
+        var c = TextWindow.PeekChar();
         switch (c)
         {
             case SlidingTextWindow.InvalidCharacter:
@@ -651,10 +651,10 @@ partial class Lexer
                 break;
 
             case '#':
-                this.TextWindow.AdvanceChar();
-                if (this.TextWindow.PeekChar() == '!')
+                TextWindow.AdvanceChar();
+                if (TextWindow.PeekChar() == '!')
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
                     info.Kind = SyntaxKind.HashExclamationToken;
                 }
                 else
@@ -664,7 +664,7 @@ partial class Lexer
             default:
                 ScanToEndOfLine(trimEnd: false);
                 info.Kind = SyntaxKind.None;
-                info.Text = this.TextWindow.GetText(intern: true);
+                info.Text = TextWindow.GetText(intern: true);
                 break;
 
         }
@@ -674,13 +674,13 @@ partial class Lexer
 
     private partial MoonScriptSyntaxNode? LexDirectiveTrivia()
     {
-        this.Start();
-        var c = this.TextWindow.PeekChar();
+        Start();
+        var c = TextWindow.PeekChar();
         if (c == ' ')
-            return this.ScanWhiteSpace();
+            return LexWhitespace();
         else if (c > 127)
         {
-            if (SyntaxFacts.IsWhiteSpace(c))
+            if (SyntaxFacts.IsWhitespace(c))
                 c = ' ';
             else if (SyntaxFacts.IsNewLine(c))
                 c = '\n';
@@ -693,19 +693,19 @@ partial class Lexer
             case '\v':
             case '\f':
             case '\u001A':
-                return this.ScanWhiteSpace();
+                return LexWhitespace();
 
             case '-':
-                if (this.TextWindow.PeekChar(1) == '-')
+                if (TextWindow.PeekChar(1) == '-')
                 {
-                    this.TextWindow.AdvanceChar(2);
-                    return this.ScanComment();
+                    TextWindow.AdvanceChar(2);
+                    return LexComment();
                 }
                 else goto default;
 
             default:
                 {
-                    var endOfLine = this.ScanEndOfLine();
+                    var endOfLine = LexEndOfLine();
                     if (endOfLine is not null)
                     {
                         /* 为了适应MoonScript根据缩进来表示块体，在识别后方琐碎内容时，连续的语法琐碎内容应在行尾换行后截断。
@@ -722,21 +722,21 @@ partial class Lexer
         }
     }
 
-    private partial void LexDirectiveTrivia(
+    private partial void ScanDirectiveAndExcludedTrivia(
         bool afterFirstToken,
-        bool afterNonWhitespaceOnLine,
+        bool afterNonWhiteSpaceOnLine,
         ref SyntaxListBuilder triviaList)
     {
-        if (SyntaxFacts.IsWhiteSpace(this.TextWindow.PeekChar()))
+        if (SyntaxFacts.IsWhitespace(TextWindow.PeekChar()))
         {
-            this.Start();
-            this.AddTrivia(this.ScanWhiteSpace(), ref triviaList);
+            Start();
+            AddTrivia(LexWhitespace(), ref triviaList);
         }
 
-        var saveMode = this._mode;
+        var saveMode = _mode;
         using var parser = new DirectiveParser(this);
-        var directive = parser.ParseDirective(afterFirstToken, afterNonWhitespaceOnLine);
-        this.AddTrivia(directive, ref triviaList);
-        this._mode = saveMode;
+        var directive = parser.ParseDirective(true, true, afterFirstToken, afterNonWhiteSpaceOnLine);
+        AddTrivia(directive, ref triviaList);
+        _mode = saveMode;
     }
 }

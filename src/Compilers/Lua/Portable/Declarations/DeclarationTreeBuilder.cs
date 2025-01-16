@@ -12,7 +12,7 @@ using Syntax;
 partial class DeclarationTreeBuilder
 {
     private partial ModuleDeclaration CreateRootDeclaration(ChunkSyntax chunk) => new(
-        name: this._scriptModuleName,
-        syntaxReference: this._syntaxTree.GetReference(chunk),
+        name: _scriptModuleName,
+        syntaxReference: _syntaxTree.GetReference(chunk),
         diagnostics: ImmutableArray<Diagnostic>.Empty);
 }

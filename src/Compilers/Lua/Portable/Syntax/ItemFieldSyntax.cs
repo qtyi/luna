@@ -11,8 +11,8 @@ partial class ItemFieldSyntax
     internal override FieldSyntax WithFieldKeyCore(ExpressionSyntax? fieldKey)
     {
         if (fieldKey is null)
-            return SyntaxFactory.ItemField(this.FieldValue);
+            return SyntaxFactory.ItemField(FieldValue);
         else
-            return SyntaxFactory.KeyValueField(fieldKey, this.FieldValue);
+            return SyntaxFactory.KeyValueField(fieldKey, FieldValue);
     }
 }

@@ -41,7 +41,7 @@ internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDecla
         : base(externalSyntaxTrees, scriptModuleName, resolver, messageProvider, isSubmission)
 #nullable enable
     {
-        this._lazyState = state;
+        _lazyState = state;
     }
 
     /// <summary>
@@ -50,20 +50,20 @@ internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDecla
     /// <returns>An object that represents the current state of syntax and declaration.</returns>
     internal State GetLazyState()
     {
-        if (this._lazyState is null)
+        if (_lazyState is null)
         {
             Interlocked.CompareExchange(
-                ref this._lazyState,
+                ref _lazyState,
                 CreateState(
-                    this.ExternalSyntaxTrees,
-                    this.ScriptClassName,
-                    this.Resolver,
-                    this.MessageProvider,
-                    this.IsSubmission),
+                    ExternalSyntaxTrees,
+                    ScriptClassName,
+                    Resolver,
+                    MessageProvider,
+                    IsSubmission),
                 null);
         }
 
-        return this._lazyState;
+        return _lazyState;
     }
 
     /// <summary>
@@ -74,10 +74,10 @@ internal sealed partial class SyntaxAndDeclarationManager : CommonSyntaxAndDecla
     internal SyntaxAndDeclarationManager WithExternalSyntaxTrees(ImmutableArray<SyntaxTree> trees) =>
         new(
             trees,
-            this.ScriptClassName,
-            this.Resolver,
-            this.MessageProvider,
-            this.IsSubmission,
+            ScriptClassName,
+            Resolver,
+            MessageProvider,
+            IsSubmission,
             state: null);
 
     /// <summary>

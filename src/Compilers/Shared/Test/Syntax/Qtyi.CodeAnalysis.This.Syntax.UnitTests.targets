@@ -1,0 +1,17 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\Qtyi.CodeAnalysis.This.UnitTests.targets" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(NetLuna);net472</TargetFrameworks>
+    <!-- The RESX resources generator produces invalid comments when the string has a line starting with '/' -->
+    <NoWarn>$(NoWarn);1570;1587</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)**\*.cs"
+             Link="%(RecursiveDir)$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)', 'This', '$(ThisLanguageName)')).Shared%(Extension)" />
+  </ItemGroup>
+
+</Project>

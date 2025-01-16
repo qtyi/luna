@@ -4,60 +4,78 @@
 
 using System.Diagnostics;
 
-#if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-#elif LANG_MOONSCRIPT
-namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-#endif
 
 partial class Lexer
 {
     /// <summary>
-    /// 扫描一个转义序列。
+    /// Scans an escape sequence to UTF-8 buffer.
     /// </summary>
     private void ScanEscapeSequence()
     {
-        var start = this.TextWindow.Position;
+        Debug.Assert(TextWindow.PeekChar() == '\\');
 
-        var c = this.TextWindow.NextChar();
+        var start = TextWindow.Position;
+
         SyntaxDiagnosticInfo? error;
 
-        Debug.Assert(c == '\\');
-
-        c = this.TextWindow.NextChar();
+        var c = TextWindow.PeekChar(1);
         switch (c)
         {
-            // 转义后返回自己的字符
+            // Represents itself
             case '\'':
             case '"':
             case '\\':
-                this._builder.Append(c);
+                if (Options.LanguageVersion < LanguageVersion.Lua3_1)
+                    goto default;
+                _utf8Builder.Add((byte)c);
+                TextWindow.AdvanceChar(2);
                 break;
+            case '[':
+            case ']':
+                if (Options.LanguageVersion != LanguageVersion.Lua5)
+                    goto default;
+                goto case '\'';
 
-            // 常用转义字符
+            // Well-known controls
             case 'a':
-                this._builder.Append('\a');
+                if (Options.LanguageVersion < LanguageVersion.Lua3_1)
+                    goto default;
+                _utf8Builder.Add((byte)'\a');
+                TextWindow.AdvanceChar(2);
                 break;
             case 'b':
-                this._builder.Append('\b');
+                if (Options.LanguageVersion < LanguageVersion.Lua3_1)
+                    goto default;
+                _utf8Builder.Add((byte)'\b');
+                TextWindow.AdvanceChar(2);
                 break;
             case 'f':
-                this._builder.Append('\f');
+                if (Options.LanguageVersion < LanguageVersion.Lua3_1)
+                    goto default;
+                _utf8Builder.Add((byte)'\f');
+                TextWindow.AdvanceChar(2);
                 break;
             case 'n':
-                this._builder.Append('\n');
+                _utf8Builder.Add((byte)'\n');
+                TextWindow.AdvanceChar(2);
                 break;
             case 'r':
-                this._builder.Append('\r');
+                _utf8Builder.Add((byte)'\r');
+                TextWindow.AdvanceChar(2);
                 break;
             case 't':
-                this._builder.Append('\t');
+                _utf8Builder.Add((byte)'\t');
+                TextWindow.AdvanceChar(2);
                 break;
             case 'v':
-                this._builder.Append('\v');
+                if (Options.LanguageVersion < LanguageVersion.Lua3_1)
+                    goto default;
+                _utf8Builder.Add((byte)'\v');
+                TextWindow.AdvanceChar(2);
                 break;
 
-            // 十进制数字表示的Unicode字符
+            // Up to three decimal digits that represents a byte
             case '0':
             case '1':
             case '2':
@@ -68,54 +86,76 @@ partial class Lexer
             case '7':
             case '8':
             case '9':
-
-            // 十六进制数字表示的ASCII字符
-            case 'x':
-                this.TextWindow.Reset(start);
-                var b = this.TextWindow.NextByteEscape(out error);
-                if (error is null)
-                    this.FlushToUtf8Builder(b);
-                this.AddError(error);
-                break;
-
-            // 十六进制数字表示的Unicode字符
-            case 'u':
-                this.TextWindow.Reset(start);
-                var bs = this.TextWindow.NextUnicodeEscape(out error);
-                if (error is null)
-                    this.FlushToUtf8Builder(bs);
-                this.AddError(error);
-                break;
-
-            // 后方紧跟的连续的字面量的空白字符和换行字符。
-            case 'z':
-                c = this.TextWindow.PeekChar();
-                while (SyntaxFacts.IsWhiteSpace(c) || SyntaxFacts.IsNewLine(c))
+                if (Options.LanguageVersion < LanguageVersion.Lua3_1)
+                    goto default;
                 {
-                    this.TextWindow.AdvanceChar();
-
-                    // 跳过这些字符。
-
-                    c = this.TextWindow.PeekChar();
+                    var b = TextWindow.NextByteEscape(out error);
+                    if (error is null)
+                        _utf8Builder.Add(b);
+                    else
+                        TextWindow.Reset(start + 1); // reset to the character after '/'
+                    AddError(error);
                 }
                 break;
 
-            // 插入换行字符序列本身。
-            // Windows系统的换行字符序列为“\r\n”；
-            // Unix系统的换行字符序列为“\n”；
-            // Mac系统的换行字符序列为“\r”。
-            case '\r':
-            case '\n':
-                this._builder.Append('\n');
-                if (c == '\r' && this.TextWindow.PeekChar() == '\n')
-                    this.TextWindow.AdvanceChar(); // 跳过这个字符。
+            // Two hexadecimal digits that represents a byte
+            case 'x':
+                if (Options.LanguageVersion < LanguageVersion.Lua5_2)
+                    goto default;
+                {
+                    var b = TextWindow.NextByteEscape(out error);
+                    if (error is null)
+                        _utf8Builder.Add(b);
+                    else
+                        TextWindow.Reset(start + 1); // reset to the character after '/'
+                    AddError(error);
+                }
                 break;
 
+            // Hexadecimal digits that represents a unicode
+            case 'u':
+                if (Options.LanguageVersion < LanguageVersion.Lua5_3)
+                    goto default;
+                {
+                    var bs = TextWindow.NextUnicodeEscape(out error);
+                    if (error is null)
+                        _utf8Builder.AddRange(bs);
+                    else
+                        TextWindow.Reset(start + 1); // reset to the character after '/'
+                    AddError(error);
+                }
+                break;
+
+            // Ignores whitespaces and new-lines directly after
+            case 'z':
+                if (Options.LanguageVersion < LanguageVersion.Lua5_2)
+                    goto default;
+                TextWindow.AdvanceChar(2);
+                c = TextWindow.PeekChar();
+                while (SyntaxFacts.IsWhitespace(c) || SyntaxFacts.IsNewLine(c))
+                {
+                    TextWindow.AdvanceChar();
+
+                    // 跳过这些字符。
+
+                    c = TextWindow.PeekChar();
+                }
+                break;
+
+            // Represents a single LF
+            case '\r':
+            case '\n':
+                if (Options.LanguageVersion < LanguageVersion.Lua4)
+                    goto default;
+                _utf8Builder.Add((byte)'\n');
+                TextWindow.AdvanceChar(2);
+                LexEndOfLine();
+                break;
+
+            // Not supported
             default:
-                this.AddError(
-                    start,
-                    this.TextWindow.Position - start,
-                    ErrorCode.ERR_IllegalEscape);
+                TextWindow.AdvanceChar();
+                AddError(position: start, width: 2, code: ErrorCode.ERR_IllegalEscape);
                 break;
         }
     }

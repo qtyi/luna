@@ -8,20 +8,17 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 internal partial class MoonScriptSyntaxNode
 {
-    public virtual object? Value => this.Kind switch
+    protected partial void SetFactoryContext(SyntaxFactoryContext context)
     {
-        SyntaxKind.TrueKeyword => Boxes.BoxedTrue,
-        SyntaxKind.FalseKeyword => Boxes.BoxedFalse,
-        SyntaxKind.NilKeyword => null,
-        _ => this.KindText
-    };
+#warning Not implemented.
+        throw new NotImplementedException();
+    }
 
-    internal static partial NodeFlags SetFactoryContext(NodeFlags flags, SyntaxFactoryContext context) => flags;
-
-    public override partial Microsoft.CodeAnalysis.SyntaxToken CreateSeparator<TNode>(SyntaxNode element) => MoonScript.SyntaxFactory.Token(SyntaxKind.CommaToken);
+    public sealed override partial Microsoft.CodeAnalysis.SyntaxToken CreateSeparator(SyntaxNode element)
+        => MoonScript.SyntaxFactory.Token(SyntaxKind.CommaToken);
 
     public override partial bool IsTriviaWithEndOfLine() =>
-        this.Kind switch
+        Kind switch
         {
             SyntaxKind.EndOfLineTrivia or
             SyntaxKind.SingleLineCommentTrivia => true,

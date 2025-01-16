@@ -7,14 +7,33 @@
 
 
 
-  <!-- 名称 -->
-  <AbstractNode Name="NameSyntax" Base="ExpressionSyntax"/>
-  <Node Name="IdentifierNameSyntax" Base="NameSyntax">
+  <!-- Names -->
+  <AbstractNode Name="NameSyntax" Base="TypeSyntax"/>
+  <AbstractNode Name="SimpleNameSyntax" Base="NameSyntax">
+    <Field Name="Identifier" Type="SyntaxToken"/>
+  </AbstractNode>
+  <Node Name="IdentifierNameSyntax" Base="SimpleNameSyntax">
     <Kind Name="IdentifierName"/>
-    <Field Name="Identifier" Type="SyntaxToken">
+    <Field Name="Identifier" Type="SyntaxToken" Override="true">
       <Kind Name="IdentifierToken"/>
-      <Kind Name="GlobalEnvironmentKeyword"/>
       <Kind Name="EnvironmentKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="GenericNameSyntax" Base="SimpleNameSyntax">
+    <Kind Name="GenericName"/>
+    <Field Name="Identifier" Type="SyntaxToken" Override="true">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeArgumentList" Type="TypeArgumentListSyntax"/>
+  </Node>
+  <Node Name="TypeArgumentListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="TypeArgumentList"/>
+    <Field Name="LessThanToken" Type="SyntaxToken">
+      <Kind Name="LessThanToken" />
+    </Field>
+    <Field Name="TypeArguments" Type="SeparatedSyntaxList&lt;TypeSyntax&gt;"/>
+    <Field Name="GreaterThanToken" Type="SyntaxToken">
+      <Kind Name="GreaterThanToken"/>
     </Field>
   </Node>
   <Node Name="QualifiedNameSyntax" Base="NameSyntax">
@@ -33,10 +52,15 @@
     </Field>
     <Field Name="Right" Type="IdentifierNameSyntax"/>
   </Node>
+  
+  
+  
+  <!-- Types -->
+  <AbstractNode Name="TypeSyntax" Base="ExpressionSyntax"/>
 
 
 
-  <!-- 表达式 -->
+  <!-- Expressions -->
   <AbstractNode Name="ExpressionSyntax" Base="LuaSyntaxNode"/>
   <Node Name="LiteralExpressionSyntax" Base="ExpressionSyntax">
     <Kind Name="NilLiteralExpression"/>
@@ -70,7 +94,7 @@
     <Field Name="FunctionKeyword" Type="SyntaxToken">
       <Kind Name="FunctionKeyword"/>
     </Field>
-    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="ParameterList" Type="ParameterDeclarationListSyntax"/>
     <Field Name="Block" Type="BlockSyntax"/>
     <Field Name="EndKeyword" Type="SyntaxToken">
       <Kind Name="EndKeyword"/>
@@ -116,7 +140,7 @@
       <Kind Name="SlashToken"/>
       <Kind Name="SlashSlashToken"/>
       <Kind Name="CaretToken"/>
-      <Kind Name="PersentToken"/>
+      <Kind Name="PercentToken"/>
       <Kind Name="AmpersandToken"/>
       <Kind Name="TildeToken"/>
       <Kind Name="BarToken"/>
@@ -127,6 +151,7 @@
       <Kind Name="LessThanEqualsToken"/>
       <Kind Name="GreaterThanToken"/>
       <Kind Name="GreaterThanEqualsToken"/>
+      <Kind Name="EqualsToken"/>
       <Kind Name="EqualsEqualsToken"/>
       <Kind Name="TildeEqualsToken"/>
       <Kind Name="AndKeyword"/>
@@ -183,10 +208,18 @@
     </Field>
     <Field Name="Name" Type="IdentifierNameSyntax"/>
   </Node>
+  <Node Name="ObjectCreationExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="ObjectCreationExpression"/>
+    <Field Name="NewKeyword" Type="SyntaxToken" Optional="True">
+      <Kind Name="NewKeyword"/>
+    </Field>
+    <Field Name="Name" Type="NameSyntax"/>
+    <Field Name="Arguments" Type="InvocationArgumentsSyntax"/>
+  </Node>
 
 
 
-  <!-- 语句 -->
+  <!-- Statements -->
   <AbstractNode Name="StatementSyntax" Base="LuaSyntaxNode"/>
   <Node Name="EmptyStatementSyntax" Base="StatementSyntax">
     <Kind Name="EmptyStatement"/>
@@ -355,7 +388,7 @@
       <Kind Name="FunctionKeyword"/>
     </Field>
     <Field Name="Name" Type="NameSyntax"/>
-    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="ParameterList" Type="ParameterDeclarationListSyntax"/>
     <Field Name="Block" Type="BlockSyntax"/>
     <Field Name="EndKeyword" Type="SyntaxToken">
       <Kind Name="EndKeyword"/>
@@ -370,7 +403,7 @@
       <Kind Name="FunctionKeyword"/>
     </Field>
     <Field Name="Name" Type="IdentifierNameSyntax"/>
-    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="ParameterList" Type="ParameterDeclarationListSyntax"/>
     <Field Name="Block" Type="BlockSyntax"/>
     <Field Name="EndKeyword" Type="SyntaxToken">
       <Kind Name="EndKeyword"/>
@@ -391,11 +424,17 @@
     </Field>
     <Field Name="Expressions" Type="SeparatedSyntaxList&lt;ExpressionSyntax&gt;" MinCount="1"/>
   </Node>
+  <Node Name="DeclarationStatementSyntax" Base="StatementSyntax">
+    <Kind Name="DeclarationStatement"/>
+    <Field Name="Declaration" Type="DeclarationSyntax"/>
+  </Node>
 
 
 
   <!-- Trivia -->
+  <!-- Preprocessor -->
   <AbstractNode Name="DirectiveTriviaSyntax" Base="StructuredTriviaSyntax">
+    <Field Name="IsActive" Type="bool"/>
     <Field Name="PromptToken" Type="SyntaxToken"/>
     <Field Name="EndOfDirectiveToken" Type="SyntaxToken"/>
   </AbstractNode>
@@ -405,24 +444,122 @@
     <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
       <Kind Name="EndOfDirectiveToken"/>
     </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
   </Node>
   <Node Name="ShebangDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
     <Kind Name="ShebangDirectiveTrivia"/>
-    <Field Name="HashExclamationToken" Type="SyntaxToken" Override="PromptToken">
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
       <Kind Name="HashExclamationToken"/>
     </Field>
     <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
       <Kind Name="EndOfDirectiveToken"/>
     </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
   </Node>
-  <Node Name="CommentDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
-    <Kind Name="CommentDirectiveTrivia"/>
-    <Field Name="HashToken" Type="SyntaxToken" Override="PromptToken">
+  <Node Name="DebugDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Kind Name="DebugDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
       <Kind Name="HashToken"/>
+    </Field>
+    <Field Name="DebugKeyword" Type="SyntaxToken">
+      <Kind Name="DebugKeyword"/>
     </Field>
     <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
       <Kind Name="EndOfDirectiveToken"/>
     </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
+  </Node>
+  <Node Name="NoDebugDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Kind Name="NoDebugDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
+      <Kind Name="HashToken"/>
+    </Field>
+    <Field Name="NoDebugKeyword" Type="SyntaxToken">
+      <Kind Name="NoDebugKeyword"/>
+    </Field>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
+  </Node>
+  <AbstractNode Name="BranchingDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Field Name="BranchTaken" Type="bool"/>
+  </AbstractNode>
+  <AbstractNode Name="ConditionalDirectiveTriviaSyntax" Base="BranchingDirectiveTriviaSyntax">
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="ConditionValue" Type="bool"/>
+  </AbstractNode>
+  <Node Name="IfDirectiveTriviaSyntax" Base="ConditionalDirectiveTriviaSyntax">
+    <Kind Name="IfDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
+      <Kind Name="DollarToken"/>
+    </Field>
+    <Field Name="IfKeyword" Type="SyntaxToken">
+      <Kind Name="IfKeyword"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax" Override="true"/>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
+    <Field Name="BranchTaken" Type="bool" Override="true"/>
+    <Field Name="ConditionValue" Type="bool" Override="true"/>
+  </Node>
+  <Node Name="IfNotDirectiveTriviaSyntax" Base="ConditionalDirectiveTriviaSyntax">
+    <Kind Name="IfNotDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
+      <Kind Name="DollarToken"/>
+    </Field>
+    <Field Name="IfNotKeyword" Type="SyntaxToken">
+      <Kind Name="IfNotKeyword"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax" Override="true"/>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
+    <Field Name="BranchTaken" Type="bool" Override="true"/>
+    <Field Name="ConditionValue" Type="bool" Override="true"/>
+  </Node>
+  <Node Name="ElseDirectiveTriviaSyntax" Base="BranchingDirectiveTriviaSyntax">
+    <Kind Name="ElseDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
+      <Kind Name="DollarToken"/>
+    </Field>
+    <Field Name="ElseKeyword" Type="SyntaxToken">
+      <Kind Name="ElseKeyword"/>
+    </Field>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
+    <Field Name="BranchTaken" Type="bool" Override="true"/>
+  </Node>
+  <Node Name="EndDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Kind Name="EndDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
+      <Kind Name="DollarToken"/>
+    </Field>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
+  </Node>
+  <Node Name="EndInputDirectiveTriviaSyntax" Base="DirectiveTriviaSyntax">
+    <Kind Name="EndInputDirectiveTrivia"/>
+    <Field Name="PromptToken" Type="SyntaxToken" Override="true">
+      <Kind Name="DollarToken"/>
+    </Field>
+    <Field Name="EndInputKeyword" Type="SyntaxToken">
+      <Kind Name="EndInputKeyword"/>
+    </Field>
+    <Field Name="EndOfDirectiveToken" Type="SyntaxToken" Override="true">
+      <Kind Name="EndOfDirectiveToken"/>
+    </Field>
+    <Field Name="IsActive" Type="bool" Override="true"/>
   </Node>
   <Node Name="SkippedTokensTriviaSyntax" Base="StructuredTriviaSyntax">
     <Kind Name="SkippedTokensTrivia"/>
@@ -431,7 +568,7 @@
 
 
 
-  <!-- 声明 -->
+  <!-- Declarations -->
   <Node Name="ChunkSyntax" Base="LuaSyntaxNode">
     <Kind Name="Chunk"/>
     <Field Name="Block" Type="BlockSyntax"/>
@@ -444,21 +581,288 @@
     <Field Name="Statements" Type="SyntaxList&lt;StatementSyntax&gt;"/>
     <Field Name="Return" Type="ReturnStatementSyntax" Optional="true"/>
   </Node>
-  <Node Name="ParameterListSyntax" Base="LuaSyntaxNode">
-    <Kind Name="ParameterList"/>
+  <AbstractNode Name="DeclarationSyntax" Base="LuaSyntaxNode">
+    <TypeComment>
+      <summary>Declaration syntax.</summary>
+    </TypeComment>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true">
+      <PropertyComment>
+        <summary>Gets the modifier list.</summary>
+      </PropertyComment>
+    </Field>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true">
+      <PropertyComment>
+        <summary>Gets the annotatedwith clause.</summary>
+      </PropertyComment>
+    </Field>
+  </AbstractNode>
+  <Node Name="ModifierListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ModifierList"/>
+    <Field Name="LessThanToken" Type="SyntaxToken">
+      <Kind Name="LessThanToken"/>
+    </Field>
+    <Field Name="Modifiers" Type="SeparatedSyntaxList&lt;ModifierSyntax&gt;"/>
+    <Field Name="GreaterThanToken" Type="SyntaxToken">
+      <Kind Name="GreaterThanToken"/>
+    </Field>
+  </Node>
+  <Node Name="ModifierSyntax" Base="LuaSyntaxNode">
+    <Kind Name="Modifier"/>
+    <Field Name="Identifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
+  </Node>
+  <Node Name="AnnotatedWithClauseSyntax" Base="LuaSyntaxNode">
+    <Kind Name="AnnotatedWithClause"/>
+    <Field Name="AnnotatedWithKeyword" Type="SyntaxToken">
+      <Kind Name="AnnotatedWithKeyword"/>
+    </Field>
+    <Field Name="AttributeList" Type="SeparatedSyntaxList&lt;ObjectCreationExpressionSyntax&gt;"/>
+  </Node>
+  <AbstractNode Name="TopLevelDeclarationSyntax" Base="DeclarationSyntax">
+    
+  </AbstractNode>
+  <Node Name="AssemblyDeclarationSyntax" Base="TopLevelDeclarationSyntax">
+    <Kind Name="AssemblyDeclaration"/>
+    <Field Name="AssemblyKeyword" Type="SyntaxToken"  >
+      <Kind Name="AssemblyKeyword"/>
+    </Field>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="ModuleDeclarationSyntax" Base="TopLevelDeclarationSyntax">
+    <Kind Name="ModuleDeclaration"/>
+    <Field Name="ModuleKeyword" Type="SyntaxToken">
+      <Kind Name="ModuleKeyword"/>
+    </Field>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="NamespaceDeclarationSyntax" Base="TopLevelDeclarationSyntax">
+    <Kind Name="NamespaceDeclaration"/>
+    <Field Name="NamespaceKeyword" Type="SyntaxToken">
+      <Kind Name="NamespaceKeyword"/>
+    </Field>
+    <Field Name="Name" Type="NameSyntax"/>
+    <Field Name="Block" Type="BlockSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <AbstractNode Name="TypeDeclarationSyntax" Base="DeclarationSyntax">
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeParameterList" Type="TypeParameterDeclarationListSyntax" Optional="true"/>
+    <Field Name="ExtendsClause" Type="ExtendsClauseSyntax" Optional="true"/>
+    <Field Name="ImplementsClause" Type="ImplementsClauseSyntax" Optional="true"/>
+    <Field Name="Block" Type="BlockSyntax"/>
+  </AbstractNode>
+  <Node Name="TypeParameterDeclarationListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="TypeParameterDeclarationList"/>
+    <Field Name="OpenBracketToken" Type="SyntaxToken">
+      <Kind Name="OpenBracketToken"/>
+    </Field>
+    <Field Name="TypeParameters" Type="SeparatedSyntaxList&lt;TypeParameterDeclarationSyntax&gt;"/>
+    <Field Name="CloseBracketToken" Type="SyntaxToken">
+      <Kind Name="CloseBracketToken"/>
+    </Field>
+  </Node>
+  <Node Name="TypeParameterDeclarationSyntax" Base="DeclarationSyntax">
+    <Kind Name="TypeParameterDeclaration"/>
+    <Field Name="TypeParameterKeyword" Type="SyntaxToken">
+      <Kind Name="TypeParameterKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="ConstrainAsClause" Type="ConstrainAsClauseSyntax" Optional="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="ConstrainAsClauseSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ConstrainAsClause"/>
+    <Field Name="ConstrainAsKeyword" Type="SyntaxToken">
+      <Kind Name="ConstrainAsKeyword"/>
+    </Field>
+    <Field Name="Constraints" Type="SeparatedSyntaxList&lt;ConstraintSyntax&gt;"/>
+  </Node>
+  <AbstractNode Name="ConstraintSyntax" Base="LuaSyntaxNode"/>
+  <Node Name="BaseTypeConstraintSyntax" Base="ConstraintSyntax">
+    <Kind Name="BaseTypeConstraint"/>
+    <Field Name="Type" Type="NameSyntax"/>
+  </Node>
+  <Node Name="ConstructorConstraintSyntax" Base="ConstraintSyntax">
+    <Kind Name="ConstructorConstraint"/>
+    <Field Name="NewKeyword" Type="SyntaxToken">
+      <Kind Name="NewKeyword"/>
+    </Field>
     <Field Name="OpenParenToken" Type="SyntaxToken">
       <Kind Name="OpenParenToken"/>
     </Field>
-    <Field Name="Parameters" Type="SeparatedSyntaxList&lt;ParameterSyntax&gt;"/>
     <Field Name="CloseParenToken" Type="SyntaxToken">
       <Kind Name="CloseParenToken"/>
     </Field>
   </Node>
-  <Node Name="ParameterSyntax" Base="LuaSyntaxNode">
-    <Kind Name="Parameter"/>
+  <Node Name="ExtendsClauseSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ExtendsClause"/>
+    <Field Name="ExtendsKeyword" Type="SyntaxToken">
+      <Kind Name="ExtendsKeyword"/>
+    </Field>
+    <Field Name="Type" Type="NameSyntax"/>
+  </Node>
+  <Node Name="ImplementsClauseSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ImplementsClause"/>
+    <Field Name="ImplementsKeyword" Type="SyntaxToken">
+      <Kind Name="ImplementsKeyword"/>
+    </Field>
+    <Field Name="Types" Type="SeparatedSyntaxList&lt;NameSyntax&gt;"/>
+  </Node>
+  <Node Name="InterfaceDeclarationSyntax" Base="TypeDeclarationSyntax">
+    <Kind Name="InterfaceDeclaration"/>
+    <Field Name="InterfaceKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="InterfaceKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
+    <Field Name="Identifier" Type="SyntaxToken" Override="true">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeParameterList" Type="TypeParameterDeclarationListSyntax" Optional="true" Override="true"/>
+    <Field Name="ImplementsClause" Type="ImplementsClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="Block" Type="BlockSyntax" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="ClassDeclarationSyntax" Base="TypeDeclarationSyntax">
+    <Kind Name="ClassDeclaration"/>
+    <Field Name="ClassKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="ClassKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
+    <Field Name="Identifier" Type="SyntaxToken" Override="true">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeParameterList" Type="TypeParameterDeclarationListSyntax" Optional="true" Override="true"/>
+    <Field Name="ExtendsClause" Type="ExtendsClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="ImplementsClause" Type="ImplementsClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="Block" Type="BlockSyntax" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="FieldDeclarationSyntax" Base="DeclarationSyntax">
+    <Kind Name="FieldDeclaration"/>
+    <Field Name="FieldKeyword" Type="SyntaxToken">
+      <Kind Name="FieldKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="ColonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="ColonToken" />
+    </Field>
+    <Field Name="Type" Type="TypeSyntax" Optional="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="Initializer" Type="EqualsValuesClauseSyntax"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="EventDeclarationSyntax" Base="DeclarationSyntax">
+    <Kind Name="EventDeclaration"/>
+    <Field Name="EventKeyword" Type="SyntaxToken">
+      <Kind Name="EventKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="ColonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="ColonToken" />
+    </Field>
+    <Field Name="Type" Type="TypeSyntax" Optional="true"/>
+    <Field Name="ImplementsClause" Type="ImplementsClauseSyntax" Optional="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="PropertyDeclarationSyntax" Base="DeclarationSyntax">
+    <Kind Name="PropertyDeclaration"/>
+    <Field Name="PropertyKeyword" Type="SyntaxToken">
+      <Kind Name="PropertyKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="ColonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="ColonToken" />
+    </Field>
+    <Field Name="Type" Type="TypeSyntax" Optional="true"/>
+    <Field Name="ImplementsClause" Type="ImplementsClauseSyntax" Optional="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="MethodDeclarationSyntax" Base="DeclarationSyntax">
+    <Kind Name="MethodDeclaration"/>
+    <Field Name="MethodKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="MethodKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeParameterDeclarationList" Type="TypeParameterDeclarationListSyntax"/>
+    <Field Name="ParameterDeclarationList" Type="ParameterDeclarationListSyntax"/>
+    <Field Name="ColonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="ColonToken" />
+    </Field>
+    <Field Name="Type" Type="TypeSyntax" Optional="true"/>
+    <Field Name="ImplementsClause" Type="ImplementsClauseSyntax" Optional="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="ParameterDeclarationSyntax" Base="DeclarationSyntax">
+    <Kind Name="ParameterDeclaration"/>
+    <Field Name="ParameterKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="ParameterKeyword"/>
+    </Field>
+    <Field Name="Modifiers" Type="ModifierListSyntax" Optional="true" Override="true"/>
     <Field Name="Identifier" Type="SyntaxToken">
       <Kind Name="IdentifierToken"/>
       <Kind Name="DotDotDotToken"/>
+    </Field>
+    <Field Name="ColonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="ColonToken" />
+    </Field>
+    <Field Name="Type" Type="TypeSyntax" Optional="true"/>
+    <Field Name="AnnotatedWithClause" Type="AnnotatedWithClauseSyntax" Optional="true" Override="true"/>
+    <Field Name="EndKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="EndKeyword"/>
+    </Field>
+  </Node>
+  <Node Name="ParameterDeclarationListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="ParameterDeclarationList"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+      <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Parameters" Type="SeparatedSyntaxList&lt;ParameterDeclarationSyntax&gt;"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+      <Kind Name="CloseParenToken"/>
     </Field>
   </Node>
   <AbstractNode Name="FieldSyntax" Base="LuaSyntaxNode">
@@ -520,20 +924,20 @@
   <Node Name="NameAttributeListSyntax" Base="LuaSyntaxNode">
     <Kind Name="NameAttributeList"/>
     <Field Name="Identifier" Type="IdentifierNameSyntax"/>
-    <Field Name="AttributeList" Type="AttributeListSyntax" Optional="true"/>
+    <Field Name="AttributeList" Type="VariableAttributeListSyntax" Optional="true"/>
   </Node>
-  <Node Name="AttributeListSyntax" Base="LuaSyntaxNode">
-    <Kind Name="AttributeList"/>
+  <Node Name="VariableAttributeListSyntax" Base="LuaSyntaxNode">
+    <Kind Name="VariableAttributeList"/>
     <Field Name="LessThanToken" Type="SyntaxToken">
       <Kind Name="LessThanToken"/>
     </Field>
-    <Field Name="Attributes" Type="SeparatedSyntaxList&lt;AttributeSyntax&gt;" MinCount="1"/>
+    <Field Name="Attributes" Type="SeparatedSyntaxList&lt;VariableAttributeSyntax&gt;" MinCount="1"/>
     <Field Name="GreaterThanToken" Type="SyntaxToken">
       <Kind Name="GreaterThanToken"/>
     </Field>
   </Node>
-  <Node Name="AttributeSyntax" Base="LuaSyntaxNode">
-    <Kind Name="Attribute"/>
+  <Node Name="VariableAttributeSyntax" Base="LuaSyntaxNode">
+    <Kind Name="VariableAttribute"/>
     <Field Name="Token" Type="SyntaxToken">
       <Kind Name="CloseKeyword"/>
       <Kind Name="ConstKeyword"/>

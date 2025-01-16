@@ -6,15 +6,15 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax;
 
 partial class NameValueFieldSyntax
 {
-    public override ExpressionSyntax? FieldKey => this.FieldName;
+    public override ExpressionSyntax? FieldKey => FieldName;
 
     internal override FieldSyntax WithFieldKeyCore(ExpressionSyntax? fieldKey)
     {
         if (fieldKey is null)
-            return SyntaxFactory.ItemField(this.FieldValue);
+            return SyntaxFactory.ItemField(FieldValue);
         else if (fieldKey is IdentifierNameSyntax fieldName)
-            return this.WithFieldName(fieldName);
+            return WithFieldName(fieldName);
         else
-            return SyntaxFactory.KeyValueField(fieldKey, this.FieldValue);
+            return SyntaxFactory.KeyValueField(fieldKey, FieldValue);
     }
 }

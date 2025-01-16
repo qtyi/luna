@@ -10,8 +10,6 @@ using Microsoft.CodeAnalysis.PooledObjects;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Language not supported.
 #endif
 
 using Symbols;
@@ -56,18 +54,18 @@ internal sealed class BindingDiagnosticBag : BindingDiagnosticBag<AssemblySymbol
 
     internal void AddDependencies(Symbol? symbol)
     {
-        if (symbol is not null && this.DependenciesBag is not null)
+        if (symbol is not null && DependenciesBag is not null)
         {
-            this.AddDependencies(symbol.GetUseSiteInfo());
+            AddDependencies(symbol.GetUseSiteInfo());
         }
     }
 
     internal bool ReportUseSite(Symbol? symbol, SyntaxNode node) =>
-        this.ReportUseSite(symbol, node.Location);
+        ReportUseSite(symbol, node.Location);
 
     internal bool ReportUseSite(Symbol? symbol, Location location) =>
         symbol is not null ?
-            this.Add(symbol.GetUseSiteInfo(), location) :
+            Add(symbol.GetUseSiteInfo(), location) :
             false;
 
     protected override bool ReportUseSiteDiagnostic(DiagnosticInfo diagnosticInfo, DiagnosticBag diagnosticBag, Location location) =>
@@ -76,27 +74,27 @@ internal sealed class BindingDiagnosticBag : BindingDiagnosticBag<AssemblySymbol
     internal ThisDiagnosticInfo Add(ErrorCode code, Location location)
     {
         var info = new ThisDiagnosticInfo(code);
-        this.Add(info, location);
+        Add(info, location);
         return info;
     }
 
     internal ThisDiagnosticInfo Add(ErrorCode code, Location location, params object[] args)
     {
         var info = new ThisDiagnosticInfo(code, args);
-        this.Add(info, location);
+        Add(info, location);
         return info;
     }
 
     internal ThisDiagnosticInfo Add(ErrorCode code, Location location, ImmutableArray<Symbol> symbols, params object[] args)
     {
         var info = new ThisDiagnosticInfo(code, args, symbols, ImmutableArray<Location>.Empty);
-        this.Add(info, location);
+        Add(info, location);
         return info;
     }
 
     internal void Add(DiagnosticInfo? info, Location location)
     {
         if (info is not null)
-            this.DiagnosticBag?.Add(info, location);
+            DiagnosticBag?.Add(info, location);
     }
 }

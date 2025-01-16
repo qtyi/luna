@@ -12,12 +12,10 @@ namespace Qtyi.CodeAnalysis.Lua;
 partial class LuaCompilationOptions
 #pragma warning restore CS0659
 {
-    /// <summary>
-    /// Gets the source language.
-    /// </summary>
     /// <value>
     /// Returns <see cref="LanguageNames.Lua"/>.
     /// </value>
+    /// <inheritdoc/>
     public override string Language => LanguageNames.Lua;
 
     #region
@@ -31,13 +29,13 @@ partial class LuaCompilationOptions
 
     internal override partial void ValidateOptions(ArrayBuilder<Diagnostic> builder)
     {
-        ValidateOptions(builder, MessageProvider.Instance);
+        ValidateOptions(builder, ThisMessageProvider.Instance);
 
         throw new NotImplementedException();
     }
     #endregion
 
-    public partial bool Equals(LuaCompilationOptions? other)
+    public partial bool Equals(ThisCompilationOptions? other)
     {
         if (ReferenceEquals(this, other)) return true;
 

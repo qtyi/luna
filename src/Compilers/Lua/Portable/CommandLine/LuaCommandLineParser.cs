@@ -2,7 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
@@ -27,15 +26,15 @@ partial class LuaCommandLineParser
     /// </summary>
     protected override string ScriptFileExtension => ".lua";
 
-    public new partial LuaCommandLineArguments Parse(IEnumerable<string> args, string? baseDirectory, string? sdkDirectory, string? additionalReferenceDirectories)
+    public new partial ThisCommandLineArguments Parse(IEnumerable<string> args, string? baseDirectory, string? sdkDirectory, string? additionalReferenceDirectories)
     {
         Debug.Assert(baseDirectory is not null || PathUtilities.IsAbsolute(baseDirectory));
 
         List<Diagnostic> diagnostics = new();
         var flattenedArgs = ArrayBuilder<string>.GetInstance();
-        List<string>? scriptArgs = this.IsScriptCommandLineParser ? new() : null;
-        List<string>? responsePaths = this.IsScriptCommandLineParser ? new() : null;
-        this.FlattenArgs(args, diagnostics, flattenedArgs, scriptArgs, baseDirectory, responsePaths);
+        List<string>? scriptArgs = IsScriptCommandLineParser ? new() : null;
+        List<string>? responsePaths = IsScriptCommandLineParser ? new() : null;
+        FlattenArgs(args, diagnostics, flattenedArgs, scriptArgs, baseDirectory, responsePaths);
 
         var appConfigPath = (string?)null;
         var displayLogo = true;
@@ -50,7 +49,7 @@ partial class LuaCommandLineParser
         var debugInformationFormat = PathUtilities.IsUnixLikePlatform ? DebugInformationFormat.PortablePdb : DebugInformationFormat.Pdb;
         var debugPlus = false;
         var pdbPath = (string?)null;
-        var noStdLib = this.IsScriptCommandLineParser; // don't add mscorlib from sdk dir when running scripts
+        var noStdLib = IsScriptCommandLineParser; // don't add mscorlib from sdk dir when running scripts
         var outputDirectory = baseDirectory;
         var pathMap = ImmutableArray<KeyValuePair<string, string>>.Empty;
         var outputFileName = (string?)null;
@@ -63,7 +62,7 @@ partial class LuaCommandLineParser
         var outputKind = OutputKind.ConsoleApplication;
         var subsystemVersion = SubsystemVersion.None;
         var languageVersion = LanguageVersion.Default;
-        var mainModuleName = (string?)null;
+        var mainTypeName = (string?)null;
         var win32ManifestFile = (string?)null;
         var win32ResourceFile = (string?)null;
         var win32IconFile = (string?)null;
@@ -99,7 +98,7 @@ partial class LuaCommandLineParser
         var highEntropyVA = false;
         var printFullPaths = false;
         var netmoduleAssemblyName = (string?)null;
-        var netmoduleName = (string?)null;
+        var moduleName = (string?)null;
         var features = new List<string>();
         var runtimeMetadataVersion = (string?)null;
         var errorEndLocation = false;
@@ -116,7 +115,7 @@ partial class LuaCommandLineParser
 
         // Process ruleset files first so that diagnostic severity settings specified on the command line via
         // /nowarn and /warnaserror can override diagnostic severity settings specified in the ruleset file.
-        if (!this.IsScriptCommandLineParser)
+        if (!IsScriptCommandLineParser)
         {
             foreach (var arg in flattenedArgs)
             {
@@ -129,8 +128,8 @@ partial class LuaCommandLineParser
                         AddDiagnostic(diagnostics, ErrorCode.ERR_SwitchNeedsArg, MessageID.IDS_Text.Localize(), name.ToString());
                     else
                     {
-                        ruleSetPath = this.ParseGenericPathToFile(unquoted, diagnostics, baseDirectory);
-                        generalDiagnosticOption = this.GetDiagnosticOptionsFromRulesetFile(ruleSetPath, out diagnosticOptions, diagnostics);
+                        ruleSetPath = ParseGenericPathToFile(unquoted, diagnostics, baseDirectory);
+                        generalDiagnosticOption = GetDiagnosticOptionsFromRulesetFile(ruleSetPath, out diagnosticOptions, diagnostics);
                     }
                 }
             }
@@ -146,7 +145,7 @@ partial class LuaCommandLineParser
             if (optionsEnded || !TryParseOption(arg, out nameMemory, out valueMemory))
             {
                 filePathBuilder = ArrayBuilder<string>.GetInstance();
-                this.ParseFileArgument(arg.AsMemory(), baseDirectory, filePathBuilder, diagnostics);
+                ParseFileArgument(arg.AsMemory(), baseDirectory, filePathBuilder, diagnostics);
                 foreach (var path in filePathBuilder)
                     sourceFiles.Add(ToCommandLineSourceFile(path));
                 filePathBuilder.Free();
@@ -202,13 +201,13 @@ partial class LuaCommandLineParser
             {
                 if (valueMemory is null)
                 {
-                    AddDiagnostic(diagnostics, ErrorCode.ERR_SwitchNeedsArg, LuaResources.IDS_Number, nameMemory.ToString());
+                    AddDiagnostic(diagnostics, ErrorCode.ERR_SwitchNeedsArg, ThisResources.IDS_Number, nameMemory.ToString());
                     continue;
                 }
 
                 if (valueMemory.Value.Length == 0)
                 {
-                    AddDiagnostic(diagnostics, ErrorCode.ERR_SwitchNeedsArg, LuaResources.IDS_Number, nameMemory.ToString());
+                    AddDiagnostic(diagnostics, ErrorCode.ERR_SwitchNeedsArg, ThisResources.IDS_Number, nameMemory.ToString());
                 }
                 else
                 {
@@ -319,26 +318,26 @@ partial class LuaCommandLineParser
         var parsedFeatures = ParseFeatures(features);
 
         string? compilationName;
-        GetCompilationAndModuleNames(diagnostics, outputKind, sourceFiles, sourceFilesSpecified, netmoduleAssemblyName, ref outputFileName, ref netmoduleName, out compilationName);
+        GetCompilationAndModuleNames(diagnostics, outputKind, sourceFiles, sourceFilesSpecified, netmoduleAssemblyName, ref outputFileName, ref moduleName, out compilationName);
 
         flattenedArgs.Free();
 
-        var parseOptions = new LuaParseOptions(
+        var parseOptions = new ThisParseOptions(
             languageVersion: languageVersion,
             documentationMode: DocumentationMode.None,
-            kind: this.IsScriptCommandLineParser ? SourceCodeKind.Script : SourceCodeKind.Regular,
+            kind: IsScriptCommandLineParser ? SourceCodeKind.Script : SourceCodeKind.Regular,
             features: parsedFeatures);
 
         // We want to report diagnostics with source suppression in the error log file.
         // However, these diagnostics won't be reported on the command line.
         var reportSuppressedDiagnostics = errorLogOptions is object;
 
-        var options = new LuaCompilationOptions(
+        var options = new ThisCompilationOptions(
             outputKind: outputKind,
             platform: platform,
-            netmoduleName: netmoduleName,
-            mainModuleName: mainModuleName,
-            scriptModuleName: WellKnownMemberNames.DefaultScriptClassName,
+            moduleName: moduleName,
+            mainTypeName: mainTypeName,
+            scriptClassName: WellKnownMemberNames.DefaultScriptClassName,
             optimizationLevel: optimize ? OptimizationLevel.Release : OptimizationLevel.Debug,
             warningLevel: warningLevel,
             concurrentBuild: concurrentBuild,
@@ -375,10 +374,10 @@ partial class LuaCommandLineParser
 
         pathMap = SortPathMap(pathMap);
 
-        return new LuaCommandLineArguments
+        return new ThisCommandLineArguments
         {
-            IsScriptRunner = this.IsScriptCommandLineParser,
-            InteractiveMode = interactiveMode || this.IsScriptCommandLineParser && sourceFiles.Count == 0,
+            IsScriptRunner = IsScriptCommandLineParser,
+            InteractiveMode = interactiveMode || IsScriptCommandLineParser && sourceFiles.Count == 0,
             BaseDirectory = baseDirectory,
             PathMap = pathMap,
             Errors = diagnostics.AsImmutable(),
@@ -468,12 +467,12 @@ partial class LuaCommandLineParser
         {
             // In lua, if the output file name isn't specified explicitly, then executables and libraries
             // derive their names from their first input files and bytecodes has its default name 'luac.out'.
-            if (!this.IsScriptCommandLineParser && !sourceFilesSpecified)
+            if (!IsScriptCommandLineParser && !sourceFilesSpecified)
             {
                 AddDiagnostic(diagnostics, ErrorCode.ERR_OutputNeedsName);
                 simpleName = null;
             }
-            else if (outputKind.IsLuaIntermediateBytecodes())
+            else if (outputKind.IsLuaBytecodes())
                 simpleName = "lua";
             else
             {
@@ -500,7 +499,7 @@ partial class LuaCommandLineParser
 
         if (outputKind.IsNetModule())
         {
-            Debug.Assert(!this.IsScriptCommandLineParser);
+            Debug.Assert(!IsScriptCommandLineParser);
 
             compilationName = netmoduleAssemblyName;
         }
@@ -535,7 +534,7 @@ partial class LuaCommandLineParser
         // with references relative to lua.exe (e.g. System.ValueTuple.dll).
         if (responsePathsOpt is not null)
         {
-            Debug.Assert(this.IsScriptCommandLineParser);
+            Debug.Assert(IsScriptCommandLineParser);
             builder.AddRange(responsePathsOpt);
         }
 
@@ -589,7 +588,7 @@ partial class LuaCommandLineParser
                 return OutputKind.WindowsRuntimeMetadata;
 
             case "intermediate":
-                return OutputKind.LuaIntermediateBytecodes;
+                return OutputKind.LuaBytecodes;
 
             default:
                 AddDiagnostic(diagnostics, ErrorCode.FTL_InvalidTarget);

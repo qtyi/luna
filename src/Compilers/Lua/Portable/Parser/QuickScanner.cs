@@ -6,77 +6,76 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
 partial class Lexer
 {
-#if TESTING
-    internal
-#else
-    private
-#endif
-        enum QuickScanState : byte
+    /// <summary>
+    /// Define possible states of a running lexer.
+    /// </summary>
+    private enum QuickScanState : byte
     {
-        /// <summary>初始状态。</summary>
+        /// <summary>The initial state.</summary>
         Initial,
-        /// <summary>后方空白字符状态。</summary>
+        /// <summary>Is trailing whitespace.</summary>
         FollowingWhite,
-        /// <summary>后方回车符状态。</summary>
+        /// <summary>Is trailing carriage return.</summary>
         FollowingCR,
-        /// <summary>标识符状态。</summary>
+        /// <summary>Is identifier.</summary>
         Identifier,
-        /// <summary>数字状态。</summary>
+        /// <summary>Is number.</summary>
         Number,
-        /// <summary>标点状态。</summary>
+        /// <summary>Is punctuation.</summary>
         Punctuation,
-        /// <summary>点状态。</summary>
+        /// <summary>Is dot (<c>.</c>).</summary>
         Dot,
-        /// <summary>两个点状态。</summary>
+        /// <summary>Is doubled dot (<c>..</c>).</summary>
         DoubledDot,
-        /// <summary>等号状态。</summary>
+        /// <summary>Is equals (<c>=</c>).</summary>
         Equals,
-        /// <summary>复合标点起始状态。</summary>
+        /// <summary>Is start of compound punctuation.</summary>
         CompoundPunctuationStart,
-        /// <summary>下一个后立即是<see cref="Done"/>状态。</summary>
+        /// <summary>Switch to <see cref="Done"/> state after eating the next character whatever it is.</summary>
         DoneAfterNext,
-        /// <summary>完成状态。</summary>
+        /// <summary>The done state.</summary>
         Done,
-        /// <summary>错误状态。</summary>
+        /// <summary>The bad state.</summary>
         Bad = Done + 1
     }
 
-#if TESTING
-    internal
-#else
-    private
-#endif
-        enum CharFlag : byte
+    /// <summary>
+    /// Classifies character the lexer meets.
+    /// </summary>
+    private enum CharFlag : byte
     {
-        /// <summary>空白字符（空格符或制表符）。</summary>
+        /// <summary>simple whitespace (space/tab).</summary>
         White,
-        /// <summary>回车符。</summary>
+        /// <summary>carriage return.</summary>
         CR,
-        /// <summary>换行符。</summary>
+        /// <summary>line feed.</summary>
         LF,
-        /// <summary>字母。</summary>
+        /// <summary>letter.</summary>
         Letter,
-        /// <summary>数字。</summary>
+        /// <summary>digit 0-9.</summary>
         Digit,
-        /// <summary>简单的标点。</summary>
+        /// <summary>some simple punctuation (parentheses, braces, comma, question).</summary>
         Punctuation,
-        /// <summary>数字小数点。</summary>
+        /// <summary>dot is different from other punctuation when followed by a digit (Ex: .9 ).</summary>
         Dot,
-        /// <summary>等号。</summary>
+        /// <summary>equals character.</summary>
         Equals,
-        /// <summary>组合标点的起始。</summary>
+        /// <summary>may be a part of compound punctuation. will be used only if followed by (not whitespace) and (not punctuation).</summary>
         CompoundPunctuationStart,
-        /// <summary>复杂内容，将导致扫描终止。</summary>
+        /// <summary>causes quick-scanning to abort.</summary>
         Complex,
+        /// <summary>legal type character.</summary>
         EndOfFile,
     }
 
-#if TESTING
-    internal
-#else
-    private
-#endif
-         static readonly byte[,] s_stateTransitions = new byte[,]
+    /// <summary>
+    /// The following table classifies the next QuickScanState when lexer is in current QuickScanState and eat next character of CharFlag.
+    /// </summary>
+    /// <remarks>
+    /// PERF: Use byte instead of QuickScanState so the compiler can use array literal initialization.
+    ///       The most natural type choice, Enum arrays, are not blittable due to a CLR limitation.
+    /// </remarks>
+    private static readonly byte[,] s_stateTransitions = new byte[,]
     {
         // Initial
         {
@@ -245,29 +244,33 @@ partial class Lexer
     };
 
     /// <summary>
-    /// 获取Unicode字符的前0x180个字符的属性。
+    /// The following table classifies the first 0x180 Unicode characters. 
     /// </summary>
-#if TESTING
-    internal
-#else
-    private
-#endif
-         static ReadOnlySpan<byte> CharProperties => new[]
-    {
-        // 0 .. 31
-        (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
-        (byte)CharFlag.Complex,
-        (byte)CharFlag.White,   // TAB
-        (byte)CharFlag.LF,      // LF
-        (byte)CharFlag.White,   // VT
-        (byte)CharFlag.White,   // FF
-        (byte)CharFlag.CR,      // CR
-        (byte)CharFlag.Complex,
-        (byte)CharFlag.Complex,
-        (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
-        (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
+    /// <remarks>
+    /// PERF: Use byte instead of CharFlags so the compiler can use array literal initialization.
+    ///       The most natural type choice, Enum arrays, are not blittable due to a CLR limitation.
+    /// </remarks>
+    private static ReadOnlySpan<byte> CharProperties =>
+    [
+        // 0 .. 8
+#pragma warning disable IDE0055
+        (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
+#pragma warning restore IDE0055
 
-        // 32 .. 63
+        // 9 .. 13
+        (byte)CharFlag.White,                      // TAB
+        (byte)CharFlag.LF,                         // LF
+        (byte)CharFlag.White,                      // VT
+        (byte)CharFlag.White,                      // FF
+        (byte)CharFlag.CR,                         // CR
+
+        // 14 .. 31
+#pragma warning disable IDE0055
+        (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
+        (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
+#pragma warning restore IDE0055
+
+        // 32 .. 126
         (byte)CharFlag.White,                      // SPC
         (byte)CharFlag.Complex,                    // !
         (byte)CharFlag.Complex,                    // "
@@ -300,9 +303,7 @@ partial class Lexer
         (byte)CharFlag.Equals,                     // =
         (byte)CharFlag.CompoundPunctuationStart,   // >
         (byte)CharFlag.Complex,                    // ?
-
-        // 64 .. 95
-        (byte)CharFlag.Complex,                    // @
+        (byte)CharFlag.Punctuation,                // @
         (byte)CharFlag.Letter,                     // A
         (byte)CharFlag.Letter,                     // B
         (byte)CharFlag.Letter,                     // C
@@ -334,8 +335,6 @@ partial class Lexer
         (byte)CharFlag.Punctuation,                // ]
         (byte)CharFlag.Punctuation,                // ^
         (byte)CharFlag.Letter,                     // _
-
-        // 96 .. 127
         (byte)CharFlag.Complex,                    // `
         (byte)CharFlag.Letter,                     // a
         (byte)CharFlag.Letter,                     // b
@@ -367,21 +366,21 @@ partial class Lexer
         (byte)CharFlag.Punctuation,                // |
         (byte)CharFlag.Punctuation,                // }
         (byte)CharFlag.CompoundPunctuationStart,   // ~
+
+        // 127 ..
+#pragma warning disable IDE0055
         (byte)CharFlag.Complex,
 
-        // 128 .. 159
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
 
-        // 160 .. 191
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Letter, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Letter, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
         (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Letter, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex, (byte)CharFlag.Complex,
 
-        // 192 .. 
         (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter,
         (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter,
         (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Complex,
@@ -411,5 +410,6 @@ partial class Lexer
         (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter,
         (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter,
         (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter, (byte)CharFlag.Letter
-    };
+#pragma warning restore IDE0055
+    ];
 }

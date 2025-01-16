@@ -18,13 +18,16 @@ using ThisCompilationOptions = MoonScriptCompilationOptions;
 using ThisParseOptions = MoonScriptParseOptions;
 #endif
 
-public static class TestOptions
+public static partial class TestOptions
 {
     public static readonly ThisParseOptions Regular = new(kind: SourceCodeKind.Regular, documentationMode: DocumentationMode.Parse);
     public static readonly ThisParseOptions Script = new(kind: SourceCodeKind.Script, documentationMode: DocumentationMode.Parse);
 
     public static readonly ThisParseOptions RegularDefault = Regular.WithLanguageVersion(LanguageVersion.Default);
     public static readonly ThisParseOptions RegularPreview = Regular.WithLanguageVersion(LanguageVersion.Preview);
+    public static readonly ThisParseOptions RegularDotNet = Regular.WithLanguageVersion(LanguageVersion.DotNet);
+
+    public static readonly ThisParseOptions RegularDotNetWithDocumentationComments = RegularDotNet.WithDocumentationMode(DocumentationMode.Diagnose);
 
     public static readonly ThisCompilationOptions ReleaseDll = CreateTestOptions(outputKind: OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release);
     public static readonly ThisCompilationOptions ReleaseExe = CreateTestOptions(outputKind: OutputKind.ConsoleApplication, optimizationLevel: OptimizationLevel.Release);
@@ -39,18 +42,21 @@ public static class TestOptions
     public static readonly ThisCompilationOptions ReleaseWinMD = CreateTestOptions(outputKind: OutputKind.WindowsRuntimeMetadata, optimizationLevel: OptimizationLevel.Release);
     public static readonly ThisCompilationOptions DebugWinMD = CreateTestOptions(outputKind: OutputKind.WindowsRuntimeMetadata, optimizationLevel: OptimizationLevel.Debug);
 
-    public static readonly ThisCompilationOptions ReleaseNetmodule = CreateTestOptions(outputKind: OutputKind.NetModule, optimizationLevel: OptimizationLevel.Release);
-    public static readonly ThisCompilationOptions DebugNetmodule = CreateTestOptions(outputKind: OutputKind.NetModule, optimizationLevel: OptimizationLevel.Debug);
+    public static readonly ThisCompilationOptions ReleaseModule = CreateTestOptions(outputKind: OutputKind.NetModule, optimizationLevel: OptimizationLevel.Release);
+    public static readonly ThisCompilationOptions DebugModule = CreateTestOptions(outputKind: OutputKind.NetModule, optimizationLevel: OptimizationLevel.Debug);
+
+    public static readonly ThisCompilationOptions ReleaseBytecodes = CreateTestOptions(outputKind: OutputKind.LuaBytecodes, optimizationLevel: OptimizationLevel.Release);
+    public static readonly ThisCompilationOptions DebugBytecodes = CreateTestOptions(outputKind: OutputKind.LuaBytecodes, optimizationLevel: OptimizationLevel.Debug);
 
     public static readonly ThisCompilationOptions SigningReleaseDll = ReleaseDll.WithStrongNameProvider(SigningTestHelpers.DefaultDesktopStrongNameProvider);
     public static readonly ThisCompilationOptions SigningReleaseExe = ReleaseExe.WithStrongNameProvider(SigningTestHelpers.DefaultDesktopStrongNameProvider);
-    public static readonly ThisCompilationOptions SigningReleaseNetmodule = ReleaseNetmodule.WithStrongNameProvider(SigningTestHelpers.DefaultDesktopStrongNameProvider);
+    public static readonly ThisCompilationOptions SigningReleaseModule = ReleaseModule.WithStrongNameProvider(SigningTestHelpers.DefaultDesktopStrongNameProvider);
     public static readonly ThisCompilationOptions SigningDebugDll = DebugDll.WithStrongNameProvider(SigningTestHelpers.DefaultDesktopStrongNameProvider);
 
     public static readonly EmitOptions NativePdbEmit = EmitOptions.Default.WithDebugInformationFormat(DebugInformationFormat.Pdb);
 
     public static ThisParseOptions WithFeature(this ThisParseOptions options, string feature, string value = "true")
-        => options.WithFeatures(options.Features.Concat(new[] { new KeyValuePair<string, string>(feature, value) }));
+        => options.WithFeatures([.. options.Features, new(feature, value)]);
 
     internal static ThisParseOptions WithExperimental(this ThisParseOptions options, params MessageID[] features)
     {

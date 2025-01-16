@@ -2,284 +2,471 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using ICSharpCode.Decompiler.Metadata;
-using ICSharpCode.Decompiler.TypeSystem;
-using Internal.TypeSystem;
-using Newtonsoft.Json.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.PooledObjects;
+using Microsoft.CodeAnalysis.Test.Utilities;
+using Qtyi.CodeAnalysis.Lua.Test.Utilities;
 using Xunit;
 
 namespace Qtyi.CodeAnalysis.Lua.UnitTests.Lexing;
 
+using QuotedTextProvider = Func<string, string>;
+
 public class StringLiteralTests : LexingTestBase
 {
-    [InlineData("""   "'\"\'"   """, false, "'\"'")] // tests double quotes
-    [InlineData("""   '"\'\"'   """, false, "\"'\"")] // tests single quotes
-    [InlineData("[[[[][]=]]", true, "[[][]=")] // tests long brackets
-    [InlineData("[=[]\r]\r\n]=\n=]]=]", true, "]\n]\n]=\n=]")] // tests different new lines
-    [InlineData("[==[\r\nabc\r\n]==]", true, "abc\n")] // tests new lines on first line and last line
+    public static readonly TheoryData<LanguageVersion> SupportMultiLineStringLiteralLanguageVersions = LanguageVersionTests.EffectiveLanguageVersions.Where(static version => version >= LanguageVersion.Lua2_2);
+
+    public static readonly TheoryData<LanguageVersion> SupportLongBracketedForm = SupportMultiLineStringLiteralLanguageVersions.Where(static version => version >= LanguageVersion.Lua5_1);
+
+    [InlineData("""   "'\"\'"   """, "'\"'")] // tests double quotes
+    [InlineData("""   '"\'\"'   """, "\"'\"")] // tests single quotes
     [Theory]
-    public void TestQuotes(string source, bool isMultiLine, string value)
+    public void QuotedForm(string source, string value)
     {
-        ValidateUtf8StringLiteral(source, isMultiLine ? SyntaxKind.MultiLineRawStringLiteralToken : SyntaxKind.StringLiteralToken, value);
+        ValidateUtf8StringLiteral(source, SyntaxKind.StringLiteralToken, value);
     }
 
-    public static IEnumerable<(string text, byte[] value)> SpecialEscapeSequences { get; } = new[]
+    [Theory]
+    [MemberData(nameof(LanguageVersionTests.EffectiveLanguageVersions), MemberType = typeof(LanguageVersionTests))]
+    public void BracketedForm(LanguageVersion version)
     {
-        ("\\a", "\a"U8.ToArray()),
-        ("\\b", "\b"U8.ToArray()),
-        ("\\f", "\f"U8.ToArray()),
-        ("\\n", "\n"U8.ToArray()),
-        ("\\r", "\r"U8.ToArray()),
-        ("\\t", "\t"U8.ToArray()),
-        ("\\v", "\v"U8.ToArray()),
-        ("\\\\", "\\"U8.ToArray()),
-        ("\\'", "'"U8.ToArray()),
-        ("\\\"", "\""U8.ToArray()),
-        ("\\\n", "\n"U8.ToArray()),
-        ("\\\r", "\n"U8.ToArray()),
-        ("\\\r\n", "\n"U8.ToArray()),
-        ("\\z ", ""U8.ToArray()),
-        ("\\z\f", ""U8.ToArray()),
-        ("\\z\n", ""U8.ToArray()),
-        ("\\z\r", ""U8.ToArray()),
-        ("\\z\t", ""U8.ToArray()),
-        ("\\z\v", ""U8.ToArray()),
-        ("\\z\r\n", ""U8.ToArray())
-    };
+        var options = TestOptions.Regular.WithLanguageVersion(version);
 
-    [Fact]
-    public void TestSpecialEscapeSequence()
-    {
-        foreach ((var text, var value) in SpecialEscapeSequences)
+        // bracketed form
+        if (version >= LanguageVersion.Lua2_2) // start from Lua 2.2
         {
-            TestWith(text, value);
-            TestWith(text, value, leading: "a");
-            TestWith(text, value, trailing: "b");
-            TestWith(text, value, leading: "a", trailing: "b");
-        }
-    }
+            ValidateUtf8StringLiteral("[[]]", SyntaxKind.MultiLineRawStringLiteralToken, string.Empty);
 
-    public static IEnumerable<(string text, byte[] value)> DigitalEscapeSequences { get; } =
-        from digit in Enumerable.Range(byte.MinValue, byte.MaxValue)
-        let length = digit switch { < 10 => 1, < 100 => 2, _ => 3 }
-        from count in Enumerable.Range(length, 4 - length)
-        let format = "D" + count
-        select ($"\\{digit.ToString(format)}", new byte[] { (byte)digit });
-
-    [Fact]
-    public void TestDigitalEscapeSequence()
-    {
-        foreach ((var text, var value) in DigitalEscapeSequences)
-        {
-            TestWith(text, value);
-            TestWith(text, value, leading: "a");
-            TestWith(text, value, trailing: "b");
-            TestWith(text, value, leading: "a", trailing: "b");
-        }
-    }
-
-    public static IEnumerable<(string text, byte[] value)> HexadecimalEscapeSequences { get; } =
-        from digit in Enumerable.Range(byte.MinValue, byte.MaxValue)
-        select ($"\\x{digit:X2}", new byte[] { (byte)digit });
-
-    [Fact]
-    public void TestHexadecimalEscapeSequence()
-    {
-        foreach ((var text, var value) in HexadecimalEscapeSequences)
-        {
-            TestWith(text, value);
-            TestWith(text, value, leading: "a");
-            TestWith(text, value, trailing: "b");
-            TestWith(text, value, leading: "a", trailing: "b");
-        }
-    }
-
-    public static IEnumerable<(string text, byte[] value)> UnicodeEscapeSequenceTestSources { get; } =
-        from digit in new int[] { 0x0, 0xF, 0x10, 0x7F, 0x80, 0xFF, 0x100, 0x7FF, 0x800, 0xFFF, 0x1000, 0xFFFF, 0x10000, 0xFFFFF, 0x100000, 0x1FFFFF, 0x200000, 0xFFFFFF, 0x1000000, 0x3FFFFFF, 0x4000000, 0xFFFFFFF, 0x10000000, 0x7FFFFFFF }
-        let length = digit.ToString("X").Length
-        from count in Enumerable.Range(length, 9 - length)
-        let format = "X" + count
-        select ($"\\u{{{digit.ToString(format)}}}", digit switch
-        {
-            <= 0x7F => new byte[] { (byte)digit },
-            <= 0x7FF => new byte[] { (byte)(0xC0 | (0x1F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            <= 0xFFFF => new byte[] { (byte)(0xE0 | (0xF & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            <= 0x1FFFFF => new byte[] { (byte)(0xF0 | (0x7 & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            <= 0x3FFFFFF => new byte[] { (byte)(0xF8 | (0x3 & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) },
-            _ => new byte[] { (byte)(0xFC | (0x1 & digit >> 30)), (byte)(0x80 | (0x3F & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit)) }
-        });
-
-    [Fact]
-    public void TestUnicodeEscapeSequence()
-    {
-        foreach ((var text, var value) in UnicodeEscapeSequenceTestSources)
-        {
-            TestWith(text, value);
-            TestWith(text, value, leading: " ");
-            TestWith(text, value, trailing: " ");
-            TestWith(text, value, leading: " ", trailing: " ");
-        }
-    }
-
-    private void TestWith(
-        string text, byte[] value,
-        string? leading = null, byte[]? leadingValue = null,
-        string? trailing = null, byte[]? trailingValue = null)
-    {
-        if (leading is not null)
-            leadingValue ??= Encoding.UTF8.GetBytes(leading);
-
-        if (trailing is not null)
-            trailingValue ??= Encoding.UTF8.GetBytes(trailing);
-
-        if (leading is not null || trailing is not null)
-        {
-            text = string.Concat(leading, text, trailing);
-            value = ConcatValues(leadingValue, value, trailingValue);
-        }
-
-        text = Quote(text, out var isMultiLine);
-        ValidateUtf8StringLiteral(text, isMultiLine ? SyntaxKind.MultiLineRawStringLiteralToken : SyntaxKind.StringLiteralToken, value);
-
-        static byte[] ConcatValues(params byte[]?[] values) => values.Where(static v => v is not null).SelectMany(static v => v!).ToArray();
-    }
-
-    private static string Quote(string text, out bool isMultiLine)
-    {
-        if (TrySingleLineQuote(text, out var quoted))
-            isMultiLine = false;
-        else
-        {
-            quoted = MultiLineQuote(text);
-            isMultiLine = true;
-        }
-
-        return quoted;
-    }
-
-    private static bool TrySingleLineQuote(string text, [NotNullWhen(true)] out string? quoted)
-    {
-        char quote;
-        if (text.Length == 0)
-            quote = '\'';
-        else
-        {
-            bool firstIsSingle, firstIsDouble;
-            bool lastIsSingle, lastIsDouble;
-            switch (text[0])
+            // ignore the new-line directly after [[
+            if (version >= LanguageVersion.Lua5) // start from Lua 5
             {
-                case '\'':
-                    firstIsSingle = true;
-                    firstIsDouble = false;
-                    break;
-
-                case '"':
-                    firstIsSingle = false;
-                    firstIsDouble = true;
-                    break;
-
-                default:
-                    firstIsSingle = false;
-                    firstIsDouble = false;
-                    break;
-            }
-            switch (text[^1])
-            {
-                case '\'':
-                    if (text.EndsWith("\\'"))
-                    {
-                        lastIsSingle = false;
-                        lastIsDouble = false;
-                    }
-                    else
-                    {
-                        lastIsSingle = true;
-                        lastIsDouble = false;
-                    }
-                    break;
-
-                case '"':
-                    if (text.EndsWith("\\\""))
-                    {
-                        lastIsSingle = false;
-                        lastIsDouble = false;
-                    }
-                    else
-                    {
-                        lastIsSingle = false;
-                        lastIsDouble = true;
-                    }
-                    break;
-
-                default:
-                    lastIsSingle = false;
-                    lastIsDouble = false;
-                    break;
-            }
-
-            if (firstIsSingle)
-            {
-                if (lastIsDouble)
-                {
-                    quoted = null;
-                    return false;
-                }
-                quote = '"';
-            }
-            else if (firstIsDouble)
-            {
-                if (lastIsSingle)
-                {
-                    quoted = null;
-                    return false;
-                }
-                quote = '\'';
-            }
-            else if (lastIsSingle)
-            {
-                if (firstIsDouble)
-                {
-                    quoted = null;
-                    return false;
-                }
-                quote = '"';
-            }
-            else if (lastIsDouble)
-            {
-                if (firstIsSingle)
-                {
-                    quoted = null;
-                    return false;
-                }
-                quote = '\'';
+                TestNewLineDirectlyAfterOpenBrackets(ignore: true, level: 0);
             }
             else
-                quote = '\'';
+            {
+                TestNewLineDirectlyAfterOpenBrackets(ignore: false, level: 0);
+            }
+        }
+        else
+        {
+            var V = LexSource("[[]]", options: options);
+            V(SyntaxKind.OpenBracketToken);
+            V(SyntaxKind.OpenBracketToken);
+            V(SyntaxKind.CloseBracketToken);
+            V(SyntaxKind.CloseBracketToken);
+            V(SyntaxKind.EndOfFileToken);
         }
 
-        quoted = string.Concat(quote, text, quote);
-        return true;
-    }
-
-    private static string MultiLineQuote(string text)
-    {
-        var level = 0;
-        if (text.Length >= 2)
+        // long-bracketed form
+        if (version >= LanguageVersion.Lua5_1) // start from Lua 5.1
         {
-            while (true)
-            {
-                var endBracket = string.Concat(']', new string('=', level), ']');
-                if (!text.Contains(endBracket))
-                    break;
+            ValidateUtf8StringLiteral("[=[]=]", SyntaxKind.MultiLineRawStringLiteralToken, string.Empty);
 
-                level++;
+            // ignore the new-line directly after [=[
+            if (true) // for all versions that supports long-bracketed form
+            {
+                TestNewLineDirectlyAfterOpenBrackets(ignore: true, level: 1);
+            }
+        }
+        else
+        {
+            var V = LexSource("[=[]=]", options: options);
+            V(SyntaxKind.OpenBracketToken);
+            V(SyntaxKind.EqualsToken);
+            V(SyntaxKind.OpenBracketToken);
+            V(SyntaxKind.CloseBracketToken);
+            V(SyntaxKind.EqualsToken);
+            V(SyntaxKind.CloseBracketToken);
+            V(SyntaxKind.EndOfFileToken);
+        }
+
+        void TestNewLineDirectlyAfterOpenBrackets(
+            bool ignore,
+            int level = 0)
+        {
+            (string? Text, byte[]? Value)[] trailings = [
+                ("\r", [.. "\n"U8]),
+                ("\n", [.. "\n"U8]),
+                ("\r\n", [.. "\n"U8]),
+                ("a", [.. "a"U8])
+            ];
+
+            TestValid(text: "\r", value: ignore ? [] : [.. "\n"U8], trailings: [trailings[0], trailings[2], trailings[3]], level: level, options: options); // [[^CR
+            TestValid(text: "\n", value: ignore ? [] : [.. "\n"U8], trailings: trailings, level: level, options: options); // [[^LF
+            TestValid(text: "\r\n", value: ignore ? [] : [.. "\n"U8], trailings: trailings, level: level, options: options); // [[^CRLF
+        }
+
+        static void TestValid(
+            string text, byte[] value,
+            (string? Text, byte[]? Value)[]? leadings = null,
+            (string? Text, byte[]? Value)[]? trailings = null,
+            int level = 0,
+            LuaParseOptions? options = null)
+        {
+            var quotedTextProvider = Bracketed(level);
+
+            TestWith(text, value, SyntaxKind.MultiLineRawStringLiteralToken, quotedTextProvider: quotedTextProvider, options: options);
+
+            foreach (var (leading, leadingValue) in leadings ?? [(null, null)])
+            {
+                var hasLeading = leading is not null || leadingValue is not null;
+
+                if (hasLeading)
+                    TestWith(text, value, SyntaxKind.MultiLineRawStringLiteralToken, leading: leading, leadingValue: leadingValue, quotedTextProvider: quotedTextProvider, options: options);
+
+                foreach (var (trailing, trailingValue) in trailings ?? [(null, null)])
+                {
+                    var hasTrailing = trailing is not null || trailingValue is not null;
+
+                    if (hasTrailing)
+                        TestWith(text, value, SyntaxKind.MultiLineRawStringLiteralToken, trailing: trailing, trailingValue: trailingValue, quotedTextProvider: quotedTextProvider, options: options);
+
+                    if (hasLeading && hasTrailing)
+                        TestWith(text, value, SyntaxKind.MultiLineRawStringLiteralToken, leading: leading, leadingValue: leadingValue, trailing: trailing, trailingValue: trailingValue, quotedTextProvider: quotedTextProvider, options: options);
+                }
             }
         }
 
-        var equals = new string('=', level);
-        return string.Concat('[', equals, '[', text, ']', equals, ']');
+        static QuotedTextProvider Bracketed(int level = 0)
+        {
+            level = level < 0 ? 0 : level;
+            return text =>
+            {
+                var equals = new string('=', level);
+                return $"[{equals}[{text}]{equals}]";
+            };
+        }
     }
+
+    [Theory]
+    [MemberData(nameof(SupportMultiLineStringLiteralLanguageVersions))]
+    public void Termination(LanguageVersion version)
+    {
+        var options = TestOptions.Regular.WithLanguageVersion(version);
+
+        // long-bracketed form
+        if (version >= LanguageVersion.Lua5_1) // start from Lua 5.1
+        {
+            // terminated string literal
+            TestTermination(text: "[[]]", value: [], terminated: true);
+            TestTermination(text: "[[[[]]", value: [.. "[["U8], terminated: true);
+            TestTermination(text: "[=[]=]", value: [], terminated: true);
+            TestTermination(text: "[==========[]==========]", value: [], terminated: true);
+            TestTermination(text: "[=[]]=]", value: [.. "]"U8], terminated: true);
+            TestTermination(text: "[=[[=[]=]", value: [.. "[=["U8], terminated: true);
+            // unterminated string literal
+            TestTermination(text: "[[", value: [], terminated: false);
+            TestTermination(text: "[[]", value: [.. "]"U8], terminated: false);
+            TestTermination(text: "[[[", value: [.. "["U8], terminated: false);
+            TestTermination(text: "[[[]", value: [.. "[]"U8], terminated: false);
+            TestTermination(text: "[=[]]", value: [.. "]]"U8], terminated: false);
+            TestTermination(text: "[=[]==]", value: [.. "]==]"U8], terminated: false);
+        }
+        // bracketed form
+        else
+        {
+            // terminated string literal
+            TestTermination(text: "[[]]", value: [], terminated: true);
+            TestTermination(text: "[[[[]]]]", value: [.. "[[]]"U8], terminated: true);
+            // unterminated string literal
+            TestTermination(text: "[[", value: [], terminated: false);
+            TestTermination(text: "[[]", value: [.. "]"U8], terminated: false);
+            TestTermination(text: "[[[", value: [.. "["U8], terminated: false);
+            TestTermination(text: "[[[]", value: [.. "[]"U8], terminated: false);
+            TestTermination(text: "[[[[]]", value: [.. "[[]]"U8], terminated: false);
+            TestTermination(text: "[[[[]][[]]", value: [.. "[[]][[]]"U8], terminated: false);
+        }
+
+        void TestTermination(
+            string text, byte[] value, bool terminated)
+        {
+            TestWith(text, value, SyntaxKind.MultiLineRawStringLiteralToken, options: options,
+                diagnostics: terminated ? null : [Diagnostic(ErrorCode.ERR_UnterminatedStringLiteral, squiggledText: string.Empty).WithLocation(1, 1)]);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(LanguageVersionTests.EffectiveLanguageVersions), MemberType = typeof(LanguageVersionTests))]
+    public void SpecialEscapeSequence(LanguageVersion version)
+    {
+        var options = TestOptions.Regular.WithLanguageVersion(version);
+
+        // \n \r \t
+        if (true) // for all versions
+        {
+            TestValid(text: @"\n", value: [.. "\n"U8], options: options);
+            TestValid(text: @"\r", value: [.. "\r"U8], options: options);
+            TestValid(text: @"\t", value: [.. "\t"U8], options: options);
+        }
+
+        // \a \b \f \v \\ \" \'
+        if (version >= LanguageVersion.Lua3_1) // start from Lua 3.1
+        {
+            TestValid(text: @"\a", value: [.. "\a"U8], options: options);
+            TestValid(text: @"\b", value: [.. "\b"U8], options: options);
+            TestValid(text: @"\f", value: [.. "\f"U8], options: options);
+            TestValid(text: @"\v", value: [.. "\v"U8], options: options);
+            TestValid(text: @"\\", value: [.. "\\"U8], options: options);
+            TestValid(text: @"\""", value: [.. "\""U8], quote: '\'', options: options);
+            TestValid(text: @"\'", value: [.. "'"U8], options: options);
+            TestValid(text: @"\065", value: [.. "A"U8], options: options);
+        }
+        else
+        {
+            TestInvalid(text: @"\a", value: [.. "a"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\b", value: [.. "b"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\f", value: [.. "f"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\v", value: [.. "v"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\\", value: [.. ""U8], illegalEscapeOffsets: [0, 1], options: options);
+            TestInvalid(text: @"\""", value: [.. "\""U8], quote: '\'', illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\'", value: [.. "'"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\065", value: [.. "065"U8], illegalEscapeOffsets: [0], options: options);
+        }
+
+        // \^CR \^LF \^CR\^LF
+        if (version >= LanguageVersion.Lua4)
+        {
+            TestValid(text: "\\\r", value: [.. "\n"U8], options: options);
+            TestValid(text: "\\\n", value: [.. "\n"U8], options: options);
+            TestValid(text: "\\\r\n", value: [.. "\n"U8], options: options);
+        }
+        else
+        {
+            TestInvalid(text: "\\\r", value: [.. ""U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\\n", value: [.. ""U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\\r\n", value: [.. ""U8], illegalEscapeOffsets: [0], options: options);
+        }
+
+        // \[ \]
+        if (version == LanguageVersion.Lua5)
+        {
+            TestValid(text: @"\[", value: [.. "["U8], options: options);
+            TestValid(text: @"\]", value: [.. "]"U8], options: options);
+        }
+        else
+        {
+            TestInvalid(text: @"\[", value: [.. "["U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\]", value: [.. "]"U8], illegalEscapeOffsets: [0], options: options);
+        }
+
+        // \xXX \z^WS \z^CR \z^LF \z^CR\^LF
+        if (version >= LanguageVersion.Lua5_2)
+        {
+            TestValid(text: @"\x41", value: [.. "A"U8], options: options);
+            TestValid(text: @"\z ", value: [.. ""U8], options: options);
+            TestValid(text: "\\z\t", value: [.. ""U8], options: options);
+            TestValid(text: "\\z\v", value: [.. ""U8], options: options);
+            TestValid(text: "\\z\f", value: [.. ""U8], options: options);
+            TestValid(text: "\\z\r", value: [.. ""U8], options: options);
+            TestValid(text: "\\z\n", value: [.. ""U8], options: options);
+            TestValid(text: "\\z\r\n", value: [.. ""U8], options: options);
+        }
+        else
+        {
+            TestInvalid(text: @"\x41", value: [.. "x41"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: @"\z ", value: [.. "z "U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\z\t", value: [.. "z\t"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\z\v", value: [.. "z\v"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\z\f", value: [.. "z\f"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\z\r", value: [.. "z"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\z\n", value: [.. "z"U8], illegalEscapeOffsets: [0], options: options);
+            TestInvalid(text: "\\z\r\n", value: [.. "z"U8], illegalEscapeOffsets: [0], options: options);
+        }
+
+        // \u{XXX}
+        if (version >= LanguageVersion.Lua5_3)
+        {
+            TestValid(text: @"\u{137F}", value: [.. "\u137F"U8], options: options);
+        }
+        else
+        {
+            TestInvalid(text: @"\u{137F}", value: [.. "u{137F}"U8], illegalEscapeOffsets: [0], options: options);
+        }
+
+        static void TestValid(
+            string text, byte[] value,
+            char quote = '"',
+            LuaParseOptions? options = null)
+        {
+            const string Leading = "c";
+            const string Trailing = "d";
+
+            var quotedTextProvider = GetQuotedTextProviderByQuote(quote);
+
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: quotedTextProvider, options: options);
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: quotedTextProvider, leading: Leading, options: options);
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: quotedTextProvider, trailing: Trailing, options: options);
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: quotedTextProvider, leading: Leading, trailing: Trailing, options: options);
+        }
+
+        static void TestInvalid(
+            string text, byte[] value,
+            int[] illegalEscapeOffsets,
+            char quote = '"',
+            LuaParseOptions? options = null)
+        {
+            const string Leading = "c";
+            const string Trailing = "d";
+
+            void Validate(NodeValidator V, byte[] leadingValue, byte[] trailingValue)
+            {
+                var endsWithEOL = SyntaxFacts.IsNewLine(text[^1]);
+
+                var builder = ArrayBuilder<DiagnosticDescription>.GetInstance();
+                if (endsWithEOL)
+                    builder.Add(Diagnostic(ErrorCode.ERR_NewlineInConst, squiggledText: string.Empty).WithLocation(1, 1));
+
+                var buffer = trailingValue.Length > 0 ? text + Trailing + quote : text + quote;
+                foreach (var offset in illegalEscapeOffsets)
+                {
+                    var squiggledText = buffer.Substring(offset, 2);
+                    builder.Add(Diagnostic(ErrorCode.ERR_IllegalEscape, squiggledText).WithLocation(1, 1 + quote.ToString().Length + (leadingValue.Length > 0 ? Leading.Length : 0) + offset));
+                }
+
+                if (endsWithEOL)
+                {
+                    V(kind: SyntaxKind.StringLiteralToken, value: new Utf8String([.. leadingValue, .. value]), diagnostics: builder.ToArray());
+
+                    string GetTrailingNewLine()
+                    {
+                        var newLine = string.Empty;
+                        for (int length = text.Length, i = length - 1; i >= 0; i--)
+                        {
+                            var c = text[i];
+                            if (SyntaxFacts.IsNewLine(c))
+                                newLine = c + newLine;
+                        }
+                        return newLine;
+                    }
+                    V(kind: SyntaxKind.EndOfLineTrivia, text: GetTrailingNewLine(), location: TriviaLocation.Trailing);
+
+                    if (trailingValue.Length > 0)
+                        V(kind: SyntaxKind.IdentifierToken, text: Trailing);
+
+                    V(kind: SyntaxKind.StringLiteralToken, value: Utf8String.Empty, diagnostics: [
+                        Diagnostic(ErrorCode.ERR_NewlineInConst, squiggledText: string.Empty).WithLocation(1, 1)
+                    ]);
+                }
+                else
+                    V(kind: SyntaxKind.StringLiteralToken, value: new Utf8String([.. leadingValue, .. value, .. trailingValue]), diagnostics: builder.ToArray());
+
+                V(SyntaxKind.EndOfFileToken);
+
+                builder.Free();
+            }
+
+            var quotedTextProvider = GetQuotedTextProviderByQuote(quote);
+
+            TestWith(text, validateAction: Validate, quotedTextProvider: quotedTextProvider, options: options);
+            TestWith(text, validateAction: Validate, leading: Leading, quotedTextProvider: quotedTextProvider, options: options);
+            TestWith(text, validateAction: Validate, trailing: Trailing, quotedTextProvider: quotedTextProvider, options: options);
+            TestWith(text, validateAction: Validate, leading: Leading, trailing: Trailing, quotedTextProvider: quotedTextProvider, options: options);
+        }
+    }
+
+    [Fact]
+    public void DigitalEscapeSequence()
+    {
+        var sequences =
+            from digit in Enumerable.Range(byte.MinValue, byte.MaxValue)
+            let length = digit switch { < 10 => 1, < 100 => 2, _ => 3 }
+            from count in Enumerable.Range(length, 4 - length)
+            let format = "D" + count
+            select ($"\\{digit.ToString(format)}", new byte[] { (byte)digit });
+
+        foreach ((var text, var value) in sequences)
+        {
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted);
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, leading: "a");
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, trailing: "b");
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, leading: "a", trailing: "b");
+        }
+    }
+
+    [Fact]
+    public void HexadecimalEscapeSequence()
+    {
+        var sequences =
+            from digit in Enumerable.Range(byte.MinValue, byte.MaxValue)
+            select ($"\\x{digit:X2}", new byte[] { (byte)digit });
+
+        foreach ((var text, var value) in sequences)
+        {
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted);
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, leading: "a");
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, trailing: "b");
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, leading: "a", trailing: "b");
+        }
+    }
+
+    [Fact]
+    public void UnicodeEscapeSequence()
+    {
+        var sequences =
+            from digit in new int[] { 0x0, 0xF, 0x10, 0x7F, 0x80, 0xFF, 0x100, 0x7FF, 0x800, 0xFFF, 0x1000, 0xFFFF, 0x10000, 0xFFFFF, 0x100000, 0x1FFFFF, 0x200000, 0xFFFFFF, 0x1000000, 0x3FFFFFF, 0x4000000, 0xFFFFFFF, 0x10000000, 0x7FFFFFFF }
+            let length = digit.ToString("X").Length
+            from count in Enumerable.Range(length, 9 - length)
+            let format = "X" + count
+            select ($"\\u{{{digit.ToString(format)}}}", digit switch
+            {
+                <= 0x7F => new byte[] { (byte)digit },
+                <= 0x7FF => [(byte)(0xC0 | (0x1F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+                <= 0xFFFF => [(byte)(0xE0 | (0xF & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+                <= 0x1FFFFF => [(byte)(0xF0 | (0x7 & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+                <= 0x3FFFFFF => [(byte)(0xF8 | (0x3 & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))],
+                _ => [(byte)(0xFC | (0x1 & digit >> 30)), (byte)(0x80 | (0x3F & digit >> 24)), (byte)(0x80 | (0x3F & digit >> 18)), (byte)(0x80 | (0x3F & digit >> 12)), (byte)(0x80 | (0x3F & digit >> 6)), (byte)(0x80 | (0x3F & digit))]
+            });
+
+        foreach ((var text, var value) in sequences)
+        {
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted);
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, leading: " ");
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, trailing: " ");
+            TestWith(text, value, kind: SyntaxKind.StringLiteralToken, quotedTextProvider: s_singleQuoted, leading: " ", trailing: " ");
+        }
+    }
+
+    private static void TestWith(
+        string text, byte[] value, SyntaxKind kind,
+        string? leading = null, byte[]? leadingValue = null,
+        string? trailing = null, byte[]? trailingValue = null,
+        QuotedTextProvider? quotedTextProvider = null,
+        DiagnosticDescription[]? diagnostics = null,
+        LuaParseOptions? options = null)
+        => TestWith(text, (V, leadingValue, trailingValue) =>
+        {
+            V = V.EndOfFile();
+            V(kind, value: new Utf8String([.. leadingValue, .. value, .. trailingValue]), diagnostics: diagnostics);
+        }, leading, leadingValue, trailing, trailingValue, quotedTextProvider, options);
+
+    private static void TestWith(
+        string text, Action<NodeValidator, byte[], byte[]> validateAction,
+        string? leading = null, byte[]? leadingValue = null,
+        string? trailing = null, byte[]? trailingValue = null,
+        QuotedTextProvider? quotedTextProvider = null,
+        LuaParseOptions? options = null)
+    {
+        leadingValue ??= leading is null ? [] : Encoding.UTF8.GetBytes(leading);
+        trailingValue ??= trailing is null ? [] : Encoding.UTF8.GetBytes(trailing);
+
+        var source = string.Concat(leading, text, trailing);
+        if (quotedTextProvider is not null)
+            source = quotedTextProvider(source);
+
+        var V = LexSource(source, options, withTrivia: true);
+        validateAction(V, leadingValue, trailingValue);
+    }
+
+    private static readonly QuotedTextProvider s_singleQuoted = GetQuotedTextProviderByQuote('\'');
+    private static readonly QuotedTextProvider s_doubleQuoted = GetQuotedTextProviderByQuote('"');
+
+    private static QuotedTextProvider GetQuotedTextProviderByQuote(char quote)
+    {
+        var quoteString = quote.ToString();
+        return GetQuotedTextProviderByQuote(quoteString, quoteString);
+    }
+
+    private static QuotedTextProvider GetQuotedTextProviderByQuote(string openQuote, string closeQuote)
+        => text => openQuote + text + closeQuote;
 }

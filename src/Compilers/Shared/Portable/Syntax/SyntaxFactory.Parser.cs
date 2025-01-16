@@ -8,20 +8,12 @@ using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisSyntaxNode = LuaSyntaxNode;
-using ThisSyntaxTree = LuaSyntaxTree;
-using ThisParseOptions = LuaParseOptions;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisSyntaxNode = MoonScriptSyntaxNode;
-using ThisSyntaxTree = MoonScriptSyntaxTree;
-using ThisParseOptions = MoonScriptParseOptions;
 #endif
 
 using Syntax.InternalSyntax;
-using SyntaxToken = Microsoft.CodeAnalysis.SyntaxToken;
+using SyntaxToken = SyntaxToken;
 
 static partial class SyntaxFactory
 {

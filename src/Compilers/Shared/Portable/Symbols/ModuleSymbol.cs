@@ -3,197 +3,52 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using System.Reflection.PortableExecutable;
 using Microsoft.CodeAnalysis;
-using Qtyi.CodeAnalysis.Symbols;
+using Microsoft.CodeAnalysis.Symbols;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Symbols;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Symbols;
-#else
-#error Not implemented
 #endif
 
 /// <summary>
-/// Represents a module (.NET namespace, type, field, etc.).
+/// Represents a .NET module within an assembly. Every assembly contains one or more modules.
 /// </summary>
-partial class ModuleSymbol : Symbol, IModuleSymbolInternal
+abstract partial class ModuleSymbol : Symbol, IModuleSymbolInternal
 {
     /// <inheritdoc/>
-    public ModuleKind ModuleKind => this.Kind switch
-    {
-        SymbolKind.Namespace => ModuleKind.Namespace,
-
-        SymbolKind.ArrayType or
-        SymbolKind.DynamicType or
-        SymbolKind.ErrorType or
-        SymbolKind.NamedType => ModuleKind.Type,
-
-        SymbolKind.Event or
-        SymbolKind.Field or
-        SymbolKind.Method or
-        SymbolKind.Property => ModuleKind.Field,
-
-        _ => ModuleKind.Unknown
-    };
-
-    /// <summary>
-    /// Returns whether this module is the unnamed, global .NET namespace that is 
-    /// at the root of all .NET namespaces.
-    /// </summary>
-    internal bool IsGlobalNamespace => this.IsGlobalModule && this.IsNamespace;
-
-    /// <inheritdoc/>
-    public abstract bool IsGlobalModule { get; }
-
-    /// <summary>
-    /// Gets a value indicate if this module is a .NET namespace.
-    /// </summary>
-    /// <value>
-    /// Returns <see langword="true"/> if this module is a .NET namespace; otherwise, <see langword="false"/>.
-    /// </value>
-    internal bool IsNamespace => this.ModuleKind == ModuleKind.Namespace;
-
-    /// <summary>
-    /// Gets a value indicate if this module is a type.
-    /// </summary>
-    /// <value>
-    /// Returns <see langword="true"/> if this module is a type; otherwise, <see langword="false"/>.
-    /// </value>
-    public bool IsType => this.ModuleKind == ModuleKind.Type;
-
-    /// <summary>
-    /// Gets a value indicate if this module is a field.
-    /// </summary>
-    /// <value>
-    /// Returns <see langword="true"/> if this module is a field; otherwise, <see langword="false"/>.
-    /// </value>
-    public bool IsField => this.ModuleKind == ModuleKind.Field;
-
-    #region GetMembers
-    /// <summary>
-    /// Gets all the members of this symbol.
-    /// </summary>
-    /// <returns>
-    /// An ImmutableArray containing all the modules that are members of this symbol.
-    /// If this symbol has no members, returns an empty ImmutableArray. Never returns
-    /// null.
-    /// </returns>
-    public abstract ImmutableArray<ModuleSymbol> GetMembers();
-
-    /// <summary>
-    /// Gets all the members of this symbol that have a particular name.
-    /// </summary>
-    /// <param name="name">Name of member to match.</param>
-    /// <returns>
-    /// An ImmutableArray containing all the modules that are members of this symbol with
-    /// the given name.
-    /// If this symbol has no members with this name, returns an empty ImmutableArray.
-    /// Never returnsnull.
-    /// </returns>
-    public abstract ImmutableArray<ModuleSymbol> GetMembers(string name);
-
-    /// <summary>
-    /// Gets all the members of this symbol that are .NET namespaces.
-    /// </summary>
-    /// <returns>
-    /// An ImmutableArray containing all the .NET namespaces that are members of this
-    /// symbol.
-    /// If this symbol has no .NET namespace members, returns an empty ImmutableArray.
-    /// Never returns null.
-    /// </returns>
-    internal abstract ImmutableArray<ModuleSymbol> GetNamespaceMembers();
-
-    /// <summary>
-    /// Gets all the members of this symbol that are .NET namespaces that have a particular
-    /// name.
-    /// </summary>
-    /// <param name="name">Name of .NET namespace to match.</param>
-    /// <returns>
-    /// An ImmutableArray containing all the .NET namespaces that are members of this symbol with
-    /// the given name.
-    /// If this symbol has no .NET namespace members with this name, returns an empty
-    /// ImmutableArray. Never returns null.
-    /// </returns>
-    internal abstract ImmutableArray<ModuleSymbol> GetNamespaceMembers(string name);
-
-    /// <summary>
-    /// Gets all the members of this symbol that are types.
-    /// </summary>
-    /// <returns>
-    /// An ImmutableArray containing all the types that are members of this symbol.
-    /// If this symbol has no type members, returns an empty ImmutableArray. Never returns
-    /// null.
-    /// </returns>
-    public abstract ImmutableArray<NamedTypeSymbol> GetTypeMembers();
-
-    /// <summary>
-    /// Gets all the members of this symbol that are types that have a particular name.
-    /// </summary>
-    /// <param name="name">Name of type to match.</param>
-    /// <returns>
-    /// An ImmutableArray containing all the types that are members of this symbol with
-    /// the given name.
-    /// If this symbol has no type members with this name, returns an empty ImmutableArray.
-    /// Never returns null.
-    /// </returns>
-    public abstract ImmutableArray<NamedTypeSymbol> GetTypeMembers(string name);
-
-    /// <summary>
-    /// Gets all the members of this symbol that are types that have a particular name and
-    /// arity.
-    /// </summary>
-    /// <param name="name">Name of type to match.</param>
-    /// <param name="arity">Arity of type to match.</param>
-    /// <returns>
-    /// An ImmutableArray containing all the types that are members of this symbol with
-    /// the given name and arity.
-    /// If this symbol has no type members with this name and arity, returns an empty
-    /// ImmutableArray. Never returns null.
-    /// </returns>
-    public virtual ImmutableArray<NamedTypeSymbol> GetTypeMembers(string name, int arity)
-    {
-        // Default implementation does a post-filter. We can override this if its a performance burden, but experience is that it won't be.
-        return this.GetTypeMembers(name).WhereAsArray(static (t, a) => t.Arity == a, arity);
-    }
-
-    /// <summary>
-    /// Gets all the members of this symbol that are fields.
-    /// </summary>
-    /// <returns>
-    /// An ImmutableArray containing all the fields that are members of this symbol.
-    /// If this symbol has no field members, returns an empty ImmutableArray. Never returns
-    /// null.
-    /// </returns>
-    public abstract ImmutableArray<FieldSymbol> GetFieldMembers();
-
-    /// <summary>
-    /// Gets all the members of this symbol that are fields that have a particular name.
-    /// </summary>
-    /// <param name="name">Name of field to match.</param>
-    /// <returns>
-    /// An ImmutableArray containing all the fields that are members of this symbol with
-    /// the given name.
-    /// If this symbol has no field members with this name, returns an empty ImmutableArray.
-    /// Never returns null.
-    /// </returns>
-    public abstract ImmutableArray<FieldSymbol> GetFieldMembers(string name);
-
-    /// <summary>
-    /// Gets all the members of this symbol that are fields that have a particular name and
-    /// arity.
-    /// </summary>
-    /// <param name="name">Name of field to match.</param>
-    /// <param name="arity">Arity of field to match.</param>
-    /// <returns>
-    /// An ImmutableArray containing all the fields that are members of this symbol with
-    /// the given name and arity.
-    /// If this symbol has no field members with this name and arity, returns an empty
-    /// ImmutableArray. Never returns null.
-    /// </returns>
-    public abstract ImmutableArray<FieldSymbol> GetFieldMembers(string name, int arity);
-    #endregion
-
-    /// <inheritdoc cref="Symbol()"/>
     internal ModuleSymbol() { }
+
+    /// <summary>
+    /// Module's ordinal within containing assembly's Modules array.
+    /// 0 - for a source module, etc.
+    /// -1 - for a module that doesn't have containing assembly, or has it, but is not part of Modules array. 
+    /// </summary>
+    internal abstract int Ordinal { get; }
+
+    /// <summary>
+    /// Target architecture of the machine.
+    /// </summary>
+    internal abstract Machine Machine { get; }
+
+    /// <summary>
+    /// Indicates that this PE file makes Win32 calls. See CorPEKind.pe32BitRequired for more information (http://msdn.microsoft.com/en-us/library/ms230275.aspx).
+    /// </summary>
+    internal abstract bool Bit32Required { get; }
+
+    /// <summary>
+    /// Returns an array of assembly identities for assemblies referenced by this module.
+    /// Items at the same position from ReferencedAssemblies and from ReferencedAssemblySymbols 
+    /// correspond to each other.
+    /// </summary>
+    public ImmutableArray<AssemblyIdentity> ReferencedAssemblies
+    {
+        get
+        {
+#warning Not implemented.
+            throw new NotImplementedException();
+        }
+    }
 }

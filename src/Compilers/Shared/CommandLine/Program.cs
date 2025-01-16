@@ -8,15 +8,11 @@ using Qtyi.CodeAnalysis.CommandLine;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.CommandLine;
-
-using Thisc = Luac;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.CommandLine;
-
-using Thisc = Moonc;
 #endif
 
-public partial class Program
+public static class Program
 {
     public static int Main(string[] args)
     {
@@ -35,43 +31,22 @@ public partial class Program
 
     private static int MainCore(string[] args)
     {
-
-/* 项目“moonc (net6.0)”的未合并的更改
-在此之前:
-        using var logger = new CompilerServerLogger($"{Thisc.ExecutableName} {Process.GetCurrentProcess().Id}");
-在此之后:
-        using var logger = new CompilerServerLogger($"{MoonScriptCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
-*/
-
-/* 项目“moonc (net472)”的未合并的更改
-在此之前:
-        using var logger = new CompilerServerLogger($"{Thisc.ExecutableName} {Process.GetCurrentProcess().Id}");
-在此之后:
-        using var logger = new CompilerServerLogger($"{MoonScriptCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
-*/
-
-/* 项目“moonc-arm64”的未合并的更改
-在此之前:
-        using var logger = new CompilerServerLogger($"{Thisc.ExecutableName} {Process.GetCurrentProcess().Id}");
-在此之后:
-        using var logger = new CompilerServerLogger($"{MoonScriptCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
-*/
-        using var logger = new CompilerServerLogger($"{LuaCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
+        using var logger = new CompilerServerLogger($"{ThisCompiler.ExecutableName} {Process.GetCurrentProcess().Id}");
 
 #if BOOTSTRAP
         ExitingTraceListener.Install(logger);
 #endif
 
-        const RequestLanguage requestLanguage =
+        const RequestLanguage RequestLanguage =
 #if LANG_LUA
             RequestLanguage.LuaCompile
 #elif LANG_MOONSCRIPT
             RequestLanguage.MoonScriptCompile
 #endif
             ;
-        return BuildClient.Run(args, requestLanguage, Thisc.Run, BuildClient.GetCompileOnServerFunc(logger));
+        return BuildClient.Run(args, RequestLanguage, Thisc.Run, BuildClient.GetCompileOnServerFunc(logger), logger);
     }
 
-    public static int Run(string[] args, string clientDir, string workingDir, string sdkDir, string tempDir, TextWriter textWriter, IAnalyzerAssemblyLoader analyzerLoader)
+    public static int Run(string[] args, string clientDir, string workingDir, string sdkDir, string? tempDir, TextWriter textWriter, IAnalyzerAssemblyLoader analyzerLoader)
         => Thisc.Run(args, new BuildPaths(clientDir: clientDir, workingDir: workingDir, sdkDir: sdkDir, tempDir: tempDir), textWriter, analyzerLoader);
 }

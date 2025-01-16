@@ -5,16 +5,11 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
@@ -40,27 +35,27 @@ internal static partial class SyntaxFactory
     internal static readonly SyntaxTrivia ElasticCarriageReturnLineFeed = CarriageReturnLineFeed.AsElastic();
 
     /// <summary>表示垂直制表符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia VerticalTab = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, "\v");
+    internal static readonly SyntaxTrivia VerticalTab = SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, "\v");
     /// <summary>表示可变的垂直制表符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia ElasticVerticalTab = VerticalTab.AsElastic();
 
     /// <summary>表示换页符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia FormFeed = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, "\f");
+    internal static readonly SyntaxTrivia FormFeed = SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, "\f");
     /// <summary>表示可变的换页符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia ElasticFormFeed = FormFeed.AsElastic();
 
     /// <summary>表示空格符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia Space = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, " ");
+    internal static readonly SyntaxTrivia Space = SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, " ");
     /// <summary>表示可变的空格符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia ElasticSpace = Space.AsElastic();
 
     /// <summary>表示制表符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia Tab = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, "\t");
+    internal static readonly SyntaxTrivia Tab = SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, "\t");
     /// <summary>表示可变的制表符的语法琐碎内容。</summary>
     internal static readonly SyntaxTrivia ElasticTab = Tab.AsElastic();
 
     /// <summary>表示可变的零空格符的语法琐碎内容。</summary>
-    internal static readonly SyntaxTrivia ElasticZeroSpace = SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, string.Empty).AsElastic();
+    internal static readonly SyntaxTrivia ElasticZeroSpace = SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, string.Empty).AsElastic();
 
     /// <summary>
     /// 将语法琐碎内容转换为可变的。
@@ -94,18 +89,18 @@ internal static partial class SyntaxFactory
     /// <param name="text">表示空白内容的字符串。</param>
     /// <param name="elastic">生成的语法琐碎内容是否为可变的。</param>
     /// <returns>表示空白内容的内部语法琐碎内容。</returns>
-    internal static SyntaxTrivia WhiteSpace(string text, bool elastic = false) =>
+    internal static SyntaxTrivia Whitespace(string text, bool elastic = false) =>
         text switch
         {
             " " => elastic ? ElasticSpace : Space,
             "\t" => elastic ? ElasticTab : Tab,
             "\v" => elastic ? ElasticVerticalTab : Tab,
             "\f" => elastic ? ElasticFormFeed : FormFeed,
-            "" => elastic ? ElasticZeroSpace : SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, text),
+            "" => elastic ? ElasticZeroSpace : SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, text),
             _ => elastic switch
             {
-                false => SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, text),
-                true => SyntaxTrivia.Create(SyntaxKind.WhiteSpaceTrivia, text).AsElastic()
+                false => SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, text),
+                true => SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, text).AsElastic()
             }
         };
 
@@ -134,11 +129,9 @@ internal static partial class SyntaxFactory
         return SyntaxTrivia.Create(SyntaxKind.SingleLineCommentTrivia, text);
     }
 
-    internal static SyntaxTrivia PreprocessingMessage(string text) => SyntaxTrivia.Create(SyntaxKind.PreprocessingMessageTrivia, text);
+    internal static SyntaxTrivia DisabledText(string text) => SyntaxTrivia.Create(SyntaxKind.DisabledTextTrivia, text);
 
-#if DEBUG
-    internal static ThisInternalSyntaxNode Mock() => new ThisInternalSyntaxNode.MockNode();
-#endif
+    internal static SyntaxTrivia PreprocessingMessage(string text) => SyntaxTrivia.Create(SyntaxKind.PreprocessingMessageTrivia, text);
 
     public static SyntaxToken Token(SyntaxKind kind) => SyntaxToken.Create(kind);
 
@@ -146,7 +139,8 @@ internal static partial class SyntaxFactory
 
     internal static SyntaxToken Token(GreenNode? leading, SyntaxKind kind, string text, string valueText, GreenNode? trailing)
     {
-        ValidateTokenKind(kind); // 检查不接受的语法分类。
+        // There are tokens that need more information (like identifier) or with non-string value (like numeric literals), so we better check if we use the right factory method.
+        ValidateTokenKind(kind);
 
         var defaultText = SyntaxFacts.GetText(kind);
         return kind >= SyntaxToken.FirstTokenWithWellKnownText && kind <= SyntaxToken.LastTokenWithWellKnownText && text == defaultText && valueText == defaultText
@@ -177,7 +171,7 @@ internal static partial class SyntaxFactory
 
     internal static SyntaxToken Literal(GreenNode? leading, string text, string value, GreenNode? trailing) => SyntaxToken.WithValue(SyntaxKind.StringLiteralToken, leading, text, value, trailing);
 
-    internal static SyntaxToken Literal(GreenNode? leading, string text, SyntaxKind kind, ImmutableArray<byte> value, GreenNode? trailing) => SyntaxToken.WithValue(kind, leading, text, value, trailing);
+    internal static SyntaxToken Literal(GreenNode? leading, string text, SyntaxKind kind, Utf8String value, GreenNode? trailing) => SyntaxToken.WithValue(kind, leading, text, value, trailing);
 
     #region SyntaxKind到SyntaxToken的转换方法
     // 各种语法部分的转换方法在各语言的独立项目中定义

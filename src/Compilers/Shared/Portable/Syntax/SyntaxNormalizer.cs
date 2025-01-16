@@ -4,17 +4,13 @@
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
-
-using ThisSyntaxRewriter = LuaSyntaxRewriter;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax;
-
-using ThisSyntaxRewriter = MoonScriptSyntaxRewriter;
 #endif
 
 internal class SyntaxNormalizer : ThisSyntaxRewriter
 {
-    internal static TNode Normalize<TNode>(TNode node, string indentWhiteSpace, string eolWhiteSpace, bool useElasticTrivia = false)
+    internal static TNode Normalize<TNode>(TNode node, string indentWhitespace, string eolWhitespace, bool useElasticTrivia = false)
     {
 #warning 未实现。
         throw new NotImplementedException();

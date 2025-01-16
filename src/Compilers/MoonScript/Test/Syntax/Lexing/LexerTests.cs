@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿#if false
+
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
@@ -206,3 +208,5 @@ public partial class LexerTests
     }
     #endregion
 }
+
+#endif

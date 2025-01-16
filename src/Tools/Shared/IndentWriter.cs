@@ -4,11 +4,10 @@
 
 using System.Collections;
 using System.Diagnostics;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Roslyn.Utilities;
 
-namespace Luna.Compilers.Generators;
+namespace Luna.Tools;
 
 /// <summary>
 /// Represents a helper that can write a sequential series of characters with indents into a <see cref="TextWriter"/> instance.
@@ -37,22 +36,22 @@ internal partial class IndentWriter
     /// <param name="writer">Output text writer.</param>
     public IndentWriter(TextWriter writer) : this(writer, 4, ' ') { }
 
-    /// <inheritdoc cref="IndentWriter.IndentWriter(TextWriter)"/>
+    /// <inheritdoc cref="IndentWriter(TextWriter)"/>
     /// <param name="indentSize">Count of whitespace characters of every indent.</param>
     /// <param name="indentChar">Whitespace character of every indent.</param>
     public IndentWriter(TextWriter writer, int indentSize, char indentChar)
     {
         Debug.Assert(char.IsWhiteSpace(indentChar));
 
-        this.Writer = writer;
-        this.IndentSize = indentSize;
-        this.IndentChar = indentChar;
+        Writer = writer;
+        IndentSize = indentSize;
+        IndentChar = indentChar;
     }
 
     /// <summary>
     /// Increase indent level.
     /// </summary>
-    protected internal void Indent() => this._indentLevel++;
+    protected internal void Indent() => _indentLevel++;
 
     /// <summary>
     /// Decrease indent level.
@@ -60,75 +59,75 @@ internal partial class IndentWriter
     /// <exception cref="InvalidOperationException">Cannot unindent from base level.</exception>
     protected internal void Unindent()
     {
-        if (this._indentLevel <= 0) throw new InvalidOperationException("Cannot unindent from base level");
+        if (_indentLevel <= 0) throw new InvalidOperationException("Cannot unindent from base level");
 
-        this._indentLevel--;
+        _indentLevel--;
     }
 
     /// <inheritdoc cref="TextWriter.Write(char)"/>
     public void Write(char value)
     {
-        this.WriteIndentIfNeeded();
-        this.Writer.Write(value);
+        WriteIndentIfNeeded();
+        Writer.Write(value);
     }
 
     /// <inheritdoc cref="TextWriter.Write(string)"/>
     public void Write(string? value)
     {
-        this.WriteIndentIfNeeded();
-        this.Writer.Write(value);
+        WriteIndentIfNeeded();
+        Writer.Write(value);
     }
 
     /// <inheritdoc cref="TextWriter.Write(string, object)"/>
-    public void Write(string format, object arg0) => this.Write(string.Format(format, arg0));
+    public void Write(string format, object arg0) => Write(string.Format(format, arg0));
 
     /// <inheritdoc cref="TextWriter.Write(string, object, object)"/>
-    public void Write(string format, object arg0, object arg1) => this.Write(string.Format(format, arg0, arg1));
+    public void Write(string format, object arg0, object arg1) => Write(string.Format(format, arg0, arg1));
 
     /// <inheritdoc cref="TextWriter.Write(string, object, object, object)"/>
-    public void Write(string format, object arg0, object arg1, object arg2) => this.Write(string.Format(format, arg0, arg1, arg2));
+    public void Write(string format, object arg0, object arg1, object arg2) => Write(string.Format(format, arg0, arg1, arg2));
 
     /// <inheritdoc cref="TextWriter.Write(string, object[])"/>
-    public void Write(string format, params object[] args) => this.Write(string.Format(format, args));
+    public void Write(string format, params object[] args) => Write(string.Format(format, args));
 
     /// <inheritdoc cref="TextWriter.WriteLine()"/>
     public void WriteLine()
     {
-        this.Writer.WriteLine();
+        Writer.WriteLine();
 
-        this._needIndent = true; // Need an indent after each line break
+        _needIndent = true; // Need an indent after each line break
     }
 
     /// <inheritdoc cref="TextWriter.WriteLine(char)"/>
     public void WriteLine(char value)
     {
-        this.WriteIndentIfNeeded();
-        this.Writer.WriteLine(value);
+        WriteIndentIfNeeded();
+        Writer.WriteLine(value);
 
-        this._needIndent = true; // Need an indent after each line break
+        _needIndent = true; // Need an indent after each line break
     }
 
     /// <inheritdoc cref="TextWriter.WriteLine(string)"/>
     public void WriteLine(string? value)
     {
         if (!string.IsNullOrEmpty(value))
-            this.WriteIndentIfNeeded(); // Do not write indent if empty line.
-        this.Writer.WriteLine(value);
+            WriteIndentIfNeeded(); // Do not write indent if empty line.
+        Writer.WriteLine(value);
 
-        this._needIndent = true; // Need an indent after each line break
+        _needIndent = true; // Need an indent after each line break
     }
 
     /// <inheritdoc cref="TextWriter.WriteLine(string, object)"/>
-    public void WriteLine(string format, object arg0) => this.WriteLine(string.Format(format, arg0));
+    public void WriteLine(string format, object arg0) => WriteLine(string.Format(format, arg0));
 
     /// <inheritdoc cref="TextWriter.WriteLine(string, object, object)"/>
-    public void WriteLine(string format, object arg0, object arg1) => this.WriteLine(string.Format(format, arg0, arg1));
+    public void WriteLine(string format, object arg0, object arg1) => WriteLine(string.Format(format, arg0, arg1));
 
     /// <inheritdoc cref="TextWriter.WriteLine(string, object, object, object)"/>
-    public void WriteLine(string format, object arg0, object arg1, object arg2) => this.WriteLine(string.Format(format, arg0, arg1, arg2));
+    public void WriteLine(string format, object arg0, object arg1, object arg2) => WriteLine(string.Format(format, arg0, arg1, arg2));
 
     /// <inheritdoc cref="TextWriter.WriteLine(string, object[])"/>
-    public void WriteLine(string format, params object[] args) => this.WriteLine(string.Format(format, args));
+    public void WriteLine(string format, params object[] args) => WriteLine(string.Format(format, args));
 
     /// <summary>
     /// Writes a string followed by a line terminator to the text string or stream, but without leading indent.
@@ -136,43 +135,43 @@ internal partial class IndentWriter
     /// <inheritdoc cref="TextWriter.WriteLine(string)"/>
     public void WriteLineWithoutIndent(string? value)
     {
-        this.Writer.WriteLine(value);
-        this._needIndent = true; // Need an indent after each line break
+        Writer.WriteLine(value);
+        _needIndent = true; // Need an indent after each line break
     }
 
     /// <summary>
     /// Writes out a formatted string and a new line, but without leading indent, using the same semantics as <see cref="string.Format(IFormatProvider, string, object[])"/>.
     /// </summary>
     /// <inheritdoc cref="TextWriter.WriteLine(string, object)"/>
-    public void WriteLineWithoutIndent(string format, object arg0) => this.WriteLineWithoutIndent(string.Format(format, arg0));
+    public void WriteLineWithoutIndent(string format, object arg0) => WriteLineWithoutIndent(string.Format(format, arg0));
 
     /// <summary>
     /// Writes out a formatted string and a new line, but without leading indent, using the same semantics as <see cref="string.Format(IFormatProvider, string, object[])"/>.
     /// </summary>
     /// <inheritdoc cref="TextWriter.WriteLine(string, object, object)"/>
-    public void WriteLineWithoutIndent(string format, object arg0, object arg1) => this.WriteLineWithoutIndent(string.Format(format, arg0, arg1));
+    public void WriteLineWithoutIndent(string format, object arg0, object arg1) => WriteLineWithoutIndent(string.Format(format, arg0, arg1));
 
     /// <summary>
     /// Writes out a formatted string and a new line, but without leading indent, using the same semantics as <see cref="string.Format(IFormatProvider, string, object[])"/>.
     /// </summary>
     /// <inheritdoc cref="TextWriter.WriteLine(string, object, object, object)"/>
-    public void WriteLineWithoutIndent(string format, object arg0, object arg1, object arg2) => this.WriteLineWithoutIndent(string.Format(format, arg0, arg1, arg2));
+    public void WriteLineWithoutIndent(string format, object arg0, object arg1, object arg2) => WriteLineWithoutIndent(string.Format(format, arg0, arg1, arg2));
 
     /// <summary>
     /// Writes out a formatted string and a new line, but without leading indent, using the same semantics as <see cref="string.Format(IFormatProvider, string, object[])"/>.
     /// </summary>
     /// <inheritdoc cref="TextWriter.WriteLine(string, object[])"/>
-    public void WriteLineWithoutIndent(string format, params object[] args) => this.WriteLineWithoutIndent(string.Format(format, args));
+    public void WriteLineWithoutIndent(string format, params object[] args) => WriteLineWithoutIndent(string.Format(format, args));
 
     /// <summary>
     /// Writes indent if <see cref="_needIndent"/> is <see langword="true"/>.
     /// </summary>
     private void WriteIndentIfNeeded()
     {
-        if (this._needIndent)
+        if (_needIndent)
         {
-            this.Writer.Write(new string(IndentChar, this._indentLevel * IndentSize));
-            this._needIndent = false;
+            Writer.Write(new string(IndentChar, _indentLevel * IndentSize));
+            _needIndent = false;
         }
     }
 

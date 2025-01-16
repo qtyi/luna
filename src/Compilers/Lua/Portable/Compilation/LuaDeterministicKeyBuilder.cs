@@ -8,12 +8,12 @@ namespace Qtyi.CodeAnalysis.Lua;
 
 partial class LuaDeterministicKeyBuilder
 {
-    private partial void WriteCompilationOptionsCore(JsonWriter writer, LuaCompilationOptions options)
+    private partial void WriteCompilationOptionsCore(JsonWriter writer, ThisCompilationOptions options)
     {
         base.WriteCompilationOptionsCore(writer, options);
     }
 
-    private partial void WriteParseOptionsCore(JsonWriter writer, LuaParseOptions parseOptions)
+    private partial void WriteParseOptionsCore(JsonWriter writer, ThisParseOptions parseOptions)
     {
         base.WriteParseOptionsCore(writer, parseOptions);
 

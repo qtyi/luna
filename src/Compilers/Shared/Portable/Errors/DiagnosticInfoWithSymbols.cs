@@ -11,7 +11,7 @@ namespace Qtyi.CodeAnalysis.Lua;
 namespace Qtyi.CodeAnalysis.MoonScript;
 #endif
 
-using ThisMessageProvider = MessageProvider;
+using ThisMessageProvider = ThisMessageProvider;
 
 /// <summary>
 /// A DiagnosticInfoWithSymbols object provides, more than normal <see cref="DiagnosticInfo"/> provides, access to symbols which the diagnostic is in.
@@ -26,7 +26,7 @@ internal class DiagnosticInfoWithSymbols : DiagnosticInfo
     /// </remarks>
     internal readonly ImmutableArray<Symbol> Symbols;
 
-    /// <inheritdoc cref="DiagnosticInfoWithSymbols.DiagnosticInfoWithSymbols(bool, ErrorCode, object[], ImmutableArray{Symbol})"/>
+    /// <inheritdoc cref="DiagnosticInfoWithSymbols(bool, ErrorCode, object[], ImmutableArray{Symbol})"/>
     internal DiagnosticInfoWithSymbols(
         ErrorCode code,
         object[] arguments,
@@ -35,7 +35,7 @@ internal class DiagnosticInfoWithSymbols : DiagnosticInfo
             ThisMessageProvider.Instance,
             (int)code,
             arguments) =>
-        this.Symbols = symbols;
+        Symbols = symbols;
 
     /// <summary>
     /// Create an instance of <see cref="DiagnosticInfoWithSymbols"/> class.
@@ -54,7 +54,7 @@ internal class DiagnosticInfoWithSymbols : DiagnosticInfo
             isWarningAsError,
             (int)code,
             arguments) =>
-        this.Symbols = symbols;
+        Symbols = symbols;
 
     /// <summary>
     /// Create an instance of <see cref="DiagnosticInfoWithSymbols"/> class with an original one and new diagnostic severity.
@@ -65,7 +65,7 @@ internal class DiagnosticInfoWithSymbols : DiagnosticInfo
         DiagnosticInfoWithSymbols original,
         DiagnosticSeverity severity)
         : base(original, severity) =>
-        this.Symbols = original.Symbols;
+        Symbols = original.Symbols;
 
     #region DiagnosticInfo
     /// <summary>

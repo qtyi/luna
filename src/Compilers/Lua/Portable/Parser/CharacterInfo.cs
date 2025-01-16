@@ -8,7 +8,7 @@ namespace Qtyi.CodeAnalysis.Lua;
 
 public static partial class SyntaxFacts
 {
-    public static partial bool IsWhiteSpace(char c) => CharacterInfo.IsWhiteSpace(c);
+    public static partial bool IsWhitespace(char c) => CharacterInfo.IsWhitespace(c);
 
     public static partial bool IsNewLine(char c) => CharacterInfo.IsNewLine(c);
 

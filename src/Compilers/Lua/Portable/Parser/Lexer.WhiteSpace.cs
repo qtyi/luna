@@ -14,28 +14,28 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 partial class Lexer
 {
     /// <summary>创建表示空白字符的<see cref="SyntaxTrivia"/>对象的函数。</summary>
-    Func<SyntaxTrivia>? _createWhiteSpaceTriviaFunction;
+    Func<SyntaxTrivia>? _createWhitespaceTriviaFunction;
     /// <summary>
     /// 创建表示空白字符的<see cref="SyntaxTrivia"/>对象。
     /// </summary>
     /// <returns>使用当前识别到的</returns>
-    private SyntaxTrivia CreateWhiteSpaceTrivia() =>
-        SyntaxFactory.WhiteSpace(this.TextWindow.GetText(intern: true));
+    private SyntaxTrivia CreateWhitespaceTrivia() =>
+        ThisInternalSyntaxFactory.Whitespace(TextWindow.GetText(intern: true));
 
-    [MemberNotNull(nameof(_createWhiteSpaceTriviaFunction))]
-    private SyntaxTrivia ScanWhiteSpace()
+    [MemberNotNull(nameof(_createWhitespaceTriviaFunction))]
+    private SyntaxTrivia LexWhitespace()
     {
-        this._createWhiteSpaceTriviaFunction ??= this.CreateWhiteSpaceTrivia;
+        _createWhitespaceTriviaFunction ??= CreateWhitespaceTrivia;
         var hashCode = Hash.FnvOffsetBias;
         var onlySpaces = true;
 
 NextChar:
-        var c = this.TextWindow.PeekChar();
+        var c = TextWindow.PeekChar();
         switch (c)
         {
             // 连续处理空白符。
             case ' ':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 hashCode = Hash.CombineFNVHash(hashCode, c);
                 goto NextChar;
 
@@ -46,7 +46,7 @@ NextChar:
 
             default:
                 // 处理其他空白字符，但注明并非仅普通的空格字符。
-                if (SyntaxFacts.IsWhiteSpace(c))
+                if (SyntaxFacts.IsWhitespace(c))
                 {
                     onlySpaces = false;
                     goto case ' ';
@@ -54,20 +54,20 @@ NextChar:
                 break;
         }
 
-        if (this.TextWindow.Width == 1 && onlySpaces)
-            return SyntaxFactory.Space;
+        if (TextWindow.Width == 1 && onlySpaces)
+            return ThisInternalSyntaxFactory.Space;
         else
         {
-            var width = this.TextWindow.Width;
+            var width = TextWindow.Width;
             if (width < MaxCachedTokenSize)
-                return this._cache.LookupTrivia(
-                    this.TextWindow.CharacterWindow,
-                    this.TextWindow.LexemeRelativeStart,
+                return _cache.LookupTrivia(
+                    TextWindow.CharacterWindow,
+                    TextWindow.LexemeRelativeStart,
                     width,
                     hashCode,
-                    this._createWhiteSpaceTriviaFunction);
+                    _createWhitespaceTriviaFunction);
             else
-                return this._createWhiteSpaceTriviaFunction();
+                return _createWhitespaceTriviaFunction();
         }
     }
 }

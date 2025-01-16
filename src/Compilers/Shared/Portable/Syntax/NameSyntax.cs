@@ -10,9 +10,20 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax;
 
 partial class NameSyntax
 {
+
+    public abstract int Arity { get; }
+
     /// <summary>
-    /// 返回限定名称的非限定的（最右侧的）部分，若名称已经是非限定的，则返回自身。
+    /// Returns the unqualified (right-most) part of a qualified or alias-qualified name, or the name itself if already unqualified. 
     /// </summary>
-    /// <returns>限定名称的非限定的（最右侧的）部分，若名称已经是非限定的，则返回自身。</returns>
-    internal abstract IdentifierNameSyntax GetUnqualifiedName();
+    /// <returns>The unqualified (right-most) part of a qualified or alias-qualified name, or the name itself if already unqualified.
+    /// If called on an instance of <see cref="QualifiedNameSyntax"/> returns the value of the <see cref="QualifiedNameSyntax.Right"/> property.
+    /// If called on an instance of <see cref="SimpleNameSyntax"/> returns the instance itself.
+    /// </returns>
+    internal abstract SimpleNameSyntax GetUnqualifiedName();
+
+    /// <summary>
+    /// Return the name in string form, without trivia or generic arguments, for use in diagnostics.
+    /// </summary>
+    internal abstract string ErrorDisplayName();
 }

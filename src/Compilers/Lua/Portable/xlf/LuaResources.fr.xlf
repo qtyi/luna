@@ -427,6 +427,11 @@
         <target state="new">Invalid search path specified</target>
         <note />
       </trans-unit>
+      <trans-unit id="WRN_ShebangOnlySupportedInScript">
+        <source>`#!` only supported in script.</source>
+        <target state="new">`#!` only supported in script.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WRN_UnifyReferenceBldRev_Description">
         <source>The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</source>
         <target state="new">The two assemblies differ in release and/or version number. For unification to occur, you must specify directives in the application's .config file, and you must provide the correct strong name of an assembly.</target>

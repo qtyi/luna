@@ -86,8 +86,7 @@ internal enum ErrorCode
     ERR_NewlineInConst,
     /// <summary>不合法的转义序列。</summary>
     ERR_IllegalEscape,
-    /// <summary>不合法的UTF-8字节序列。</summary>
-    ERR_IllegalUtf8ByteSequence,
+    ERR_UnpairedSurrogates,
     WRN_ErrorOverride,
 
     #region 语法错误
@@ -139,10 +138,6 @@ internal enum ErrorCode
     ERR_TypeForwardedToMultipleAssemblies,
     #endregion
 
-    #region Lua 1.0的消息
-    ERR_FeatureNotAvailableInVersion1 = 501,
-    #endregion
-
     #region Lua 1.1的消息
     ERR_FeatureNotAvailableInVersion1_1 = 1001,
     #endregion
@@ -155,24 +150,20 @@ internal enum ErrorCode
     ERR_FeatureNotAvailableInVersion2_2 = 2001,
     #endregion
 
-    #region Lua 2.3的消息
-    ERR_FeatureNotAvailableInVersion2_3 = 2501,
-    #endregion
-
     #region Lua 2.4的消息
     ERR_FeatureNotAvailableInVersion2_4 = 3001,
     #endregion
 
     #region Lua 2.5的消息
     ERR_FeatureNotAvailableInVersion2_5 = 3501,
-    #endregion
-
-    #region Lua 3.0的消息
-    ERR_FeatureNotAvailableInVersion3 = 4001,
+    WRN_ShebangOnlySupportedInScript,
     #endregion
 
     #region Lua 3.1的消息
     ERR_FeatureNotAvailableInVersion3_1 = 4501,
+    ERR_InvalidPreprocExpr,
+    ERR_UnexpectedDirective,
+    ERR_EndDirectiveExpected,
     #endregion
 
     #region Lua 3.2的消息
@@ -205,7 +196,11 @@ internal enum ErrorCode
 
     #region Lua实验性版本的消息
     ERR_FeatureIsExperimental = 8501,
-    ERR_FeatureInPreview,
+    ERR_FeatureNotAvailableInPreview,
+    #endregion
+
+    #region Lua dotnet的消息
+    ERR_FeatureNotAvailableInVersionDotNet = 9001,
     #endregion
 
     // 更新编译器的警告后应手动运行（eng\generate-compiler-code.cmd）。

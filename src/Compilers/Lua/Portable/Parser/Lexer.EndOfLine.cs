@@ -4,37 +4,33 @@
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
 partial class Lexer
 {
-    private partial ThisInternalSyntaxNode? ScanEndOfLine()
+    private partial SyntaxTrivia? LexEndOfLine()
     {
-        var c1 = this.TextWindow.PeekChar();
-        var c2 = this.TextWindow.PeekChar(1);
+        var c1 = TextWindow.PeekChar();
+        var c2 = TextWindow.PeekChar(1);
         if (SyntaxFacts.IsNewLine(c1, c2))
         {
-            this.TextWindow.AdvanceChar(2);
+            TextWindow.AdvanceChar(2);
             if (c1 == '\r' && c2 == '\n')
-                return SyntaxFactory.CarriageReturnLineFeed;
+                return ThisInternalSyntaxFactory.CarriageReturnLineFeed;
             else
-                return SyntaxFactory.EndOfLine(new string(new[] { c1, c2 }));
+                return ThisInternalSyntaxFactory.EndOfLine(new string(new[] { c1, c2 }));
         }
         else if (SyntaxFacts.IsNewLine(c1))
         {
-            this.TextWindow.AdvanceChar();
+            TextWindow.AdvanceChar();
             if (c1 == '\n')
-                return SyntaxFactory.LineFeed;
+                return ThisInternalSyntaxFactory.LineFeed;
             else if (c1 == '\r')
-                return SyntaxFactory.CarriageReturn;
+                return ThisInternalSyntaxFactory.CarriageReturn;
             else
-                return SyntaxFactory.EndOfLine(new string(new[] { c1 }));
+                return ThisInternalSyntaxFactory.EndOfLine(new string(new[] { c1 }));
         }
 
         return null;

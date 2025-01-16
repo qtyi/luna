@@ -17,7 +17,7 @@ partial class LuaSyntaxTree
     /// </remarks>
     /// <returns>语法树的编译单元根节点。</returns>
     /// <exception cref="InvalidCastException">当<see cref="SyntaxTree.HasCompilationUnitRoot"/>为<see langword="false"/>抛出。</exception>
-    /// <inheritdoc cref="LuaSyntaxTree.GetRoot(CancellationToken)"/>
+    /// <inheritdoc cref="GetRoot(CancellationToken)"/>
     public ChunkSyntax GetCompilationUnitRoot(CancellationToken cancellationToken = default) =>
-        (ChunkSyntax)this.GetRoot(cancellationToken);
+        (ChunkSyntax)GetRoot(cancellationToken);
 }

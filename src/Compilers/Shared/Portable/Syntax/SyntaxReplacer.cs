@@ -8,14 +8,8 @@ using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
-
-using ThisSyntaxNode = LuaSyntaxNode;
-using ThisSyntaxRewriter = LuaSyntaxRewriter;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax;
-
-using ThisSyntaxNode = MoonScriptSyntaxNode;
-using ThisSyntaxRewriter = MoonScriptSyntaxRewriter;
 #endif
 
 /// <summary>
@@ -84,8 +78,8 @@ internal static partial class SyntaxReplacer
         private readonly bool _visitIntoStructuredTrivia;
         private readonly bool _shouldVisitTrivia;
 
-        public override bool VisitIntoStructuredTrivia => this._visitIntoStructuredTrivia;
-        public bool HasWork => this._nodeSet.Count + this._tokenSet.Count + this._triviaSet.Count > 0;
+        public override bool VisitIntoStructuredTrivia => _visitIntoStructuredTrivia;
+        public bool HasWork => _nodeSet.Count + _tokenSet.Count + _triviaSet.Count > 0;
 
         public Replacer(
             IEnumerable<TNode>? nodes,
@@ -95,32 +89,32 @@ internal static partial class SyntaxReplacer
             IEnumerable<SyntaxTrivia>? trivia,
             Func<SyntaxTrivia, SyntaxTrivia, SyntaxTrivia>? computeReplacementTrivia)
         {
-            this._computeReplacementNode = computeReplacementNode;
-            this._computeReplacementToken = computeReplacementToken;
-            this._computeReplacementTrivia = computeReplacementTrivia;
+            _computeReplacementNode = computeReplacementNode;
+            _computeReplacementToken = computeReplacementToken;
+            _computeReplacementTrivia = computeReplacementTrivia;
 
-            this._nodeSet = nodes is null ? Replacer<TNode>.s_noNodes : new(nodes);
-            this._tokenSet = tokens is null ? Replacer<TNode>.s_noTokens : new(tokens);
-            this._triviaSet = trivia is null ? Replacer<TNode>.s_noTrivia : new(trivia);
+            _nodeSet = nodes is null ? s_noNodes : new(nodes);
+            _tokenSet = tokens is null ? s_noTokens : new(tokens);
+            _triviaSet = trivia is null ? s_noTrivia : new(trivia);
 
-            this._spanSet = new(
+            _spanSet = new(
                 new[]
                 {
-                    from n in this._nodeSet select n.FullSpan,
-                    from t in this._tokenSet select t.FullSpan,
-                    from t in this._triviaSet select t.FullSpan
+                    from n in _nodeSet select n.FullSpan,
+                    from t in _tokenSet select t.FullSpan,
+                    from t in _triviaSet select t.FullSpan
                 }.SelectMany(spans => spans)
             );
 
             // 快速计算总文本范围，缩小搜索范围。
-            this._totalSpan = Replacer<TNode>.ComputeTotalSpan(this._spanSet);
+            _totalSpan = Replacer<TNode>.ComputeTotalSpan(_spanSet);
 
-            this._visitIntoStructuredTrivia =
-                this._nodeSet.Any(n => n.IsPartOfStructuredTrivia()) ||
-                this._tokenSet.Any(t => t.IsPartOfStructuredTrivia()) ||
-                this._triviaSet.Any(t => t.IsPartOfStructuredTrivia());
+            _visitIntoStructuredTrivia =
+                _nodeSet.Any(n => n.IsPartOfStructuredTrivia()) ||
+                _tokenSet.Any(t => t.IsPartOfStructuredTrivia()) ||
+                _triviaSet.Any(t => t.IsPartOfStructuredTrivia());
 
-            this._shouldVisitTrivia = this._triviaSet.Count > 0 || this._visitIntoStructuredTrivia;
+            _shouldVisitTrivia = _triviaSet.Count > 0 || _visitIntoStructuredTrivia;
         }
 
         /// <summary>
@@ -160,9 +154,9 @@ internal static partial class SyntaxReplacer
         private bool ShouldVisit(TextSpan span)
         {
             // 首先快速与总文本范围进行交集测试。
-            if (!span.IntersectsWith(this._totalSpan)) return false;
+            if (!span.IntersectsWith(_totalSpan)) return false;
 
-            foreach (var s in this._spanSet)
+            foreach (var s in _spanSet)
             {
                 if (span.IntersectsWith(s)) return true;
             }
@@ -185,13 +179,13 @@ internal static partial class SyntaxReplacer
 
             SyntaxNode rewritten;
 
-            if (this.ShouldVisit(node.FullSpan))
+            if (ShouldVisit(node.FullSpan))
                 rewritten = base.Visit(node);
             else
                 rewritten = node;
 
-            if (this._nodeSet.Contains(node) && this._computeReplacementNode is not null)
-                rewritten = this._computeReplacementNode((TNode)node, (TNode)rewritten);
+            if (_nodeSet.Contains(node) && _computeReplacementNode is not null)
+                rewritten = _computeReplacementNode((TNode)node, (TNode)rewritten);
 
             return rewritten;
         }
@@ -208,13 +202,13 @@ internal static partial class SyntaxReplacer
         {
             SyntaxToken rewritten;
 
-            if (this._shouldVisitTrivia && this.ShouldVisit(token.FullSpan))
+            if (_shouldVisitTrivia && ShouldVisit(token.FullSpan))
                 rewritten = base.VisitToken(token);
             else
                 rewritten = token;
 
-            if (this._tokenSet.Contains(token) && this._computeReplacementToken is not null)
-                rewritten = this._computeReplacementToken(token, rewritten);
+            if (_tokenSet.Contains(token) && _computeReplacementToken is not null)
+                rewritten = _computeReplacementToken(token, rewritten);
 
             return rewritten;
         }
@@ -231,13 +225,13 @@ internal static partial class SyntaxReplacer
         {
             SyntaxTrivia rewritten;
 
-            if (this.VisitIntoStructuredTrivia && trivia.HasStructure && this.ShouldVisit(trivia.FullSpan))
-                rewritten = this.VisitTrivia(trivia);
+            if (VisitIntoStructuredTrivia && trivia.HasStructure && ShouldVisit(trivia.FullSpan))
+                rewritten = VisitTrivia(trivia);
             else
                 rewritten = trivia;
 
-            if (this._triviaSet.Contains(trivia) && this._computeReplacementTrivia is not null)
-                rewritten = this._computeReplacementTrivia(trivia, rewritten);
+            if (_triviaSet.Contains(trivia) && _computeReplacementTrivia is not null)
+                rewritten = _computeReplacementTrivia(trivia, rewritten);
 
             return rewritten;
         }

@@ -12,9 +12,9 @@ partial class LanguageParser
 {
     internal ChunkSyntax ParseCompilationUnit()
     {
-        var block = this.ParseBlock(SyntaxKind.Chunk);
-        var endOfFile = this.EatToken(SyntaxKind.EndOfFileToken);
-        return this._syntaxFactory.Chunk(block, endOfFile);
+        var block = ParseBlock(SyntaxKind.Chunk);
+        var endOfFile = EatToken(SyntaxKind.EndOfFileToken);
+        return _syntaxFactory.Chunk(block, endOfFile);
     }
 
 #if TESTING
@@ -24,10 +24,10 @@ partial class LanguageParser
 #endif
         BlockSyntax ParseBlock(SyntaxKind structure)
     {
-        this._syntaxFactoryContext.EnterStructure(structure);
+        _syntaxFactoryContext.EnterStructure(structure);
 
-        var statementBuilder = this._pool.Allocate<StatementSyntax>();
-        this.ParseStatements(statementBuilder);
+        var statementBuilder = _pool.Allocate<StatementSyntax>();
+        ParseStatements(statementBuilder);
 
         SyntaxList<StatementSyntax> statements;
         if (IsLargeEnoughNonEmptyStatementList(statementBuilder))
@@ -35,20 +35,20 @@ partial class LanguageParser
         else
             statements = statementBuilder;
 
-        this._syntaxFactoryContext.LeaveStructure(structure);
+        _syntaxFactoryContext.LeaveStructure(structure);
 
-        var returnStat = this.CurrentTokenKind == SyntaxKind.ReturnKeyword ? this.ParseReturnStatement() : null;
+        var returnStat = CurrentTokenKind == SyntaxKind.ReturnKeyword ? ParseReturnStatement() : null;
         if (returnStat is not null)
         {
             // 跳过后方的连续的表示空语句的分号标记。
-            var skippedSyntax = this.SkipTokens(token => token.Kind == SyntaxKind.SemicolonToken);
+            var skippedSyntax = SkipTokens(token => token.Kind == SyntaxKind.SemicolonToken);
             if (skippedSyntax is not null)
-                returnStat = this.AddTrailingSkippedSyntax(returnStat, skippedSyntax);
+                returnStat = AddTrailingSkippedSyntax(returnStat, skippedSyntax);
         }
 
-        var block = this._syntaxFactory.Block(statements, returnStat);
+        var block = _syntaxFactory.Block(statements, returnStat);
 
-        this._pool.Free(statementBuilder);
+        _pool.Free(statementBuilder);
         return block;
     }
 

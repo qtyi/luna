@@ -6,12 +6,8 @@ using System.Diagnostics;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax.LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax.MoonScriptSyntaxNode;
 #endif
 
 internal class SyntaxLastTokenReplacer :
@@ -28,8 +24,8 @@ internal class SyntaxLastTokenReplacer :
 
     private SyntaxLastTokenReplacer(SyntaxToken oldToken, SyntaxToken newToken)
     {
-        this._oldToken = oldToken;
-        this._newToken = newToken;
+        _oldToken = oldToken;
+        _newToken = newToken;
     }
 
     internal static TRoot Replace<TRoot>(TRoot root, SyntaxToken newToken)
@@ -53,19 +49,19 @@ internal class SyntaxLastTokenReplacer :
 
     public override ThisInternalSyntaxNode? Visit(ThisInternalSyntaxNode? node)
     {
-        if (node is not null && !this._found)
+        if (node is not null && !_found)
         {
-            this._count--;
-            if (this._count == 0)
+            _count--;
+            if (_count == 0)
             {
                 if (node is SyntaxToken token)
                 {
-                    Debug.Assert(token == this._oldToken);
-                    this._found = true;
-                    return this._newToken;
+                    Debug.Assert(token == _oldToken);
+                    _found = true;
+                    return _newToken;
                 }
 
-                this._count += CountNonNullSlots(node);
+                _count += CountNonNullSlots(node);
                 return base.Visit(node);
             }
         }

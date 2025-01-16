@@ -10,8 +10,6 @@ using Microsoft.CodeAnalysis;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Language not supported.
 #endif
 
 #warning 未实现。
@@ -157,6 +155,8 @@ partial class MessageProvider : CommonMessageProvider
 
     public override int ERR_BadAssemblyName => throw new NotImplementedException();
 
+    public override int? WRN_ByValArraySizeConstRequired => throw new NotImplementedException();
+
     public override Diagnostic CreateDiagnostic(DiagnosticInfo info) => new ThisDiagnostic(info, Location.None);
 
     public override Diagnostic CreateDiagnostic(int code, Location location, params object[] args)
@@ -169,12 +169,12 @@ partial class MessageProvider : CommonMessageProvider
 
     public override LocalizableString GetDescription(int code) => ErrorFacts.GetDescription((ErrorCode)code);
 
-    public override ReportDiagnostic GetDiagnosticReport(DiagnosticInfo diagnosticInfo, CompilationOptions options)
+    public override ReportDiagnostic GetDiagnosticReport(DiagnosticInfo diagnosticInfo, Microsoft.CodeAnalysis.CompilationOptions options)
     {
         throw new NotImplementedException();
     }
 
-    public override string GetErrorDisplayString(Microsoft.CodeAnalysis.ISymbol symbol)
+    public override string GetErrorDisplayString(ISymbol symbol)
     {
         throw new NotImplementedException();
     }
@@ -225,7 +225,7 @@ partial class MessageProvider : CommonMessageProvider
         throw new NotImplementedException();
     }
 
-    protected override void ReportInvalidNamedArgument(DiagnosticBag diagnostics, SyntaxNode attributeSyntax, int namedArgumentIndex, Microsoft.CodeAnalysis.ITypeSymbol attributeClass, string parameterName)
+    protected override void ReportInvalidNamedArgument(DiagnosticBag diagnostics, SyntaxNode attributeSyntax, int namedArgumentIndex, ITypeSymbol attributeClass, string parameterName)
     {
         throw new NotImplementedException();
     }

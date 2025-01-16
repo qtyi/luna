@@ -4,7 +4,7 @@
 
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Luna.Compilers.Generators;
+namespace Luna.Tools;
 
 internal static class IndentWriterExtensions
 {

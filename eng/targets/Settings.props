@@ -6,7 +6,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <Copyright>© Qtyi</Copyright>
+    <CopyrightQtyi>© Qtyi and Contributors</CopyrightQtyi>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
     <PackageTags>Luna CodeAnalysis Compiler Parser Scanner Lexer Emit CodeGeneration Metadata IL Compilation Scripting Syntax Semantics</PackageTags>

@@ -10,8 +10,6 @@ using Microsoft.CodeAnalysis.Text;
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-#else
-#error Language not supported.
 #endif
 
 internal readonly partial struct Blender
@@ -22,6 +20,8 @@ internal readonly partial struct Blender
 
     private readonly int _newPosition;
     private readonly int _changeDelta;
+    private readonly DirectiveStack _newDirectives;
+    private readonly DirectiveStack _oldDirectives;
     private readonly LexerMode _newLexerDrivenMode;
 
     public Blender(
@@ -29,30 +29,33 @@ internal readonly partial struct Blender
         ThisSyntaxNode? oldTree,
         IEnumerable<TextChangeRange>? changes)
     {
-        this._lexer = lexer;
-        this._changes = ImmutableStack.Create<TextChangeRange>();
+        _lexer = lexer;
+        _changes = ImmutableStack.Create<TextChangeRange>();
 
         if (changes is not null)
         {
             var collapsed = TextChangeRange.Collapse(changes);
 
             var affectedRange = ExtendToAffectedRange(oldTree, collapsed);
-            this._changes = this._changes.Push(affectedRange);
+            _changes = _changes.Push(affectedRange);
         }
 
         if (oldTree is null)
         {
-            this._oldTreeCursor = new();
-            this._newPosition = lexer.TextWindow.Position;
+            // start at lexer current position if no nodes specified
+            _oldTreeCursor = new();
+            _newPosition = lexer.TextWindow.Position;
         }
         else
         {
-            this._oldTreeCursor = Cursor.FromRoot(oldTree).MoveToFirstChild();
-            this._newPosition = 0;
+            _oldTreeCursor = Cursor.FromRoot(oldTree, lexer.Options.LanguageVersion).MoveToFirstChild();
+            _newPosition = 0;
         }
 
-        this._changeDelta = 0;
-        this._newLexerDrivenMode = LexerMode.None;
+        _changeDelta = 0;
+        _newDirectives = default;
+        _oldDirectives = default;
+        _newLexerDrivenMode = LexerMode.None;
     }
 
     private Blender(
@@ -61,15 +64,19 @@ internal readonly partial struct Blender
         ImmutableStack<TextChangeRange> changes,
         int newPosition,
         int changeDelta,
+        DirectiveStack newDirectives,
+        DirectiveStack oldDirectives,
         LexerMode newLexerDrivenMode
     )
     {
-        this._lexer = lexer;
-        this._oldTreeCursor = oldTreeCursor;
-        this._changes = changes;
-        this._newPosition = newPosition;
-        this._changeDelta = changeDelta;
-        this._newLexerDrivenMode = newLexerDrivenMode;
+        _lexer = lexer;
+        _oldTreeCursor = oldTreeCursor;
+        _changes = changes;
+        _newPosition = newPosition;
+        _changeDelta = changeDelta;
+        _newDirectives = newDirectives;
+        _oldDirectives = oldDirectives;
+        _newLexerDrivenMode = newLexerDrivenMode;
     }
 
     private static TextChangeRange ExtendToAffectedRange(ThisSyntaxNode oldTree, TextChangeRange changeRange)
@@ -95,9 +102,9 @@ internal readonly partial struct Blender
         return new TextChangeRange(finalSpan, finalLength);
     }
 
-    public BlendedNode ReadNode(LexerMode mode) => this.ReadNodeOrToken(mode, asToken: false);
+    public BlendedNode ReadNode(LexerMode mode) => ReadNodeOrToken(mode, asToken: false);
 
-    public BlendedNode ReadToken(LexerMode mode) => this.ReadNodeOrToken(mode, asToken: true);
+    public BlendedNode ReadToken(LexerMode mode) => ReadNodeOrToken(mode, asToken: true);
 
     private BlendedNode ReadNodeOrToken(LexerMode mode, bool asToken)
     {

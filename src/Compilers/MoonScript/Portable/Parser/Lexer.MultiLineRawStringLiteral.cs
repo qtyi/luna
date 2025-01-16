@@ -8,22 +8,19 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 partial class Lexer
 {
-    private partial bool ScanMultiLineRawStringLiteral(ref TokenInfo info, int level)
+    private partial void ScanMultiLineRawStringLiteral(ref TokenInfo info, int level)
     {
-        if (this.ScanLongBrackets(out var isTerminal, level))
-        {
-            info.Kind = SyntaxKind.MultiLineRawStringLiteralToken;
-            info.ValueKind = SpecialType.System_String;
-            info.Text = this.TextWindow.GetText(intern: true);
-            info.StringValue = this.TextWindow.Intern(this._builder);
+        ScanLongBrackets(out var isTerminal, level);
 
-            this.CheckFeatureAvaliability(MessageID.IDS_FeatureMultiLineRawStringLiteral);
-            if (!isTerminal)
-                this.AddError(ErrorCode.ERR_UnterminatedStringLiteral);
+        info.Kind = SyntaxKind.MultiLineRawStringLiteralToken;
+        info.ValueKind = TokenValueType.String;
+        info.Text = TextWindow.GetText(intern: true);
+        info.StringValue = TextWindow.Intern(_builder);
 
-            return true;
-        }
-
-        return false;
+        CheckFeatureAvaliability(MessageID.IDS_FeatureMultiLineRawStringLiteral);
+        if (!isTerminal)
+            AddError(ErrorCode.ERR_UnterminatedStringLiteral);
     }
+
+    private partial bool IgnoreNewLineDirectlyAfterOpenBrackets() => true;
 }

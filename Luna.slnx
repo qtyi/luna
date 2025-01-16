@@ -1,0 +1,39 @@
+<Solution>
+  <Folder Name="/Compilers/" />
+  <Folder Name="/Compilers/Core/">
+    <Project Path="src/Compilers/Core/CodeAnalysisTest/Qtyi.CodeAnalysis.UnitTests.csproj" />
+    <Project Path="src/Compilers/Core/CommandLine/Qtyi.CodeAnalysis.CommandLine.csproj" />
+    <Project Path="src/Compilers/Core/Portable/Qtyi.CodeAnalysis.csproj" />
+    <Project Path="src/Compilers/Test/Resources/Core/Qtyi.CodeAnalysis.Compiler.Test.Resources.csproj" />
+    <Project Path="src/Compilers/Test/Utilities/Core/Qtyi.CodeAnalysis.Test.Utilities.csproj" />
+    <Project Path="src/Test/PdbUtilities/Luna.Test.PdbUtilities.csproj" />
+  </Folder>
+  <Folder Name="/Compilers/Lua/">
+    <Project Path="src/Compilers/Lua/luac/AnyCpu/luac.csproj" />
+    <Project Path="src/Compilers/Lua/luac/arm64/luac-arm64.csproj" />
+    <Project Path="src/Compilers/Lua/Portable/Qtyi.CodeAnalysis.Lua.csproj" />
+    <Project Path="src/Compilers/Lua/Test/Syntax/Qtyi.CodeAnalysis.Lua.Syntax.UnitTests.csproj" />
+    <Project Path="src/Compilers/Test/Utilities/Lua/Qtyi.CodeAnalysis.Lua.Test.Utilities.csproj" />
+  </Folder>
+  <Folder Name="/Compilers/MoonScript/">
+    <Project Path="src/Compilers/MoonScript/moonc/AnyCpu/moonc.csproj" />
+    <Project Path="src/Compilers/MoonScript/moonc/arm64/moonc-arm64.csproj" />
+    <Project Path="src/Compilers/MoonScript/Portable/Qtyi.CodeAnalysis.MoonScript.csproj" />
+    <Project Path="src/Compilers/MoonScript/Test/Syntax/Qtyi.CodeAnalysis.MoonScript.Syntax.UnitTests.csproj" />
+    <Project Path="src/Compilers/Test/Utilities/MoonScript/Qtyi.CodeAnalysis.MoonScript.Test.Utilities.csproj" />
+  </Folder>
+  <Folder Name="/Dependencies/">
+    <Project Path="src/Dependencies/Lua.Corelib/Lua.Corelib.csproj" />
+  </Folder>
+  <Folder Name="/Tools/" />
+  <Folder Name="/Tools/Source/">
+    <Project Path="src/Tools/Source/src/Compilers/CodeAnalysis/LuaCodeAnalysisSourceGeneration/LuaCodeAnalysisSourceGeneration.csproj" />
+    <Project Path="src/Tools/Source/src/Compilers/CodeAnalysis/MoonScriptCodeAnalysisSourceGeneration/MoonScriptCodeAnalysisSourceGeneration.csproj" />
+    <Project Path="src/Tools/Source/src/Compilers/CommandLine/CommandLineSourceGenerators.csproj" />
+    <Project Path="src/Tools/Source/src/Compilers/Test/CodeAnalysisCompilerTestResourcesSourceGenerators/CodeAnalysisCompilerTestResourcesSourceGenerators.csproj" />
+  </Folder>
+  <Folder Name="/Tools/Source/Core/">
+    <Project Path="src/Tools/Source/src/Compilers/CodeAnalysis/Core/Luna.Tools.Source.CodeAnalysis.csproj" />
+    <Project Path="src/Tools/Source/src/Shared/Luna.Tools.Source.csproj" />
+  </Folder>
+</Solution>

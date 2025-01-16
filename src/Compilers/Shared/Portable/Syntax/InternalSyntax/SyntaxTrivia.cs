@@ -13,108 +13,79 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 #endif
 
-internal partial class SyntaxTrivia :
-#if LANG_LUA
-    LuaSyntaxNode
-#elif LANG_MOONSCRIPT
-    MoonScriptSyntaxNode
-#endif
+internal partial class SyntaxTrivia : ThisInternalSyntaxNode
 {
     public readonly string Text;
-
-    static SyntaxTrivia()
-    {
-        ObjectBinder.RegisterTypeReader(typeof(SyntaxTrivia), r => new SyntaxTrivia(r));
-    }
-
-    internal override void WriteTo(ObjectWriter writer)
-    {
-        base.WriteTo(writer);
-        writer.WriteString(this.Text);
-    }
 
     internal SyntaxTrivia(
         SyntaxKind kind,
         string text,
         DiagnosticInfo[]? diagnostics = null,
-        SyntaxAnnotation[]? annotations = null) : base(kind, diagnostics, annotations, text.Length)
+        SyntaxAnnotation[]? annotations = null
+    ) : base(kind, diagnostics, annotations, text.Length)
     {
-        this.Text = text;
+        Text = text;
+
+        if (kind == SyntaxKind.PreprocessingMessageTrivia)
+        {
+            SetFlags(NodeFlags.ContainsSkippedText);
+        }
     }
-
-    internal SyntaxTrivia(ObjectReader reader) : base(reader)
-    {
-        this.Text = reader.ReadString();
-        this.FullWidth = this.Text.Length;
-    }
-
-    public override int GetLeadingTriviaWidth() => 0;
-
-    public override int GetTrailingTriviaWidth() => 0;
 
     public override int Width
     {
         get
         {
-            Debug.Assert(this.FullWidth == this.Text.Length);
-            return this.FullWidth;
+            Debug.Assert(FullWidth == Text.Length);
+            return FullWidth;
         }
     }
 
-    /// <summary>此语法节点是否为指令。</summary>
-    /// <remarks>此属性的值永远为<see langword="false"/>。</remarks>
+    /// <inheritdoc/>
     public sealed override bool IsDirective => false;
 
-    /// <summary>此语法节点是否为标记。</summary>
-    /// <remarks>此属性的值永远为<see langword="false"/>。</remarks>
+    /// <inheritdoc/>
     public sealed override bool IsToken => false;
 
-    /// <summary>此语法节点是否为琐碎内容。</summary>
-    /// <remarks>此属性的值永远为<see langword="true"/>。</remarks>
+    /// <inheritdoc/>
     public sealed override bool IsTrivia => true;
 
-    public virtual bool IsWhiteSpace => this.Kind == SyntaxKind.WhiteSpaceTrivia;
+    public virtual bool IsWhitespace => Kind == SyntaxKind.WhitespaceTrivia;
 
-    public virtual bool IsEndOfLine => this.Kind == SyntaxKind.EndOfLineTrivia;
+    public virtual bool IsEndOfLine => Kind == SyntaxKind.EndOfLineTrivia;
 
-    internal override bool ShouldReuseInSerialization => this.Kind == SyntaxKind.WhiteSpaceTrivia && this.FullWidth < Lexer.MaxCachedTokenSize;
+    #region Accept
+    public override void Accept(ThisInternalSyntaxVisitor visitor) => visitor.VisitTrivia(this);
 
-    public override void Accept(
-#if LANG_LUA
-        LuaSyntaxVisitor
-#elif LANG_MOONSCRIPT
-        MoonScriptSyntaxVisitor
-#endif
-        visitor) => visitor.VisitTrivia(this);
-
-    public override TResult? Accept<TResult>(
-#if LANG_LUA
-        LuaSyntaxVisitor<TResult>
-#elif LANG_MOONSCRIPT
-        MoonScriptSyntaxVisitor<TResult>
-#endif
-        visitor) where TResult : default => visitor.VisitTrivia(this);
+    public override TResult? Accept<TResult>(ThisInternalSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitTrivia(this);
+    #endregion
 
     internal static SyntaxTrivia Create(SyntaxKind kind, string text) => new(kind, text);
 
+    [DoesNotReturn]
     internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => throw ExceptionUtilities.Unreachable();
 
+    [DoesNotReturn]
     internal override GreenNode? GetSlot(int index) => throw ExceptionUtilities.Unreachable();
 
     public override bool IsEquivalentTo([NotNullWhen(true)] GreenNode? other) =>
-        base.IsEquivalentTo(other) && this.Text == ((SyntaxTrivia)other).Text;
+        base.IsEquivalentTo(other) && Text == ((SyntaxTrivia)other).Text;
 
-    public override string ToFullString() => this.Text;
+    public override int GetLeadingTriviaWidth() => 0;
 
-    public override string ToString() => this.Text;
+    public override int GetTrailingTriviaWidth() => 0;
 
-    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics) =>
-        new SyntaxTrivia(this.Kind, this.Text, diagnostics, this.GetAnnotations());
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new SyntaxTrivia(Kind, Text, diagnostics, GetAnnotations());
 
-    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations) =>
-        new SyntaxTrivia(this.Kind, this.Text, this.GetDiagnostics(), annotations);
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new SyntaxTrivia(Kind, Text, GetDiagnostics(), annotations);
 
-    protected override void WriteTriviaTo(TextWriter writer) => writer.Write(this.Text);
+    protected override void WriteTriviaTo(TextWriter writer) => writer.Write(Text);
+
+    public override string ToFullString() => Text;
+
+    public override string ToString() => Text;
 
     public static implicit operator Microsoft.CodeAnalysis.SyntaxTrivia(SyntaxTrivia trivia) =>
         new(token: default, trivia, position: 0, index: 0);

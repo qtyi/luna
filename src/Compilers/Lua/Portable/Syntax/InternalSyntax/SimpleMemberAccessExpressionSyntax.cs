@@ -6,5 +6,5 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
 partial class SimpleMemberAccessExpressionSyntax
 {
-    public override ExpressionSyntax Member => this.MemberName;
+    public override ExpressionSyntax Member => MemberName;
 }

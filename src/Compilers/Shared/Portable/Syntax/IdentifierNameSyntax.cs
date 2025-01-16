@@ -14,7 +14,11 @@ namespace Qtyi.CodeAnalysis.MoonScript
     {
         partial class IdentifierNameSyntax
         {
-            internal override IdentifierNameSyntax GetUnqualifiedName() => this;
+            public override int Arity => 0;
+
+            internal override SimpleNameSyntax GetUnqualifiedName() => this;
+
+            internal override string ErrorDisplayName() => Identifier.ValueText;
         }
     }
 

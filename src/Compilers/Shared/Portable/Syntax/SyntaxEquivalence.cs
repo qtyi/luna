@@ -7,16 +7,8 @@ using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisSyntaxNode = LuaSyntaxNode;
-using ThisSyntaxTree = LuaSyntaxTree;
-using ThisParseOptions = LuaParseOptions;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisSyntaxNode = MoonScriptSyntaxNode;
-using ThisSyntaxTree = MoonScriptSyntaxTree;
-using ThisParseOptions = MoonScriptParseOptions;
 #endif
 
 internal static partial class SyntaxEquivalence

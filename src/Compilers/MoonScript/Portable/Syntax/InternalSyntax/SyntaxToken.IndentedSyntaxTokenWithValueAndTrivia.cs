@@ -3,23 +3,21 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
 
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 partial class SyntaxToken
 {
     internal class IndentedSyntaxTokenWithValueAndTrivia<T> : IndentedSyntaxTokenWithValue<T>
+        where T : notnull
     {
-        static IndentedSyntaxTokenWithValueAndTrivia() => ObjectBinder.RegisterTypeReader(typeof(IndentedSyntaxTokenWithValueAndTrivia<T>), r => new IndentedSyntaxTokenWithValueAndTrivia<T>(r));
-
         private readonly GreenNode? _leading;
         private readonly GreenNode? _trailing;
 
         internal IndentedSyntaxTokenWithValueAndTrivia(
             SyntaxKind kind,
             string text,
-            T? value,
+            T value,
             int innerIndent,
             GreenNode? leading,
             GreenNode? trailing
@@ -27,12 +25,12 @@ partial class SyntaxToken
         {
             if (leading is not null)
             {
-                this.AdjustFlagsAndWidth(leading);
-                this._leading = leading;
+                AdjustFlagsAndWidth(leading);
+                _leading = leading;
             }
             if (trailing is not null)
             {
-                this.AdjustFlagsAndWidth(trailing);
+                AdjustFlagsAndWidth(trailing);
                 _trailing = trailing;
             }
         }
@@ -40,7 +38,7 @@ partial class SyntaxToken
         internal IndentedSyntaxTokenWithValueAndTrivia(
             SyntaxKind kind,
             string text,
-            T? value,
+            T value,
             int innerIndent,
             GreenNode? leading,
             GreenNode? trailing,
@@ -50,53 +48,30 @@ partial class SyntaxToken
         {
             if (leading is not null)
             {
-                this.AdjustFlagsAndWidth(leading);
-                this._leading = leading;
+                AdjustFlagsAndWidth(leading);
+                _leading = leading;
             }
             if (trailing is not null)
             {
-                this.AdjustFlagsAndWidth(trailing);
-                this._trailing = trailing;
+                AdjustFlagsAndWidth(trailing);
+                _trailing = trailing;
             }
         }
 
-        internal IndentedSyntaxTokenWithValueAndTrivia(ObjectReader reader) : base(reader)
-        {
-            var leading = (GreenNode?)reader.ReadValue();
-            if (leading is not null)
-            {
-                this.AdjustFlagsAndWidth(leading);
-                this._leading = leading;
-            }
-            var trailing = (GreenNode?)reader.ReadValue();
-            if (trailing is not null)
-            {
-                this.AdjustFlagsAndWidth(trailing);
-                this._trailing = trailing;
-            }
-        }
+        public override GreenNode? GetLeadingTrivia() => _leading;
 
-        internal override void WriteTo(ObjectWriter writer)
-        {
-            base.WriteTo(writer);
-            writer.WriteValue(this._leading);
-            writer.WriteValue(this._trailing);
-        }
+        public override GreenNode? GetTrailingTrivia() => _trailing;
 
-        public override GreenNode? GetLeadingTrivia() => this._leading;
+        public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia)
+            => new IndentedSyntaxTokenWithValueAndTrivia<T>(Kind, TextField, ValueField, InnerIndent, trivia, _trailing, GetDiagnostics(), GetAnnotations());
 
-        public override GreenNode? GetTrailingTrivia() => this._trailing;
+        public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia)
+            => new IndentedSyntaxTokenWithValueAndTrivia<T>(Kind, TextField, ValueField, InnerIndent, _leading, trivia, GetDiagnostics(), GetAnnotations());
 
-        public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia) =>
-            new IndentedSyntaxTokenWithValueAndTrivia<T>(this.Kind, this._text, this._value, this._innerIndent, trivia, this.GetTrailingTrivia(), this.GetDiagnostics(), this.GetAnnotations());
+        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+            => new IndentedSyntaxTokenWithValueAndTrivia<T>(Kind, TextField, ValueField, InnerIndent, _leading, _trailing, diagnostics, GetAnnotations());
 
-        public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia) =>
-            new IndentedSyntaxTokenWithValueAndTrivia<T>(this.Kind, this._text, this._value, this._innerIndent, this.GetLeadingTrivia(), trivia, this.GetDiagnostics(), this.GetAnnotations());
-
-        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics) =>
-            new IndentedSyntaxTokenWithValueAndTrivia<T>(this.Kind, this._text, this._value, this._innerIndent, this.GetLeadingTrivia(), this.GetTrailingTrivia(), diagnostics, this.GetAnnotations());
-
-        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations) =>
-             new IndentedSyntaxTokenWithValueAndTrivia<T>(this.Kind, this._text, this._value, this._innerIndent, this.GetLeadingTrivia(), this.GetTrailingTrivia(), this.GetDiagnostics(), annotations);
+        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+            => new IndentedSyntaxTokenWithValueAndTrivia<T>(Kind, TextField, ValueField, InnerIndent, _leading, _trailing, GetDiagnostics(), annotations);
     }
 }

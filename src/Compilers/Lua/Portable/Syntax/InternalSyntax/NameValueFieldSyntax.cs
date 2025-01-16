@@ -6,5 +6,5 @@ namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
 
 partial class NameValueFieldSyntax
 {
-    public override ExpressionSyntax? FieldKey => this.FieldName;
+    public override ExpressionSyntax? FieldKey => FieldName;
 }

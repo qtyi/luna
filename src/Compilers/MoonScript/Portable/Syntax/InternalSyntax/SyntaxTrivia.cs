@@ -6,6 +6,6 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 partial class SyntaxTrivia
 {
-    public int WhiteSpaceIndent => this.IsWhiteSpace ? 0 :
-        this.Text.Sum(SyntaxFacts.WhiteSpaceIndent);
+    public int WhiteSpaceIndent => IsWhitespace ? 0 :
+        Text.Sum(SyntaxFacts.WhiteSpaceIndent);
 }

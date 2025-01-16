@@ -121,6 +121,10 @@
     <value>'{0}' is not structured trivia.</value>
     <comment>{0} is the name of an argument.</comment>
   </data>
+  <data name="ArgMustBeDefinedInEnum" xml:space="preserve">
+    <value>'{0}' must be defined in Enum '{1}'.</value>
+    <comment>{0} is the name of an argument, {1} is the name of an Enum type.</comment>
+  </data>
   <data name="ArgMustBeEmpty" xml:space="preserve">
     <value>'{0}' must be empty.</value>
     <comment>{0} is the name of an argument.</comment>
@@ -151,6 +155,9 @@
   </data>
   <data name="SpeculatedSyntaxNodeCannotBelongToCurrentCompilation" xml:space="preserve">
     <value>Syntax node to be speculated cannot belong to a syntax tree from the current compilation.</value>
+  </data>
+  <data name="WRN_ShebangOnlySupportedInScript" xml:space="preserve">
+    <value>`#!` only supported in script.</value>
   </data>
   <data name="SyntaxNodeIsNotWithinSyntaxTree" xml:space="preserve">
     <value>Syntax node is not within syntax tree.</value>

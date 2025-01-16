@@ -2,8 +2,6 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Roslyn.Utilities;
-
 namespace Qtyi.CodeAnalysis.MoonScript;
 
 partial class Symbol
@@ -18,28 +16,8 @@ partial class Symbol
     {
         get
         {
-            switch (this.Kind)
-            {
-                case SymbolKind.Local:
-                case SymbolKind.Label:
-                    return true;
-
-                case SymbolKind.Assembly:
-                case SymbolKind.DynamicType:
-                case SymbolKind.Netmodule:
-                    return false;
-
-                case SymbolKind.Namespace:
-                case SymbolKind.Field:
-                case SymbolKind.Parameter:
-                case SymbolKind.NamedType:
-                    break;
-
-                default:
-                    throw ExceptionUtilities.UnexpectedValue(this.Kind);
-            }
-
-            return SyntaxFacts.IsValidIdentifier(this.Name);
+#warning Not implemented.
+            throw new NotImplementedException();
         }
     }
 }

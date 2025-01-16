@@ -7,6 +7,6 @@ namespace Qtyi.CodeAnalysis.Lua;
 partial class LuaCompilationReference
 {
     #region Debugger Display
-    private partial string GetDebugDisplay() => LuaResources.CompilationLua + this.Compilation.AssemblyName;
+    private partial string GetDebugDisplay() => ThisResources.CompilationLua + Compilation.AssemblyName;
     #endregion
 }

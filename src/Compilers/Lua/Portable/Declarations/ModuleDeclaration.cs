@@ -24,8 +24,8 @@ internal partial class ModuleDeclaration
         ImmutableArray<Diagnostic> diagnostics)
         : base(name)
     {
-        this._syntaxReference = syntaxReference;
-        this.Diagnostics = diagnostics;
+        _syntaxReference = syntaxReference;
+        Diagnostics = diagnostics;
     }
 
     #region Declaration

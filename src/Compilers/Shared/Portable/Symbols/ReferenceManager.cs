@@ -9,18 +9,12 @@ using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisCompilation = LuaCompilation;
-using ThisMessageProvider = MessageProvider;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisCompilation = MoonScriptCompilation;
-using ThisMessageProvider = MessageProvider;
 #endif
 
 using Symbols;
-using MetadataOrDiagnostic = System.Object;
+using MetadataOrDiagnostic = Object;
 
 partial class
 #if LANG_LUA
@@ -30,14 +24,14 @@ partial class
 #endif
 {
     /// <summary>
-    /// <see cref="ReferenceManager"/> encapsulates functionality to create an underlying <see cref="SourceAssemblySymbol"/> 
+    /// <see cref="ThisReferenceManager"/> encapsulates functionality to create an underlying <see cref="SourceAssemblySymbol"/> 
     /// (with underlying <see cref="NetmoduleSymbol"/>) for <see cref="Compilation"/> and <see cref="AssemblySymbol"/>s for referenced
     /// assemblies (with underlying <see cref="NetmoduleSymbol"/>) all properly linked together based on
     /// reference resolution between them.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <see cref="ReferenceManager"/> is also responsible for reuse of metadata readers for imported modules
+    /// <see cref="ThisReferenceManager"/> is also responsible for reuse of metadata readers for imported modules
     /// and assemblies as well as existing <see cref="AssemblySymbol"/>s for referenced assemblies. In order
     /// to do that, it maintains global cache for metadata readers and <see cref="AssemblySymbol"/>s
     /// associated with them. The cache uses <see cref="WeakReference{T}"/>s to refer to the metadata readers and

@@ -26,19 +26,19 @@ internal partial class SyntaxFactoryContext
 
     private readonly Stack<SyntaxKind> _structureStack = new();
 
-    internal SyntaxKind CurrentStructure => this._structureStack.Count > 0 ? this._structureStack.Peek() : SyntaxKind.None;
+    internal SyntaxKind CurrentStructure => _structureStack.Count > 0 ? _structureStack.Peek() : SyntaxKind.None;
 
-    internal void EnterStructure(SyntaxKind kind) => this._structureStack.Push(kind);
+    internal void EnterStructure(SyntaxKind kind) => _structureStack.Push(kind);
 
     private void LeaveStructure()
     {
-        Debug.Assert(this._structureStack.Count != 0);
-        this._structureStack.Pop();
+        Debug.Assert(_structureStack.Count != 0);
+        _structureStack.Pop();
     }
 
     internal void LeaveStructure(SyntaxKind kind)
     {
-        Debug.Assert(this._structureStack.Count != 0);
-        Debug.Assert(kind == this._structureStack.Pop());
+        Debug.Assert(_structureStack.Count != 0);
+        Debug.Assert(kind == _structureStack.Pop());
     }
 }

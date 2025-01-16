@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -13,24 +12,13 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 partial class SyntaxToken
 {
-    internal class SyntaxIdentifierWithTrivia : SyntaxIdentifier
+    internal class SyntaxIdentifierWithTrivia : SyntaxIdentifierExtended
     {
-        static SyntaxIdentifierWithTrivia() => ObjectBinder.RegisterTypeReader(typeof(SyntaxIdentifierWithTrivia), r => new SyntaxIdentifierWithTrivia(r));
-
-        protected readonly SyntaxKind _contextualKind;
-        protected readonly string _valueText;
-
         private readonly GreenNode? _leading;
         private readonly GreenNode? _trailing;
 
-        public sealed override GreenNode? GetLeadingTrivia() => this._leading;
-        public sealed override GreenNode? GetTrailingTrivia() => this._trailing;
-
-        public override SyntaxKind ContextualKind => this._contextualKind;
-
-        public override string ValueText => this._valueText;
-
-        public override object? Value => this._valueText;
+        public sealed override GreenNode? GetLeadingTrivia() => _leading;
+        public sealed override GreenNode? GetTrailingTrivia() => _trailing;
 
         internal SyntaxIdentifierWithTrivia(
             SyntaxKind contextualKind,
@@ -38,14 +26,18 @@ partial class SyntaxToken
             string valueText,
             GreenNode? leading,
             GreenNode? trailing
-        ) : base(text)
+        ) : base(contextualKind, text, valueText)
         {
-            this._contextualKind = contextualKind;
-            this._valueText = valueText;
-
-            InitializeWithTrivia(this, ref this._leading, ref this._trailing,
-                leading, trailing
-            );
+            if (leading is not null)
+            {
+                AdjustFlagsAndWidth(leading);
+                _leading = leading;
+            }
+            if (trailing is not null)
+            {
+                AdjustFlagsAndWidth(trailing);
+                _trailing = trailing;
+            }
         }
 
         internal SyntaxIdentifierWithTrivia(
@@ -56,44 +48,30 @@ partial class SyntaxToken
             GreenNode? trailing,
             DiagnosticInfo[]? diagnostics,
             SyntaxAnnotation[]? annotations
-        ) : base(text, diagnostics, annotations)
+        ) : base(contextualKind, text, valueText, diagnostics, annotations)
         {
-            this._contextualKind = contextualKind;
-            this._valueText = valueText;
-
-            InitializeWithTrivia(this, ref this._leading, ref this._trailing,
-                leading, trailing
-            );
-        }
-
-        internal SyntaxIdentifierWithTrivia(ObjectReader reader) : base(reader)
-        {
-            this._contextualKind = (SyntaxKind)reader.ReadInt16();
-            this._valueText = reader.ReadString();
-
-            InitializeWithTrivia(this, ref this._leading, ref this._trailing,
-                (GreenNode?)reader.ReadValue(),
-                (GreenNode?)reader.ReadValue()
-            );
-        }
-
-        internal override void WriteTo(ObjectWriter writer)
-        {
-            base.WriteTo(writer);
-            writer.WriteValue(this._leading);
-            writer.WriteValue(this._trailing);
+            if (leading is not null)
+            {
+                AdjustFlagsAndWidth(leading);
+                _leading = leading;
+            }
+            if (trailing is not null)
+            {
+                AdjustFlagsAndWidth(trailing);
+                _trailing = trailing;
+            }
         }
 
         public override SyntaxToken TokenWithLeadingTrivia(GreenNode? trivia) =>
-            new SyntaxIdentifierWithTrivia(this._contextualKind, this._text, this._valueText, trivia, this.GetTrailingTrivia(), this.GetDiagnostics(), this.GetAnnotations());
+            new SyntaxIdentifierWithTrivia(ContextualKindField, TextField, ValueTextField, trivia, _trailing, GetDiagnostics(), GetAnnotations());
 
         public override SyntaxToken TokenWithTrailingTrivia(GreenNode? trivia) =>
-            new SyntaxIdentifierWithTrivia(this._contextualKind, this._text, this._valueText, this.GetLeadingTrivia(), trivia, this.GetDiagnostics(), this.GetAnnotations());
+            new SyntaxIdentifierWithTrivia(ContextualKindField, TextField, ValueTextField, _leading, trivia, GetDiagnostics(), GetAnnotations());
 
         internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics) =>
-            new SyntaxIdentifierWithTrivia(this._contextualKind, this._text, this._valueText, this.GetLeadingTrivia(), this.GetTrailingTrivia(), diagnostics, this.GetAnnotations());
+            new SyntaxIdentifierWithTrivia(ContextualKindField, TextField, ValueTextField, _leading, _trailing, diagnostics, GetAnnotations());
 
         internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations) =>
-            new SyntaxIdentifierWithTrivia(this._contextualKind, this._text, this._valueText, this.GetLeadingTrivia(), this.GetTrailingTrivia(), this.GetDiagnostics(), annotations);
+            new SyntaxIdentifierWithTrivia(ContextualKindField, TextField, ValueTextField, _leading, _trailing, GetDiagnostics(), annotations);
     }
 }

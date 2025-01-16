@@ -12,137 +12,173 @@ using Microsoft.CodeAnalysis.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = LuaSyntaxNode;
-using ThisParseOptions = LuaParseOptions;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
-using ThisParseOptions = MoonScriptParseOptions;
 #endif
 
 internal partial class Lexer : AbstractLexer
 {
-    /// <summary>标识符缓冲数组初始容量（表示标识符字符长度的初始值）。</summary>
+    /// <summary>Initial capacity of identifier characters buffer.</summary>
     private const int IdentifierBufferInitialCapacity = 32;
-    /// <summary>语法琐碎内容列表初始容量（表示连续的语法琐碎内容中标记数量的初始值）。</summary>
+    /// <summary>Initial capacity of trivia list.</summary>
     private const int TriviaListInitialCapacity = 8;
 
-    /// <summary>与解析相关的选项。</summary>
+    /// <summary>Parse options, like language version, documentation mode, source code kind, features, etc..</summary>
     private readonly ThisParseOptions _options;
 
-    /// <summary>词法分析器的当前分析模式。</summary>
-#if TESTING
-    internal
-#else
-    private
-#endif
-        LexerMode _mode;
+    /// <summary>Current mode of this lexer.</summary>
+    private LexerMode _mode;
+    /// <summary><see cref="char"/> buffer for UTF-16 text.</summary>
     private readonly StringBuilder _builder;
+    /// <summary><see cref="byte"/> buffer for UTF-8 text.</summary>
     private readonly ArrayBuilder<byte> _utf8Builder;
-    /// <summary>标识符缓冲数组。</summary>
+    /// <summary>Identifier characters buffer.</summary>
     private char[] _identifierBuffer;
-    /// <summary>标识符字符长度。</summary>
+    /// <summary>Count of available characters in <see cref="_identifierBuffer"/>.</summary>
     private int _identifierLength;
-    /// <summary>词法分析器缓存。</summary>
+    /// <summary>Cache of this lexer.</summary>
     private readonly LexerCache _cache;
-    /// <summary>产生的坏标记的累计数量。</summary>
+    /// <summary>Cumulative count of bad tokens produced.</summary>
     private int _badTokenCount;
 
-    private readonly bool _allowPreprocessorDirectives;
-
     /// <summary>
-    /// 获取与解析相关的选项。
+    /// Gets parse options for this lexer.
     /// </summary>
     /// <value>
-    /// 与解析相关的选项。
+    /// Parse options.
     /// </value>
-    public ThisParseOptions Options => this._options;
+    public ThisParseOptions Options => _options;
 
     /// <summary>
-    /// 创建词法分析器的新实例。
+    /// Gets a value indicating whether the documentation comments are treated as regular comments.
     /// </summary>
-    /// <param name="options">与解析相关的选项。</param>
-    /// <param name="allowPreprocessorDirectives"></param>
+    /// <value>
+    /// Returns <see langword="true"/> if the documentation comments are treated as regular comments; otherwise, <see langword="false"/>.
+    /// </value>
+    public bool SuppressDocumentationCommentParse => _options.DocumentationMode < DocumentationMode.Parse;
+
+    /// <summary>All directives we parsed.</summary>
+    private DirectiveStack _directives;
+    /// <summary>Parser to parse directives.</summary>
+    /// <remarks>PERF: Expensive to continually recreate.  So just initialize/reinitialize on demand.</remarks>
+    private DirectiveParser? _directiveParser;
+
+    /// <summary>
+    /// Gets a stack of directives we parsed.
+    /// </summary>
+    public DirectiveStack Directives => _directives;
+
+    /// <summary>
+    /// Create a new instance of <see cref="Lexer"/> type.
+    /// </summary>
+    /// <param name="options">Parse options for the lexer.</param>
+    /// <param name="allowPreprocessorDirectives">A value indecates whether we allow preprocessor directives.</param>
     /// <inheritdoc/>
-    public Lexer(SourceText text, ThisParseOptions options, bool allowPreprocessorDirectives = true) : base(text)
+    public Lexer(SourceText text, ThisParseOptions options) : base(text)
     {
-        this._options = options;
-        this._builder = new();
-        this._utf8Builder = ArrayBuilder<byte>.GetInstance();
-        this._identifierBuffer = new char[IdentifierBufferInitialCapacity];
-        this._cache = new();
-        this._createQuickTokenFunction = this.CreateQuickToken;
-        this._allowPreprocessorDirectives = allowPreprocessorDirectives;
+        Debug.Assert(options is not null);
+
+        _options = options;
+        _builder = new();
+        _utf8Builder = ArrayBuilder<byte>.GetInstance();
+        _identifierBuffer = new char[IdentifierBufferInitialCapacity];
+        _cache = new();
     }
 
     /// <inheritdoc/>
     public override void Dispose()
     {
-        this._cache.Free();
-        this._utf8Builder.Free();
+        _cache.Free();
+        _utf8Builder.Free();
+
+        _directiveParser?.Dispose();
 
         base.Dispose();
     }
 
+    /// <summary>
+    /// Reset offset of text windows of this lexer to specified character position and reset directive stack.
+    /// </summary>
+    /// <param name="position">Character position to reset.</param>
+    /// <param name="directives">Stack of directives to reset.</param>
+    public void Reset(int position, DirectiveStack directives)
+    {
+        TextWindow.Reset(position);
+        _directives = directives;
+    }
+
+    /// <summary>
+    /// Add specified trivia to trivia list, report diagnostics if trivia contains errors.
+    /// </summary>
+    /// <param name="trivia">Syntax trivia to add.</param>
+    /// <param name="list">Syntax trivia list to add to, not <see langword="null"/> when returns.</param>
     private void AddTrivia(ThisInternalSyntaxNode trivia, [NotNull] ref SyntaxListBuilder? list)
     {
-        if (this.HasErrors)
-            trivia = trivia.WithDiagnosticsGreen(this.GetErrors(leadingTriviaWidth: 0));
+        if (HasErrors)
+            trivia = trivia.WithDiagnosticsGreen(GetErrors(leadingTriviaWidth: 0));
 
-        if (list is null)
-            list = new(TriviaListInitialCapacity);
+        list ??= new(TriviaListInitialCapacity);
 
         list.Add(trivia);
     }
 
     /// <summary>
-    /// 重置词法分析器当前的字符偏移量到指定的位置
+    /// Gets lex mode flags.
     /// </summary>
-    /// <param name="position">要重置到的位置。</param>
-    public void Reset(int position) => this.TextWindow.Reset(position);
-
-    /// <summary>
-    /// 获取指定词法分析器模式枚举值中的模式部分。
-    /// </summary>
-    /// <param name="mode">要获取模式部分的词法分析器模式枚举值。</param>
-    /// <returns><paramref name="mode"/>的模式部分的词法分析器模式枚举值。</returns>
+    /// <param name="mode">Lexer mode enum value.</param>
+    /// <returns><paramref name="mode"/>Lex mode flags of <paramref name="mode"/>.</returns>
     private static partial LexerMode ModeOf(LexerMode mode);
 
     /// <summary>
-    /// 词法分析器的当前模式的枚举值中的模式部分是否与指定词法分析器模式枚举值相等。
+    /// Checks if lex mode flags of current lexer mode the same as specified enum value.
     /// </summary>
-    /// <param name="mode">要与词法分析器的当前模式的枚举值中的模式部分相比较的词法分析器模式枚举值。</param>
-    /// <returns>若相等，则返回<see langword="true"/>；否则返回<see langword="false"/>。</returns>
-    private bool ModeIs(LexerMode mode) => ModeOf(this._mode) == mode;
+    /// <param name="mode">Lexer mode enum value to compare.</param>
+    /// <returns>Returns <see langword="true"/> if lex mode flags of <see cref="_mode"/> the same as <paramref name="mode"/>; otherwise, <see langword="false"/>.</returns>
+    private bool ModeIs(LexerMode mode) => ModeOf(_mode) == mode;
 
     /// <summary>
-    /// 使用指定的词法分析器模式分析一个语法标记，并将它调整为分析后的词法分析器的当前模式。
+    /// Lexes a token using specified lexer mode and adjustify to new lexer mode that is the current mode after lexing.
     /// </summary>
-    /// <param name="mode">词法分析器的模式。</param>
-    /// <returns>分析得到的语法标记。</returns>
+    /// <param name="mode">Lexer mode enum values for lexing.</param>
+    /// <returns>Syntax token the result of lexing.</returns>
     public SyntaxToken Lex(ref LexerMode mode)
     {
-        var result = this.Lex(mode);
-        mode = this._mode;
+        var result = Lex(mode);
+        mode = _mode;
         return result;
     }
 
     /// <summary>
-    /// 使用指定的词法分析器模式分析一个语法标记。
+    /// Lexes a token using specified lexer mode。
     /// </summary>
-    /// <param name="mode">词法分析器的模式。</param>
-    /// <returns>分析得到的语法标记。</returns>
+    /// <param name="mode">Lexer mode enum values for lexing.</param>
+    /// <returns>Syntax token the result of lexing.</returns>
     public partial SyntaxToken Lex(LexerMode mode);
 
-    /// <summary>前方语法琐碎内容缓存。</summary>
-    private SyntaxListBuilder _leadingTriviaCache = new(10);
-    /// <summary>后方语法琐碎内容缓存。</summary>
-    private SyntaxListBuilder _trailingTriviaCache = new(10);
+    /// <summary>Cache syntax list for leading trivia.</summary>
+    private SyntaxListBuilder _leadingTriviaCache = new(TriviaListInitialCapacity);
+    /// <summary>Cache syntax list for trailing trivia.</summary>
+    private SyntaxListBuilder _trailingTriviaCache = new(TriviaListInitialCapacity);
+    /// <summary>Cache syntax list for directive trivia.</summary>
+    /// <remarks>PERF: Expensive to continually recreate.  So just initialize/reinitialize on demand.</remarks>
+    private SyntaxListBuilder? _directiveTriviaCache;
 
     /// <summary>
-    /// 获取语法琐碎内容缓存的总宽度。
+    /// Creates a syntax token.
+    /// </summary>
+    /// <param name="info">An object collects information about a syntax token.</param>
+    /// <param name="leading">Syntax list for leading trivia.</param>
+    /// <param name="trailing">Syntax list for trailing trivia.</param>
+    /// <param name="errors">Syntax diagnostics collected.</param>
+    /// <returns>A syntax token</returns>
+    private partial SyntaxToken Create(
+        in TokenInfo info,
+        SyntaxListBuilder? leading,
+        SyntaxListBuilder? trailing,
+        SyntaxDiagnosticInfo[]? errors);
+
+    /// <summary>
+    /// Gets full character width of trivia list. Returns 0 if <paramref name="builder"/> is <see langword="null"/>.
     /// </summary>
     private static int GetFullWidth(SyntaxListBuilder? builder)
     {
@@ -160,96 +196,238 @@ internal partial class Lexer : AbstractLexer
     }
 
     /// <summary>
-    /// 分析一个语法标记。
+    /// Lexes a syntax token.
     /// </summary>
-    /// <returns>分析得到的语法标记。</returns>
-#if TESTING
-    internal
-#else
-    private
-#endif
-        SyntaxToken LexSyntaxToken()
+    /// <returns>Syntax token the result of lexing.</returns>
+    private SyntaxToken LexSyntaxToken()
     {
-        // 分析前方语法琐碎内容。
-        this.LexSyntaxLeadingTriviaCore();
-        var leading = this._leadingTriviaCache;
+        // Scan leading trivia of a token.
+        ScanSyntaxLeadingTrivia();
+        var leading = _leadingTriviaCache;
 
-        // 分析语法标记，并获得标记信息。
+        // Scan token and get info.
         TokenInfo tokenInfo = default;
-        this.Start();
-        this.ScanSyntaxToken(ref tokenInfo);
-        var errors = this.GetErrors(GetFullWidth(leading));
+        Start();
+        ScanSyntaxToken(ref tokenInfo);
+        var errors = GetErrors(GetFullWidth(leading));
 
-        // 分析后方语法琐碎内容。
-        this.LexSyntaxTrailingTriviaCore();
-        var trailing = this._trailingTriviaCache;
+        // Scan trailing trivia of a token.
+        ScanSyntaxTrailingTrivia();
+        var trailing = _trailingTriviaCache;
 
-        return this.Create(in tokenInfo, leading, trailing, errors);
+        return Create(in tokenInfo, leading, trailing, errors);
     }
 
     /// <summary>
-    /// 分析一个前方语法琐碎内容。
+    /// Lexes a series of leading syntax trivia and returns in a syntax list.
     /// </summary>
-    /// <returns>分析得到的前方语法琐碎内容。</returns>
+    /// <returns>Syntax trivia list the result of lexing.</returns>
     internal SyntaxTriviaList LexSyntaxLeadingTrivia()
     {
-        this.LexSyntaxLeadingTriviaCore();
+        ScanSyntaxLeadingTrivia();
         return new(
-            default,
-            this._leadingTriviaCache.ToListNode(),
+            token: default,
+            node: _leadingTriviaCache.ToListNode(),
             position: 0,
             index: 0);
     }
 
     /// <summary>
-    /// 分析一个后方语法琐碎内容。
+    /// Lexes a new-line sequence
     /// </summary>
-    /// <returns>分析得到的后方语法琐碎内容。</returns>
-    internal SyntaxTriviaList LexSyntaxTrailingTrivia()
-    {
-        this.LexSyntaxTrailingTriviaCore();
-        return new(default,
-            this._trailingTriviaCache.ToListNode(), position: 0, index: 0);
-    }
+    /// <returns>Syntax trivia the result of lexing.</returns>
+    private partial SyntaxTrivia? LexEndOfLine();
 
     /// <summary>
-    /// 分析一个前方语法琐碎内容并存入<see cref="Lexer._leadingTriviaCache"/>。
+    /// Lexes a comment.
     /// </summary>
-    private void LexSyntaxLeadingTriviaCore()
-    {
-        this._leadingTriviaCache.Clear();
-        this.LexSyntaxTrivia(
-            afterFirstToken: this.TextWindow.Position > 0,
-            isTrailing: false,
-            triviaList: ref this._leadingTriviaCache);
-    }
+    /// <returns>Syntax trivia the result of lexing.</returns>
+    private partial SyntaxTrivia LexComment();
 
     /// <summary>
-    /// 分析一个后方语法琐碎内容并存入<see cref="Lexer._trailingTriviaCache"/>。
+    /// Lexes a directive syntax token.
     /// </summary>
-    private void LexSyntaxTrailingTriviaCore()
-    {
-        this._trailingTriviaCache.Clear();
-        this.LexSyntaxTrivia(
-            afterFirstToken: true,
-            isTrailing: true,
-            triviaList: ref this._trailingTriviaCache);
-    }
-
+    /// <returns>Directive syntax token the result of lexing.</returns>
     private SyntaxToken LexDirectiveToken()
     {
-        this.Start();
+        // Scan directive token and get info.
         TokenInfo info = default;
-        this.ScanDirectiveToken(ref info);
-        var trailing = LexDirectiveTrailingTrivia(info.Kind == SyntaxKind.EndOfDirectiveToken);
-        return Create(in info, null, trailing, this.GetErrors(0));
+        Start();
+        ScanDirectiveToken(ref info);
+        var errors = GetErrors(leadingTriviaWidth: 0);
+
+        // Scan directive trailing trivia of a token.
+        _directiveTriviaCache?.Clear();
+        ScanDirectiveTrailingTrivia(
+            includeEndOfLine: info.Kind == SyntaxKind.EndOfDirectiveToken,
+            triviaList: ref _directiveTriviaCache);
+
+        return Create(in info, leading: null, trailing: _directiveTriviaCache, errors);
     }
 
+    /// <summary>
+    /// Lexes a directive syntax trivia.
+    /// </summary>
+    /// <returns>Directive syntax trivia the result of lexing.</returns>
+    private partial ThisInternalSyntaxNode? LexDirectiveTrivia();
+
+    /// <summary>
+    /// Lexes a directive syntax trivia and ignores its preprocessing message.
+    /// </summary>
+    /// <returns>Directive syntax trivia the result of lexing.</returns>
+    public SyntaxToken LexEndOfDirectiveWithOptionalPreprocessingMessage(bool trimEnd = false)
+    {
+        var builder = PooledStringBuilder.GetInstance();
+        // Skip the rest of the line until we hit a EOL or EOF.  This follows the PP_Message portion of the specification.
+        ScanToEndOfLine(builder: builder.Builder, trimStart: true, trimEnd: trimEnd);
+
+        SyntaxTrivia? leading;
+        if (builder.Length == 0)
+        {
+            leading = null;
+            builder.Free();
+        }
+        else
+            leading = ThisInternalSyntaxFactory.PreprocessingMessage(builder.ToStringAndFree());
+
+        // now try to consume the EOL if there.
+        ScanDirectiveTrailingTrivia(
+            includeEndOfLine: true,
+            triviaList: ref _directiveTriviaCache);
+        var trailing = _directiveTriviaCache?.ToListNode();
+        var endOfDirective = ThisInternalSyntaxFactory.Token(leading, SyntaxKind.EndOfDirectiveToken, trailing);
+
+        return endOfDirective;
+    }
+
+    /// <summary>
+    /// Scans a syntax token.
+    /// </summary>
+    /// <param name="info">An object that collects information about a syntax token.</param>
+    private partial void ScanSyntaxToken(ref TokenInfo info);
+
+    /// <summary>
+    /// Scans a directive syntax token.
+    /// </summary>
+    /// <param name="info">An object that collects information about a directive syntax token.</param>
     private partial bool ScanDirectiveToken(ref TokenInfo info);
 
-    private SyntaxListBuilder? LexDirectiveTrailingTrivia(bool includeEndOfLine)
+    /// <summary>
+    /// Scans a numeric literal.
+    /// </summary>
+    /// <param name="info">An object that collects information about a syntax token.</param>
+    /// <returns>Returns <see langword="true"/> if we find a numeric literal; otherwise, <see langword="false"/>.</returns>
+    private partial bool ScanNumericLiteral(ref TokenInfo info);
+
+    /// <summary>
+    /// Scans a string literal.
+    /// </summary>
+    /// <param name="info">An object that collects information about a syntax token.</param>
+    /// <returns>Returns <see langword="true"/> if we find a string literal; otherwise, <see langword="false"/>.</returns>
+    private partial bool ScanStringLiteral(ref TokenInfo info);
+
+    /// <summary>
+    /// Scans a multi-line raw string literal.
+    /// </summary>
+    /// <param name="info">An object that collects information about a syntax token.</param>
+    /// <returns>Returns <see langword="true"/> if we find a string literal; otherwise, <see langword="false"/>.</returns>
+    private partial void ScanMultiLineRawStringLiteral(ref TokenInfo info, int level = -1);
+
+    /// <summary>
+    /// 将UTF-16字符串从<see cref="_builder"/>中转换成UTF-8字节序列，并输入到<see cref="_utf8Builder"/>中。
+    /// </summary>
+    /// <param name="additionalBytes">在后方追加的字节序列。</param>
+#warning Documentation comment needs globalize.
+    // TODO: Intern Utf8String directly by TextWindow.
+    private void FlushToUtf8Builder(params byte[] additionalBytes)
     {
-        SyntaxListBuilder? triviaList = null;
+        if (_builder.Length != 0)
+        {
+            var strValue = TextWindow.Intern(_builder);
+            _builder.Length = 0;
+
+            var utf8Bytes = Encoding.UTF8.GetBytes(strValue);
+            _utf8Builder.AddRange(utf8Bytes);
+        }
+
+        _utf8Builder.AddRange(additionalBytes);
+    }
+
+    /// <summary>
+    /// Scans an identifier or a keyword.
+    /// </summary>
+    /// <param name="info">An object that collects information about a syntax token.</param>
+    /// <returns>Returns <see langword="true"/> if we find an identifier or a keyword; otherwise, <see langword="false"/>.</returns>
+    private partial bool ScanIdentifierOrKeyword(ref TokenInfo info);
+
+    /// <summary>
+    /// Scans a syntax trivia.
+    /// </summary>
+    /// <param name="afterFirstToken">Set to <see langword="false"/> if we are scanning before the first syntax token; otherwise, <see langword="true"/>.</param>
+    /// <param name="isTrailing">Set to <see langword="false"/> if we are scanning leading syntax trivia; otherwise, set to <see langword="true"/> that we are scanning trailing syntax trivia.</param>
+    /// <param name="triviaList">Syntax List to collect syntax trivia we scanned.</param>
+    private partial void ScanSyntaxTrivia(
+        bool afterFirstToken,
+        bool isTrailing,
+        ref SyntaxListBuilder triviaList);
+
+    /// <summary>
+    /// Lexes a series of trailing syntax trivia and returns in a syntax list.
+    /// </summary>
+    /// <returns>Syntax trivia list the result of lexing.</returns>
+    internal SyntaxTriviaList LexSyntaxTrailingTrivia()
+    {
+        ScanSyntaxTrailingTrivia();
+        return new(
+            token: default,
+            node: _trailingTriviaCache.ToListNode(),
+            position: 0,
+            index: 0);
+    }
+
+    /// <summary>
+    /// Scans a series of leading syntax trivia and adds to cache list.
+    /// </summary>
+    private void ScanSyntaxLeadingTrivia()
+    {
+        _leadingTriviaCache.Clear();
+        ScanSyntaxTrivia(
+            afterFirstToken: TextWindow.Position > 0,
+            isTrailing: false,
+            triviaList: ref _leadingTriviaCache);
+    }
+
+    /// <summary>
+    /// Scans a series of trailing syntax trivia and adds to cache list.
+    /// </summary>
+    private void ScanSyntaxTrailingTrivia()
+    {
+        _trailingTriviaCache.Clear();
+        ScanSyntaxTrivia(
+            afterFirstToken: true,
+            isTrailing: true,
+            triviaList: ref _trailingTriviaCache);
+    }
+
+    /// <summary>
+    /// Scans a syntax trivia.
+    /// </summary>
+    /// <param name="afterFirstToken">Set to <see langword="false"/> if we are scanning before the first syntax token; otherwise, <see langword="true"/>.</param>
+    /// <param name="afterNonWhitespaceOnLine"></param>
+    /// <param name="triviaList">Syntax List to collect syntax trivia we scanned.</param>
+#warning Needs documentation for parameter `afterNonWhitespaceOnLine`.
+    private partial void ScanDirectiveAndExcludedTrivia(
+        bool afterFirstToken,
+        bool afterNonWhitespaceOnLine,
+        ref SyntaxListBuilder triviaList);
+
+    /// <summary>
+    /// Scans a series of trailing syntax trivia of directive trivia and adds to cache list.
+    /// </summary>
+    /// <param name="includeEndOfLine">Set to <see langword="true"/> if EOL should be included; otherwise, <see langword="false"/>.</param>
+    /// <param name="triviaList">Syntax List to collect syntax trivia we scanned.</param>
+    private void ScanDirectiveTrailingTrivia(bool includeEndOfLine, ref SyntaxListBuilder? triviaList)
+    {
         while (true)
         {
             var position = TextWindow.Position;
@@ -259,296 +437,208 @@ internal partial class Lexer : AbstractLexer
             else if (trivia.Kind == SyntaxKind.EndOfLineTrivia)
             {
                 if (includeEndOfLine)
-                    this.AddTrivia(trivia, ref triviaList);
+                    AddTrivia(trivia, ref triviaList);
                 else
-                    this.TextWindow.Reset(position);
+                    TextWindow.Reset(position);
 
                 break;
             }
             else
-                this.AddTrivia(trivia, ref triviaList);
+                AddTrivia(trivia, ref triviaList);
         }
-        return triviaList;
-    }
-
-    private partial ThisInternalSyntaxNode? LexDirectiveTrivia();
-
-    private partial void LexDirectiveTrivia(
-        bool afterFirstToken,
-        bool afterNonWhitespaceOnLine,
-        ref SyntaxListBuilder triviaList);
-
-    public SyntaxToken LexEndOfDirectiveWithOptionalPreprocessingMessage()
-    {
-        var builder = PooledStringBuilder.GetInstance();
-        // Skip the rest of the line until we hit a EOL or EOF.  This follows the PP_Message portion of the specification.
-        this.ScanToEndOfLine(builder.Builder, trimEnd: false);
-
-        var leading = SyntaxFactory.PreprocessingMessage(builder.ToStringAndFree());
-
-        // now try to consume the EOL if there.
-        var trailing = this.LexDirectiveTrailingTrivia(includeEndOfLine: true)?.ToListNode();
-        var endOfDirective = SyntaxFactory.Token(leading, SyntaxKind.EndOfDirectiveToken, trailing);
-
-        return endOfDirective;
     }
 
     /// <summary>
-    /// 创建一个语法标记。
+    /// Scans to the end of the line and buffers characters in a <see cref="StringBuilder"/>.
     /// </summary>
-    /// <param name="info">语法标记的相关信息。</param>
-    /// <param name="leading">起始的语法列表构造器。</param>
-    /// <param name="trailing">结尾的语法列表构造器。</param>
-    /// <param name="errors">语法诊断消息数组。</param>
-    /// <returns>新的语法标记。</returns>
-    /// <remarks>
-    /// <paramref name="info"/>应表示标识符，或其字符串值不为<see langword="null"/>。
-    /// </remarks>
-    private partial SyntaxToken Create(
-        in TokenInfo info,
-        SyntaxListBuilder? leading,
-        SyntaxListBuilder? trailing,
-        SyntaxDiagnosticInfo[]? errors);
-
-    /// <summary>
-    /// 扫描一个完整的语法标记。
-    /// </summary>
-    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
-    private partial void ScanSyntaxToken(ref TokenInfo info);
-
-    /// <summary>
-    /// 扫描一个整形数字字面量。
-    /// </summary>
-    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
-    /// <returns>
-    /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
-    /// </returns>
-    private partial bool ScanNumericLiteral(ref TokenInfo info);
-
-    /// <summary>
-    /// 扫描一个字符串字面量。
-    /// </summary>
-    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
-    /// <returns>
-    /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
-    /// </returns>
-    private partial bool ScanStringLiteral(ref TokenInfo info);
-
-    /// <summary>
-    /// 将UTF-16字符串从<see cref="_builder"/>中转换成UTF-8字节序列，并输入到<see cref="_utf8Builder"/>中。
-    /// </summary>
-    /// <param name="additionalBytes">在后方追加的字节序列。</param>
-    private void FlushToUtf8Builder(params byte[] additionalBytes)
-    {
-        if (this._builder.Length != 0)
-        {
-            var strValue = this.TextWindow.Intern(this._builder);
-            this._builder.Length = 0;
-
-            var utf8Bytes = Encoding.UTF8.GetBytes(strValue);
-            this._utf8Builder.AddRange(utf8Bytes);
-        }
-
-        this._utf8Builder.AddRange(additionalBytes);
-    }
-
-    /// <summary>
-    /// 扫描一个多行原始字符串字面量。
-    /// </summary>
-    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
-    /// <returns>
-    /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
-    /// </returns>
-    private partial bool ScanMultiLineRawStringLiteral(ref TokenInfo info, int level = -1);
-
-    /// <summary>
-    /// 扫描一个标识符或关键字。
-    /// </summary>
-    /// <param name="info">指定的标记信息，它将在扫描过程中被修改。</param>
-    /// <returns>
-    /// 若扫描成功，则返回<see langword="true"/>；否则返回<see langword="false"/>。
-    /// </returns>
-    private partial bool ScanIdentifierOrKeyword(ref TokenInfo info);
-
-    /// <summary>
-    /// 分析一个语法琐碎内容。
-    /// </summary>
-    /// <param name="afterFirstToken"></param>
-    /// <param name="isTrailing">若要分析的是前方语法琐碎内容，则传入<see langword="false"/>；若要分析的是后方语法琐碎内容，则传入<see langword="true"/>。</param>
-    /// <param name="triviaList">语法琐碎内容缓存。</param>
-    private partial void LexSyntaxTrivia(
-        bool afterFirstToken,
-        bool isTrailing,
-        ref SyntaxListBuilder triviaList);
-
-    /// <summary>
-    /// 扫描一个表示新行的字符序列，并返回对应的绿树节点。
-    /// </summary>
-    /// <returns>表示新行的绿树节点。</returns>
-    private partial ThisInternalSyntaxNode? ScanEndOfLine();
-
-    /// <summary>
-    /// 扫描一个表示注释的字符序列，并返回对应的语法琐碎内容。
-    /// </summary>
-    /// <returns>表示注释的语法琐碎内容。</returns>
-    private partial SyntaxTrivia ScanComment();
-
-    /// <summary>
-    /// 扫描到一行的末尾。
-    /// </summary>
+    /// <param name="builder">String builder to collect characters we scanned.</param>
+    /// <param name="trimStart">Set to <see langword="true"/> to remove all whitespaces at the start; otherwise, <see langword="false"/>.</param>
+    /// <param name="trimEnd">Set to <see langword="true"/> to remove all whitespaces at the end; otherwise, <see langword="false"/>.</param>
     private void ScanToEndOfLine(
         StringBuilder? builder = null,
         bool trimStart = true,
         bool trimEnd = true)
     {
-        builder ??= this._builder;
-        builder.Clear();
+        builder?.Clear();
+
         var length = 0;
         for (
-            var c = this.TextWindow.PeekChar();
-            !SyntaxFacts.IsNewLine(c) && (c != SlidingTextWindow.InvalidCharacter || !this.TextWindow.IsReallyAtEnd());
-            c = this.TextWindow.PeekChar()
+            var c = TextWindow.PeekChar();
+            !SyntaxFacts.IsNewLine(c) && (c != SlidingTextWindow.InvalidCharacter || !TextWindow.IsReallyAtEnd());
+            c = TextWindow.PeekChar()
         )
         {
-            var isWhiteSpace = SyntaxFacts.IsWhiteSpace(c);
-            if (!trimStart || length != 0 || !isWhiteSpace)
+            var isWhitespace = SyntaxFacts.IsWhitespace(c);
+            if (builder is not null &&
+                (!trimStart || length != 0 || !isWhitespace))
             {
                 builder.Append(c);
 
-                if (!trimEnd || !isWhiteSpace)
+                if (!trimEnd || !isWhitespace)
                     length = builder.Length;
             }
-            this.TextWindow.AdvanceChar();
+            TextWindow.AdvanceChar();
         }
-        builder.Length = length;
+
+        if (builder is not null)
+            builder.Length = length;
     }
 
     /// <summary>
-    /// 扫描长方括号结构（多行注释或字符串常量）。
+    /// Scans a paired long brackets (<c>[=[ ]=]</c>) (for string literal and comment).
     /// </summary>
-    /// <param name="isTerminal">长方括号结构是否闭合。</param>
-    /// <param name="level">如果指定了这个参数，则表示预先匹配到的长方括号结构的级数。</param>
-    private bool ScanLongBrackets(out bool isTerminal, int level = -1)
+    /// <param name="closed">Sets to <see langword="true"/> if the brackets closed correctly; otherwise, <see langword="false"/>.</param>
+    /// <param name="level">Represents the level of long brackets if set to non negative; otherwise any possible level.</param>
+    /// <returns>Returns <see langword="true"/> if we find a long brackets with correct level; otherwise, <see langword="false"/>.</returns>
+    private bool ScanLongBrackets(out bool closed, int level = -1)
     {
-        this._builder.Clear();
+        _builder.Clear();
 
-        /* 匹配长方括号的开始部分。
-         * 开始部分要符合格式：\[=*\[
-         */
-        if (this.TextWindow.PeekChar() != '[') // 不符合格式。
+        var start = TextWindow.Position;
+
+        // First character must be `[` and second character must be `[` or `=`.
+        if (TextWindow.PeekChar() != '[' || TextWindow.PeekChar(1) is not '[' and not '=')
+            goto Invalid;
+
+        // Check or get level
+        if (level >= 0)
         {
-            isTerminal = default;
-            return false;
+            TextWindow.AdvanceChar();
+            for (var i = 0; i < level; i++)
+            {
+                if (TextWindow.NextChar() != '=')
+                    goto Invalid;
+            }
+            if (TextWindow.NextChar() != '[')
+                goto Invalid;
         }
-
-        // 匹配长方括号的复数等号部分，同时收集级数（等号字符个数）信息，为之后匹配长方括号的结束部分做准备。
-        if (level < 0)
+        else
         {
+            TextWindow.AdvanceChar();
             level = 0;
             while (true)
             {
-                var c = this.TextWindow.PeekChar(level + 1);
-                if (c == '=') // 优先扫描等号字符。
-                {
+                var c = TextWindow.NextChar();
+                if (c == '=')
                     level++;
-                    continue;
-                }
-                else if (c == '[') // 然后扫描左方括号字符。
+                else if (c == '[')
                     break;
-                else // 不符合格式。
-                {
-                    isTerminal = default;
-                    return false;
-                }
+                else // invalid
+                    goto Invalid;
             }
         }
-        this.TextWindow.AdvanceChar(level + 2);
 
-        /* 接下来一边扫描正常字符，一边匹配相同级数的结束长方括号。
-         * 除了非法字符外，扫描到的每一个字符都将被视为注释的一部分。
-         * 如果没有匹配到相同级数的结束长方括号，方法仍然返回true表示执行成功，但通过isTerminal参数传出false表示长方括号未闭合。
-         */
+        // Ignores the EOL directly after open brackets if supported.
+        if (SyntaxFacts.IsNewLine(TextWindow.PeekChar()) && IgnoreNewLineDirectlyAfterOpenBrackets())
+            TextWindow.AdvancePastNewLine();
+
         while (true)
         {
-            var c = this.TextWindow.NextChar();
-            if (c == SlidingTextWindow.InvalidCharacter && this.TextWindow.IsReallyAtEnd()) break;
+            var c = TextWindow.PeekChar();
 
-            if (c == '\r')
+            // At EOF.
+            if (c == SlidingTextWindow.InvalidCharacter && TextWindow.IsReallyAtEnd())
             {
-                if (this.TextWindow.PeekChar() == '\n')
-                    // 匹配到“\r\n”，使用后方的换行符。
-                    this.TextWindow.AdvanceChar();
-                c = '\n';
+                closed = false;
+                break;
             }
 
-            if (!(c == '\n' && this._builder.Length == 0))
-                // 忽略第一个新行。
-                this._builder.Append(c);
-
-            if (c != ']') continue; // 不进入匹配结束长方括号的代码区域。
-
-            var isPairedLevel = true;
-            for (var i = 0; i < level; i++)
+            // Meet possible close short brackets.
+            if (c == ']')
             {
-                if (this.TextWindow.PeekChar() == '=')
-                    this._builder.Append(this.TextWindow.NextChar());
-                else
+                // Check level.
+                for (var i = 1; i <= level; i++)
                 {
-                    isPairedLevel = false;
+                    if (TextWindow.PeekChar(i) != '=') // not match
+                        goto NormalChar;
+                }
+
+                // Correctly paired.
+                if (TextWindow.PeekChar(level + 1) == ']')
+                {
+                    TextWindow.AdvanceChar(level + 2);
+                    closed = true;
                     break;
                 }
             }
 
-            if (isPairedLevel && this.TextWindow.PeekChar() == ']') // 长方括号结构完全配对。
+NormalChar:
+            
+#pragma warning disable IDE0055
+            // Append LF if we meet EOL.
+#pragma warning restore IDE0055
+            if (SyntaxFacts.IsNewLine(c))
             {
-                this.TextWindow.AdvanceChar();
-                // 由于this._builder的末尾处有结束长方括号结构，因此需要删除这段内容。
-                this._builder.Length -= level + 1;
-
-                isTerminal = true;
-                return true;
+                _builder.Append('\n');
+                TextWindow.AdvancePastNewLine();
+            }
+            // Normal characters.
+            else
+            {
+                var cs = TextWindow.SingleOrSurrogatePair(out var error);
+                if (error is not null)
+                    AddError(error);
+                _builder.Append(new string(cs));
             }
         }
 
-        // 代码执行到这里的情况都是格式不符的情况。
-        isTerminal = default;
+        return true;
+
+Invalid:
+        TextWindow.Reset(start);
+        closed = default;
         return false;
     }
 
     /// <summary>
-    /// 将字符添加到标识符缓冲中。
+    /// Add character to <see cref="_identifierBuffer"/>;
     /// </summary>
     /// <param name="c">要添加的字符，将会是标识符的一部分。</param>
     private void AddIdentifierChar(char c)
     {
-        if (this._identifierLength >= this._identifierBuffer.Length)
-            this.GrowIdentifierBuffer();
+        if (_identifierLength >= _identifierBuffer.Length)
+            GrowIdentifierBuffer();
 
-        this._identifierBuffer[this._identifierLength++] = c;
+        _identifierBuffer[_identifierLength++] = c;
     }
 
     /// <summary>
-    /// 翻倍标识符缓冲数组<see cref="_identifierBuffer"/>的容量。
+    /// Expand capacity of <see cref="_identifierBuffer"/>.
     /// </summary>
     private void GrowIdentifierBuffer()
     {
-        var tmp = new char[this._identifierBuffer.Length * 2];
-        Array.Copy(this._identifierBuffer, tmp, this._identifierBuffer.Length);
-        this._identifierBuffer = tmp;
+        var tmp = new char[_identifierBuffer.Length * 2];
+        Array.Copy(_identifierBuffer, tmp, _identifierBuffer.Length);
+        _identifierBuffer = tmp;
     }
 
     /// <summary>
-    /// 清空标识符缓冲。
+    /// Clear <see cref="_identifierBuffer"/>.
     /// </summary>
     private void ResetIdentifierBuffer()
     {
-        this._identifierLength = 0;
+        _identifierLength = 0;
     }
+
+    /// <summary>
+    /// Checks if a punctuation token is avaliable in current language version.
+    /// </summary>
+    /// <param name="kind">Syntax kind that represents a punctuation.</param>
+    /// <returns>Returns <see langword="true"/> if <paramref name="kind"/> represents an avaliable punctuation token in current language version specified by <see cref="Options"/>; otherwise, <see langword="false"/>.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private bool IsPunctuationAvaliable(SyntaxKind kind) => SyntaxFacts.IsPunctuation(kind, Options.LanguageVersion);
+
+    /// <summary>
+    /// Checks if we ignore the new-line directly after open brackets of multi-line string literal in current language version.
+    /// </summary>
+    /// <returns>Returns <see langword="true"/> if <paramref name="kind"/> represents an avaliable punctuation token in current language version specified by <see cref="Options"/>; otherwise, <see langword="false"/>.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private partial bool IgnoreNewLineDirectlyAfterOpenBrackets();
 
     private void CheckFeatureAvaliability(MessageID feature)
     {
-        var info = feature.GetFeatureAvailabilityDiagnosticInfo(this.Options);
+        var info = feature.GetFeatureAvailabilityDiagnosticInfo(Options);
         if (info is not null)
-            this.AddError(info.Code, info.Arguments);
+            AddError(info.Code, info.Arguments);
     }
 }

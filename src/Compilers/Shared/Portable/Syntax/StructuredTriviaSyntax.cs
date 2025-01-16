@@ -7,14 +7,8 @@ using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax;
-
-using ThisSyntaxNode = LuaSyntaxNode;
-using ThisInternalSyntaxNode = InternalSyntax.LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax;
-
-using ThisSyntaxNode = MoonScriptSyntaxNode;
-using ThisInternalSyntaxNode = InternalSyntax.MoonScriptSyntaxNode;
 #endif
 
 public abstract partial class StructuredTriviaSyntax : ThisSyntaxNode, IStructuredTriviaSyntax
@@ -24,7 +18,7 @@ public abstract partial class StructuredTriviaSyntax : ThisSyntaxNode, IStructur
     /// <summary>
     /// 获取上级语法琐碎内容。
     /// </summary>
-    public override SyntaxTrivia ParentTrivia => this._parent;
+    public override SyntaxTrivia ParentTrivia => _parent;
 
     internal StructuredTriviaSyntax(
         ThisInternalSyntaxNode green,

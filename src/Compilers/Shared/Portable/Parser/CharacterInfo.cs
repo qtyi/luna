@@ -8,8 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Language not supported.
 #endif
 
 /// <summary>
@@ -17,8 +15,8 @@ namespace Qtyi.CodeAnalysis.MoonScript;
 /// </summary>
 public static partial class SyntaxFacts
 {
-    /// <inheritdoc cref="CharacterInfo.IsWhiteSpace(char)"/>
-    public static partial bool IsWhiteSpace(char c);
+    /// <inheritdoc cref="CharacterInfo.IsWhitespace(char)"/>
+    public static partial bool IsWhitespace(char c);
 
     /// <inheritdoc cref="CharacterInfo.IsNewLine(char)"/>
     public static partial bool IsNewLine(char c);

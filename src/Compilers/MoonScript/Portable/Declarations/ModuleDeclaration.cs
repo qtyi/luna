@@ -18,7 +18,7 @@ internal partial class ModuleDeclaration
     public override DeclarationKind Kind => DeclarationKind.Module;
 
     /// <inheritdoc cref="Declaration.Children"/>
-    public new ImmutableArray<ClassDeclaration> Children => this._children;
+    public new ImmutableArray<ClassDeclaration> Children => _children;
 
     /// <summary>
     /// Create a new instance of <see cref="ModuleDeclaration"/> type.
@@ -34,13 +34,13 @@ internal partial class ModuleDeclaration
         ImmutableArray<Diagnostic> diagnostics)
         : base(name)
     {
-        this._syntaxReference = syntaxReference;
-        this._children = children;
-        this.Diagnostics = diagnostics;
+        _syntaxReference = syntaxReference;
+        _children = children;
+        Diagnostics = diagnostics;
     }
 
     #region Declaration
     /// <inheritdoc/>
-    protected sealed override ImmutableArray<Declaration> GetDeclarationChildren() => StaticCast<Declaration>.From(this._children);
+    protected sealed override ImmutableArray<Declaration> GetDeclarationChildren() => StaticCast<Declaration>.From(_children);
     #endregion
 }

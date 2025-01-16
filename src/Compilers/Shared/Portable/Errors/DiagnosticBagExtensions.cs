@@ -9,8 +9,6 @@ using Microsoft.CodeAnalysis;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Language not supported.
 #endif
 
 internal static class DiagnosticBagExtensions
