@@ -13,14 +13,14 @@ partial class LanguageParser
 #endif
         IdentifierNameSyntax ParseIdentifierName()
     {
-        var identifier = this.EatToken(SyntaxKind.IdentifierToken);
-        return this._syntaxFactory.IdentifierName(identifier);
+        var identifier = EatToken(SyntaxKind.IdentifierToken);
+        return _syntaxFactory.IdentifierName(identifier);
     }
 
     private IdentifierNameSyntax ParseAsIdentifierName()
     {
-        var identifier = this.EatTokenAsKind(SyntaxKind.IdentifierToken);
-        return this._syntaxFactory.IdentifierName(identifier);
+        var identifier = EatTokenAsKind(SyntaxKind.IdentifierToken);
+        return _syntaxFactory.IdentifierName(identifier);
     }
 
 #if TESTING
@@ -30,58 +30,58 @@ partial class LanguageParser
 #endif
         NameSyntax ParseName()
     {
-        NameSyntax left = this.ParseIdentifierName();
+        NameSyntax left = ParseIdentifierName();
         // QualifiedName
-        while (this.CurrentTokenKind == SyntaxKind.DotToken)
+        while (CurrentTokenKind == SyntaxKind.DotToken)
         {
-            var dot = this.EatToken(SyntaxKind.DotToken);
+            var dot = EatToken(SyntaxKind.DotToken);
             IdentifierNameSyntax right;
-            if (this.CurrentTokenKind != SyntaxKind.IdentifierToken)
+            if (CurrentTokenKind != SyntaxKind.IdentifierToken)
             {
-                dot = this.AddError(dot, ErrorCode.ERR_IdentifierExpected);
-                right = this.CreateMissingIdentifierName();
-                left = this._syntaxFactory.QualifiedName(left, dot, right);
+                dot = AddError(dot, ErrorCode.ERR_IdentifierExpected);
+                right = CreateMissingIdentifierName();
+                left = _syntaxFactory.QualifiedName(left, dot, right);
             }
             else
             {
-                right = this.ParseIdentifierName();
-                left = this._syntaxFactory.QualifiedName(left, dot, right);
+                right = ParseIdentifierName();
+                left = _syntaxFactory.QualifiedName(left, dot, right);
             }
         }
 
         // ImplicitSelfParameterName
-        if (this.CurrentTokenKind == SyntaxKind.ColonToken)
+        if (CurrentTokenKind == SyntaxKind.ColonToken)
         {
-            var colon = this.EatToken(SyntaxKind.ColonToken);
+            var colon = EatToken(SyntaxKind.ColonToken);
             IdentifierNameSyntax right;
-            if (this.CurrentTokenKind != SyntaxKind.IdentifierToken)
+            if (CurrentTokenKind != SyntaxKind.IdentifierToken)
             {
-                colon = this.AddError(colon, ErrorCode.ERR_IdentifierExpected);
-                right = this.CreateMissingIdentifierName();
-                left = this._syntaxFactory.ImplicitSelfParameterName(left, colon, right);
+                colon = AddError(colon, ErrorCode.ERR_IdentifierExpected);
+                right = CreateMissingIdentifierName();
+                left = _syntaxFactory.ImplicitSelfParameterName(left, colon, right);
             }
             else
             {
-                right = this.ParseIdentifierName();
-                left = this._syntaxFactory.ImplicitSelfParameterName(left, colon, right);
+                right = ParseIdentifierName();
+                left = _syntaxFactory.ImplicitSelfParameterName(left, colon, right);
             }
 
             // 将后续可能的QualifiedName及ImplicitSelfParameterName结构视为错误。
-            if (this.CurrentTokenKind is SyntaxKind.DotToken or SyntaxKind.ColonToken)
+            if (CurrentTokenKind is SyntaxKind.DotToken or SyntaxKind.ColonToken)
             {
-                var unexpectedChar = SyntaxFacts.GetText(this.CurrentTokenKind);
-                var builder = this._pool.Allocate<SyntaxToken>();
+                var unexpectedChar = SyntaxFacts.GetText(CurrentTokenKind);
+                var builder = _pool.Allocate<SyntaxToken>();
                 do
                 {
-                    builder.Add(this.EatToken());
-                    if (this.CurrentTokenKind == SyntaxKind.IdentifierToken)
-                        builder.Add(this.EatToken());
+                    builder.Add(EatToken());
+                    if (CurrentTokenKind == SyntaxKind.IdentifierToken)
+                        builder.Add(EatToken());
                 }
-                while (this.CurrentTokenKind is SyntaxKind.DotToken or SyntaxKind.ColonToken);
-                var skippedTokensTrivia = this._syntaxFactory.SkippedTokensTrivia(this._pool.ToListAndFree(builder));
-                skippedTokensTrivia = this.AddError(skippedTokensTrivia, ErrorCode.ERR_UnexpectedCharacter, unexpectedChar);
+                while (CurrentTokenKind is SyntaxKind.DotToken or SyntaxKind.ColonToken);
+                var skippedTokensTrivia = _syntaxFactory.SkippedTokensTrivia(_pool.ToListAndFree(builder));
+                skippedTokensTrivia = AddError(skippedTokensTrivia, ErrorCode.ERR_UnexpectedCharacter, unexpectedChar);
 
-                left = this.AddTrailingSkippedSyntax(left, skippedTokensTrivia);
+                left = AddTrailingSkippedSyntax(left, skippedTokensTrivia);
             }
         }
 
@@ -93,12 +93,12 @@ partial class LanguageParser
 #else
     private
 #endif
-        IdentifierNameSyntax CreateMissingIdentifierName() => this._syntaxFactory.IdentifierName(CreateMissingIdentifierToken());
+        IdentifierNameSyntax CreateMissingIdentifierName() => _syntaxFactory.IdentifierName(CreateMissingIdentifierToken());
 
 #if TESTING
     internal
 #else
     private
 #endif
-        static SyntaxToken CreateMissingIdentifierToken() => SyntaxFactory.MissingToken(SyntaxKind.IdentifierToken);
+        static SyntaxToken CreateMissingIdentifierToken() => ThisInternalSyntaxFactory.MissingToken(SyntaxKind.IdentifierToken);
 }

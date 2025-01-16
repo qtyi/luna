@@ -7,6 +7,11 @@
         <target state="new">'{0}' is not structured trivia.</target>
         <note>{0} is the name of an argument.</note>
       </trans-unit>
+      <trans-unit id="ArgMustBeDefinedInEnum">
+        <source>'{0}' must be defined in Enum '{1}'.</source>
+        <target state="new">'{0}' must be defined in Enum '{1}'.</target>
+        <note>{0} is the name of an argument, {1} is the name of an Enum type.</note>
+      </trans-unit>
       <trans-unit id="ArgMustBeEmpty">
         <source>'{0}' must be empty.</source>
         <target state="new">'{0}' must be empty.</target>

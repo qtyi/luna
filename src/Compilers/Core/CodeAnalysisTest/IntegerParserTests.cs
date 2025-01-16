@@ -9,7 +9,11 @@ namespace Qtyi.CodeAnalysis.UnitTests;
 
 public class IntegerParserTests
 {
+#if NETFRAMEWORK
     private static readonly Random s_random = new();
+#else
+    private static readonly Random s_random = Random.Shared;
+#endif
 
     protected internal static BigInteger NextRandomBigInteger()
     {
@@ -28,10 +32,10 @@ public class IntegerParserTests
 
     protected internal static long NextRandomInt64()
     {
-#if NET6_0_OR_GREATER
-        return s_random.NextInt64();
-#else
+#if NETFRAMEWORK
         return (s_random.Next() << sizeof(uint)) + unchecked((uint)s_random.Next());
+#else
+        return s_random.NextInt64();
 #endif
     }
 
@@ -50,7 +54,7 @@ public class IntegerParserTests
         const int SampleCount = 31000;
         Parallel.For(0, SampleCount, body =>
         {
-            var source = this.GetRandomUnsignedBigInteger();
+            var source = GetRandomUnsignedBigInteger();
             var decimalStr = source.ToString();
 
             var success = IntegerParser.TryParseDecimalInt64(decimalStr, out var result);
@@ -71,7 +75,7 @@ public class IntegerParserTests
         const int SampleCount = 31000;
         Parallel.For(0, SampleCount, body =>
         {
-            var source = this.GetRandomInt64();
+            var source = GetRandomInt64();
             var hexadecimalStr = Convert.ToString(source, 16);
 
             var success = IntegerParser.TryParseHexadecimalInt64(hexadecimalStr, out var result);

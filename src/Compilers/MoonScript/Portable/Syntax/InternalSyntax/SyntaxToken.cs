@@ -10,6 +10,40 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 internal partial class SyntaxToken
 {
+    internal const SyntaxKind FirstTokenWithWellKnownText = SyntaxKind.PlusToken;
+    internal const SyntaxKind LastTokenWithWellKnownText = SyntaxKind.MultiLineCommentTrivia;
+
+    /// <summary>
+    /// Gets value of this token.
+    /// </summary>
+    /// <value>
+    /// <list type="bullet">
+    /// <item>
+    /// <term>Keyword <c>true</c></term>
+    /// <description><see langword="true"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Keyword <c>false</c></term>
+    /// <description><see langword="false"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Keyword <c>nil</c></term>
+    /// <description><see langword="null"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Others</term>
+    /// <description>A string the same as <see cref="ThisInternalSyntaxNode.KindText"/>.</description>
+    /// </item>
+    /// </list>
+    /// </value>
+    public virtual partial object? Value => Kind switch
+    {
+        SyntaxKind.TrueKeyword => Boxes.BoxedTrue,
+        SyntaxKind.FalseKeyword => Boxes.BoxedFalse,
+        SyntaxKind.NilKeyword => null,
+        _ => KindText
+    };
+
     /// <summary>
     /// 获取此语法标记的空白缩进量。
     /// </summary>
@@ -17,7 +51,7 @@ internal partial class SyntaxToken
     {
         var indent = 0;
         var isContinuedWhiteSpace = true;
-        foreach (var node in this.LeadingTrivia)
+        foreach (var node in LeadingTrivia)
         {
             Debug.Assert(node is SyntaxTrivia);
             var trivia = (SyntaxTrivia)node;
@@ -59,7 +93,4 @@ internal partial class SyntaxToken
 
     internal static SyntaxToken InterpolatedStringLiteral
         (MoonScriptSyntaxNode leading, string text, ImmutableArray<SyntaxToken> tokens, int innerIndent, MoonScriptSyntaxNode trailing) => new IndentedSyntaxTokenWithValueAndTrivia<ImmutableArray<SyntaxToken>>(SyntaxKind.InterpolatedStringLiteralToken, text, tokens, innerIndent, leading, trailing);
-
-    internal const SyntaxKind FirstTokenWithWellKnownText = SyntaxKind.PlusToken;
-    internal const SyntaxKind LastTokenWithWellKnownText = SyntaxKind.MultiLineCommentTrivia;
 }

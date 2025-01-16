@@ -12,8 +12,6 @@ using Roslyn.Utilities;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Not implemented
 #endif
 
 using Symbols;
@@ -29,7 +27,7 @@ internal abstract partial class
 {
     IDefinition IReference.AsDefinition(EmitContext context) => throw ExceptionUtilities.Unreachable();
 
-    Microsoft.CodeAnalysis.Symbols.ISymbolInternal IReference.GetInternalSymbol() => this.AdaptedSymbol;
+    Microsoft.CodeAnalysis.Symbols.ISymbolInternal IReference.GetInternalSymbol() => AdaptedSymbol;
 
     void IReference.Dispatch(MetadataVisitor visitor) => throw ExceptionUtilities.Unreachable();
 }
@@ -47,7 +45,7 @@ internal partial class SymbolAdapter
     internal abstract Symbol AdaptedSymbol { get; }
 
     /// <inheritdoc/>
-    public sealed override string? ToString() => this.AdaptedSymbol.ToString();
+    public sealed override string? ToString() => AdaptedSymbol.ToString();
 
     /// <remarks>
     /// It is not supported to rely on default equality of these Cci objects, an explicit way to compare and hash them should be used.
@@ -64,23 +62,23 @@ internal partial class SymbolAdapter
     public sealed override int GetHashCode() => throw ExceptionUtilities.Unreachable();
 
     /// <summary>
-    /// Checks if <see cref="AdaptedSymbol"/> is a definition and its containing .NET module is a <see cref="SourceNetmoduleSymbol"/>.
+    /// Checks if <see cref="AdaptedSymbol"/> is a definition and its containing .NET module is a <see cref="SourceModuleSymbol"/>.
     /// </summary>
     [Conditional("DEBUG")]
-    protected internal void CheckDefinitionInvariant() => this.AdaptedSymbol.CheckDefinitionInvariant();
+    protected internal void CheckDefinitionInvariant() => AdaptedSymbol.CheckDefinitionInvariant();
 
     /// <summary>
     /// Return whether <see cref="AdaptedSymbol"/> is either the original definition
     /// or distinct from the original.
     /// </summary>
-    internal bool IsDefinitionOrDistinct() => this.AdaptedSymbol.IsDefinitionOrDistinct();
+    internal bool IsDefinitionOrDistinct() => AdaptedSymbol.IsDefinitionOrDistinct();
 }
 #endif
 
 partial class Symbol
 {
 #if DEBUG
-    internal SymbolAdapter GetCciAdapter() => this.GetCciAdapterImpl();
+    internal SymbolAdapter GetCciAdapter() => GetCciAdapterImpl();
     protected virtual SymbolAdapter GetCciAdapterImpl() => throw ExceptionUtilities.Unreachable();
 #else
     internal Symbol AdaptedSymbol => this;
@@ -88,18 +86,18 @@ partial class Symbol
 #endif
 
     /// <summary>
-    /// Checks if this symbol is a definition and its containing .NET module is a <see cref="SourceNetmoduleSymbol"/>.
+    /// Checks if this symbol is a definition and its containing .NET module is a <see cref="SourceModuleSymbol"/>.
     /// </summary>
     [Conditional("DEBUG")]
     protected internal void CheckDefinitionInvariant()
     {
         // can't be generic instantiation
-        Debug.Assert(this.IsDefinition);
+        Debug.Assert(IsDefinition);
 
         // must be declared in the .NET module we are building
-        Debug.Assert(this.ContainingNetmodule is SourceNetmoduleSymbol ||
-                     (this.Kind == SymbolKind.Assembly && this is SourceAssemblySymbol) ||
-                     (this.Kind == SymbolKind.Netmodule && this is SourceNetmoduleSymbol));
+        Debug.Assert(ContainingModule is SourceModuleSymbol ||
+                     (Kind == SymbolKind.Assembly && this is SourceAssemblySymbol) ||
+                     (Kind == SymbolKind.NetModule && this is SourceModuleSymbol));
     }
 
     IReference Microsoft.CodeAnalysis.Symbols.ISymbolInternal.GetCciAdapter() => GetCciAdapter();
@@ -111,6 +109,6 @@ partial class Symbol
     /// </summary>
     internal bool IsDefinitionOrDistinct()
     {
-        return this.IsDefinition || !this.Equals(this.OriginalDefinition, SymbolEqualityComparer.ConsiderEverything.CompareKind);
+        return IsDefinition || !Equals(OriginalDefinition, SymbolEqualityComparer.ConsiderEverything.CompareKind);
     }
 }

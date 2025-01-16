@@ -9,8 +9,6 @@ using Roslyn.Utilities;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Language not supported.
 #endif
 
 /// <summary>
@@ -35,10 +33,10 @@ internal sealed class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
         bool displayFullPaths,
         bool displayEndLocation)
     {
-        this._baseDirectory = baseDirectory;
-        this._displayFullPaths = displayFullPaths;
-        this._displayEndLocations = displayEndLocation;
-        this._lazyNormalizedBaseDirectory = new(() => FileUtilities.TryNormalizeAbsolutePath(baseDirectory));
+        _baseDirectory = baseDirectory;
+        _displayFullPaths = displayFullPaths;
+        _displayEndLocations = displayEndLocation;
+        _lazyNormalizedBaseDirectory = new(() => FileUtilities.TryNormalizeAbsolutePath(baseDirectory));
     }
 
     /// <summary>
@@ -49,7 +47,7 @@ internal sealed class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
     /// <returns>The formatted message.</returns>
     internal override string FormatSourceSpan(LinePositionSpan span, IFormatProvider? formatter)
     {
-        if (this._displayEndLocations)
+        if (_displayEndLocations)
             return string.Format(formatter, "({0},{1},{2},{3})",
                 span.Start.Line + 1,        // start line num.
                 span.Start.Character + 1,   // start column num.
@@ -72,12 +70,12 @@ internal sealed class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
     /// <returns>The formatted message.</returns>
     internal override string FormatSourcePath(string path, string? basePath, IFormatProvider? formatter)
     {
-        var normalizedPath = FileUtilities.NormalizeRelativePath(path, basePath, this._baseDirectory);
+        var normalizedPath = FileUtilities.NormalizeRelativePath(path, basePath, _baseDirectory);
         if (normalizedPath is null) return path;
 
         // By default, specify the name of the file in which an error was found.
         // When The /fullpaths option is present, specify the full path to the file.
-        return this._displayFullPaths ? normalizedPath : this.RelativizeNormalizedPath(normalizedPath);
+        return _displayFullPaths ? normalizedPath : RelativizeNormalizedPath(normalizedPath);
     }
 
     /// <summary>
@@ -87,7 +85,7 @@ internal sealed class CommandLineDiagnosticFormatter : ThisDiagnosticFormatter
     /// <returns>The path name starting from the <see cref="_baseDirectory"/> to <paramref name="normalizedPath"/>.</returns>
     internal string RelativizeNormalizedPath(string normalizedPath)
     {
-        var normalizedBaseDirectory = this._lazyNormalizedBaseDirectory.Value;
+        var normalizedBaseDirectory = _lazyNormalizedBaseDirectory.Value;
         if (normalizedBaseDirectory is null) return normalizedPath;
 
         var normalizedDirectory = PathUtilities.GetDirectoryName(normalizedPath);

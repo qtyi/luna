@@ -72,15 +72,3 @@ M:Microsoft.CodeAnalysis.CodeActions.CodeAction.GetChangedSolutionAsync(CSystem.
 M:Microsoft.CodeAnalysis.CodeActions.CodeAction.GetChangedDocumentAsync(CancellationToken); Use overload that takes progress
 M:Microsoft.CodeAnalysis.DesktopStrongNameProvider.#ctor(System.Collections.Immutable.ImmutableArray{System.String}); Use overload that takes in temp directory
 M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Object[]); Use WriteEventCore instead
-P:Microsoft.CodeAnalysis.CompilationOptions.OutputKind; Use 'Qtyi.CodeAnalysis.CompilationOptions.OutputKind' instead
-M:Microsoft.CodeAnalysis.CompilationOptions.WithOutputKind(Microsoft.CodeAnalysis.OutputKind); Use overload that takes Qtyi.CodeAnalysis.OutputKind
-M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithOutputKind(Microsoft.CodeAnalysis.OutputKind); Use overload that takes Qtyi.CodeAnalysis.OutputKind
-P:Microsoft.CodeAnalysis.CompilationOptions.ModuleName; Use 'Microsoft.CodeAnalysis.CompilationOptions.NetmoduleName' instead
-M:Microsoft.CodeAnalysis.CompilationOptions.WithModuleName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.WithNetmoduleName(System.String)' instead
-M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithModuleName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.CommonWithNetmoduleName(System.String)' instead
-P:Microsoft.CodeAnalysis.CompilationOptions.ScriptClassName; Use 'Microsoft.CodeAnalysis.CompilationOptions.ScriptModuleName' instead
-M:Microsoft.CodeAnalysis.CompilationOptions.WithScriptClassName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.WithScriptModuleName(System.String)' instead
-M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithScriptClassName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.CommonWithScriptModuleName(System.String)' instead
-P:Microsoft.CodeAnalysis.CompilationOptions.MainTypeName; Use 'Microsoft.CodeAnalysis.CompilationOptions.MainModuleName' instead
-M:Microsoft.CodeAnalysis.CompilationOptions.WithMainTypeName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.WithMainModuleName(System.String)' instead
-M:Microsoft.CodeAnalysis.CompilationOptions.CommonWithMainTypeName(System.String); Use 'Qtyi.CodeAnalysis.CompilationOptions.CommonWithMainModuleName(System.String)' instead

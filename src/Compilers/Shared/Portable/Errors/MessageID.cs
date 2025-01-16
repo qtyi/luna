@@ -6,18 +6,8 @@ using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua;
-
-using ThisParseOptions = LuaParseOptions;
-using ThisCompilation = LuaCompilation;
-using ThisDiagnosticInfo = LuaDiagnosticInfo;
-using ThisRequiredLanguageVersion = LuaRequiredLanguageVersion;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-
-using ThisParseOptions = MoonScriptParseOptions;
-using ThisCompilation = MoonScriptCompilation;
-using ThisDiagnosticInfo = MoonScriptDiagnosticInfo;
-using ThisRequiredLanguageVersion = MoonScriptRequiredLanguageVersion;
 #endif
 
 /// <summary>
@@ -27,12 +17,12 @@ internal partial struct LocalizableErrorArgument : IFormattable
 {
     private readonly MessageID _id;
 
-    internal LocalizableErrorArgument(MessageID id) => this._id = id;
+    internal LocalizableErrorArgument(MessageID id) => _id = id;
 
-    public override string ToString() => this.ToString(format: null, formatProvider: null);
+    public override string ToString() => ToString(format: null, formatProvider: null);
 
     public string ToString(string? format, IFormatProvider? formatProvider) =>
-        ErrorFacts.GetMessage(this._id, formatProvider as System.Globalization.CultureInfo);
+        ErrorFacts.GetMessage(_id, formatProvider as System.Globalization.CultureInfo);
 }
 
 /// <summary>
@@ -103,8 +93,8 @@ internal static partial class MessageIDExtensions
             return new(ErrorCode.ERR_FeatureIsExperimental, feature.Localize(), requiredFeature);
 
         var requiredVersion = feature.RequiredVersion();
-        if (requiredVersion == LanguageVersion.Preview.MapSpecifiedToEffectiveVersion())
-            return new(ErrorCode.ERR_FeatureInPreview, feature.Localize());
+        if (requiredVersion == LanguageVersion.DotNet.MapSpecifiedToEffectiveVersion())
+            return new(ErrorCode.ERR_FeatureNotAvailableInPreview, feature.Localize());
         else
             return new(availableVersion.GetErrorCode(), feature.Localize(), new ThisRequiredLanguageVersion(requiredVersion));
     }

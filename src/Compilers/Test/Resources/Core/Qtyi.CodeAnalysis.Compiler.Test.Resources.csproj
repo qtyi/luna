@@ -1,20 +1,24 @@
-﻿<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetLunaNext);net472</TargetFrameworks>
-    <RootNamespace>
-      <!-- Remains empty -->
-    </RootNamespace>
-    <OutputType>Library</OutputType>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <RootNamespace><!-- Remains empty --></RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
     <IsShipping>false</IsShipping>
+    <IsPackable>true</IsPackable>
+    <PackageId>Qtyi.CodeAnalysis.Compiler.Test.Resources</PackageId>
+    <PackageDescription>This is an internal package for testing. Not meant for external or production uses. The API can and will break at our discretion.</PackageDescription>
+    <NoWarn>$(NoWarn),NU5100,NU5106,CS1591</NoWarn>
+    <IsTestUtilityProject>true</IsTestUtilityProject>
   </PropertyGroup>
+
+  <Import Project="Microsoft.CodeAnalysis.Compiler.Test.Resources.targets" />
 
   <ItemGroup Label="CompilerVisibleItemMetadatas">
     <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="GeneratorName" />
   </ItemGroup>
-
-  <Import Project="Microsoft.CodeAnalysis.Compiler.Test.Resources.targets" />
 
   <ItemGroup Label="TestFiles">
     <LuaTestFiles Include="$(LuaLuaRepositoryDirectory)testes\*.lua" />
@@ -28,13 +32,11 @@
     <AdditionalFiles Include="@(MoonScriptTestFiles)" Link="MoonScriptTestFiles\%(FileName)%(Extension)" GeneratorName="MoonScriptTestFilesGenerator" />
   </ItemGroup>
 
-  <!--
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Tools\Source\CompilerGeneratorTools\src\CodeAnalysisCompilerTestResourcesSourceGenerators\CodeAnalysisCompilerTestResourcesSourceGenerators.csproj">
+    <ProjectReference Include="..\..\..\..\Tools\Source\src\Compilers\Test\CodeAnalysisCompilerTestResourcesSourceGenerators\CodeAnalysisCompilerTestResourcesSourceGenerators.csproj">
       <OutputItemType>Analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
-  -->
 
 </Project>

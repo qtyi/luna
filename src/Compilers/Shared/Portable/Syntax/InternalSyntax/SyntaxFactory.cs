@@ -5,16 +5,11 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = MoonScriptSyntaxNode;
 #endif
 
 using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
@@ -136,10 +131,6 @@ internal static partial class SyntaxFactory
 
     internal static SyntaxTrivia PreprocessingMessage(string text) => SyntaxTrivia.Create(SyntaxKind.PreprocessingMessageTrivia, text);
 
-#if DEBUG
-    internal static ThisInternalSyntaxNode Mock() => new ThisInternalSyntaxNode.MockNode();
-#endif
-
     public static SyntaxToken Token(SyntaxKind kind) => SyntaxToken.Create(kind);
 
     internal static SyntaxToken Token(GreenNode? leading, SyntaxKind kind, GreenNode? trailing) => SyntaxToken.Create(kind, leading, trailing);
@@ -177,7 +168,7 @@ internal static partial class SyntaxFactory
 
     internal static SyntaxToken Literal(GreenNode? leading, string text, string value, GreenNode? trailing) => SyntaxToken.WithValue(SyntaxKind.StringLiteralToken, leading, text, value, trailing);
 
-    internal static SyntaxToken Literal(GreenNode? leading, string text, SyntaxKind kind, ImmutableArray<byte> value, GreenNode? trailing) => SyntaxToken.WithValue(kind, leading, text, value, trailing);
+    internal static SyntaxToken Literal(GreenNode? leading, string text, SyntaxKind kind, Utf8String value, GreenNode? trailing) => SyntaxToken.WithValue(kind, leading, text, value, trailing);
 
     #region SyntaxKind到SyntaxToken的转换方法
     // 各种语法部分的转换方法在各语言的独立项目中定义

@@ -28,7 +28,9 @@ public enum SyntaxKind : ushort
     /// <summary>Represents <c>^</c> token.</summary>
     CaretToken,
     /// <summary>Represents <c>%</c> token.</summary>
-    PersentToken,
+    PercentToken,
+    /// <summary>Represents <c>@</c> token.</summary>
+    CommercialAtToken,
     /// <summary>Represents <c>#</c> token.</summary>
     HashToken,
     /// <summary>Represents <c>&amp;</c> token.</summary>
@@ -63,6 +65,9 @@ public enum SyntaxKind : ushort
     CommaToken,
     /// <summary>Represents <c>.</c> token.</summary>
     DotToken,
+
+    /// <summary>Represents <c>$</c> token.</summary>
+    DollarToken = 8256,
 
     /// <summary>Represents <c>&lt;&lt;</c> token.</summary>
     LessThanLessThanToken = 8257,
@@ -135,78 +140,82 @@ public enum SyntaxKind : ushort
     /// <summary>Represents <c>while</c> keyword.</summary>
     WhileKeyword,
 
-    // EnviromentKeywords
-    /// <summary>Represents <c>_G</c> keyword.</summary>
-    GlobalEnvironmentKeyword = 8385,
-    /// <summary>Represents <c>_ENV</c> keyword.编译器在编译期间将这个关键词作为所有游离的变量的作用环境，它的值不是固定的。（自Lua 5.2版本添加。）</summary>
-    EnvironmentKeyword,
+    // Environment Keywords
+    /// <summary>Represents <c>_ENV</c> keyword.</summary>
+    EnvironmentKeyword = 8491,
 
-    // Metafields and Metamethods
-    /// <summary>表示元表（<c>()</c>）元字段<c>__metatable</c>。</summary>
-    MetatableMetafield = 8449,
-    /// <summary>表示加法（<c>+</c>）元方法<c>__add</c>。</summary>
-    AdditionMetamethod,
-    /// <summary>表示减法（二元<c>-</c>）元方法<c>__sub</c>。</summary>
-    SubtractionMetamethod,
-    /// <summary>表示乘法（<c>*</c>）元方法<c>__mul</c>。</summary>
-    MultiplicationMetamethod,
-    /// <summary>表示除法（<c>/</c>）元方法<c>__div</c>。</summary>
-    DivisionMetamethod,
-    /// <summary>表示取模（<c>%</c>）元方法<c>__mod</c>。</summary>
-    ModuloMetamethod,
-    /// <summary>表示取幂（<c>^</c>）元方法<c>__pow</c>。</summary>
-    ExponentiationMetamethod,
-    /// <summary>表示取负（一元<c>-</c>）元方法<c>__unm</c>。</summary>
-    NegationMetamethod,
-    /// <summary>表示向下取整除法（<c>+</c>）元方法<c>__idiv</c>。</summary>
-    FloorDivisionMetamethod,
-    /// <summary>表示按位与（<c>&amp;</c>）元方法<c>__band</c>。</summary>
-    BitwiseAndMetamethod,
-    /// <summary>表示按位或（<c>|</c>）元方法<c>__bor</c>。</summary>
-    BitwiseOrMetamethod,
-    /// <summary>表示按位异或（二元<c>~</c>）元方法<c>__bxor</c>。</summary>
-    BitwiseExclusiveOrMetamethod,
-    /// <summary>表示按位取反（一元<c>~</c>）元方法<c>__bnot</c>。</summary>
-    BitwiseNotMetamethod,
-    /// <summary>表示按位向左位移（<c>&lt;&lt;</c>）元方法<c>__shl</c>。</summary>
-    BitwiseLeftShiftMetamethod,
-    /// <summary>表示按位向右位移（<c>&gt;&gt;</c>）元方法<c>__shr</c>。</summary>
-    BitwiseRightShiftMetamethod,
-    /// <summary>表示连接（<c>..</c>）元方法<c>__concat</c>。</summary>
-    ConcatenationMetamethod,
-    /// <summary>表示长度（<c>#</c>）元方法<c>__len</c>。</summary>
-    LengthMetamethod,
-    /// <summary>表示相等（<c>==</c>）元方法<c>__eq</c>。</summary>
-    EqualMetamethod,
-    /// <summary>表示小于（<c>&lt;</c>）元方法<c>__lt</c>。</summary>
-    LessThanMetamethod,
-    /// <summary>表示小于等于（<c>&lt;=</c>）元方法<c>__le</c>。</summary>
-    LessEqualMetamethod,
-    /// <summary>表示操作索引（<c>[]</c>）元方法<c>__index</c>。</summary>
-    IndexingAccessMetamethod,
-    /// <summary>表示调用（<c>()</c>）元方法<c>__call</c>。</summary>
-    CallMetamethod,
-    /// <summary>表示字典访问（<c>()</c>）元方法<c>__pairs</c>。</summary>
-    PairsMetamethod,
-    /// <summary>表示转换为字符串（<c>()</c>）元方法<c>__tostring</c>。</summary>
-    ToStringMetamethod,
-    /// <summary>表示垃圾收集（<c>+</c>）元方法<c>__gc</c>。</summary>
-    GarbageCollectionMetamethod,
-    /// <summary>表示标记要被关闭（<c>+</c>）元方法<c>__close</c>。（自Lua 5.4版本添加。）</summary>
-    ToBeClosedMetamethod,
-    /// <summary>表示弱表模式（<c>+</c>）元字段<c>__mode</c>。</summary>
-    WeakModeMetafield,
-    /// <summary>表示名称（<c>+</c>）元字段<c>__name</c>。</summary>
-    NameMetafield,
-
-    // Attributes
+    // Variable Attribute Keywords
     /// <summary>Represents <c>close</c> keyword.</summary>
-    CloseKeyword,
+    CloseKeyword = 8501,
     /// <summary>Represents <c>const</c> keyword.</summary>
     ConstKeyword,
+
+    // Dotnet Keywords
+    /// <summary>Represents <c>abstract</c> keyword.</summary>
+    AbstractKeyword = 8601,
+    /// <summary>Represents <c>annotatedwith</c> keyword.</summary>
+    AnnotatedWithKeyword,
+    /// <summary>Represents <c>assembly</c> keyword.</summary>
+    AssemblyKeyword,
+    /// <summary>Represents <c>class</c> keyword.</summary>
+    ClassKeyword,
+    /// <summary>Represents <c>constainas</c> keyword.</summary>
+    ConstrainAsKeyword,
+    /// <summary>Represents <c>event</c> keyword.</summary>
+    EventKeyword,
+    /// <summary>Represents <c>extends</c> keyword.</summary>
+    ExtendsKeyword,
+    /// <summary>Represents <c>field</c> keyword.</summary>
+    FieldKeyword,
+    /// <summary>Represents <c>final</c> keyword.</summary>
+    FinalKeyword,
+    /// <summary>Represents <c>implements</c> keyword.</summary>
+    ImplementsKeyword,
+    /// <summary>Represents <c>interface</c> keyword.</summary>
+    InterfaceKeyword,
+    /// <summary>Represents <c>method</c> keyword.</summary>
+    MethodKeyword,
+    /// <summary>Represents <c>module</c> keyword.</summary>
+    ModuleKeyword,
+    /// <summary>Represents <c>namespace</c> keyword.</summary>
+    NamespaceKeyword,
+    /// <summary>Represents <c>new</c> keyword.</summary>
+    NewKeyword,
+    /// <summary>Represents <c>out</c> keyword.</summary>
+    OutKeyword,
+    /// <summary>Represents <c>parameter</c> keyword.</summary>
+    ParameterKeyword,
+    /// <summary>Represents <c>private</c> keyword.</summary>
+    PrivateKeyword,
+    /// <summary>Represents <c>property</c> keyword.</summary>
+    PropertyKeyword,
+    /// <summary>Represents <c>protected</c> keyword.</summary>
+    ProtectedKeyword,
+    /// <summary>Represents <c>public</c> keyword.</summary>
+    PublicKeyword,
+    /// <summary>Represents <c>readonly</c> keyword.</summary>
+    ReadonlyKeyword,
+    /// <summary>Represents <c>ref</c> keyword.</summary>
+    RefKeyword,
+    /// <summary>Represents <c>typeparameter</c> keyword.</summary>
+    TypeParameterKeyword,
+    /// <summary>Represents <c>static</c> keyword.</summary>
+    StaticKeyword,
+
+    // Preprocessor Keywords
+    /// <summary>Represents <c>debug</c> keyword.</summary>
+    DebugKeyword = 8650,
+    /// <summary>Represents <c>nodebug</c> keyword.</summary>
+    NoDebugKeyword,
+    /// <summary>Represents <c>ifnot</c> keyword.</summary>
+    IfNotKeyword,
+    /// <summary>Represents <c>endinput</c> keyword.</summary>
+    EndInputKeyword,
+
     #endregion
 
-    EndOfDirectiveToken = 9216,
+    EndOfDirectiveToken = 9215,
+    EndOfDocumentationCommentToken = 9216,
     /// <summary>表示文件的结尾。</summary>
     EndOfFileToken = 9217, // 假定此类型为最后一个无文本标记。
 
@@ -245,9 +254,10 @@ public enum SyntaxKind : ushort
     // = 9345
     #endregion
 
-    #region 名称
+    #region Name
     /// <summary>表示标识符名称。</summary>
     IdentifierName = 9473,
+    GenericName,
     /// <summary>表示限定的名称。</summary>
     QualifiedName,
     /// <summary>表示传入隐式self参数的名称。</summary>
@@ -338,9 +348,11 @@ public enum SyntaxKind : ushort
     SimpleMemberAccessExpression = 9729, // 使用“.”操作
     /// <summary>表示索引成员操作表达式。</summary>
     IndexMemberAccessExpression, // 使用“[]”操作
+
+    ObjectCreationExpression,
     #endregion
 
-    #region 语句
+    #region Statement
     /// <summary>表示仅有分隔符（<c>;</c>）的空语句。</summary>
     EmptyStatement = 9761,
     /// <summary>表示赋值语句。</summary>
@@ -379,9 +391,11 @@ public enum SyntaxKind : ushort
     LocalDeclarationStatement,
     /// <summary>表示本地变量定义的赋值从句。</summary>
     EqualsValuesClause,
+
+    DeclarationStatement,
     #endregion
 
-    #region 声明
+    #region Declaration
     /// <summary>表示程序块（编译单元）。</summary>
     Chunk = 9889,
     /// <summary>表示代码块。</summary>
@@ -395,9 +409,9 @@ public enum SyntaxKind : ushort
     /// <summary>表示值键对表字段。</summary>
     KeyValueField,
     /// <summary>表示函数参数列表。</summary>
-    ParameterList,
+    ParameterDeclarationList,
     /// <summary>表示函数参数。</summary>
-    Parameter,
+    ParameterDeclaration,
     /// <summary>表示调用参数列表。</summary>
     ArgumentList,
     /// <summary>表示调用参数表。</summary>
@@ -409,8 +423,28 @@ public enum SyntaxKind : ushort
     /// <summary>表示标识符后接特性列表。</summary>
     NameAttributeList,
     /// <summary>表示特性列表。</summary>
-    AttributeList,
+    VariableAttributeList,
     /// <summary>表示特性。</summary>
-    Attribute,
+    VariableAttribute,
+    ModifierList,
+    Modifier,
+    AnnotatedWithClause,
+    AssemblyDeclaration,
+    ModuleDeclaration,
+    NamespaceDeclaration,
+    ConstrainAsClause,
+    ExtendsClause,
+    ImplementsClause,
+    InterfaceDeclaration,
+    ClassDeclaration,
+    TypeParameterDeclarationList,
+    TypeParameterDeclaration,
+    FieldDeclaration,
+    EventDeclaration,
+    PropertyDeclaration,
+    MethodDeclaration,
+    TypeArgumentList,
+    BaseTypeConstraint,
+    ConstructorConstraint,
     #endregion
 }

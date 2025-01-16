@@ -3,32 +3,30 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
-using System.Linq;
 
-namespace Qtyi.CodeAnalysis
+namespace Qtyi.CodeAnalysis;
+
+internal static class ImmutableArrayExtensions
 {
-    internal static class ImmutableArrayExtensions
+    public static ImmutableArray<T> CastDown<T, TBase>(this ImmutableArray<TBase> items) where T : class?, TBase
     {
-        public static ImmutableArray<T> CastDown<T, TBase>(this ImmutableArray<TBase> items) where T : class?, TBase
+        if (items.IsDefault)
         {
-            if (items.IsDefault)
-            {
-                return default;
-            }
-
-            if (items.IsEmpty)
-            {
-                return ImmutableArray<T>.Empty;
-            }
-
-            var length = items.Length;
-            var array = new T[length];
-            for (var i = 0; i < length; i++)
-            {
-                array[i] = (T)items[i];
-            }
-
-            return ImmutableArray.Create(array);
+            return default;
         }
+
+        if (items.IsEmpty)
+        {
+            return ImmutableArray<T>.Empty;
+        }
+
+        var length = items.Length;
+        var array = new T[length];
+        for (var i = 0; i < length; i++)
+        {
+            array[i] = (T)items[i];
+        }
+
+        return ImmutableArray.Create(array);
     }
 }

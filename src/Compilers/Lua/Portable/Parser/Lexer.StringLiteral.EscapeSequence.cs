@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
@@ -17,44 +19,44 @@ partial class Lexer
     /// </summary>
     private void ScanEscapeSequence()
     {
-        var start = this.TextWindow.Position;
+        var start = TextWindow.Position;
 
-        var c = this.TextWindow.NextChar();
+        var c = TextWindow.NextChar();
         SyntaxDiagnosticInfo? error;
 
         Debug.Assert(c == '\\');
 
-        c = this.TextWindow.NextChar();
+        c = TextWindow.NextChar();
         switch (c)
         {
             // 转义后返回自己的字符
             case '\'':
             case '"':
             case '\\':
-                this._builder.Append(c);
+                _utf8Builder.Add((byte)c);
                 break;
 
             // 常用转义字符
             case 'a':
-                this._builder.Append('\a');
+                _utf8Builder.Add((byte)'\a');
                 break;
             case 'b':
-                this._builder.Append('\b');
+                _utf8Builder.Add((byte)'\b');
                 break;
             case 'f':
-                this._builder.Append('\f');
+                _utf8Builder.Add((byte)'\f');
                 break;
             case 'n':
-                this._builder.Append('\n');
+                _utf8Builder.Add((byte)'\n');
                 break;
             case 'r':
-                this._builder.Append('\r');
+                _utf8Builder.Add((byte)'\r');
                 break;
             case 't':
-                this._builder.Append('\t');
+                _utf8Builder.Add((byte)'\t');
                 break;
             case 'v':
-                this._builder.Append('\v');
+                _utf8Builder.Add((byte)'\v');
                 break;
 
             // 十进制数字表示的Unicode字符
@@ -71,32 +73,32 @@ partial class Lexer
 
             // 十六进制数字表示的ASCII字符
             case 'x':
-                this.TextWindow.Reset(start);
-                var b = this.TextWindow.NextByteEscape(out error);
+                TextWindow.Reset(start);
+                var b = TextWindow.NextByteEscape(out error);
                 if (error is null)
-                    this.FlushToUtf8Builder(b);
-                this.AddError(error);
+                    _utf8Builder.Add(b);
+                AddError(error);
                 break;
 
             // 十六进制数字表示的Unicode字符
             case 'u':
-                this.TextWindow.Reset(start);
-                var bs = this.TextWindow.NextUnicodeEscape(out error);
+                TextWindow.Reset(start);
+                var bs = TextWindow.NextUnicodeEscape(out error);
                 if (error is null)
-                    this.FlushToUtf8Builder(bs);
-                this.AddError(error);
+                    _utf8Builder.AddRange(bs);
+                AddError(error);
                 break;
 
             // 后方紧跟的连续的字面量的空白字符和换行字符。
             case 'z':
-                c = this.TextWindow.PeekChar();
+                c = TextWindow.PeekChar();
                 while (SyntaxFacts.IsWhiteSpace(c) || SyntaxFacts.IsNewLine(c))
                 {
-                    this.TextWindow.AdvanceChar();
+                    TextWindow.AdvanceChar();
 
                     // 跳过这些字符。
 
-                    c = this.TextWindow.PeekChar();
+                    c = TextWindow.PeekChar();
                 }
                 break;
 
@@ -106,15 +108,15 @@ partial class Lexer
             // Mac系统的换行字符序列为“\r”。
             case '\r':
             case '\n':
-                this._builder.Append('\n');
-                if (c == '\r' && this.TextWindow.PeekChar() == '\n')
-                    this.TextWindow.AdvanceChar(); // 跳过这个字符。
+                _utf8Builder.Add((byte)'\n');
+                if (c == '\r' && TextWindow.PeekChar() == '\n')
+                    TextWindow.AdvanceChar(); // 跳过这个字符。
                 break;
 
             default:
-                this.AddError(
+                AddError(
                     start,
-                    this.TextWindow.Position - start,
+                    TextWindow.Position - start,
                     ErrorCode.ERR_IllegalEscape);
                 break;
         }

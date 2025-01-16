@@ -20,22 +20,22 @@ partial class Lexer
     /// </summary>
     /// <returns>使用当前识别到的</returns>
     private SyntaxTrivia CreateWhiteSpaceTrivia() =>
-        SyntaxFactory.WhiteSpace(this.TextWindow.GetText(intern: true));
+        ThisInternalSyntaxFactory.WhiteSpace(TextWindow.GetText(intern: true));
 
     [MemberNotNull(nameof(_createWhiteSpaceTriviaFunction))]
     private SyntaxTrivia ScanWhiteSpace()
     {
-        this._createWhiteSpaceTriviaFunction ??= this.CreateWhiteSpaceTrivia;
+        _createWhiteSpaceTriviaFunction ??= CreateWhiteSpaceTrivia;
         var hashCode = Hash.FnvOffsetBias;
         var onlySpaces = true;
 
 NextChar:
-        var c = this.TextWindow.PeekChar();
+        var c = TextWindow.PeekChar();
         switch (c)
         {
             // 连续处理空白符。
             case ' ':
-                this.TextWindow.AdvanceChar();
+                TextWindow.AdvanceChar();
                 hashCode = Hash.CombineFNVHash(hashCode, c);
                 goto NextChar;
 
@@ -54,20 +54,20 @@ NextChar:
                 break;
         }
 
-        if (this.TextWindow.Width == 1 && onlySpaces)
-            return SyntaxFactory.Space;
+        if (TextWindow.Width == 1 && onlySpaces)
+            return ThisInternalSyntaxFactory.Space;
         else
         {
-            var width = this.TextWindow.Width;
+            var width = TextWindow.Width;
             if (width < MaxCachedTokenSize)
-                return this._cache.LookupTrivia(
-                    this.TextWindow.CharacterWindow,
-                    this.TextWindow.LexemeRelativeStart,
+                return _cache.LookupTrivia(
+                    TextWindow.CharacterWindow,
+                    TextWindow.LexemeRelativeStart,
                     width,
                     hashCode,
-                    this._createWhiteSpaceTriviaFunction);
+                    _createWhiteSpaceTriviaFunction);
             else
-                return this._createWhiteSpaceTriviaFunction();
+                return _createWhiteSpaceTriviaFunction();
         }
     }
 }

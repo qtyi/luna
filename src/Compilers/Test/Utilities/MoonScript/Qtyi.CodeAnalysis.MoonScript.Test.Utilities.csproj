@@ -3,7 +3,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(NetLunaAll);net472</TargetFrameworks>
-    <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,6 +13,6 @@
     <InternalsVisibleTo Include="Qtyi.CodeAnalysis.MoonScript.Syntax.UnitTests" />
   </ItemGroup>
 
-  <Import Project="..\Shared\Qtyi.CodeAnalysis.Test.Utilities.Shared.projitems" Label="Shared" />
+  <Import Project="..\Shared\Qtyi.CodeAnalysis.This.Test.Utilities.targets" />
 
 </Project>

@@ -16,15 +16,17 @@ partial class MoonScriptCompiler
     protected override partial void ResolveAnalyzersFromArguments(
         List<DiagnosticInfo> diagnostics,
         CommonMessageProvider messageProvider,
+        Microsoft.CodeAnalysis.CompilationOptions compilationOptions,
         bool skipAnalyzers,
         out ImmutableArray<DiagnosticAnalyzer> analyzers,
         out ImmutableArray<ISourceGenerator> generators)
     {
-        this.Arguments.ResolveAnalyzersFromArguments(
+        Arguments.ResolveAnalyzersFromArguments(
             LanguageNames.Lua,
             diagnostics,
             messageProvider,
-            this.AssemblyLoader,
+            AssemblyLoader,
+            compilationOptions,
             skipAnalyzers,
             out analyzers,
             out generators);
@@ -32,6 +34,16 @@ partial class MoonScriptCompiler
 
     public override partial void PrintHelp(TextWriter consoleOutput)
     {
-        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_MOONCHelp, this.Culture));
+        consoleOutput.WriteLine(ErrorFacts.GetMessage(MessageID.IDS_MOONCHelp, Culture));
+    }
+
+    private protected override partial void DiagnoseBadAccesses(
+        TextWriter consoleOutput,
+        ErrorLogger? errorLogger,
+        Compilation compilation,
+        ImmutableArray<Diagnostic> diagnostics)
+    {
+#warning Not implemented
+        throw new NotImplementedException();
     }
 }

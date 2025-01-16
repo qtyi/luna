@@ -10,5 +10,5 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 partial class IdentifierNameSyntax
 {
-    public override string ToString() => this.Identifier.Text;
+    public override string ToString() => Identifier.Text;
 }

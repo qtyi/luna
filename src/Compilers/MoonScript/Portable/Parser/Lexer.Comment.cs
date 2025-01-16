@@ -6,18 +6,18 @@ namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
 
 partial class Lexer
 {
-    private partial SyntaxTrivia ScanComment()
+    private partial SyntaxTrivia LexComment()
     {
-        if (this.ScanLongBrackets(out var isTerminal))
+        if (ScanLongBrackets(out var isTerminal))
         {
-            this.CheckFeatureAvaliability(MessageID.IDS_FeatureMultiLineComment);
+            CheckFeatureAvaliability(MessageID.IDS_FeatureMultiLineComment);
             if (!isTerminal)
-                this.AddError(ErrorCode.ERR_OpenEndedComment);
+                AddError(ErrorCode.ERR_OpenEndedComment);
         }
         else
-            this.ScanToEndOfLine(trimEnd: true);
+            ScanToEndOfLine(trimEnd: true);
 
-        var text = this.TextWindow.GetText(intern: false);
+        var text = TextWindow.GetText(intern: false);
         return SyntaxFactory.Comment(text);
     }
 }

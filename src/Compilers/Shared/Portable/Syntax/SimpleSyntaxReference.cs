@@ -20,16 +20,16 @@ internal sealed class SimpleSyntaxReference : SyntaxReference
     private readonly SyntaxNode _node;
 
     /// <inheritdoc/>
-    public override SyntaxTree SyntaxTree => this._node.SyntaxTree;
+    public override SyntaxTree SyntaxTree => _node.SyntaxTree;
 
     /// <inheritdoc/>
-    public override TextSpan Span => this._node.Span;
+    public override TextSpan Span => _node.Span;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SimpleSyntaxReference"/> class。
     /// </summary>
     /// <param name="node">The syntax node to be referenced.</param>
-    internal SimpleSyntaxReference(SyntaxNode node) => this._node = node;
+    internal SimpleSyntaxReference(SyntaxNode node) => _node = node;
 
     /// <summary>
     /// Retrieves the original referenced syntax node.
@@ -39,5 +39,5 @@ internal sealed class SimpleSyntaxReference : SyntaxReference
     /// <remarks>
     /// As the method only returns the syntax node passed into constructor, any value to <paramref name="cancellationToken"/> will be ignored.
     /// </remarks>
-    public override SyntaxNode GetSyntax(CancellationToken cancellationToken = default) => this._node;
+    public override SyntaxNode GetSyntax(CancellationToken cancellationToken = default) => _node;
 }

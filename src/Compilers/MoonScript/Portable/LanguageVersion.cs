@@ -8,59 +8,109 @@ using Roslyn.Utilities;
 namespace Qtyi.CodeAnalysis.MoonScript;
 
 /// <summary>
-/// 枚举MoonScript语言的所有版本。
+/// Specifies the MoonScript language version.
 /// </summary>
 public enum LanguageVersion
 {
-    /* 由于MoonScript尚未有正式发行版本，因此没有版本号。 */
-    [Obsolete("未正式发行版本")]
-    MoonScript0_5 = 1,
+    /// <summary>
+    /// MoonScript language version 0.1.
+    /// </summary>
+    MoonScript0_1 = 1,
+    /// <summary>
+    /// MoonScript language version 0.2.
+    /// </summary>
+    MoonScript0_2,
+    /// <summary>
+    /// MoonScript language version 0.3.
+    /// </summary>
+    MoonScript0_3,
+    /// <summary>
+    /// MoonScript language version 0.4.
+    /// </summary>
+    MoonScript0_4,
+    /// <summary>
+    /// MoonScript language version 0.5.
+    /// </summary>
+    MoonScript0_5,
 
     /// <summary>
-    /// 支持的最新的主要版本。
+    /// Preview of the next language version.
     /// </summary>
-    LatestMajor = int.MaxValue - 2,
+    Preview = DotNet - 1,
+
     /// <summary>
-    /// 下一个预览版本。
+    /// The .NET compatible version of the language.
     /// </summary>
-    Preview = int.MaxValue - 1,
+    DotNet = Latest - 1,
+
     /// <summary>
-    /// 支持的最新的版本。
+    /// The latest supported version of the language.
     /// </summary>
     Latest = int.MaxValue,
     /// <summary>
-    /// 默认的语言版本，也就是支持的最新的版本。
+    /// The default language version, which is the latest supported version.
     /// </summary>
     Default = 0
 }
 
 internal static partial class LanguageVersionExtensionsInternal
 {
-    internal static partial ErrorCode GetErrorCode(this LanguageVersion version) =>
-        version switch
-        {
-            LanguageVersion.MoonScript0_5 => ErrorCode.ERR_FeatureNotAvailableInVersion0_5,
-            _ => throw ExceptionUtilities.UnexpectedValue(version)
-        };
+    internal static partial bool IsValid(this LanguageVersion version) => version switch
+    {
+        LanguageVersion.MoonScript0_1 or
+        LanguageVersion.MoonScript0_2 or
+        LanguageVersion.MoonScript0_3 or
+        LanguageVersion.MoonScript0_4 or
+        LanguageVersion.MoonScript0_5 or
+        LanguageVersion.Preview or
+        LanguageVersion.DotNet => true,
+
+        _ => false
+    };
+
+    internal static partial ErrorCode GetErrorCode(this LanguageVersion version) => version switch
+    {
+        LanguageVersion.MoonScript0_1 => ErrorCode.ERR_FeatureNotAvailableInVersion0_1,
+        LanguageVersion.MoonScript0_2 => ErrorCode.ERR_FeatureNotAvailableInVersion0_2,
+        LanguageVersion.MoonScript0_3 => ErrorCode.ERR_FeatureNotAvailableInVersion0_3,
+        LanguageVersion.MoonScript0_4 => ErrorCode.ERR_FeatureNotAvailableInVersion0_4,
+        LanguageVersion.MoonScript0_5 => ErrorCode.ERR_FeatureNotAvailableInVersion0_5,
+        LanguageVersion.Preview => ErrorCode.ERR_FeatureNotAvailableInPreview,
+        LanguageVersion.DotNet => ErrorCode.ERR_FeatureNotAvailableInVersionDotNet,
+
+        _ => throw ExceptionUtilities.UnexpectedValue(version)
+    };
 }
 
 public static partial class LanguageVersionFacts
 {
     /// <summary>
-    /// 获取MoonScript的下一个版本的<see cref="LanguageVersion"/>常量。
+    /// Gets current language version of MoonScript.
+    /// </summary>
+    /// <value>
+    /// Enum value that represents the current language version of MoonScript.
+    /// </value>
+    internal static partial LanguageVersion CurrentVersion => LanguageVersion.MoonScript0_5;
+
+    /// <summary>
+    /// Enum value that represents the next language version of MoonScript.
     /// </summary>
     internal const LanguageVersion MoonScriptNext = LanguageVersion.Preview;
 
-    public static partial string ToDisplayString(this LanguageVersion version) =>
-        version switch
-        {
-            LanguageVersion.MoonScript0_5 => "0.5",
-            LanguageVersion.Default => "default",
-            LanguageVersion.Latest => "latest",
-            LanguageVersion.LatestMajor => "latestmajor",
-            LanguageVersion.Preview => "preview",
-            _ => throw ExceptionUtilities.UnexpectedValue(version)
-        };
+    public static partial string ToDisplayString(this LanguageVersion version) => version switch
+    {
+        LanguageVersion.MoonScript0_1 => "0.1",
+        LanguageVersion.MoonScript0_2 => "0.2",
+        LanguageVersion.MoonScript0_3 => "0.3",
+        LanguageVersion.MoonScript0_4 => "0.4",
+        LanguageVersion.MoonScript0_5 => "0.5",
+        LanguageVersion.Preview => "preview",
+        LanguageVersion.DotNet => "dotnet",
+        LanguageVersion.Latest => "latest",
+        LanguageVersion.Default => "default",
+
+        _ => throw ExceptionUtilities.UnexpectedValue(version)
+    };
 
     public static partial bool TryParse(string? version, out LanguageVersion result)
     {
@@ -78,15 +128,33 @@ public static partial class LanguageVersionFacts
             case "latest":
                 result = LanguageVersion.Latest;
                 return true;
-            case "latestmajor":
-                result = LanguageVersion.LatestMajor;
+
+            case "0.1":
+                result = LanguageVersion.MoonScript0_1;
                 return true;
-            case "preview":
-                result = LanguageVersion.Preview;
+
+            case "0.2":
+                result = LanguageVersion.MoonScript0_2;
+                return true;
+
+            case "0.3":
+                result = LanguageVersion.MoonScript0_3;
+                return true;
+
+            case "0.4":
+                result = LanguageVersion.MoonScript0_4;
                 return true;
 
             case "0.5":
                 result = LanguageVersion.MoonScript0_5;
+                return true;
+
+            case "preview":
+                result = LanguageVersion.Preview;
+                return true;
+
+            case "dotnet":
+                result = LanguageVersion.DotNet;
                 return true;
 
             default:
@@ -94,18 +162,4 @@ public static partial class LanguageVersionFacts
                 return false;
         }
     }
-
-    public static partial LanguageVersion MapSpecifiedToEffectiveVersion(this LanguageVersion version) =>
-        version switch
-        {
-            LanguageVersion.Latest or
-            LanguageVersion.Default => LanguageVersion.MoonScript0_5,
-            LanguageVersion.LatestMajor => LanguageVersion.Preview,
-            _ => version
-        };
-
-    /// <summary>
-    /// 获取MoonScript语言的当前版本。
-    /// </summary>
-    internal static LanguageVersion CurrentVersion => LanguageVersion.MoonScript0_5;
 }

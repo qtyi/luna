@@ -7,12 +7,8 @@ using Microsoft.CodeAnalysis;
 
 #if LANG_LUA
 namespace Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.Lua.Syntax.InternalSyntax.LuaSyntaxNode;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax;
-
-using ThisInternalSyntaxNode = Qtyi.CodeAnalysis.MoonScript.Syntax.InternalSyntax.MoonScriptSyntaxNode;
 #endif
 
 internal class SyntaxFirstTokenReplacer :
@@ -29,9 +25,9 @@ internal class SyntaxFirstTokenReplacer :
 
     private SyntaxFirstTokenReplacer(SyntaxToken oldToken, SyntaxToken newToken, int diagnosticOffsetDelta)
     {
-        this._oldToken = oldToken;
-        this._newToken = newToken;
-        this._diagnosticOffsetDelta = diagnosticOffsetDelta;
+        _oldToken = oldToken;
+        _newToken = newToken;
+        _diagnosticOffsetDelta = diagnosticOffsetDelta;
     }
 
     internal static TRoot Replace<TRoot>(TRoot root, SyntaxToken newToken, int diagnosticOffsetDelta)
@@ -53,16 +49,16 @@ internal class SyntaxFirstTokenReplacer :
 
     public override ThisInternalSyntaxNode? Visit(ThisInternalSyntaxNode? node)
     {
-        if (node is not null && !this._foundOldToken)
+        if (node is not null && !_foundOldToken)
         {
             if (node is SyntaxToken token)
             {
-                Debug.Assert(token == this._oldToken);
-                this._foundOldToken = true;
+                Debug.Assert(token == _oldToken);
+                _foundOldToken = true;
                 return _newToken;
             }
             else
-                return UpdateDiagnosticOffset(base.Visit(node)!, this._diagnosticOffsetDelta);
+                return UpdateDiagnosticOffset(base.Visit(node)!, _diagnosticOffsetDelta);
         }
 
         return node;

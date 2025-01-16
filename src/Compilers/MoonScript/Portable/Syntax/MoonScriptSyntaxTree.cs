@@ -19,5 +19,5 @@ partial class MoonScriptSyntaxTree
     /// <exception cref="InvalidCastException">当<see cref="SyntaxTree.HasCompilationUnitRoot"/>为<see langword="false"/>抛出。</exception>
     /// <inheritdoc cref="MoonScriptSyntaxTree.GetRoot(CancellationToken)"/>
     public ChunkSyntax GetCompilationUnitRoot(CancellationToken cancellationToken = default) =>
-        (ChunkSyntax)this.GetRoot(cancellationToken);
+        (ChunkSyntax)GetRoot(cancellationToken);
 }

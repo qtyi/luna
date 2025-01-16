@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Luna.Tools.Source.CodeAnalysis.MoonScript</AssemblyName>
+    <RootNamespace>Luna.Tools</RootNamespace>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>true</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsShipping>false</IsShipping>
+    <ExcludeFromSourceBuild>false</ExcludeFromSourceBuild>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\..\..\Shared\CSharp\IndentWriterExtensions.cs" />
+    <Compile Include="..\Shared\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- InternalsVisibleTos -->
+
+    <!-- InternalsVisibleFroms -->
+    <InternalsVisibleFrom Include="Microsoft.CodeAnalysis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Make sure to reference the same version of Microsoft.CodeAnalysis.Analyzers as the rest of the build -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Qtyi.Net.Compilers.Toolset.DevEnv.Compilers" PrivateAssets="all" />
+
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\Core\Luna.Tools.Source.CodeAnalysis.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetDependencyTargetPaths">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="$(ArtifactsBinDir)Luna.Tools.Source\$(Configuration)\netstandard2.0\Luna.Tools.Source.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(ArtifactsBinDir)Luna.Tools.Source.CodeAnalysis\$(Configuration)\netstandard2.0\Luna.Tools.Source.CodeAnalysis.dll" IncludeRuntimeDependency="false" />
+    </ItemGroup>
+  </Target>
+</Project>

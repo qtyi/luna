@@ -8,8 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace Qtyi.CodeAnalysis.Lua;
 #elif LANG_MOONSCRIPT
 namespace Qtyi.CodeAnalysis.MoonScript;
-#else
-#error Language not supported.
 #endif
 
 /// <summary>

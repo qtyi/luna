@@ -18,7 +18,7 @@ internal partial class LexerCache
         512,
         key =>
         {
-            var kind = SyntaxFacts.GetKeywordKind(key);
+            var kind = SyntaxFacts.GetReservedKeywordKind(key);
             if (kind == SyntaxKind.None)
                 kind = SyntaxFacts.GetContextualKeywordKind(key);
 
@@ -31,23 +31,19 @@ internal partial class LexerCache
     private readonly TextKeyedCache<SyntaxToken> _tokenMap;
     /// <summary>关键词映射表。</summary>
     private readonly CachingIdentityFactory<string, SyntaxKind> _keywordKindMap;
-    /// <summary>
-    /// 关键词的最大字符长度。
-    /// </summary>
-    internal const int MaxKeywordLength = 10;
 
     internal LexerCache()
     {
-        this._triviaMap = TextKeyedCache<SyntaxTrivia>.GetInstance();
-        this._tokenMap = TextKeyedCache<SyntaxToken>.GetInstance();
-        this._keywordKindMap = s_keywordKindPool.Allocate();
+        _triviaMap = TextKeyedCache<SyntaxTrivia>.GetInstance();
+        _tokenMap = TextKeyedCache<SyntaxToken>.GetInstance();
+        _keywordKindMap = s_keywordKindPool.Allocate();
     }
 
     internal void Free()
     {
-        this._keywordKindMap.Free();
-        this._triviaMap.Free();
-        this._tokenMap.Free();
+        _keywordKindMap.Free();
+        _triviaMap.Free();
+        _tokenMap.Free();
     }
 
     /// <summary>
@@ -64,7 +60,7 @@ internal partial class LexerCache
             return false;
         }
 
-        kind = this._keywordKindMap.GetOrMakeValue(key);
+        kind = _keywordKindMap.GetOrMakeValue(key);
         return kind != SyntaxKind.None;
     }
 
@@ -84,39 +80,42 @@ internal partial class LexerCache
         int hashCode,
         Func<SyntaxTrivia> createTriviaFunction)
     {
-        var value = this._triviaMap.FindItem(textBuffer, keyStart, keyLength, hashCode);
+        var value = _triviaMap.FindItem(textBuffer, keyStart, keyLength, hashCode);
 
         if (value is null)
         {
             value = createTriviaFunction();
-            this._triviaMap.AddItem(textBuffer, keyStart, keyLength, hashCode, value);
+            _triviaMap.AddItem(textBuffer, keyStart, keyLength, hashCode, value);
         }
 
         return value;
     }
 
     /// <summary>
-    /// 在缓存中查找语法标记。
+    /// Lookup syntax token in text buffer.
     /// </summary>
-    /// <param name="textBuffer">读取表示语法标记的字符缓存。</param>
-    /// <param name="keyStart">开始读取的字符位置</param>
-    /// <param name="keyLength">读取的字符数量。</param>
-    /// <param name="hashCode">指定的哈希码。</param>
-    /// <param name="createTokenFunction">从新创建语法标记的函数。</param>
-    /// <returns>查找到的语法标记。</returns>
-    internal SyntaxToken LookupToken(
+    /// <param name="textBuffer">Text buffer to lookup in.</param>
+    /// <param name="keyStart">Character position of reading starts.</param>
+    /// <param name="keyLength">Characters count of reading</param>
+    /// <param name="hashCode">Calculated hash code.</param>
+    /// <param name="createTokenFunction">Function to create a syntax token.</param>
+    /// <param name="data">Argument for <paramref name="createTokenFunction"/>.</param>
+    /// <typeparam name="TArg">Type of argument.</typeparam>
+    /// <returns>Syntax token searched.</returns>
+    internal SyntaxToken LookupToken<TArg>(
         char[] textBuffer,
         int keyStart,
         int keyLength,
         int hashCode,
-        Func<SyntaxToken> createTokenFunction)
+        Func<TArg, SyntaxToken> createTokenFunction,
+        TArg data)
     {
-        var value = this._tokenMap.FindItem(textBuffer, keyStart, keyLength, hashCode);
+        var value = _tokenMap.FindItem(textBuffer, keyStart, keyLength, hashCode);
 
         if (value is null)
         {
-            value = createTokenFunction();
-            this._tokenMap.AddItem(textBuffer, keyStart, keyLength, hashCode, value);
+            value = createTokenFunction(data);
+            _tokenMap.AddItem(textBuffer, keyStart, keyLength, hashCode, value);
         }
 
         return value;
